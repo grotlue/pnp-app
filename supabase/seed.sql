@@ -1,0 +1,3 @@
+-- Optional local seed for fast UI testing.
+-- Inserts are commented out because todos.user_id must reference auth.users.
+-- After creating a local user in Studio/Auth, you can insert test rows manually.

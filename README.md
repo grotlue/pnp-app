@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# pnp-app
 
-## Getting Started
+Next.js + TypeScript + Tailwind + shadcn/ui + Supabase.
 
-First, run the development server:
+## Zielbild
+
+- Lokal: Supabase läuft in Docker (über Supabase CLI).
+- Cloud: Gleiche DB-Struktur per Migrationen auf ein kostenloses Supabase-Projekt deployen.
+
+## Voraussetzungen
+
+- Node.js + npm
+- Docker Desktop (muss laufen)
+
+## Lokale Entwicklung mit Supabase (Docker)
+
+1. Supabase lokal starten:
+
+```bash
+npm run supabase:start
+```
+
+2. Frontend-Umgebungsvariablen aus lokalem Stack in `.env.local` schreiben:
+
+```bash
+npm run supabase:env:local
+```
+
+3. Next.js starten:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Nützliche Kommandos:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run supabase:status
+npm run supabase:stop
+npm run supabase:db:reset
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Datenbank sauber versionieren
 
-## Learn More
+Migration anlegen:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run supabase:db:new -- add_profiles_table
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Dann SQL in `supabase/migrations/<timestamp>_add_profiles_table.sql` ergänzen.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Lokal testen:
 
-## Deploy on Vercel
+```bash
+npm run supabase:db:reset
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Kostenlos auf Supabase Cloud deployen
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Kostenloses Supabase-Projekt im Dashboard erstellen.
+2. Project Ref kopieren (z. B. `abcdxyz12345`).
+3. CLI anmelden:
+
+```bash
+npx supabase login
+```
+
+4. Projekt verlinken:
+
+```bash
+SUPABASE_PROJECT_REF=<dein-project-ref> npm run supabase:link
+```
+
+5. Migrationen in Cloud pushen:
+
+```bash
+npm run supabase:push
+```
+
+6. In `.env.local` auf Cloud-Werte wechseln:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<hosted-anon-key>
+```
+
+## Typen für die Datenbank (optional)
+
+Nach dem Link auf das Cloud-Projekt:
+
+```bash
+npm run supabase:types
+```
+
+Dies schreibt Typen nach `src/types/database.ts`.
+
+## Dateien
+
+- Supabase CLI-Konfig: `supabase/config.toml`
+- Migrationen: `supabase/migrations/`
+- Seed: `supabase/seed.sql`
+- Local-env Beispiel: `.env.local.example`
+- Env-Generator: `scripts/update-local-supabase-env.sh`
