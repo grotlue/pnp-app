@@ -12,6 +12,14 @@ Next.js + TypeScript + Tailwind + shadcn/ui + Supabase.
 - Node.js + npm
 - Docker Desktop (muss laufen)
 
+## Environment
+
+Starte immer von `.env.example` und lege daraus deine lokale `.env.local` an.
+
+```bash
+cp .env.example .env.local
+```
+
 ## Lokale Entwicklung mit Supabase (Docker)
 
 1. Supabase lokal starten:
@@ -95,10 +103,24 @@ npm run supabase:types
 
 Dies schreibt Typen nach `src/types/database.ts`.
 
+## Quality Gates
+
+Lokal vor einem PR ausführen:
+
+```bash
+npm run typecheck
+npm run lint
+npm run test:run
+npm run build
+```
+
+Die gleichen Gates laufen auch in CI auf `push` und `pull_request`.
+
 ## Dateien
 
 - Supabase CLI-Konfig: `supabase/config.toml`
 - Migrationen: `supabase/migrations/`
 - Seed: `supabase/seed.sql`
+- Env-Beispiel: `.env.example`
 - Local-env Beispiel: `.env.local.example`
 - Env-Generator: `scripts/update-local-supabase-env.sh`
