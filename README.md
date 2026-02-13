@@ -25,27 +25,27 @@ cp .env.example .env.local
 1. Supabase lokal starten:
 
 ```bash
-npm run supabase:start
+yarn supabase:start
 ```
 
 2. Frontend-Umgebungsvariablen aus lokalem Stack in `.env.local` schreiben:
 
 ```bash
-npm run supabase:env:local
+yarn supabase:env:local
 ```
 
 3. Next.js starten:
 
 ```bash
-npm run dev
+yarn dev
 ```
 
 Nützliche Kommandos:
 
 ```bash
-npm run supabase:status
-npm run supabase:stop
-npm run supabase:db:reset
+yarn supabase:status
+yarn supabase:stop
+yarn supabase:db:reset
 ```
 
 ## Datenbank sauber versionieren
@@ -53,7 +53,7 @@ npm run supabase:db:reset
 Migration anlegen:
 
 ```bash
-npm run supabase:db:new -- add_profiles_table
+yarn supabase:db:new add_profiles_table
 ```
 
 Dann SQL in `supabase/migrations/<timestamp>_add_profiles_table.sql` ergänzen.
@@ -61,7 +61,7 @@ Dann SQL in `supabase/migrations/<timestamp>_add_profiles_table.sql` ergänzen.
 Lokal testen:
 
 ```bash
-npm run supabase:db:reset
+yarn supabase:db:reset
 ```
 
 ## Kostenlos auf Supabase Cloud deployen
@@ -71,19 +71,19 @@ npm run supabase:db:reset
 3. CLI anmelden:
 
 ```bash
-npx supabase login
+yarn supabase login
 ```
 
 4. Projekt verlinken:
 
 ```bash
-SUPABASE_PROJECT_REF=<dein-project-ref> npm run supabase:link
+SUPABASE_PROJECT_REF=<dein-project-ref> yarn supabase:link
 ```
 
 5. Migrationen in Cloud pushen:
 
 ```bash
-npm run supabase:push
+yarn supabase:push
 ```
 
 6. In `.env.local` auf Cloud-Werte wechseln:
@@ -98,7 +98,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=<hosted-anon-key>
 Nach dem Link auf das Cloud-Projekt:
 
 ```bash
-npm run supabase:types
+yarn supabase:types
 ```
 
 Dies schreibt Typen nach `src/types/database.ts`.
@@ -108,10 +108,10 @@ Dies schreibt Typen nach `src/types/database.ts`.
 Lokal vor einem PR ausführen:
 
 ```bash
-npm run typecheck
-npm run lint
-npm run test:run
-npm run build
+yarn typecheck
+yarn lint
+yarn test:run
+yarn build
 ```
 
 Die gleichen Gates laufen auch in CI auf `push` und `pull_request`.
