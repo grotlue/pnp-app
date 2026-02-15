@@ -1,4 +1,5 @@
 import type { User } from "@supabase/supabase-js";
+import { jsonError } from "@/lib/api/http";
 import {
   createServerSupabaseClient,
   createServerSupabaseUserClient,
@@ -42,30 +43,41 @@ export async function requireAuth(
     };
   }
 
-  const authClient = createServerSupabaseClient();
-  const { data, error } = await authClient.auth.getUser(token);
+  try {
+    const authClient = createServerSupabaseClient();
+    const { data, error } = await authClient.auth.getUser(token);
 
-  if (error || !data.user) {
-    return {
-      response: Response.json(
-        {
-          error: {
-            code: "invalid_token",
-            message: "Access token is invalid or expired.",
+    if (error || !data.user) {
+      return {
+        response: Response.json(
+          {
+            error: {
+              code: "invalid_token",
+              message: "Access token is invalid or expired.",
+            },
           },
-        },
-        { status: 401 },
+          { status: 401 },
+        ),
+      };
+    }
+
+    const client = createServerSupabaseUserClient(token);
+
+    return {
+      context: {
+        accessToken: token,
+        user: data.user,
+        client,
+      },
+    };
+  } catch (error) {
+    console.warn("requireAuth failed", error);
+    return {
+      response: jsonError(
+        500,
+        "auth_check_failed",
+        "Authentication check failed",
       ),
     };
   }
-
-  const client = createServerSupabaseUserClient(token);
-
-  return {
-    context: {
-      accessToken: token,
-      user: data.user,
-      client,
-    },
-  };
 }

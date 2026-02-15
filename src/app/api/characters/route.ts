@@ -18,18 +18,28 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
+  const scopeParam = url.searchParams.get("scope");
+  const scope =
+    scopeParam === "mine" || scopeParam === "public" ? scopeParam : "all";
   const limitParam = Number(url.searchParams.get("limit") ?? "100");
   const limit = Number.isFinite(limitParam)
     ? Math.min(Math.max(limitParam, 1), 500)
     : 100;
 
-  const { data, error } = await auth.context.client
+  let query = auth.context.client
     .from("characters")
     .select(
       "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, is_private, created_at, updated_at",
     )
-    .limit(limit)
-    .order("updated_at", { ascending: false });
+    .limit(limit);
+
+  if (scope === "mine") {
+    query = query.eq("owner_user_id", auth.context.user.id);
+  } else if (scope === "public") {
+    query = query.eq("is_private", false);
+  }
+
+  const { data, error } = await query.order("updated_at", { ascending: false });
 
   if (error) {
     return jsonError(400, "character_list_failed", error.message);

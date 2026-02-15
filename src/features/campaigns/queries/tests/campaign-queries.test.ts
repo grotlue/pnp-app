@@ -51,6 +51,16 @@ describe("campaign queries", () => {
     });
   });
 
+  it("getCampaignsQuery supports scope option", async () => {
+    const data = [{ id: "c3", owner_user_id: "u3", title: "C", description: "" }];
+    apiRequestMock.mockResolvedValueOnce({ data, error: null, status: 200 });
+
+    await expect(getCampaignsQuery(session, { scope: "member" })).resolves.toEqual(data);
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/campaigns?scope=member", {
+      session,
+    });
+  });
+
   it("getCampaignsQuery throws on error response", async () => {
     apiRequestMock.mockResolvedValueOnce({
       data: null,

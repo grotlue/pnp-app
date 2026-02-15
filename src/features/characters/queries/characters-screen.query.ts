@@ -2,8 +2,21 @@ import { apiRequest, unwrapApiResponse } from "@/lib/client/api";
 import type { ClientSession } from "@/lib/client/session";
 import type { Character, CharacterCreateInput } from "../types";
 
-export async function getCharacters(session: ClientSession): Promise<Character[]> {
-  const response = await apiRequest<Character[]>("/api/characters", { session });
+type GetCharactersOptions = {
+  scope?: "mine" | "public";
+};
+
+export async function getCharacters(
+  session: ClientSession,
+  options?: GetCharactersOptions,
+): Promise<Character[]> {
+  const searchParams = new URLSearchParams();
+  if (options?.scope) {
+    searchParams.set("scope", options.scope);
+  }
+  const path = searchParams.size > 0 ? `/api/characters?${searchParams.toString()}` : "/api/characters";
+
+  const response = await apiRequest<Character[]>(path, { session });
   return unwrapApiResponse(response, "Failed to load characters");
 }
 

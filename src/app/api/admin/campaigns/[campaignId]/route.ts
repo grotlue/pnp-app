@@ -41,8 +41,14 @@ export async function PATCH(request: Request, { params }: Params) {
     patch.is_private = body.isPrivate;
   }
 
-  const service = createServiceRoleSupabaseClient();
-  const { data, error } = await service
+  const client = (() => {
+    try {
+      return createServiceRoleSupabaseClient();
+    } catch {
+      return admin.context.client;
+    }
+  })();
+  const { data, error } = await client
     .from("campaigns")
     .update(patch)
     .eq("id", campaignId)
@@ -63,8 +69,14 @@ export async function DELETE(request: Request, { params }: Params) {
   }
 
   const { campaignId } = await params;
-  const service = createServiceRoleSupabaseClient();
-  const { error } = await service.from("campaigns").delete().eq("id", campaignId);
+  const client = (() => {
+    try {
+      return createServiceRoleSupabaseClient();
+    } catch {
+      return admin.context.client;
+    }
+  })();
+  const { error } = await client.from("campaigns").delete().eq("id", campaignId);
 
   if (error) {
     return jsonError(400, "admin_campaign_delete_failed", error.message);
