@@ -46,6 +46,15 @@ describe("character queries", () => {
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to load characters");
   });
 
+  it("getCharacters supports scope option", async () => {
+    const response = { data: [{ id: "char1" }], error: null, status: 200 };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(getCharacters(session, { scope: "mine" })).resolves.toEqual([{ id: "char1" }]);
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/characters?scope=mine", { session });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to load characters");
+  });
+
   it("createCharacter posts payload", async () => {
     const response = { data: { id: "char2" }, error: null, status: 201 };
     apiRequestMock.mockResolvedValueOnce(response);

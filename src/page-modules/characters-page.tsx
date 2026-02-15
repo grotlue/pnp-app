@@ -90,16 +90,12 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
         throw new Error("Missing session");
       }
 
-      return getCampaignsQuery(session);
+      return getCampaignsQuery(session, { scope: "member" });
     },
   });
 
   const characters = charactersQuery.data ?? [];
-  const meUserId = meQuery.data?.user.id;
-  const visibleCharacters =
-    meQuery.data?.profile.role === "admin"
-      ? characters.filter((character) => character.owner_user_id === meUserId)
-      : characters;
+  const visibleCharacters = characters;
   const sortedAndFilteredCharacters = sortCharacters(
     searchCharacters(visibleCharacters, searchQuery),
     sortBy,

@@ -103,8 +103,8 @@ export function HomePageView({
 
       const [me, campaigns, characters] = await Promise.all([
         getMe(session),
-        getCampaignsQuery(session),
-        getCharacters(session),
+        getCampaignsQuery(session, { scope: "public" }),
+        getCharacters(session, { scope: "public" }),
       ]);
 
       return {
@@ -199,8 +199,8 @@ export function HomePageView({
   const data = loggedInQuery.data;
   const me: MeResponse | null = data?.me ?? null;
   const currentUserId = me?.user.id;
-  const publicCampaigns = (data?.campaigns ?? []).filter((campaign) => !campaign.is_private);
-  const publicCharacters = (data?.characters ?? []).filter((character) => !character.is_private);
+  const publicCampaigns = data?.campaigns ?? [];
+  const publicCharacters = data?.characters ?? [];
   const campaignById = new Map(publicCampaigns.map((campaign) => [campaign.id, campaign]));
 
   const visibleCharactersByType = publicCharacters.filter(
