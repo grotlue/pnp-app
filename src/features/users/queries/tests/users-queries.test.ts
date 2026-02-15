@@ -19,7 +19,12 @@ import {
   requestPasswordReset,
   verifyAuthToken,
 } from "../users-auth.query";
-import { getMe, updateMyProfile } from "../users-profile.query";
+import {
+  createProfileAvatarSignedUpload,
+  getMe,
+  getProfileAvatarSignedUrl,
+  updateMyProfile,
+} from "../users-profile.query";
 import { deleteMyAccount, updateMyEmail, updateMyPassword } from "../users-settings.query";
 
 const session = {
@@ -193,6 +198,56 @@ describe("users auth/profile/settings queries", () => {
       },
     });
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to save profile");
+  });
+
+  it("createProfileAvatarSignedUpload posts upload metadata", async () => {
+    const response = {
+      data: { token: "upload-token", signedUrl: "https://signed-upload", path: "u1/avatar.png" },
+      error: null,
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(
+      createProfileAvatarSignedUpload(session, {
+        fileName: "avatar.png",
+        width: 512,
+        height: 512,
+      }),
+    ).resolves.toEqual(response.data);
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/storage/profile-images/signed-upload", {
+      method: "POST",
+      session,
+      body: {
+        fileName: "avatar.png",
+        width: 512,
+        height: 512,
+      },
+    });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to prepare profile image upload",
+    );
+  });
+
+  it("getProfileAvatarSignedUrl requests signed preview URL", async () => {
+    const response = {
+      data: { signedUrl: "https://signed-preview" },
+      error: null,
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(getProfileAvatarSignedUrl(session, "u1/avatar.png")).resolves.toEqual(response.data);
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/storage/profile-images/signed-url", {
+      method: "POST",
+      session,
+      body: {
+        path: "u1/avatar.png",
+        expiresIn: 600,
+      },
+    });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to load profile image");
   });
 
   it("updateMyEmail sends patch payload", async () => {

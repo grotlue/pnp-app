@@ -41,3 +41,26 @@ export async function deleteCharacterFromEdit(
   });
   return unwrapApiResponse(response, "Failed to delete character");
 }
+
+export async function createCharacterAvatarSignedUpload(
+  session: ClientSession,
+  characterId: string,
+  input: {
+    fileName: string;
+    width: number;
+    height: number;
+  },
+): Promise<{ token: string; signedUrl: string; path: string }> {
+  const response = await apiRequest<{ token: string; signedUrl: string; path: string }>(
+    "/api/storage/character-images/signed-upload",
+    {
+      method: "POST",
+      session,
+      body: {
+        characterId,
+        ...input,
+      },
+    },
+  );
+  return unwrapApiResponse(response, "Failed to prepare character image upload");
+}

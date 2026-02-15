@@ -8,6 +8,7 @@ export type MeResponse = {
   profile: {
     username: string;
     description: string;
+    avatar_path?: string | null;
     locale: "en" | "de";
     role?: "user" | "admin";
   };

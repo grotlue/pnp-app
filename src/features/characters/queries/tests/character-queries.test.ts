@@ -12,6 +12,7 @@ vi.mock("@/lib/client/api", () => ({
 
 import { createCharacter, deleteCharacter, getCharacters } from "../characters-screen.query";
 import {
+  createCharacterAvatarSignedUpload,
   deleteCharacterFromEdit,
   getCharacterEditContext,
   updateCharacter,
@@ -133,6 +134,37 @@ describe("character queries", () => {
       session,
     });
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to delete character");
+  });
+
+  it("createCharacterAvatarSignedUpload posts upload metadata", async () => {
+    const response = {
+      data: { token: "upload-token", signedUrl: "https://signed-upload", path: "u1/char1/avatar.png" },
+      error: null,
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(
+      createCharacterAvatarSignedUpload(session, "char1", {
+        fileName: "avatar.png",
+        width: 400,
+        height: 400,
+      }),
+    ).resolves.toEqual(response.data);
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/storage/character-images/signed-upload", {
+      method: "POST",
+      session,
+      body: {
+        characterId: "char1",
+        fileName: "avatar.png",
+        width: 400,
+        height: 400,
+      },
+    });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to prepare character image upload",
+    );
   });
 
   it("getCharacterDetailContext aggregates all related resources", async () => {

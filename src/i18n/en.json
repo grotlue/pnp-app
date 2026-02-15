@@ -155,10 +155,22 @@
       "avatarPath": "Avatar storage path",
       "noPermission": "Only the character owner can edit this character."
     },
+    "imageUpload": {
+      "hint": "Formats: JPG, PNG, WEBP. Image must be square.",
+      "empty": "No image selected",
+      "upload": "Upload image",
+      "replace": "Replace image",
+      "remove": "Remove image",
+      "uploading": "Uploading image...",
+      "invalidType": "Please select a JPG, PNG, or WEBP image.",
+      "invalidDimensions": "The image must be square (same width and height)."
+    },
     "fields": {
       "email": "Email",
       "password": "Password",
       "username": "Username",
+      "profileImage": "Profile image",
+      "characterImage": "Character image",
       "newEmail": "New email",
       "newPassword": "New password",
       "description": "Description",
