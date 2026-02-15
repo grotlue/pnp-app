@@ -102,6 +102,8 @@ src/
 - Page modules: `*-page.tsx`.
 - Hooks: `use-*.ts`.
 - Query modules: `*.query.ts` / `*.mutation.ts`.
+- Tests must live in a `tests/` subfolder next to the module/route they validate.
+  - Example: `src/features/campaigns/queries/tests/get-campaigns.query.test.ts`
 - Keep TypeScript strictness intact.
 
 ## 8) Testing and Quality Gates

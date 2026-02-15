@@ -85,3 +85,4 @@ src/
 - Page modules: `*-page.tsx`.
 - Hooks: `use-*.ts`.
 - Domain types: `features/<domain>/types.ts`.
+- Tests: place in `tests/` subfolders next to the code under test.

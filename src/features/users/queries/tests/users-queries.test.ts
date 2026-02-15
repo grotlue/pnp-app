@@ -18,9 +18,9 @@ import {
   registerUser,
   requestPasswordReset,
   verifyAuthToken,
-} from "./users-auth.query";
-import { getMe, updateMyProfile } from "./users-profile.query";
-import { deleteMyAccount, updateMyEmail, updateMyPassword } from "./users-settings.query";
+} from "../users-auth.query";
+import { getMe, updateMyProfile } from "../users-profile.query";
+import { deleteMyAccount, updateMyEmail, updateMyPassword } from "../users-settings.query";
 
 const session = {
   accessToken: "access-token",

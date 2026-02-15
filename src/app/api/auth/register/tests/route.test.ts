@@ -13,7 +13,7 @@ vi.mock("@/server/supabase/server-client", () => ({
   createServerSupabaseClient: createServerSupabaseClientMock,
 }));
 
-import { POST } from "./route";
+import { POST } from "../route";
 
 beforeEach(() => {
   vi.clearAllMocks();

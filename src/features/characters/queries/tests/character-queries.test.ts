@@ -10,12 +10,12 @@ vi.mock("@/lib/client/api", () => ({
   unwrapApiResponse: unwrapApiResponseMock,
 }));
 
-import { createCharacter, deleteCharacter, getCharacters } from "./characters-screen.query";
+import { createCharacter, deleteCharacter, getCharacters } from "../characters-screen.query";
 import {
   deleteCharacterFromEdit,
   getCharacterEditContext,
   updateCharacter,
-} from "./character-edit.query";
+} from "../character-edit.query";
 import {
   addRelationshipTimelineEntry,
   assignCharacterCampaign,
@@ -27,7 +27,7 @@ import {
   getRelationshipDetailForExternalTarget,
   unassignCharacterCampaign,
   updateRelationship,
-} from "./character-detail.query";
+} from "../character-detail.query";
 
 const session = { accessToken: "token-1" };
 

@@ -8,7 +8,7 @@ vi.mock("@/server/supabase/server-client", () => ({
   createServerSupabaseClient: createServerSupabaseClientMock,
 }));
 
-import { requireAuth } from "./require-auth";
+import { requireAuth } from "../require-auth";
 
 beforeEach(() => {
   vi.clearAllMocks();

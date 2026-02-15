@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { isFeatureEnabled, resolveRuntimeEnvironment } from "./feature-flags";
+import { isFeatureEnabled, resolveRuntimeEnvironment } from "../feature-flags";
 
 function clearFlagEnv() {
   delete process.env.APP_ENV;

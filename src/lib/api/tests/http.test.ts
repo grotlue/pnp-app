@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { jsonError, jsonOk, parseJsonBody } from "./http";
+import { jsonError, jsonOk, parseJsonBody } from "../http";
 
 describe("http helpers", () => {
   it("jsonOk wraps data with status", async () => {

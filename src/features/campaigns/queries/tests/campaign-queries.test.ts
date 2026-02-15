@@ -10,11 +10,11 @@ vi.mock("@/lib/client/api", () => ({
   unwrapApiResponse: unwrapApiResponseMock,
 }));
 
-import { createCampaignMutation } from "./create-campaign.mutation";
-import { updateCampaignMutation } from "./update-campaign.mutation";
-import { deleteCampaignMutation } from "./delete-campaign.mutation";
-import { getCampaignsQuery } from "./get-campaigns.query";
-import { getMyUserQuery } from "./get-my-user.query";
+import { createCampaignMutation } from "../create-campaign.mutation";
+import { updateCampaignMutation } from "../update-campaign.mutation";
+import { deleteCampaignMutation } from "../delete-campaign.mutation";
+import { getCampaignsQuery } from "../get-campaigns.query";
+import { getMyUserQuery } from "../get-my-user.query";
 import {
   assignCharacterToCampaign,
   decideCampaignMembership,
@@ -23,7 +23,7 @@ import {
   inviteUserToCampaign,
   requestJoinCampaign,
   updateCampaignDetail,
-} from "./campaign-detail.query";
+} from "../campaign-detail.query";
 
 const session = { accessToken: "access-token" };
 
