@@ -20,7 +20,7 @@ export function useCharactersScreen(session: ClientSession | null) {
       if (!session) {
         throw new Error("Missing session");
       }
-      return getCharacters(session);
+      return getCharacters(session, { scope: "mine" });
     },
   });
 

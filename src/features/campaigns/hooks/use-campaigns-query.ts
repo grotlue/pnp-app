@@ -17,7 +17,7 @@ export function useCampaignsQuery(session: ClientSession | null) {
       }
 
       const [campaigns, me] = await Promise.all([
-        getCampaignsQuery(session),
+        getCampaignsQuery(session, { scope: "member" }),
         getMyUserQuery(session),
       ]);
 

@@ -16,16 +16,24 @@ export async function GET(request: Request) {
   const { client, user } = auth.context;
   const url = new URL(request.url);
   const roleForUserId = url.searchParams.get("roleForUserId");
+  const scopeParam = url.searchParams.get("scope");
+  const scope =
+    scopeParam === "member" || scopeParam === "public" ? scopeParam : "all";
   const limitParam = Number(url.searchParams.get("limit") ?? "100");
   const limit = Number.isFinite(limitParam)
     ? Math.min(Math.max(limitParam, 1), 500)
     : 100;
 
-  const { data, error } = await client
+  let campaignsQuery = client
     .from("campaigns")
     .select("id, owner_user_id, title, description, is_private, created_at, updated_at")
-    .limit(limit)
-    .order("updated_at", { ascending: false });
+    .limit(limit);
+
+  if (scope === "public") {
+    campaignsQuery = campaignsQuery.eq("is_private", false);
+  }
+
+  const { data, error } = await campaignsQuery.order("updated_at", { ascending: false });
 
   if (error) {
     return jsonError(400, "campaign_list_failed", error.message);
@@ -84,8 +92,7 @@ export async function GET(request: Request) {
     (membershipsForTargetUser ?? []).map((membership) => membership.campaign_id),
   );
 
-  return jsonOk(
-    campaigns.map((campaign) => {
+  const enrichedCampaigns = campaigns.map((campaign) => {
       const acceptedMemberIds = acceptedMembersByCampaign.get(campaign.id) ?? [];
       const isOwner = campaign.owner_user_id === user.id;
       const isAcceptedPlayer =
@@ -108,8 +115,14 @@ export async function GET(request: Request) {
         current_user_role: isOwner ? "owner" : isAcceptedPlayer ? "player" : null,
         role_for_user: roleForTargetUser,
       };
-    }),
-  );
+    });
+
+  const visibleCampaigns =
+    scope === "member"
+      ? enrichedCampaigns.filter((campaign) => campaign.current_user_role !== null)
+      : enrichedCampaigns;
+
+  return jsonOk(visibleCampaigns);
 }
 
 export async function POST(request: Request) {
