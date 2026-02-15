@@ -142,12 +142,30 @@ Minimum expectations:
 ## 11) Branching Strategy
 
 - Use short-lived branches only.
+- Never implement changes directly on `main` or `production`.
 - Branch names:
   - `feat/<scope>-<short-description>`
   - `fix/<scope>-<short-description>`
   - `refactor/<scope>-<short-description>`
   - `chore/<scope>-<short-description>`
 - Keep one branch focused on one concern. Do not mix schema, API, and large UI redesign in the same PR unless required.
+
+### 11.1) Mandatory Agent Branch Safety
+
+When working as an automated coding agent:
+
+- At task start, check current branch before any edits.
+- If current branch is `main` or `production`, create a new working branch first.
+- If current task scope does not fit the current working branch scope, ask whether to create a new branch.
+- If user confirms, create the new branch before making changes.
+
+### 11.2) Branch Scope Rules
+
+- One branch = one coherent change package.
+- Prefer opening a new branch when switching from:
+  - infra/deploy work -> product feature work
+  - backend/data model work -> unrelated UI redesign
+  - bugfix work -> refactor-only work
 
 ## 12) Commit Conventions
 
@@ -178,6 +196,16 @@ Before opening or merging a PR, ensure all points are addressed:
 - Screenshots or short video for user-facing UI changes.
 - Manual test steps included for changed flows.
 - Documentation updated if architecture, behavior, or conventions changed.
+
+### 13.1) Mandatory PR Creation
+
+- After a coherent change package is complete, open a Pull Request.
+- Do not leave completed work only on a local branch.
+- PR title should follow conventional commit intent (`feat(...)`, `fix(...)`, `refactor(...)`, `docs(...)`, `chore(...)`).
+- PR description must include:
+  - scope summary
+  - test/verification results
+  - risk notes
 
 ## 14) Definition of Done
 

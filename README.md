@@ -65,6 +65,13 @@ yarn test:run
 yarn build
 ```
 
+## Branch and PR workflow
+
+- Do not implement changes directly on `main` or `production`.
+- Create a dedicated working branch per coherent change package.
+- Open a PR after the package is complete.
+- See: `docs/development/BRANCHING_AND_PR_WORKFLOW.md`
+
 ## Automatic deployment (`production` branch)
 
 Current mode:
@@ -126,6 +133,7 @@ Step-by-step setup:
 - Supabase migrations: `supabase/migrations/`
 - Local fixture logins: `docs/development/LOCAL_DEV_FIXTURE_USERS.md`
 - Admin credential template: `docs/development/ADMIN_BOOTSTRAP_CREDENTIALS_TEMPLATE.md`
+- Branch + PR workflow: `docs/development/BRANCHING_AND_PR_WORKFLOW.md`
 
 ## Feature flags
 
