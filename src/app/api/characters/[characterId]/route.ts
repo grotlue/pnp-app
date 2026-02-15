@@ -11,6 +11,7 @@ type UpdateCharacterBody = {
   age?: number | null;
   description?: string;
   avatarPath?: string | null;
+  isPrivate?: boolean;
 };
 
 export async function GET(request: Request, { params }: Params) {
@@ -23,7 +24,7 @@ export async function GET(request: Request, { params }: Params) {
   const { data, error } = await auth.context.client
     .from("characters")
     .select(
-      "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, created_at, updated_at",
+      "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, is_private, created_at, updated_at",
     )
     .eq("id", characterId)
     .single();
@@ -64,13 +65,16 @@ export async function PATCH(request: Request, { params }: Params) {
   if (body.avatarPath !== undefined) {
     patch.avatar_path = body.avatarPath;
   }
+  if (body.isPrivate !== undefined) {
+    patch.is_private = body.isPrivate;
+  }
 
   const { data, error } = await auth.context.client
     .from("characters")
     .update(patch)
     .eq("id", characterId)
     .select(
-      "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, created_at, updated_at",
+      "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, is_private, created_at, updated_at",
     )
     .single();
 

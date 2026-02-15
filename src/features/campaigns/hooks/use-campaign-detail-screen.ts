@@ -42,7 +42,7 @@ export function useCampaignDetailScreen(session: ClientSession | null, campaignI
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (input: { title: string; description: string }) => {
+    mutationFn: async (input: { title: string; description: string; isPrivate?: boolean }) => {
       if (!session) {
         throw new Error("Missing session");
       }

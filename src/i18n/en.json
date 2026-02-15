@@ -53,6 +53,10 @@
       "title": "Profile",
       "subtitle": "Update your public profile information."
     },
+    "userProfile": {
+      "title": "User profile",
+      "subtitle": "Public profile details."
+    },
     "settings": {
       "title": "Settings",
       "subtitle": "Manage private account settings.",
@@ -112,6 +116,7 @@
       "createCharacter": "Create character",
       "editCharacter": "Edit character",
       "deleteCharacter": "Delete character",
+      "foreignItemLabel": "Admin mode: item owned by another user",
       "ownerLabel": "Owner",
       "campaignLabel": "Campaign",
       "noCampaign": "No campaign"
@@ -161,7 +166,9 @@
       "characterAge": "Age",
       "campaignTitle": "Campaign title",
       "campaignDescription": "Campaign description",
-      "type": "Type"
+      "type": "Type",
+      "language": "Language",
+      "visibilityPrivate": "Private"
     },
     "actions": {
       "login": "Login",
@@ -182,7 +189,9 @@
       "reject": "Reject",
       "changeEmail": "Change email",
       "changePassword": "Change password",
-      "deleteAccount": "Delete account"
+      "deleteAccount": "Delete account",
+      "on": "on",
+      "off": "off"
     },
     "feedback": {
       "requestFailed": "Request failed.",

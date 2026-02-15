@@ -1,11 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { EmptyState } from "@/components/common/empty-state";
+import { FeedbackMessage } from "@/components/common/feedback-message";
+import { FormInput, FormSelect, FormTextarea } from "@/components/common/form-controls";
+import { SectionBox } from "@/components/common/section-box";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppHeader } from "@/components/common/app-header";
 import { Modal } from "@/components/common/modal";
+import { ToggleTabs } from "@/components/common/toggle-tabs";
+import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
+import { VisibilityToggle } from "@/components/common/visibility-toggle";
 import { useCampaignDetailScreen } from "@/features/campaigns/hooks/use-campaign-detail-screen";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { useClientSession } from "@/lib/client/use-client-session";
@@ -14,9 +22,6 @@ type CampaignDetailScreenProps = {
   locale: AppLocale;
   campaignId: string;
 };
-
-const fieldClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary";
 
 export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
@@ -40,7 +45,7 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
   const [inviteOpen, setInviteOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
   const [joinOpen, setJoinOpen] = useState(false);
-  const [editForm, setEditForm] = useState({ title: "", description: "" });
+  const [editForm, setEditForm] = useState({ title: "", description: "", isPrivate: false });
   const [inviteUserId, setInviteUserId] = useState("");
   const [assignCharacterId, setAssignCharacterId] = useState("");
 
@@ -77,10 +82,12 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
 
   const { me, detail, characters, users } = detailQuery.data;
   const isOwner = detail.campaign.owner_user_id === me.user.id;
+  const canManage = isOwner || (me.profile.role === "admin" && !detail.campaign.is_private);
+  const isForeignAdminView = me.profile.role === "admin" && !isOwner;
   const ownMembership = detail.memberships.find((entry) => entry.user_id === me.user.id);
-  const canRequestJoin = !isOwner && (!ownMembership || ownMembership.state === "rejected");
+  const canRequestJoin = !canManage && (!ownMembership || ownMembership.state === "rejected");
   const hasPendingJoinRequest =
-    !isOwner && ownMembership?.source === "request" && ownMembership.state === "pending";
+    !canManage && ownMembership?.source === "request" && ownMembership.state === "pending";
 
   const acceptedPlayers = detail.memberships.filter((entry) => entry.state === "accepted");
   const campaignCharacters = characters.filter((entry) => entry.campaign_id === campaignId);
@@ -94,7 +101,7 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
     if (entry.owner_user_id !== me.user.id) {
       return false;
     }
-    if (!isOwner && entry.type !== "player") {
+    if (!canManage && entry.type !== "player") {
       return false;
     }
     return true;
@@ -112,18 +119,33 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
     return users.find((entry) => entry.id === userId)?.username ?? userId;
   }
 
+  function isAdminUser(userId: string) {
+    return users.find((entry) => entry.id === userId)?.role === "admin";
+  }
+
   return (
     <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
       <AppHeader locale={locale} session={session} />
       <main className="mx-auto w-full max-w-7xl px-4 py-8">
         <Card>
           <CardHeader>
-            <CardTitle>{detail.campaign.title}</CardTitle>
+            <CardTitle>
+              <TitleWithPrivacy
+                title={detail.campaign.title}
+                isPrivate={detail.campaign.is_private}
+                iconClassName="size-4"
+              />
+            </CardTitle>
             <CardDescription>{t("ui.campaignDetail.subtitle")}</CardDescription>
+            {isForeignAdminView ? (
+              <div className="inline-flex w-fit rounded-md border border-destructive/40 bg-destructive/10 px-2 py-1 text-xs font-medium text-destructive">
+                {t("ui.admin.foreignItemLabel")}
+              </div>
+            ) : null}
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
-              {isOwner ? (
+              {canManage ? (
                 <>
                   <Button
                     variant="outline"
@@ -131,6 +153,7 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                       setEditForm({
                         title: detail.campaign.title,
                         description: detail.campaign.description,
+                        isPrivate: detail.campaign.is_private ?? false,
                       });
                       setEditOpen(true);
                     }}
@@ -157,45 +180,57 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
               ) : null}
             </div>
 
-            {feedback ? (
-              <div className="rounded-md border border-border bg-background p-2 text-xs">
-                {feedback}
-              </div>
-            ) : null}
+            <FeedbackMessage message={feedback} />
+            <FeedbackMessage
+              message={hasPendingJoinRequest ? t("ui.campaignDetail.joinPending") : ""}
+            />
 
-            {hasPendingJoinRequest ? (
-              <div className="rounded-md border border-border bg-background p-2 text-xs">
-                {t("ui.campaignDetail.joinPending")}
-              </div>
-            ) : null}
-
-            <div className="rounded-lg border border-border bg-background/70 p-3 text-sm">
-              <div className="font-medium">{t("ui.fields.campaignDescription")}</div>
+            <SectionBox title={t("ui.fields.campaignDescription")} className="text-sm">
               <div className="mt-1 text-muted-foreground">{detail.campaign.description || "-"}</div>
-            </div>
+            </SectionBox>
 
-            <div className="rounded-lg border border-border bg-background/70 p-3">
-              <div className="mb-2 text-sm font-medium">{t("ui.campaignDetail.players")}</div>
+            <SectionBox title={t("ui.campaignDetail.players")}>
               <div className="space-y-1 text-xs">
                 {acceptedPlayers.map((entry) => (
-                  <div key={entry.id}>{usernameFor(entry.user_id)}</div>
+                  isAdminUser(entry.user_id) ? (
+                    <div key={entry.id}>{usernameFor(entry.user_id)}</div>
+                  ) : (
+                    <Link
+                      key={entry.id}
+                      href={`/users/${entry.user_id}`}
+                      className="block underline-offset-2 hover:underline"
+                    >
+                      {usernameFor(entry.user_id)}
+                    </Link>
+                  )
                 ))}
                 {acceptedPlayers.length === 0 ? (
-                  <div className="text-muted-foreground">{t("ui.feedback.empty")}</div>
+                  <EmptyState
+                    label={t("ui.feedback.empty")}
+                    className="border-0 bg-transparent p-0 text-muted-foreground"
+                  />
                 ) : null}
               </div>
-            </div>
+            </SectionBox>
 
-            {isOwner && pendingRequests.length > 0 ? (
-              <div className="rounded-lg border border-border bg-background/70 p-3">
-                <div className="mb-2 text-sm font-medium">{t("ui.campaignDetail.pendingRequests")}</div>
+            {canManage && pendingRequests.length > 0 ? (
+              <SectionBox title={t("ui.campaignDetail.pendingRequests")}>
                 <div className="space-y-2">
                   {pendingRequests.map((entry) => (
                     <div
                       key={entry.id}
                       className="flex flex-wrap items-center gap-2 rounded border border-border px-2 py-2 text-xs"
                     >
-                      <span>{usernameFor(entry.user_id)}</span>
+                      {isAdminUser(entry.user_id) ? (
+                        <span>{usernameFor(entry.user_id)}</span>
+                      ) : (
+                        <Link
+                          href={`/users/${entry.user_id}`}
+                          className="underline-offset-2 hover:underline"
+                        >
+                          {usernameFor(entry.user_id)}
+                        </Link>
+                      )}
                       <Button
                         size="sm"
                         variant="outline"
@@ -241,35 +276,34 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                     </div>
                   ))}
                 </div>
-              </div>
+              </SectionBox>
             ) : null}
 
-            <div className="rounded-lg border border-border bg-background/70 p-3">
-              <div className="mb-2 flex gap-2">
-                <Button
-                  size="sm"
-                  variant={tab === "player" ? "default" : "outline"}
-                  onClick={() => setTab("player")}
-                >
-                  {t("ui.campaignDetail.playerCharacters")}
-                </Button>
-                <Button
-                  size="sm"
-                  variant={tab === "npc" ? "default" : "outline"}
-                  onClick={() => setTab("npc")}
-                >
-                  {t("ui.campaignDetail.npcs")}
-                </Button>
+            <SectionBox>
+              <div className="mb-2">
+                <ToggleTabs
+                  value={tab}
+                  onChange={setTab}
+                  options={[
+                    { value: "player", label: t("ui.campaignDetail.playerCharacters") },
+                    { value: "npc", label: t("ui.campaignDetail.npcs") },
+                  ]}
+                />
               </div>
               <div className="space-y-1 text-xs">
                 {(tab === "player" ? playerCharacters : npcCharacters).map((entry) => (
-                  <div key={entry.id}>{entry.name}</div>
+                  <Link key={entry.id} href={`/characters/${entry.id}`} className="flex items-center gap-1 underline-offset-2 hover:underline">
+                    <TitleWithPrivacy title={entry.name} isPrivate={entry.is_private} />
+                  </Link>
                 ))}
                 {(tab === "player" ? playerCharacters : npcCharacters).length === 0 ? (
-                  <div className="text-muted-foreground">{t("ui.feedback.empty")}</div>
+                  <EmptyState
+                    label={t("ui.feedback.empty")}
+                    className="border-0 bg-transparent p-0 text-muted-foreground"
+                  />
                 ) : null}
               </div>
-            </div>
+            </SectionBox>
           </CardContent>
         </Card>
       </main>
@@ -302,18 +336,26 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
         }
       >
         <div className="grid gap-2">
-          <input
-            className={fieldClass}
+          <FormInput
             value={editForm.title}
             placeholder={t("ui.fields.campaignTitle")}
             onChange={(event) => setEditForm((prev) => ({ ...prev, title: event.target.value }))}
           />
-          <textarea
-            className={`${fieldClass} min-h-24`}
+          <FormTextarea
+            className="min-h-24"
             value={editForm.description}
             placeholder={t("ui.fields.campaignDescription")}
             onChange={(event) =>
               setEditForm((prev) => ({ ...prev, description: event.target.value }))
+            }
+          />
+          <VisibilityToggle
+            isPrivate={editForm.isPrivate}
+            label={t("ui.fields.visibilityPrivate")}
+            onLabel={t("ui.actions.on")}
+            offLabel={t("ui.actions.off")}
+            onToggle={() =>
+              setEditForm((prev) => ({ ...prev, isPrivate: !prev.isPrivate }))
             }
           />
         </div>
@@ -378,8 +420,7 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
           </>
         }
       >
-        <select
-          className={fieldClass}
+        <FormSelect
           value={inviteUserId}
           onChange={(event) => setInviteUserId(event.target.value)}
         >
@@ -389,7 +430,7 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
               {entry.username}
             </option>
           ))}
-        </select>
+        </FormSelect>
       </Modal>
 
       <Modal
@@ -420,8 +461,7 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
           </>
         }
       >
-        <select
-          className={fieldClass}
+        <FormSelect
           value={assignCharacterId}
           onChange={(event) => setAssignCharacterId(event.target.value)}
         >
@@ -431,7 +471,7 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
               {entry.name} ({entry.type})
             </option>
           ))}
-        </select>
+        </FormSelect>
       </Modal>
 
       <Modal

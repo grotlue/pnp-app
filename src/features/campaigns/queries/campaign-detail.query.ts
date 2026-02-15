@@ -49,7 +49,7 @@ export async function decideCampaignMembership(
 export async function updateCampaignDetail(
   session: ClientSession,
   campaignId: string,
-  input: { title: string; description: string },
+  input: { title: string; description: string; isPrivate?: boolean },
 ): Promise<Campaign> {
   const response = await apiRequest<Campaign>(`/api/campaigns/${campaignId}`, {
     method: "PATCH",

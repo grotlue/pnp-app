@@ -1,7 +1,5 @@
-import { getRequestLocale } from "@/lib/i18n/request-locale";
-import { AdminPageView } from "@/page-modules/admin-page";
+import { redirect } from "next/navigation";
 
 export default async function AdminPage() {
-  const locale = await getRequestLocale();
-  return <AdminPageView locale={locale} />;
+  redirect("/admin/users");
 }

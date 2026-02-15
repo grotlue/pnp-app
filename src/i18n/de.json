@@ -53,6 +53,10 @@
       "title": "Profil",
       "subtitle": "Aktualisiere deine öffentlichen Profildaten."
     },
+    "userProfile": {
+      "title": "Nutzerprofil",
+      "subtitle": "Öffentliche Profildetails."
+    },
     "settings": {
       "title": "Einstellungen",
       "subtitle": "Private Kontoeinstellungen verwalten.",
@@ -112,6 +116,7 @@
       "createCharacter": "Charakter erstellen",
       "editCharacter": "Charakter bearbeiten",
       "deleteCharacter": "Charakter löschen",
+      "foreignItemLabel": "Admin-Modus: Element gehört einem anderen Nutzer",
       "ownerLabel": "Besitzer",
       "campaignLabel": "Kampagne",
       "noCampaign": "Keine Kampagne"
@@ -161,7 +166,9 @@
       "characterAge": "Alter",
       "campaignTitle": "Kampagnentitel",
       "campaignDescription": "Kampagnenbeschreibung",
-      "type": "Typ"
+      "type": "Typ",
+      "language": "Sprache",
+      "visibilityPrivate": "Privat"
     },
     "actions": {
       "login": "Anmelden",
@@ -182,7 +189,9 @@
       "reject": "Ablehnen",
       "changeEmail": "E-Mail ändern",
       "changePassword": "Passwort ändern",
-      "deleteAccount": "Konto löschen"
+      "deleteAccount": "Konto löschen",
+      "on": "an",
+      "off": "aus"
     },
     "feedback": {
       "requestFailed": "Anfrage fehlgeschlagen.",

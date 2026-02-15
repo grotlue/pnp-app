@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { FeedbackMessage } from "@/components/common/feedback-message";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { setSession } from "@/lib/client/session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
@@ -96,9 +97,7 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             {errorMessage ? (
-              <div className="rounded-md border border-border bg-background p-2 text-xs">
-                {errorMessage}
-              </div>
+              <FeedbackMessage message={errorMessage} />
             ) : (
               <div className="text-muted-foreground">{t("ui.authCallback.processing")}</div>
             )}

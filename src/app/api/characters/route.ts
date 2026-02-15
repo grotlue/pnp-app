@@ -8,6 +8,7 @@ type CreateCharacterBody = {
   description?: string;
   avatarPath?: string | null;
   campaignId?: string | null;
+  isPrivate?: boolean;
 };
 
 export async function GET(request: Request) {
@@ -25,7 +26,7 @@ export async function GET(request: Request) {
   const { data, error } = await auth.context.client
     .from("characters")
     .select(
-      "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, created_at, updated_at",
+      "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, is_private, created_at, updated_at",
     )
     .limit(limit)
     .order("created_at", { ascending: false });
@@ -58,6 +59,7 @@ export async function POST(request: Request) {
     description: body.description ?? "",
     avatar_path: body.avatarPath ?? null,
     campaign_id: body.campaignId ?? null,
+    is_private: body.isPrivate ?? false,
   };
 
   const { error } = await auth.context.client.from("characters").insert(insertPayload);
@@ -76,6 +78,7 @@ export async function POST(request: Request) {
       age: insertPayload.age,
       description: insertPayload.description,
       avatar_path: insertPayload.avatar_path,
+      is_private: insertPayload.is_private,
     },
     201,
   );

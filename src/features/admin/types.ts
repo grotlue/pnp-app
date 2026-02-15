@@ -37,12 +37,14 @@ export type AdminCreateCampaignInput = {
   ownerUserId: string;
   title: string;
   description: string;
+  isPrivate?: boolean;
 };
 
 export type AdminUpdateCampaignInput = {
   ownerUserId?: string;
   title?: string;
   description?: string;
+  isPrivate?: boolean;
 };
 
 export type AdminCharacter = Character & {
@@ -58,6 +60,7 @@ export type AdminCreateCharacterInput = {
   age?: number | null;
   description?: string;
   avatarPath?: string | null;
+  isPrivate?: boolean;
 };
 
 export type AdminUpdateCharacterInput = {
@@ -68,4 +71,5 @@ export type AdminUpdateCharacterInput = {
   age?: number | null;
   description?: string;
   avatarPath?: string | null;
+  isPrivate?: boolean;
 };

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { FeedbackMessage } from "@/components/common/feedback-message";
+import { FormInput } from "@/components/common/form-controls";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { setSession } from "@/lib/client/session";
@@ -21,9 +23,6 @@ import {
 type AuthResetPasswordPageViewProps = {
   locale: AppLocale;
 };
-
-const fieldClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary";
 
 export function AuthResetPasswordPageView({ locale }: AuthResetPasswordPageViewProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
@@ -155,24 +154,17 @@ export function AuthResetPasswordPageView({ locale }: AuthResetPasswordPageViewP
             {resolving ? (
               <div className="text-sm text-muted-foreground">{t("ui.authReset.processing")}</div>
             ) : sessionTokens ? (
-              <input
-                className={fieldClass}
+              <FormInput
                 type="password"
                 placeholder={t("ui.fields.newPassword")}
                 value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)}
               />
             ) : (
-              <div className="rounded-md border border-border bg-background p-2 text-xs">
-                {resolveError || t("ui.authReset.invalidLink")}
-              </div>
+              <FeedbackMessage message={resolveError || t("ui.authReset.invalidLink")} />
             )}
 
-            {message ? (
-              <div className="rounded-md border border-border bg-background p-2 text-xs">
-                {message}
-              </div>
-            ) : null}
+            <FeedbackMessage message={message} />
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-2">
             {sessionTokens ? (

@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AppHeader } from "@/components/common/app-header";
+import { FeedbackMessage } from "@/components/common/feedback-message";
+import { FormInput } from "@/components/common/form-controls";
+import { Modal } from "@/components/common/modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Modal } from "@/components/common/modal";
-import { AppHeader } from "@/components/common/app-header";
 import { clearSession } from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
@@ -14,13 +16,11 @@ import {
   updateMyEmail,
   updateMyPassword,
 } from "@/features/users/queries/users-settings.query";
+import { getMe } from "@/features/users/queries/users-profile.query";
 
 type SettingsScreenProps = {
   locale: AppLocale;
 };
-
-const fieldClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary";
 
 export function SettingsPageView({ locale }: SettingsScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
@@ -40,7 +40,19 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
     }
     if (!session) {
       router.replace("/");
+      return;
     }
+
+    void (async () => {
+      try {
+        const me = await getMe(session);
+        if (me.profile.role === "admin") {
+          router.replace("/admin/users");
+        }
+      } catch {
+        // Route guards and API errors are handled by the page itself.
+      }
+    })();
   }, [ready, session, router]);
 
   async function run(action: () => Promise<void>) {
@@ -75,8 +87,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
             <CardDescription>{t("ui.settings.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <input
-              className={fieldClass}
+            <FormInput
               value={newEmail}
               placeholder={t("ui.fields.newEmail")}
               onChange={(event) => setNewEmail(event.target.value)}
@@ -100,8 +111,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
               {t("ui.actions.changeEmail")}
             </Button>
 
-            <input
-              className={fieldClass}
+            <FormInput
               type="password"
               value={newPassword}
               placeholder={t("ui.fields.newPassword")}
@@ -130,11 +140,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
               {t("ui.actions.deleteAccount")}
             </Button>
 
-            {message ? (
-              <div className="rounded-md border border-border bg-background p-2 text-xs">
-                {message}
-              </div>
-            ) : null}
+            <FeedbackMessage message={message} />
           </CardContent>
         </Card>
       </main>

@@ -2,10 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AppHeader } from "@/components/common/app-header";
+import { FeedbackMessage } from "@/components/common/feedback-message";
+import { FormInput, FormSelect, FormTextarea } from "@/components/common/form-controls";
+import { Modal } from "@/components/common/modal";
+import { VisibilityToggle } from "@/components/common/visibility-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Modal } from "@/components/common/modal";
-import { AppHeader } from "@/components/common/app-header";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { useCharacterEditScreen } from "@/features/characters/hooks/use-character-edit-screen";
@@ -14,9 +17,6 @@ type CharacterEditScreenProps = {
   locale: AppLocale;
   characterId: string;
 };
-
-const fieldClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary";
 
 export function CharacterEditPageView({ locale, characterId }: CharacterEditScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
@@ -31,6 +31,7 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
     type?: "player" | "npc";
     avatarPath?: string;
     description?: string;
+    isPrivate?: boolean;
   }>({});
 
   useEffect(() => {
@@ -58,10 +59,15 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
     type: formEdits.type ?? character.type,
     avatarPath: formEdits.avatarPath ?? (character.avatar_path ?? ""),
     description: formEdits.description ?? character.description,
+    isPrivate: formEdits.isPrivate ?? (character.is_private ?? false),
   };
 
-  const isOwner = editQuery.data.me.user.id === character.owner_user_id;
-  if (!isOwner) {
+  const canManage = editQuery.data.me.user.id === character.owner_user_id
+    || (editQuery.data.me.profile.role === "admin" && !character.is_private);
+  const isForeignAdminView =
+    editQuery.data.me.profile.role === "admin" &&
+    editQuery.data.me.user.id !== character.owner_user_id;
+  if (!canManage) {
     return (
       <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
         <AppHeader locale={locale} session={session} />
@@ -85,26 +91,28 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
           <CardHeader>
             <CardTitle>{t("ui.characterEdit.title")}</CardTitle>
             <CardDescription>{t("ui.characterEdit.subtitle")}</CardDescription>
+            {isForeignAdminView ? (
+              <div className="inline-flex w-fit rounded-md border border-destructive/40 bg-destructive/10 px-2 py-1 text-xs font-medium text-destructive">
+                {t("ui.admin.foreignItemLabel")}
+              </div>
+            ) : null}
           </CardHeader>
           <CardContent className="space-y-3">
-            <input
-              className={fieldClass}
+            <FormInput
               value={form.name}
               placeholder={t("ui.fields.characterName")}
               onChange={(event) =>
                 setFormEdits((prev) => ({ ...prev, name: event.target.value }))
               }
             />
-            <input
-              className={fieldClass}
+            <FormInput
               value={form.age}
               placeholder={t("ui.fields.characterAge")}
               onChange={(event) =>
                 setFormEdits((prev) => ({ ...prev, age: event.target.value }))
               }
             />
-            <select
-              className={fieldClass}
+            <FormSelect
               value={form.type}
               onChange={(event) =>
                 setFormEdits((prev) => ({
@@ -115,21 +123,29 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
             >
               <option value="player">player</option>
               <option value="npc">npc</option>
-            </select>
-            <input
-              className={fieldClass}
+            </FormSelect>
+            <FormInput
               value={form.avatarPath}
               placeholder={t("ui.characterEdit.avatarPath")}
               onChange={(event) =>
                 setFormEdits((prev) => ({ ...prev, avatarPath: event.target.value }))
               }
             />
-            <textarea
-              className={`${fieldClass} min-h-24`}
+            <FormTextarea
+              className="min-h-24"
               value={form.description}
               placeholder={t("ui.fields.description")}
               onChange={(event) =>
                 setFormEdits((prev) => ({ ...prev, description: event.target.value }))
+              }
+            />
+            <VisibilityToggle
+              isPrivate={form.isPrivate}
+              label={t("ui.fields.visibilityPrivate")}
+              onLabel={t("ui.actions.on")}
+              offLabel={t("ui.actions.off")}
+              onToggle={() =>
+                setFormEdits((prev) => ({ ...prev, isPrivate: !form.isPrivate }))
               }
             />
 
@@ -145,6 +161,7 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
                         type: form.type as "player" | "npc",
                         avatarPath: form.avatarPath || null,
                         description: form.description,
+                        isPrivate: form.isPrivate,
                       });
                       setMessage(t("ui.feedback.saved"));
                       router.push(`/characters/${character.id}`);
@@ -168,11 +185,7 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
               </Button>
             </div>
 
-            {message ? (
-              <div className="rounded-md border border-border bg-background p-2 text-xs">
-                {message}
-              </div>
-            ) : null}
+            <FeedbackMessage message={message} />
           </CardContent>
         </Card>
       </main>

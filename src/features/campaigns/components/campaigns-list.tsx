@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/common/empty-state";
 import { CampaignCard } from "./campaign-card";
 import type { Campaign } from "../types";
 
@@ -10,6 +11,7 @@ type CampaignsListProps = {
   deleteLabel: string;
   emptyLabel: string;
   isOwner: (campaign: Campaign, userId?: string) => boolean;
+  canManage: (campaign: Campaign, userId?: string) => boolean;
   onEdit: (campaign: Campaign) => void;
   onDelete: (campaign: Campaign) => void;
 };
@@ -23,15 +25,12 @@ export function CampaignsList({
   deleteLabel,
   emptyLabel,
   isOwner,
+  canManage,
   onEdit,
   onDelete,
 }: CampaignsListProps) {
   if (campaigns.length === 0) {
-    return (
-      <div className="rounded-lg border border-border bg-background/70 p-3 text-xs text-muted-foreground">
-        {emptyLabel}
-      </div>
-    );
+    return <EmptyState label={emptyLabel} />;
   }
 
   return (
@@ -45,6 +44,7 @@ export function CampaignsList({
           editLabel={editLabel}
           deleteLabel={deleteLabel}
           isOwner={isOwner(campaign, currentUserId)}
+          canManage={canManage(campaign, currentUserId)}
           onEdit={() => onEdit(campaign)}
           onDelete={() => onDelete(campaign)}
         />

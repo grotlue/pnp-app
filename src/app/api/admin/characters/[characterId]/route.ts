@@ -16,6 +16,7 @@ type UpdateCharacterBody = {
   age?: number | null;
   description?: string;
   avatarPath?: string | null;
+  isPrivate?: boolean;
 };
 
 export async function PATCH(request: Request, { params }: Params) {
@@ -52,6 +53,9 @@ export async function PATCH(request: Request, { params }: Params) {
   if (body.avatarPath !== undefined) {
     patch.avatar_path = body.avatarPath;
   }
+  if (body.isPrivate !== undefined) {
+    patch.is_private = body.isPrivate;
+  }
 
   const service = createServiceRoleSupabaseClient();
   const { data, error } = await service
@@ -59,7 +63,7 @@ export async function PATCH(request: Request, { params }: Params) {
     .update(patch)
     .eq("id", characterId)
     .select(
-      "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, created_at, updated_at",
+      "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, is_private, created_at, updated_at",
     )
     .single();
 

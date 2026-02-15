@@ -12,6 +12,7 @@ type UpdateCampaignBody = {
   ownerUserId?: string;
   title?: string;
   description?: string;
+  isPrivate?: boolean;
 };
 
 export async function PATCH(request: Request, { params }: Params) {
@@ -36,13 +37,16 @@ export async function PATCH(request: Request, { params }: Params) {
   if (body.description !== undefined) {
     patch.description = body.description;
   }
+  if (body.isPrivate !== undefined) {
+    patch.is_private = body.isPrivate;
+  }
 
   const service = createServiceRoleSupabaseClient();
   const { data, error } = await service
     .from("campaigns")
     .update(patch)
     .eq("id", campaignId)
-    .select("id, owner_user_id, title, description, created_at, updated_at")
+    .select("id, owner_user_id, title, description, is_private, created_at, updated_at")
     .single();
 
   if (error) {

@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AppHeader } from "@/components/common/app-header";
+import { FeedbackMessage } from "@/components/common/feedback-message";
+import { FormInput, FormSelect, FormTextarea } from "@/components/common/form-controls";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AppHeader } from "@/components/common/app-header";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { getMe, updateMyProfile } from "@/features/users/queries/users-profile.query";
@@ -13,9 +15,6 @@ import type { MeResponse } from "@/features/users/types";
 type ProfileScreenProps = {
   locale: AppLocale;
 };
-
-const fieldClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary";
 
 export function ProfilePageView({ locale }: ProfileScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
@@ -48,6 +47,10 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
     }
     try {
       const response: MeResponse = await getMe(session);
+      if (response.profile.role === "admin") {
+        router.replace("/admin/users");
+        return;
+      }
       setForm({
         username: response.profile.username,
         description: response.profile.description,
@@ -93,16 +96,14 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
             <CardDescription>{t("ui.profile.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <input
-              className={fieldClass}
+            <FormInput
               value={form.username}
               placeholder={t("ui.fields.username")}
               onChange={(event) =>
                 setForm((prev) => ({ ...prev, username: event.target.value }))
               }
             />
-            <select
-              className={fieldClass}
+            <FormSelect
               value={form.locale}
               onChange={(event) =>
                 setForm((prev) => ({
@@ -113,9 +114,9 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
             >
               <option value="en">English</option>
               <option value="de">Deutsch</option>
-            </select>
-            <textarea
-              className={`${fieldClass} min-h-24`}
+            </FormSelect>
+            <FormTextarea
+              className="min-h-24"
               value={form.description}
               placeholder={t("ui.fields.description")}
               onChange={(event) =>
@@ -127,11 +128,7 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
                 {t("ui.actions.save")}
               </Button>
             </div>
-            {message ? (
-              <div className="rounded-md border border-border bg-background p-2 text-xs">
-                {message}
-              </div>
-            ) : null}
+            <FeedbackMessage message={message} />
           </CardContent>
         </Card>
       </main>

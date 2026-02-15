@@ -6,6 +6,7 @@ type CreateCampaignBody = {
   ownerUserId?: string;
   title?: string;
   description?: string;
+  isPrivate?: boolean;
 };
 
 export async function GET(request: Request) {
@@ -17,7 +18,7 @@ export async function GET(request: Request) {
   const service = createServiceRoleSupabaseClient();
   const { data, error } = await service
     .from("campaigns")
-    .select("id, owner_user_id, title, description, created_at, updated_at")
+    .select("id, owner_user_id, title, description, is_private, created_at, updated_at")
     .order("created_at", { ascending: false })
     .limit(500);
 
@@ -46,8 +47,9 @@ export async function POST(request: Request) {
       owner_user_id: body.ownerUserId,
       title: body.title,
       description: body.description ?? "",
+      is_private: body.isPrivate ?? false,
     })
-    .select("id, owner_user_id, title, description, created_at, updated_at")
+    .select("id, owner_user_id, title, description, is_private, created_at, updated_at")
     .single();
 
   if (error) {

@@ -1,17 +1,31 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Pencil, Trash2 } from "lucide-react";
 import { AppHeader } from "@/components/common/app-header";
+import { EmptyState } from "@/components/common/empty-state";
+import { FeedbackMessage } from "@/components/common/feedback-message";
+import { IconActionButton } from "@/components/common/icon-action-button";
+import { ListItemRow } from "@/components/common/list-item-row";
+import { NavTabs } from "@/components/common/nav-tabs";
 import { Modal } from "@/components/common/modal";
+import {
+  CampaignFormFields,
+  CharacterFormFields,
+  type AdminCampaignFormValues,
+  type AdminCharacterFormValues,
+  type AdminUserFormValues,
+  UserFormFields,
+} from "@/page-modules/admin-page-forms";
+import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAdminDashboard } from "@/features/admin/hooks/use-admin-dashboard";
 import type {
   AdminCampaign,
   AdminCharacter,
-  AdminCreateCampaignInput,
-  AdminCreateCharacterInput,
   AdminCreateUserInput,
   AdminUser,
 } from "@/features/admin/types";
@@ -20,10 +34,8 @@ import { getTranslator, type AppLocale } from "@/lib/i18n";
 
 type AdminPageViewProps = {
   locale: AppLocale;
+  section: "users" | "campaigns" | "characters";
 };
-
-const fieldClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary";
 
 const defaultCreateUserForm: AdminCreateUserInput = {
   email: "",
@@ -33,20 +45,48 @@ const defaultCreateUserForm: AdminCreateUserInput = {
   locale: "en",
 };
 
-const defaultCreateCampaignForm: AdminCreateCampaignInput = {
+const defaultEditUserForm: AdminUserFormValues = {
+  email: "",
+  password: "",
+  username: "",
+  description: "",
+  locale: "en",
+};
+
+const defaultCreateCampaignForm: AdminCampaignFormValues = {
   ownerUserId: "",
   title: "",
   description: "",
+  isPrivate: false,
 };
 
-const defaultCreateCharacterForm: AdminCreateCharacterInput = {
+const defaultEditCampaignForm: AdminCampaignFormValues = {
   ownerUserId: "",
-  campaignId: null,
+  title: "",
+  description: "",
+  isPrivate: false,
+};
+
+const defaultCreateCharacterFormView: AdminCharacterFormValues = {
+  ownerUserId: "",
+  campaignIdText: "",
   type: "player",
   name: "",
-  age: null,
+  ageText: "",
   description: "",
-  avatarPath: null,
+  avatarPathText: "",
+  isPrivate: false,
+};
+
+const defaultEditCharacterForm: AdminCharacterFormValues = {
+  ownerUserId: "",
+  campaignIdText: "",
+  type: "player",
+  name: "",
+  ageText: "",
+  description: "",
+  avatarPathText: "",
+  isPrivate: false,
 };
 
 function parseNumberOrNull(value: string): number | null {
@@ -61,7 +101,7 @@ function isProtectedAdminUser(user: AdminUser): boolean {
   return user.role === "admin";
 }
 
-export function AdminPageView({ locale }: AdminPageViewProps) {
+export function AdminPageView({ locale, section }: AdminPageViewProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
   const router = useRouter();
   const { session, ready } = useClientSession();
@@ -73,43 +113,27 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
   const [editUser, setEditUser] = useState<AdminUser | null>(null);
   const [deleteUser, setDeleteUser] = useState<AdminUser | null>(null);
   const [createUserForm, setCreateUserForm] = useState<AdminCreateUserInput>(defaultCreateUserForm);
-  const [editUserForm, setEditUserForm] = useState({
-    email: "",
-    password: "",
-    username: "",
-    description: "",
-    locale: "en" as "en" | "de",
-  });
+  const [editUserForm, setEditUserForm] = useState<AdminUserFormValues>(defaultEditUserForm);
 
   const [createCampaignOpen, setCreateCampaignOpen] = useState(false);
   const [editCampaign, setEditCampaign] = useState<AdminCampaign | null>(null);
   const [deleteCampaign, setDeleteCampaign] = useState<AdminCampaign | null>(null);
-  const [createCampaignForm, setCreateCampaignForm] =
-    useState<AdminCreateCampaignInput>(defaultCreateCampaignForm);
-  const [editCampaignForm, setEditCampaignForm] = useState({
-    ownerUserId: "",
-    title: "",
-    description: "",
-  });
+  const [createCampaignForm, setCreateCampaignForm] = useState<AdminCampaignFormValues>(
+    defaultCreateCampaignForm,
+  );
+  const [editCampaignForm, setEditCampaignForm] = useState<AdminCampaignFormValues>(
+    defaultEditCampaignForm,
+  );
 
   const [createCharacterOpen, setCreateCharacterOpen] = useState(false);
   const [editCharacter, setEditCharacter] = useState<AdminCharacter | null>(null);
   const [deleteCharacter, setDeleteCharacter] = useState<AdminCharacter | null>(null);
-  const [createCharacterForm, setCreateCharacterForm] = useState({
-    ...defaultCreateCharacterForm,
-    ageText: "",
-    campaignIdText: "",
-    avatarPathText: "",
-  });
-  const [editCharacterForm, setEditCharacterForm] = useState({
-    ownerUserId: "",
-    campaignIdText: "",
-    type: "player" as "player" | "npc",
-    name: "",
-    ageText: "",
-    description: "",
-    avatarPathText: "",
-  });
+  const [createCharacterForm, setCreateCharacterForm] = useState<AdminCharacterFormValues>(
+    defaultCreateCharacterFormView,
+  );
+  const [editCharacterForm, setEditCharacterForm] = useState<AdminCharacterFormValues>(
+    defaultEditCharacterForm,
+  );
 
   useEffect(() => {
     if (!ready) {
@@ -150,6 +174,11 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
     .map((error) => error.message);
 
   const feedback = message || queryErrors[0] || "";
+  const sectionTabs = [
+    { key: "users" as const, href: "/admin/users", label: t("ui.admin.usersTitle") },
+    { key: "campaigns" as const, href: "/admin/campaigns", label: t("ui.admin.campaignsTitle") },
+    { key: "characters" as const, href: "/admin/characters", label: t("ui.admin.charactersTitle") },
+  ];
 
   if (!ready || !session) {
     return <main className="min-h-screen" />;
@@ -180,14 +209,17 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
             <CardDescription>{t("ui.admin.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent>
-            {feedback ? (
-              <div className="rounded-md border border-border bg-background p-2 text-xs">
-                {feedback}
-              </div>
-            ) : null}
+            <FeedbackMessage message={feedback} />
           </CardContent>
         </Card>
 
+        <Card>
+          <CardContent className="pt-6">
+            <NavTabs activeKey={section} tabs={sectionTabs} />
+          </CardContent>
+        </Card>
+
+        {section === "users" ? (
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.admin.usersTitle")}</CardTitle>
@@ -196,57 +228,66 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
           <CardContent className="space-y-3">
             <Button onClick={() => setCreateUserOpen(true)}>{t("ui.admin.createUser")}</Button>
             {users.length === 0 ? (
-              <div className="rounded-lg border border-border bg-background/70 p-3 text-xs text-muted-foreground">
-                {t("ui.feedback.empty")}
-              </div>
+              <EmptyState label={t("ui.feedback.empty")} />
             ) : (
               users.map((user) => (
-                <div
+                <ListItemRow
                   key={user.id}
-                  className="grid gap-2 rounded-lg border border-border bg-background/70 p-3 md:grid-cols-[1fr_auto]"
+                  actions={
+                    !isProtectedAdminUser(user) ? (
+                      <>
+                        <IconActionButton
+                          label={t("ui.actions.edit")}
+                          icon={Pencil}
+                          onClick={() => {
+                            setEditUser(user);
+                            setEditUserForm({
+                              email: user.email,
+                              password: "",
+                              username: user.username,
+                              description: user.description ?? "",
+                              locale: user.locale,
+                            });
+                          }}
+                        />
+                        <IconActionButton
+                          label={t("ui.actions.delete")}
+                          icon={Trash2}
+                          variant="destructive"
+                          disabled={user.id === admin.meQuery.data?.user.id}
+                          onClick={() => setDeleteUser(user)}
+                        />
+                      </>
+                    ) : null
+                  }
                 >
-                  <div>
-                    <div className="font-medium">
-                      {user.username} ({user.email})
+                  {isProtectedAdminUser(user) ? (
+                    <div>
+                      <div className="font-medium">
+                        {user.username} ({user.email})
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {user.role} - {user.id}
+                      </div>
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      {user.role} - {user.id}
-                    </div>
-                  </div>
-                  {!isProtectedAdminUser(user) ? (
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setEditUser(user);
-                          setEditUserForm({
-                            email: user.email,
-                            password: "",
-                            username: user.username,
-                            description: user.description ?? "",
-                            locale: user.locale,
-                          });
-                        }}
-                      >
-                        {t("ui.actions.edit")}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        disabled={user.id === admin.meQuery.data?.user.id}
-                        onClick={() => setDeleteUser(user)}
-                      >
-                        {t("ui.actions.delete")}
-                      </Button>
-                    </div>
-                  ) : null}
-                </div>
+                  ) : (
+                    <Link href={`/users/${user.id}`} className="block">
+                      <div className="font-medium">
+                        {user.username} ({user.email})
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {user.role} - {user.id}
+                      </div>
+                    </Link>
+                  )}
+                </ListItemRow>
               ))
             )}
           </CardContent>
         </Card>
+        ) : null}
 
+        {section === "campaigns" ? (
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.admin.campaignsTitle")}</CardTitle>
@@ -265,47 +306,54 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
               {t("ui.admin.createCampaign")}
             </Button>
             {campaigns.length === 0 ? (
-              <div className="rounded-lg border border-border bg-background/70 p-3 text-xs text-muted-foreground">
-                {t("ui.feedback.empty")}
-              </div>
+              <EmptyState label={t("ui.feedback.empty")} />
             ) : (
               campaigns.map((campaign) => (
-                <div
+                <ListItemRow
                   key={campaign.id}
-                  className="grid gap-2 rounded-lg border border-border bg-background/70 p-3 md:grid-cols-[1fr_auto]"
+                  actions={
+                    <>
+                      <IconActionButton
+                        label={t("ui.actions.edit")}
+                        icon={Pencil}
+                        onClick={() => {
+                          setEditCampaign(campaign);
+                          setEditCampaignForm({
+                            ownerUserId: campaign.owner_user_id,
+                            title: campaign.title,
+                            description: campaign.description ?? "",
+                            isPrivate: campaign.is_private ?? false,
+                          });
+                        }}
+                      />
+                      <IconActionButton
+                        label={t("ui.actions.delete")}
+                        icon={Trash2}
+                        variant="destructive"
+                        onClick={() => setDeleteCampaign(campaign)}
+                      />
+                    </>
+                  }
                 >
-                  <div>
-                    <div className="font-medium">{campaign.title}</div>
+                  <Link href={`/campaigns/${campaign.id}`} className="block">
+                    <TitleWithPrivacy
+                      title={campaign.title}
+                      isPrivate={campaign.is_private}
+                      className="font-medium underline-offset-2 hover:underline"
+                    />
                     <div className="text-xs text-muted-foreground">
                       {t("ui.admin.ownerLabel")}:{" "}
                       {userById.get(campaign.owner_user_id)?.username ?? campaign.owner_user_id}
                     </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setEditCampaign(campaign);
-                        setEditCampaignForm({
-                          ownerUserId: campaign.owner_user_id,
-                          title: campaign.title,
-                          description: campaign.description ?? "",
-                        });
-                      }}
-                    >
-                      {t("ui.actions.edit")}
-                    </Button>
-                    <Button size="sm" variant="destructive" onClick={() => setDeleteCampaign(campaign)}>
-                      {t("ui.actions.delete")}
-                    </Button>
-                  </div>
-                </div>
+                  </Link>
+                </ListItemRow>
               ))
             )}
           </CardContent>
         </Card>
+        ) : null}
 
+        {section === "characters" ? (
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.admin.charactersTitle")}</CardTitle>
@@ -324,59 +372,59 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
               {t("ui.admin.createCharacter")}
             </Button>
             {characters.length === 0 ? (
-              <div className="rounded-lg border border-border bg-background/70 p-3 text-xs text-muted-foreground">
-                {t("ui.feedback.empty")}
-              </div>
+              <EmptyState label={t("ui.feedback.empty")} />
             ) : (
               characters.map((character) => (
-                <div
+                <ListItemRow
                   key={character.id}
-                  className="grid gap-2 rounded-lg border border-border bg-background/70 p-3 md:grid-cols-[1fr_auto]"
+                  actions={
+                    <>
+                      <IconActionButton
+                        label={t("ui.actions.edit")}
+                        icon={Pencil}
+                        onClick={() => {
+                          setEditCharacter(character);
+                          setEditCharacterForm({
+                            ownerUserId: character.owner_user_id,
+                            campaignIdText: character.campaign_id ?? "",
+                            type: character.type,
+                            name: character.name,
+                            ageText:
+                              character.age === null || character.age === undefined
+                                ? ""
+                                : String(character.age),
+                            description: character.description ?? "",
+                            avatarPathText: character.avatar_path ?? "",
+                            isPrivate: character.is_private ?? false,
+                          });
+                        }}
+                      />
+                      <IconActionButton
+                        label={t("ui.actions.delete")}
+                        icon={Trash2}
+                        variant="destructive"
+                        onClick={() => setDeleteCharacter(character)}
+                      />
+                    </>
+                  }
                 >
-                  <div>
-                    <div className="font-medium">
-                      {character.name} ({character.type})
-                    </div>
+                  <Link href={`/characters/${character.id}`} className="block">
+                    <TitleWithPrivacy
+                      title={`${character.name} (${character.type})`}
+                      isPrivate={character.is_private}
+                      className="font-medium"
+                    />
                     <div className="text-xs text-muted-foreground">
                       {t("ui.admin.ownerLabel")}:{" "}
                       {userById.get(character.owner_user_id)?.username ?? character.owner_user_id}
                     </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setEditCharacter(character);
-                        setEditCharacterForm({
-                          ownerUserId: character.owner_user_id,
-                          campaignIdText: character.campaign_id ?? "",
-                          type: character.type,
-                          name: character.name,
-                          ageText:
-                            character.age === null || character.age === undefined
-                              ? ""
-                              : String(character.age),
-                          description: character.description ?? "",
-                          avatarPathText: character.avatar_path ?? "",
-                        });
-                      }}
-                    >
-                      {t("ui.actions.edit")}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => setDeleteCharacter(character)}
-                    >
-                      {t("ui.actions.delete")}
-                    </Button>
-                  </div>
-                </div>
+                  </Link>
+                </ListItemRow>
               ))
             )}
           </CardContent>
         </Card>
+        ) : null}
       </main>
 
       <Modal
@@ -408,50 +456,12 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
           </>
         }
       >
-        <div className="grid gap-2">
-          <input
-            className={fieldClass}
-            placeholder={t("ui.fields.email")}
-            value={createUserForm.email}
-            onChange={(event) =>
-              setCreateUserForm((prev) => ({ ...prev, email: event.target.value }))
-            }
-          />
-          <input
-            className={fieldClass}
-            placeholder={t("ui.fields.password")}
-            value={createUserForm.password}
-            onChange={(event) =>
-              setCreateUserForm((prev) => ({ ...prev, password: event.target.value }))
-            }
-          />
-          <input
-            className={fieldClass}
-            placeholder={t("ui.fields.username")}
-            value={createUserForm.username}
-            onChange={(event) =>
-              setCreateUserForm((prev) => ({ ...prev, username: event.target.value }))
-            }
-          />
-          <textarea
-            className={`${fieldClass} min-h-20`}
-            placeholder={t("ui.fields.description")}
-            value={createUserForm.description}
-            onChange={(event) =>
-              setCreateUserForm((prev) => ({ ...prev, description: event.target.value }))
-            }
-          />
-          <select
-            className={fieldClass}
-            value={createUserForm.locale}
-            onChange={(event) =>
-              setCreateUserForm((prev) => ({ ...prev, locale: event.target.value as "en" | "de" }))
-            }
-          >
-            <option value="en">en</option>
-            <option value="de">de</option>
-          </select>
-        </div>
+        <UserFormFields
+          t={t}
+          values={createUserForm}
+          passwordPlaceholder={t("ui.fields.password")}
+          onChange={setCreateUserForm}
+        />
       </Modal>
 
       <Modal
@@ -497,48 +507,12 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
           </>
         }
       >
-        <div className="grid gap-2">
-          <input
-            className={fieldClass}
-            placeholder={t("ui.fields.email")}
-            value={editUserForm.email}
-            onChange={(event) => setEditUserForm((prev) => ({ ...prev, email: event.target.value }))}
-          />
-          <input
-            className={fieldClass}
-            placeholder={t("ui.admin.newPasswordOptional")}
-            value={editUserForm.password}
-            onChange={(event) =>
-              setEditUserForm((prev) => ({ ...prev, password: event.target.value }))
-            }
-          />
-          <input
-            className={fieldClass}
-            placeholder={t("ui.fields.username")}
-            value={editUserForm.username}
-            onChange={(event) =>
-              setEditUserForm((prev) => ({ ...prev, username: event.target.value }))
-            }
-          />
-          <textarea
-            className={`${fieldClass} min-h-20`}
-            placeholder={t("ui.fields.description")}
-            value={editUserForm.description}
-            onChange={(event) =>
-              setEditUserForm((prev) => ({ ...prev, description: event.target.value }))
-            }
-          />
-          <select
-            className={fieldClass}
-            value={editUserForm.locale}
-            onChange={(event) =>
-              setEditUserForm((prev) => ({ ...prev, locale: event.target.value as "en" | "de" }))
-            }
-          >
-            <option value="en">en</option>
-            <option value="de">de</option>
-          </select>
-        </div>
+        <UserFormFields
+          t={t}
+          values={editUserForm}
+          passwordPlaceholder={t("ui.admin.newPasswordOptional")}
+          onChange={setEditUserForm}
+        />
       </Modal>
 
       <Modal
@@ -612,38 +586,12 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
           </>
         }
       >
-        <div className="grid gap-2">
-          <label className="text-xs text-muted-foreground">{t("ui.admin.ownerLabel")}</label>
-          <select
-            className={fieldClass}
-            value={createCampaignForm.ownerUserId}
-            onChange={(event) =>
-              setCreateCampaignForm((prev) => ({ ...prev, ownerUserId: event.target.value }))
-            }
-          >
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.username} ({user.email})
-              </option>
-            ))}
-          </select>
-          <input
-            className={fieldClass}
-            placeholder={t("ui.fields.campaignTitle")}
-            value={createCampaignForm.title}
-            onChange={(event) =>
-              setCreateCampaignForm((prev) => ({ ...prev, title: event.target.value }))
-            }
-          />
-          <textarea
-            className={`${fieldClass} min-h-20`}
-            placeholder={t("ui.fields.campaignDescription")}
-            value={createCampaignForm.description}
-            onChange={(event) =>
-              setCreateCampaignForm((prev) => ({ ...prev, description: event.target.value }))
-            }
-          />
-        </div>
+        <CampaignFormFields
+          t={t}
+          values={createCampaignForm}
+          users={users}
+          onChange={setCreateCampaignForm}
+        />
       </Modal>
 
       <Modal
@@ -680,38 +628,12 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
           </>
         }
       >
-        <div className="grid gap-2">
-          <label className="text-xs text-muted-foreground">{t("ui.admin.ownerLabel")}</label>
-          <select
-            className={fieldClass}
-            value={editCampaignForm.ownerUserId}
-            onChange={(event) =>
-              setEditCampaignForm((prev) => ({ ...prev, ownerUserId: event.target.value }))
-            }
-          >
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.username} ({user.email})
-              </option>
-            ))}
-          </select>
-          <input
-            className={fieldClass}
-            placeholder={t("ui.fields.campaignTitle")}
-            value={editCampaignForm.title}
-            onChange={(event) =>
-              setEditCampaignForm((prev) => ({ ...prev, title: event.target.value }))
-            }
-          />
-          <textarea
-            className={`${fieldClass} min-h-20`}
-            placeholder={t("ui.fields.campaignDescription")}
-            value={editCampaignForm.description}
-            onChange={(event) =>
-              setEditCampaignForm((prev) => ({ ...prev, description: event.target.value }))
-            }
-          />
-        </div>
+        <CampaignFormFields
+          t={t}
+          values={editCampaignForm}
+          users={users}
+          onChange={setEditCampaignForm}
+        />
       </Modal>
 
       <Modal
@@ -771,14 +693,10 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
                       age: parseNumberOrNull(createCharacterForm.ageText),
                       description: createCharacterForm.description,
                       avatarPath: createCharacterForm.avatarPathText || null,
+                      isPrivate: createCharacterForm.isPrivate,
                     });
                     setCreateCharacterOpen(false);
-                    setCreateCharacterForm({
-                      ...defaultCreateCharacterForm,
-                      ageText: "",
-                      campaignIdText: "",
-                      avatarPathText: "",
-                    });
+                    setCreateCharacterForm(defaultCreateCharacterFormView);
                     setMessage(t("ui.feedback.created"));
                   } catch (error) {
                     setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
@@ -791,84 +709,13 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
           </>
         }
       >
-        <div className="grid gap-2">
-          <label className="text-xs text-muted-foreground">{t("ui.admin.ownerLabel")}</label>
-          <select
-            className={fieldClass}
-            value={createCharacterForm.ownerUserId}
-            onChange={(event) =>
-              setCreateCharacterForm((prev) => ({ ...prev, ownerUserId: event.target.value }))
-            }
-          >
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.username} ({user.email})
-              </option>
-            ))}
-          </select>
-
-          <label className="text-xs text-muted-foreground">{t("ui.admin.campaignLabel")}</label>
-          <select
-            className={fieldClass}
-            value={createCharacterForm.campaignIdText}
-            onChange={(event) =>
-              setCreateCharacterForm((prev) => ({ ...prev, campaignIdText: event.target.value }))
-            }
-          >
-            <option value="">{t("ui.admin.noCampaign")}</option>
-            {campaigns.map((campaign) => (
-              <option key={campaign.id} value={campaign.id}>
-                {campaign.title}
-              </option>
-            ))}
-          </select>
-
-          <select
-            className={fieldClass}
-            value={createCharacterForm.type}
-            onChange={(event) =>
-              setCreateCharacterForm((prev) => ({
-                ...prev,
-                type: event.target.value as "player" | "npc",
-              }))
-            }
-          >
-            <option value="player">player</option>
-            <option value="npc">npc</option>
-          </select>
-          <input
-            className={fieldClass}
-            placeholder={t("ui.fields.characterName")}
-            value={createCharacterForm.name}
-            onChange={(event) =>
-              setCreateCharacterForm((prev) => ({ ...prev, name: event.target.value }))
-            }
-          />
-          <input
-            className={fieldClass}
-            placeholder={t("ui.fields.characterAge")}
-            value={createCharacterForm.ageText}
-            onChange={(event) =>
-              setCreateCharacterForm((prev) => ({ ...prev, ageText: event.target.value }))
-            }
-          />
-          <input
-            className={fieldClass}
-            placeholder={t("ui.characterEdit.avatarPath")}
-            value={createCharacterForm.avatarPathText}
-            onChange={(event) =>
-              setCreateCharacterForm((prev) => ({ ...prev, avatarPathText: event.target.value }))
-            }
-          />
-          <textarea
-            className={`${fieldClass} min-h-20`}
-            placeholder={t("ui.fields.description")}
-            value={createCharacterForm.description}
-            onChange={(event) =>
-              setCreateCharacterForm((prev) => ({ ...prev, description: event.target.value }))
-            }
-          />
-        </div>
+        <CharacterFormFields
+          t={t}
+          values={createCharacterForm}
+          users={users}
+          campaigns={campaigns}
+          onChange={setCreateCharacterForm}
+        />
       </Modal>
 
       <Modal
@@ -898,6 +745,7 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
                         age: parseNumberOrNull(editCharacterForm.ageText),
                         description: editCharacterForm.description,
                         avatarPath: editCharacterForm.avatarPathText || null,
+                        isPrivate: editCharacterForm.isPrivate,
                       },
                     });
                     setEditCharacter(null);
@@ -913,82 +761,13 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
           </>
         }
       >
-        <div className="grid gap-2">
-          <label className="text-xs text-muted-foreground">{t("ui.admin.ownerLabel")}</label>
-          <select
-            className={fieldClass}
-            value={editCharacterForm.ownerUserId}
-            onChange={(event) =>
-              setEditCharacterForm((prev) => ({ ...prev, ownerUserId: event.target.value }))
-            }
-          >
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.username} ({user.email})
-              </option>
-            ))}
-          </select>
-          <label className="text-xs text-muted-foreground">{t("ui.admin.campaignLabel")}</label>
-          <select
-            className={fieldClass}
-            value={editCharacterForm.campaignIdText}
-            onChange={(event) =>
-              setEditCharacterForm((prev) => ({ ...prev, campaignIdText: event.target.value }))
-            }
-          >
-            <option value="">{t("ui.admin.noCampaign")}</option>
-            {campaigns.map((campaign) => (
-              <option key={campaign.id} value={campaign.id}>
-                {campaign.title}
-              </option>
-            ))}
-          </select>
-          <select
-            className={fieldClass}
-            value={editCharacterForm.type}
-            onChange={(event) =>
-              setEditCharacterForm((prev) => ({
-                ...prev,
-                type: event.target.value as "player" | "npc",
-              }))
-            }
-          >
-            <option value="player">player</option>
-            <option value="npc">npc</option>
-          </select>
-          <input
-            className={fieldClass}
-            placeholder={t("ui.fields.characterName")}
-            value={editCharacterForm.name}
-            onChange={(event) =>
-              setEditCharacterForm((prev) => ({ ...prev, name: event.target.value }))
-            }
-          />
-          <input
-            className={fieldClass}
-            placeholder={t("ui.fields.characterAge")}
-            value={editCharacterForm.ageText}
-            onChange={(event) =>
-              setEditCharacterForm((prev) => ({ ...prev, ageText: event.target.value }))
-            }
-          />
-          <input
-            className={fieldClass}
-            placeholder={t("ui.characterEdit.avatarPath")}
-            value={editCharacterForm.avatarPathText}
-            onChange={(event) =>
-              setEditCharacterForm((prev) => ({ ...prev, avatarPathText: event.target.value }))
-            }
-          />
-          <textarea
-            className={`${fieldClass} min-h-20`}
-            placeholder={t("ui.fields.description")}
-            value={editCharacterForm.description}
-            onChange={(event) =>
-              setEditCharacterForm((prev) => ({ ...prev, description: event.target.value }))
-            }
-          />
-        </div>
+        <CharacterFormFields
+          t={t}
+          values={editCharacterForm}
+          users={users}
+          campaigns={campaigns}
+          onChange={setEditCharacterForm}
+        />
       </Modal>
 
       <Modal

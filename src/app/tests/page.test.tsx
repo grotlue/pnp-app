@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { AppProviders } from "../providers";
 import HomePage from "../page";
 
 vi.mock("next/navigation", () => ({
@@ -14,7 +15,7 @@ describe("Home page", () => {
     const ui = await HomePage({
       searchParams: Promise.resolve({}),
     });
-    render(ui);
+    render(<AppProviders>{ui}</AppProviders>);
 
     expect(await screen.findByRole("button", { name: "Login" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Register" })).toBeInTheDocument();
@@ -27,7 +28,7 @@ describe("Home page", () => {
       const ui = await HomePage({
         searchParams: Promise.resolve({}),
       });
-      render(ui);
+      render(<AppProviders>{ui}</AppProviders>);
 
       expect(await screen.findByRole("button", { name: "Login" })).toBeInTheDocument();
       expect(screen.queryByRole("link", { name: "Register" })).not.toBeInTheDocument();

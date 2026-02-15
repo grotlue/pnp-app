@@ -10,6 +10,7 @@ type CreateCharacterBody = {
   age?: number | null;
   description?: string;
   avatarPath?: string | null;
+  isPrivate?: boolean;
 };
 
 export async function GET(request: Request) {
@@ -22,7 +23,7 @@ export async function GET(request: Request) {
   const { data, error } = await service
     .from("characters")
     .select(
-      "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, created_at, updated_at",
+      "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, is_private, created_at, updated_at",
     )
     .order("created_at", { ascending: false })
     .limit(500);
@@ -56,9 +57,10 @@ export async function POST(request: Request) {
       age: body.age ?? null,
       description: body.description ?? "",
       avatar_path: body.avatarPath ?? null,
+      is_private: body.isPrivate ?? false,
     })
     .select(
-      "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, created_at, updated_at",
+      "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, is_private, created_at, updated_at",
     )
     .single();
 

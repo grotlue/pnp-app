@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { LogOut, Settings, Shield, User } from "lucide-react";
+import { IconActionButton, IconActionLinkButton } from "@/components/common/icon-action-button";
 import { clearSession } from "@/lib/client/session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import type { ClientSession } from "@/lib/client/session";
 import { logoutUser } from "@/features/users/queries/users-auth.query";
+import { getMe } from "@/features/users/queries/users-profile.query";
 import { appNavigationRoutes, appRoutes } from "@/app/router";
 
 type AppHeaderProps = {
@@ -19,6 +22,12 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const currentPath = pathname ?? "";
+  const meQuery = useQuery({
+    queryKey: ["me", "header", session.accessToken],
+    queryFn: async () => getMe(session),
+  });
+  const role = meQuery.data?.profile.role;
+  const roleResolved = meQuery.isSuccess;
 
   async function onLogout() {
     try {
@@ -56,10 +65,37 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
             );
           })}
         </nav>
-        <div className="ml-auto">
-          <Button variant="destructive" size="sm" onClick={onLogout}>
-            {t("ui.actions.logout")}
-          </Button>
+        <div className="ml-auto flex items-center gap-1">
+          {roleResolved && role !== "admin" ? (
+            <>
+              <IconActionLinkButton
+                label={t("ui.menu.profile")}
+                icon={User}
+                href={appRoutes.profile}
+                variant="ghost"
+              />
+              <IconActionLinkButton
+                label={t("ui.menu.settings")}
+                icon={Settings}
+                href={appRoutes.settings}
+                variant="ghost"
+              />
+            </>
+          ) : null}
+          {roleResolved && role === "admin" ? (
+            <IconActionLinkButton
+              label={t("ui.menu.admin")}
+              icon={Shield}
+              href={appRoutes.admin}
+              variant="ghost"
+            />
+          ) : null}
+          <IconActionButton
+            label={t("ui.actions.logout")}
+            icon={LogOut}
+            variant="ghost"
+            onClick={onLogout}
+          />
         </div>
       </div>
     </header>

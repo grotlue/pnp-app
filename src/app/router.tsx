@@ -17,8 +17,6 @@ export const appRoutes = {
 export const appNavigationRoutes = [
   { href: appRoutes.characters, key: "ui.menu.characters" },
   { href: appRoutes.campaigns, key: "ui.menu.campaigns" },
-  { href: appRoutes.profile, key: "ui.menu.profile" },
-  { href: appRoutes.settings, key: "ui.menu.settings" },
 ] as const;
 
 type AppRouterProps = {

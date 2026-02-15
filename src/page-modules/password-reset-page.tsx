@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { FeedbackMessage } from "@/components/common/feedback-message";
+import { FormInput } from "@/components/common/form-controls";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,9 +19,6 @@ import { requestPasswordReset } from "@/features/users/queries/users-auth.query"
 type PasswordResetScreenProps = {
   locale: AppLocale;
 };
-
-const fieldClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary";
 
 export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
@@ -49,18 +48,13 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
             <CardDescription>{t("ui.passwordReset.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <input
-              className={fieldClass}
+            <FormInput
               type="email"
               placeholder={t("ui.fields.email")}
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
-            {message ? (
-              <div className="rounded-md border border-border bg-background p-2 text-xs">
-                {message}
-              </div>
-            ) : null}
+            <FeedbackMessage message={message} />
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-2">
             <Button disabled={busy} onClick={onSubmit}>

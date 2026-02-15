@@ -4,6 +4,7 @@ import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
 type CreateCampaignBody = {
   title?: string;
   description?: string;
+  isPrivate?: boolean;
 };
 
 export async function GET(request: Request) {
@@ -20,7 +21,7 @@ export async function GET(request: Request) {
     : 100;
   const { data, error } = await client
     .from("campaigns")
-    .select("id, owner_user_id, title, description, created_at, updated_at")
+    .select("id, owner_user_id, title, description, is_private, created_at, updated_at")
     .limit(limit)
     .order("created_at", { ascending: false });
 
@@ -52,6 +53,17 @@ export async function POST(request: Request) {
 
   if (error) {
     return jsonError(400, "campaign_create_failed", error.message);
+  }
+
+  if (body.isPrivate !== undefined && body.isPrivate) {
+    const { error: updateError } = await auth.context.client
+      .from("campaigns")
+      .update({ is_private: true })
+      .eq("id", data);
+
+    if (updateError) {
+      return jsonError(400, "campaign_create_failed", updateError.message);
+    }
   }
 
   return jsonOk({ campaignId: data }, 201);

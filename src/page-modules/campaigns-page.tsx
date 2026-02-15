@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AppHeader } from "@/components/common/app-header";
+import { FeedbackMessage } from "@/components/common/feedback-message";
+import { Modal } from "@/components/common/modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Modal } from "@/components/common/modal";
-import { AppHeader } from "@/components/common/app-header";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { isCampaignOwner } from "@/features/campaigns/logic/campaign-role.logic";
@@ -19,12 +20,10 @@ type CampaignsPageViewProps = {
   locale: AppLocale;
 };
 
-const fieldClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary";
-
 const defaultFormValues: CampaignFormValues = {
   title: "",
   description: "",
+  isPrivate: false,
 };
 
 export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
@@ -58,6 +57,11 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
   const feedback = message || queryError;
   const campaigns = campaignsQuery.data?.campaigns ?? [];
   const currentUserId = campaignsQuery.data?.me.user.id;
+  const currentUserRole = campaignsQuery.data?.me.profile?.role;
+  const visibleCampaigns =
+    currentUserRole === "admin"
+      ? campaigns.filter((campaign) => campaign.owner_user_id === currentUserId)
+      : campaigns;
 
   if (!ready || !session) {
     return <main className="min-h-screen" />;
@@ -77,11 +81,7 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
               <Button onClick={() => setCreateOpen(true)}>{t("ui.campaigns.create")}</Button>
             </div>
 
-            {feedback ? (
-              <div className="rounded-md border border-border bg-background p-2 text-xs">
-                {feedback}
-              </div>
-            ) : null}
+            <FeedbackMessage message={feedback} />
 
             {campaignsQuery.isLoading ? (
               <div className="rounded-lg border border-border bg-background/70 p-3 text-xs text-muted-foreground">
@@ -89,7 +89,7 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
               </div>
             ) : (
               <CampaignsList
-                campaigns={campaigns}
+                campaigns={visibleCampaigns}
                 currentUserId={currentUserId}
                 ownerLabel={t("ui.campaigns.roleOwner")}
                 playerLabel={t("ui.campaigns.rolePlayer")}
@@ -97,11 +97,16 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
                 deleteLabel={t("ui.actions.delete")}
                 emptyLabel={t("ui.feedback.empty")}
                 isOwner={isCampaignOwner}
+                canManage={(campaign, userId) =>
+                  isCampaignOwner(campaign, userId) ||
+                  campaignsQuery.data?.me.profile?.role === "admin"
+                }
                 onEdit={(campaign) => {
                   setEditCampaign(campaign);
                   setEditForm({
                     title: campaign.title,
                     description: campaign.description,
+                    isPrivate: campaign.is_private ?? false,
                   });
                 }}
                 onDelete={setDeleteCampaign}
@@ -146,7 +151,9 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
           onChange={setCreateForm}
           titlePlaceholder={t("ui.fields.campaignTitle")}
           descriptionPlaceholder={t("ui.fields.campaignDescription")}
-          inputClassName={fieldClass}
+          visibilityLabel={t("ui.fields.visibilityPrivate")}
+          onLabel={t("ui.actions.on")}
+          offLabel={t("ui.actions.off")}
         />
       </Modal>
 
@@ -191,7 +198,9 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
           onChange={setEditForm}
           titlePlaceholder={t("ui.fields.campaignTitle")}
           descriptionPlaceholder={t("ui.fields.campaignDescription")}
-          inputClassName={fieldClass}
+          visibilityLabel={t("ui.fields.visibilityPrivate")}
+          onLabel={t("ui.actions.on")}
+          offLabel={t("ui.actions.off")}
         />
       </Modal>
 

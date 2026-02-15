@@ -43,3 +43,11 @@ export type PasswordResetConfirmResponse = {
   refreshToken?: string;
   expiresAt?: number;
 };
+
+export type PublicUserProfile = {
+  id: string;
+  username: string;
+  description: string;
+  avatar_path: string | null;
+  locale: "en" | "de";
+};

@@ -11,6 +11,7 @@ export type Character = {
   age: number | null;
   description: string;
   avatar_path?: string | null;
+  is_private?: boolean;
 };
 
 export type CharacterCreateInput = {
@@ -18,6 +19,7 @@ export type CharacterCreateInput = {
   name: string;
   age: number | null;
   description: string;
+  isPrivate?: boolean;
 };
 
 export type CharacterUpdateInput = {
@@ -26,4 +28,5 @@ export type CharacterUpdateInput = {
   type: CharacterType;
   avatarPath: string | null;
   description: string;
+  isPrivate?: boolean;
 };

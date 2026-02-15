@@ -3,21 +3,28 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { Pencil, Trash2 } from "lucide-react";
+import { AppHeader } from "@/components/common/app-header";
+import { EmptyState } from "@/components/common/empty-state";
+import { FeedbackMessage } from "@/components/common/feedback-message";
+import { FormInput, FormSelect, FormTextarea } from "@/components/common/form-controls";
+import { IconActionButton, IconActionLinkButton } from "@/components/common/icon-action-button";
+import { ListItemRow } from "@/components/common/list-item-row";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { AppHeader } from "@/components/common/app-header";
 import { Modal } from "@/components/common/modal";
+import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
+import { VisibilityToggle } from "@/components/common/visibility-toggle";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import type { Character } from "@/features/characters/types";
 import { useCharactersScreen } from "@/features/characters/hooks/use-characters-screen";
+import { getMe } from "@/features/users/queries/users-profile.query";
 
 type CharactersScreenProps = {
   locale: AppLocale;
 };
-
-const fieldClass =
-  "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary";
 
 export function CharactersPageView({ locale }: CharactersScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
@@ -34,6 +41,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
     name: "",
     age: "",
     description: "",
+    isPrivate: false,
   });
   useEffect(() => {
     if (!ready) {
@@ -47,10 +55,41 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
   const { charactersQuery, createMutation, deleteMutation, anyPending } = useCharactersScreen(
     session,
   );
+  const meQuery = useQuery({
+    queryKey: ["me", "characters-screen", session?.accessToken ?? "no-session"],
+    enabled: Boolean(session),
+    queryFn: async () => {
+      if (!session) {
+        throw new Error("Missing session");
+      }
+
+      return getMe(session);
+    },
+  });
   const characters = charactersQuery.data ?? [];
+  const meUserId = meQuery.data?.user.id;
+  const visibleCharacters =
+    meQuery.data?.profile.role === "admin"
+      ? characters.filter((character) => character.owner_user_id === meUserId)
+      : characters;
 
   if (!ready || !session) {
     return <main className="min-h-screen" />;
+  }
+
+  if (meQuery.isLoading) {
+    return (
+      <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+        <AppHeader locale={locale} session={session} />
+        <main className="mx-auto w-full max-w-7xl px-4 py-8">
+          <Card>
+            <CardContent className="py-8 text-sm text-muted-foreground">
+              {t("ui.start.loading")}
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
   }
 
   return (
@@ -69,43 +108,41 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
               </Button>
             </div>
 
-            {message ? (
-              <div className="rounded-md border border-border bg-background p-2 text-xs">
-                {message}
-              </div>
-            ) : null}
+            <FeedbackMessage message={message} />
 
             <div className="space-y-2">
-              {characters.map((character) => (
-                <div
+              {visibleCharacters.map((character) => (
+                <ListItemRow
                   key={character.id}
-                  className="grid gap-2 rounded-lg border border-border bg-background/70 p-3 md:grid-cols-[1fr_auto]"
+                  actions={
+                    <>
+                      <IconActionLinkButton
+                        label={t("ui.actions.edit")}
+                        icon={Pencil}
+                        href={`/characters/${character.id}/edit`}
+                      />
+                      <IconActionButton
+                        label={t("ui.actions.delete")}
+                        icon={Trash2}
+                        variant="destructive"
+                        onClick={() => setDeleteTarget(character)}
+                      />
+                    </>
+                  }
                 >
                   <Link className="text-left" href={`/characters/${character.id}`}>
-                    <div className="font-medium">{character.name}</div>
+                    <TitleWithPrivacy
+                      title={character.name}
+                      isPrivate={character.is_private}
+                      className="font-medium"
+                    />
                     <div className="text-xs text-muted-foreground">
                       {character.type} {character.campaign_id ? `- ${character.campaign_id}` : ""}
                     </div>
                   </Link>
-                  <div className="flex flex-wrap gap-2">
-                    <Button asChild size="sm" variant="outline">
-                      <Link href={`/characters/${character.id}/edit`}>{t("ui.actions.edit")}</Link>
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => setDeleteTarget(character)}
-                    >
-                      {t("ui.actions.delete")}
-                    </Button>
-                  </div>
-                </div>
+                </ListItemRow>
               ))}
-              {characters.length === 0 ? (
-                <div className="rounded-lg border border-border bg-background/70 p-3 text-xs text-muted-foreground">
-                  {t("ui.feedback.empty")}
-                </div>
-              ) : null}
+              {visibleCharacters.length === 0 ? <EmptyState label={t("ui.feedback.empty")} /> : null}
             </div>
           </CardContent>
         </Card>
@@ -130,9 +167,16 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
                       name: createForm.name,
                       age: createForm.age ? Number(createForm.age) : null,
                       description: createForm.description,
+                      isPrivate: createForm.isPrivate,
                     });
                     setCreateOpen(false);
-                    setCreateForm({ type: "player", name: "", age: "", description: "" });
+                    setCreateForm({
+                      type: "player",
+                      name: "",
+                      age: "",
+                      description: "",
+                      isPrivate: false,
+                    });
                     setMessage(t("ui.feedback.created"));
                   } catch (error) {
                     setMessage(
@@ -149,8 +193,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
         }
       >
         <div className="grid gap-2">
-          <select
-            className={fieldClass}
+          <FormSelect
             value={createForm.type}
             onChange={(event) =>
               setCreateForm((prev) => ({ ...prev, type: event.target.value }))
@@ -158,29 +201,36 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
           >
             <option value="player">player</option>
             <option value="npc">npc</option>
-          </select>
-          <input
-            className={fieldClass}
+          </FormSelect>
+          <FormInput
             placeholder={t("ui.fields.characterName")}
             value={createForm.name}
             onChange={(event) =>
               setCreateForm((prev) => ({ ...prev, name: event.target.value }))
             }
           />
-          <input
-            className={fieldClass}
+          <FormInput
             placeholder={t("ui.fields.characterAge")}
             value={createForm.age}
             onChange={(event) =>
               setCreateForm((prev) => ({ ...prev, age: event.target.value }))
             }
           />
-          <textarea
-            className={`${fieldClass} min-h-24`}
+          <FormTextarea
+            className="min-h-24"
             placeholder={t("ui.fields.description")}
             value={createForm.description}
             onChange={(event) =>
               setCreateForm((prev) => ({ ...prev, description: event.target.value }))
+            }
+          />
+          <VisibilityToggle
+            isPrivate={createForm.isPrivate}
+            label={t("ui.fields.visibilityPrivate")}
+            onLabel={t("ui.actions.on")}
+            offLabel={t("ui.actions.off")}
+            onToggle={() =>
+              setCreateForm((prev) => ({ ...prev, isPrivate: !prev.isPrivate }))
             }
           />
         </div>

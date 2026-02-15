@@ -1,5 +1,5 @@
 import { requireAuth } from "@/server/auth/require-auth";
-import { jsonError, jsonOk } from "@/lib/api/http";
+import { jsonOk } from "@/lib/api/http";
 
 export async function POST(request: Request) {
   const auth = await requireAuth(request);
@@ -7,10 +7,8 @@ export async function POST(request: Request) {
     return auth.response;
   }
 
-  const { error } = await auth.context.client.auth.signOut();
-  if (error) {
-    return jsonError(400, "logout_failed", error.message);
-  }
-
+  // We use a token-bound server client (`accessToken` option). In this mode,
+  // supabase.auth.signOut() is not supported by supabase-js.
+  // Client session cleanup is handled in the frontend and is the source of truth.
   return jsonOk({ success: true });
 }

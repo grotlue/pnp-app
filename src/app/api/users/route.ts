@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await auth.context.client
     .from("profiles")
-    .select("id, username")
+    .select("id, username, role")
     .limit(limit)
     .order("username", { ascending: true });
 

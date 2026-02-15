@@ -3,6 +3,7 @@ export type Campaign = {
   owner_user_id: string;
   title: string;
   description: string;
+  is_private?: boolean;
 };
 
 export type CampaignMembership = {
@@ -20,15 +21,20 @@ export type CampaignDetail = {
 export type UserEntry = {
   id: string;
   username: string;
+  role?: "user" | "admin";
 };
 
 export type MeResponse = {
   user: {
     id: string;
   };
+  profile?: {
+    role?: "user" | "admin";
+  };
 };
 
 export type CampaignFormValues = {
   title: string;
   description: string;
+  isPrivate?: boolean;
 };
