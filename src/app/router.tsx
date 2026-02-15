@@ -1,0 +1,31 @@
+import type { ReactNode } from "react";
+
+export const appRoutes = {
+  home: "/",
+  register: "/register",
+  passwordReset: "/password-reset",
+  authCallback: "/auth/callback",
+  authResetPassword: "/auth/reset-password",
+  characters: "/characters",
+  campaigns: "/campaigns",
+  profile: "/profile",
+  settings: "/settings",
+  dashboard: "/dashboard",
+} as const;
+
+export const appNavigationRoutes = [
+  { href: appRoutes.characters, key: "ui.menu.characters" },
+  { href: appRoutes.campaigns, key: "ui.menu.campaigns" },
+  { href: appRoutes.profile, key: "ui.menu.profile" },
+  { href: appRoutes.settings, key: "ui.menu.settings" },
+] as const;
+
+type AppRouterProps = {
+  children: ReactNode;
+};
+
+// Next.js file-system routing resolves route matching.
+// This component centralizes route metadata and wraps rendered routes.
+export function AppRouter({ children }: AppRouterProps) {
+  return <>{children}</>;
+}

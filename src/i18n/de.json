@@ -1,0 +1,194 @@
+{
+  "app": {
+    "title": "pnp-app",
+    "description": "Kampagnen- und Charakterverwaltung für Pen-&-Paper-Rollenspiel."
+  },
+  "ui": {
+    "menu": {
+      "characters": "Charaktere",
+      "campaigns": "Kampagnen",
+      "profile": "Profil",
+      "settings": "Einstellungen"
+    },
+    "nav": {
+      "register": "Registrieren",
+      "passwordReset": "Passwort vergessen?",
+      "backToLogin": "Zurück zum Login"
+    },
+    "start": {
+      "loggedOutTitle": "Login",
+      "loggedOutSubtitle": "Melde dich an, um Kampagnen und Charaktere zu verwalten.",
+      "loggedInTitle": "Startseite (eingeloggt)",
+      "loggedInSubtitle": "Verwalte Inhalte über das Menü.",
+      "welcome": "Willkommen",
+      "loading": "Profil wird geladen...",
+      "quickLinks": "Schnellzugriff",
+      "quickLinksSubtitle": "Öffne direkt die wichtigsten Bereiche."
+    },
+    "register": {
+      "title": "Registrierung",
+      "subtitle": "Erstelle dein Konto.",
+      "alreadyRegistered": "Schon registriert? Zum Login"
+    },
+    "passwordReset": {
+      "title": "Passwort zurücksetzen",
+      "subtitle": "Fordere eine E-Mail zum Zurücksetzen an."
+    },
+    "authCallback": {
+      "title": "Authentifizierung",
+      "subtitle": "Dein Anmeldelink wird verarbeitet.",
+      "processing": "Authentifizierung wird verarbeitet...",
+      "invalidLink": "Dieser Authentifizierungslink ist ungültig oder abgelaufen."
+    },
+    "authReset": {
+      "title": "Neues Passwort setzen",
+      "subtitle": "Lege ein neues Passwort für dein Konto fest.",
+      "processing": "Reset-Link wird geprüft...",
+      "invalidLink": "Dieser Passwort-Reset-Link ist ungültig oder abgelaufen.",
+      "submit": "Neues Passwort setzen",
+      "updated": "Passwort erfolgreich aktualisiert."
+    },
+    "profile": {
+      "title": "Profil",
+      "subtitle": "Aktualisiere deine öffentlichen Profildaten."
+    },
+    "settings": {
+      "title": "Einstellungen",
+      "subtitle": "Private Kontoeinstellungen verwalten.",
+      "deleteTitle": "Konto löschen",
+      "deleteConfirm": "Möchtest du dein Konto wirklich löschen?"
+    },
+    "characters": {
+      "title": "Charaktere",
+      "subtitle": "Liste, Detailansicht, Bearbeiten und Löschen deiner Charaktere.",
+      "create": "Neuen Charakter erstellen",
+      "edit": "Charakter bearbeiten",
+      "detail": "Charakterdetails",
+      "deleteTitle": "Charakter löschen",
+      "deleteConfirm": "Diesen Charakter dauerhaft löschen?"
+    },
+    "campaigns": {
+      "title": "Kampagnen",
+      "subtitle": "Kampagnen, die du besitzt oder als Spieler nutzt.",
+      "create": "Neue Kampagne erstellen",
+      "edit": "Kampagne bearbeiten",
+      "deleteTitle": "Kampagne löschen",
+      "deleteConfirm": "Diese Kampagne dauerhaft löschen?",
+      "roleOwner": "owner",
+      "rolePlayer": "player"
+    },
+    "campaignDetail": {
+      "subtitle": "Kampagnen-Detailansicht",
+      "invite": "Benutzer einladen",
+      "selectUser": "Benutzer auswählen",
+      "players": "Spielerliste",
+      "playerCharacters": "Spielercharaktere",
+      "npcs": "NPCs",
+      "assignCharacter": "Charakter zuweisen",
+      "selectCharacter": "Charakter auswählen",
+      "requestJoin": "Beitritt anfragen",
+      "joinConfirm": "Beitrittsanfrage an Kampagnenbesitzer senden?",
+      "joinPending": "Deine Beitrittsanfrage ist noch offen.",
+      "pendingRequests": "Offene Beitrittsanfragen"
+    },
+    "characterDetail": {
+      "subtitle": "Charakter-Detailansicht",
+      "noImage": "Kein Profilbild",
+      "assignedCampaign": "Zugewiesene Kampagne",
+      "assignCampaign": "Kampagne zuweisen",
+      "selectCampaign": "Kampagne auswählen",
+      "removeFromCampaign": "Aus Kampagne entfernen",
+      "unassignConfirm": "Diesen Charakter aus der Kampagne entfernen?",
+      "unassignInfo": "Beziehungen und Timeline-Einträge bleiben erhalten. So bleibt die Historie für spätere Features nutzbar.",
+      "addRelationship": "Beziehung hinzufügen",
+      "relationships": "Beziehungen",
+      "externalOneWay": "Externe einseitige Beziehung",
+      "targetExisting": "Bestehender Charakter",
+      "targetExternal": "Externer Name",
+      "selectRelationshipTarget": "Zielcharakter auswählen",
+      "externalName": "Externer Charaktername",
+      "category": "Kategorie",
+      "label": "Label",
+      "customLabel": "Eigenes Label",
+      "firstTimelineEntry": "Erster Timeline-Eintrag",
+      "editRelationship": "Beziehung bearbeiten",
+      "deleteRelationship": "Beziehung löschen",
+      "deleteRelationshipConfirm": "Nur die Perspektive dieses Charakters löschen?",
+      "relationshipDetail": "Beziehungsdetails",
+      "howThisSeesOther": "Wie dieser Charakter den anderen sieht",
+      "howOtherSeesThis": "Wie der andere diesen Charakter sieht",
+      "timeline": "Timeline"
+    },
+    "characterEdit": {
+      "title": "Charakter bearbeiten",
+      "subtitle": "Charakterdaten und Typ aktualisieren.",
+      "avatarPath": "Avatar-Storage-Pfad",
+      "noPermission": "Nur der Besitzer kann diesen Charakter bearbeiten."
+    },
+    "fields": {
+      "email": "E-Mail",
+      "password": "Passwort",
+      "username": "Benutzername",
+      "newEmail": "Neue E-Mail",
+      "newPassword": "Neues Passwort",
+      "description": "Beschreibung",
+      "characterName": "Charaktername",
+      "characterAge": "Alter",
+      "campaignTitle": "Kampagnentitel",
+      "campaignDescription": "Kampagnenbeschreibung",
+      "type": "Typ"
+    },
+    "actions": {
+      "login": "Anmelden",
+      "register": "Registrieren",
+      "sendReset": "Reset-E-Mail senden",
+      "logout": "Abmelden",
+      "reload": "Neu laden",
+      "close": "Schließen",
+      "create": "Erstellen",
+      "save": "Speichern",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "confirmDelete": "Löschen bestätigen",
+      "confirm": "Bestätigen",
+      "invite": "Einladen",
+      "assign": "Zuweisen",
+      "accept": "Annehmen",
+      "reject": "Ablehnen",
+      "changeEmail": "E-Mail ändern",
+      "changePassword": "Passwort ändern",
+      "deleteAccount": "Konto löschen"
+    },
+    "feedback": {
+      "requestFailed": "Anfrage fehlgeschlagen.",
+      "empty": "Noch keine Einträge.",
+      "created": "Erfolgreich erstellt.",
+      "saved": "Erfolgreich gespeichert.",
+      "deleted": "Erfolgreich gelöscht.",
+      "sent": "Erfolgreich gesendet.",
+      "registeredNowLogin": "Registrierung erfolgreich. Bitte einloggen.",
+      "passwordResetSent": "Passwort-Reset-E-Mail wurde gesendet."
+    }
+  },
+  "relationship": {
+    "category": {
+      "family": "Familie",
+      "friends": "Freunde",
+      "romance": "Romantik",
+      "conflict": "Konflikt",
+      "professional": "Beruflich",
+      "other": "Sonstiges"
+    },
+    "label": {
+      "best_friend": "Bester Freund",
+      "friend": "Freund",
+      "rival": "Rivale",
+      "enemy": "Feind",
+      "ally": "Verbündeter",
+      "mentor": "Mentor",
+      "student": "Schüler",
+      "family": "Familie",
+      "partner": "Partner"
+    }
+  }
+}

@@ -1,25 +1,23 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
-import Home from "./page";
+import { describe, expect, it, vi } from "vitest";
+import HomePage from "./page";
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    refresh: vi.fn(),
+  }),
+}));
 
 describe("Home page", () => {
-  it("renders the product title and setup hint", () => {
-    render(<Home />);
+  it("renders logged-out login form", async () => {
+    const ui = await HomePage({
+      searchParams: Promise.resolve({}),
+    });
+    render(ui);
 
-    expect(screen.getByText("pnp-app")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Passe als Nächstes/i)
-    ).toBeInTheDocument();
-  });
-
-  it("renders both call-to-action labels", () => {
-    render(<Home />);
-
-    expect(
-      screen.getByRole("button", { name: "Sekundär" })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Primär" })
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: "Login" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Register" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Forgot password?" })).toBeInTheDocument();
   });
 });

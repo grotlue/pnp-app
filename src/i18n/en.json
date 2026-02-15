@@ -1,0 +1,194 @@
+{
+  "app": {
+    "title": "pnp-app",
+    "description": "Campaign and character management for pen & paper roleplay."
+  },
+  "ui": {
+    "menu": {
+      "characters": "Characters",
+      "campaigns": "Campaigns",
+      "profile": "Profile",
+      "settings": "Settings"
+    },
+    "nav": {
+      "register": "Register",
+      "passwordReset": "Forgot password?",
+      "backToLogin": "Back to login"
+    },
+    "start": {
+      "loggedOutTitle": "Login",
+      "loggedOutSubtitle": "Sign in to access your campaigns and characters.",
+      "loggedInTitle": "Logged-in Startpage",
+      "loggedInSubtitle": "Use the menu to manage all Phase 1 content.",
+      "welcome": "Welcome",
+      "loading": "Loading profile...",
+      "quickLinks": "Quick Access",
+      "quickLinksSubtitle": "Open your most-used sections."
+    },
+    "register": {
+      "title": "Registration",
+      "subtitle": "Create your account.",
+      "alreadyRegistered": "Already registered? Go to login"
+    },
+    "passwordReset": {
+      "title": "Password Reset",
+      "subtitle": "Request a password reset email."
+    },
+    "authCallback": {
+      "title": "Authentication",
+      "subtitle": "We are processing your sign-in link.",
+      "processing": "Processing authentication...",
+      "invalidLink": "This authentication link is invalid or expired."
+    },
+    "authReset": {
+      "title": "Set New Password",
+      "subtitle": "Choose a new password for your account.",
+      "processing": "Validating reset link...",
+      "invalidLink": "This password reset link is invalid or expired.",
+      "submit": "Set new password",
+      "updated": "Password updated successfully."
+    },
+    "profile": {
+      "title": "Profile",
+      "subtitle": "Update your public profile information."
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Manage private account settings.",
+      "deleteTitle": "Delete account",
+      "deleteConfirm": "Do you really want to delete your account?"
+    },
+    "characters": {
+      "title": "Characters",
+      "subtitle": "List, view, edit, and delete your characters.",
+      "create": "Create new character",
+      "edit": "Edit character",
+      "detail": "Character detail",
+      "deleteTitle": "Delete character",
+      "deleteConfirm": "Delete this character permanently?"
+    },
+    "campaigns": {
+      "title": "Campaigns",
+      "subtitle": "Campaigns you own or joined as a player.",
+      "create": "Create new campaign",
+      "edit": "Edit campaign",
+      "deleteTitle": "Delete campaign",
+      "deleteConfirm": "Delete this campaign permanently?",
+      "roleOwner": "owner",
+      "rolePlayer": "player"
+    },
+    "campaignDetail": {
+      "subtitle": "Campaign detail view",
+      "invite": "Invite user",
+      "selectUser": "Select user",
+      "players": "Player list",
+      "playerCharacters": "Player characters",
+      "npcs": "NPCs",
+      "assignCharacter": "Assign character",
+      "selectCharacter": "Select character",
+      "requestJoin": "Request to join",
+      "joinConfirm": "Send join request to campaign owner?",
+      "joinPending": "Your join request is pending.",
+      "pendingRequests": "Pending join requests"
+    },
+    "characterDetail": {
+      "subtitle": "Character detail view",
+      "noImage": "No profile image",
+      "assignedCampaign": "Assigned campaign",
+      "assignCampaign": "Assign to campaign",
+      "selectCampaign": "Select campaign",
+      "removeFromCampaign": "Remove from campaign",
+      "unassignConfirm": "Unassign this character from the campaign?",
+      "unassignInfo": "Relationships and timeline entries are preserved. This keeps history for future features.",
+      "addRelationship": "Add relationship",
+      "relationships": "Relationships",
+      "externalOneWay": "External one-way relation",
+      "targetExisting": "Existing character",
+      "targetExternal": "External name",
+      "selectRelationshipTarget": "Select target character",
+      "externalName": "External character name",
+      "category": "Category",
+      "label": "Label",
+      "customLabel": "Custom label",
+      "firstTimelineEntry": "First timeline entry",
+      "editRelationship": "Edit relationship",
+      "deleteRelationship": "Delete relationship",
+      "deleteRelationshipConfirm": "Delete only this character's relationship perspective?",
+      "relationshipDetail": "Relationship detail",
+      "howThisSeesOther": "How this character sees the other",
+      "howOtherSeesThis": "How the other sees this character",
+      "timeline": "Timeline"
+    },
+    "characterEdit": {
+      "title": "Edit character",
+      "subtitle": "Update character data and type.",
+      "avatarPath": "Avatar storage path",
+      "noPermission": "Only the character owner can edit this character."
+    },
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "username": "Username",
+      "newEmail": "New email",
+      "newPassword": "New password",
+      "description": "Description",
+      "characterName": "Character name",
+      "characterAge": "Age",
+      "campaignTitle": "Campaign title",
+      "campaignDescription": "Campaign description",
+      "type": "Type"
+    },
+    "actions": {
+      "login": "Login",
+      "register": "Register",
+      "sendReset": "Send reset email",
+      "logout": "Logout",
+      "reload": "Reload",
+      "close": "Close",
+      "create": "Create",
+      "save": "Save",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirmDelete": "Confirm delete",
+      "confirm": "Confirm",
+      "invite": "Invite",
+      "assign": "Assign",
+      "accept": "Accept",
+      "reject": "Reject",
+      "changeEmail": "Change email",
+      "changePassword": "Change password",
+      "deleteAccount": "Delete account"
+    },
+    "feedback": {
+      "requestFailed": "Request failed.",
+      "empty": "No entries yet.",
+      "created": "Created successfully.",
+      "saved": "Saved successfully.",
+      "deleted": "Deleted successfully.",
+      "sent": "Sent successfully.",
+      "registeredNowLogin": "Registration successful. Please log in.",
+      "passwordResetSent": "Password reset email sent."
+    }
+  },
+  "relationship": {
+    "category": {
+      "family": "Family",
+      "friends": "Friends",
+      "romance": "Romance",
+      "conflict": "Conflict",
+      "professional": "Professional",
+      "other": "Other"
+    },
+    "label": {
+      "best_friend": "Best Friend",
+      "friend": "Friend",
+      "rival": "Rival",
+      "enemy": "Enemy",
+      "ally": "Ally",
+      "mentor": "Mentor",
+      "student": "Student",
+      "family": "Family",
+      "partner": "Partner"
+    }
+  }
+}
