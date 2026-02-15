@@ -69,6 +69,14 @@ Optional environment variables in both environments:
 - `ADMIN_BOOTSTRAP_DESCRIPTION` (default: `System admin account`)
 - `ADMIN_BOOTSTRAP_LOCALE` (default: `en`)
 
+## 3.2) Add GitHub Repository Secrets (PR label preview deploy)
+
+In `Settings` -> `Secrets and variables` -> `Actions` -> `Repository secrets`, add:
+
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+
 ## 4) Where to find each value
 
 ### Supabase
@@ -121,20 +129,15 @@ Repository configuration (`vercel.json`) already restricts branch deploys:
 
 - `production` -> production deployment
 - `main` -> preview deployment
-- all other branches -> no Vercel deployment
+- all other branches -> no automatic Vercel deployment
 
 ## 8) Workflow behavior
 
 - `CI` runs on all pushes and pull requests.
-- Deployment jobs are triggered from `CI` (reusable workflows), not via `workflow_run`.
-- `deploy_production` runs only when:
-  - `quality` in `CI` succeeded
-  - event is `push`
-  - branch is `production`
-- `deploy_preview` runs only when:
-  - `quality` in `CI` succeeded
-  - event is `push`
-  - branch is `main`
+- `Deploy Production DB` runs only after successful `CI` on pushes to `production` (`workflow_run`).
+- `Deploy Preview DB` runs only after successful `CI` on pushes to `main` (`workflow_run`).
+- `Deploy PR Preview` runs on pull request updates only when the PR has label `preview-deploy`.
+- `Deploy PR Preview` is skipped for fork PRs (no repository secrets exposure).
 
 Deployment order:
 
@@ -142,12 +145,13 @@ Deployment order:
 2. Vercel deploys:
   - `production` branch -> production deployment
   - `main` branch -> preview deployment
-  - all other branches -> skipped by Vercel
+  - all other branches -> skipped by Vercel unless PR is labeled `preview-deploy`
 3. `CI` runs
-4. On successful `quality` job:
+4. On successful `CI`:
   - `production` branch -> `Deploy Production DB` runs `supabase db push --linked`
   - `main` branch -> `Deploy Preview DB` runs `supabase db push --linked`
-5. Workflow then runs admin bootstrap script:
+5. If PR label `preview-deploy` is present, `Deploy PR Preview` creates a Vercel preview deployment and comments the URL on the PR.
+6. DB workflow then runs admin bootstrap script:
   - creates admin user when missing
   - enforces `profiles.role = 'admin'` for that user
   - keeps existing admin account idempotently

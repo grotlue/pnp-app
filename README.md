@@ -80,16 +80,18 @@ Current mode:
 - **Vercel Git integration** deploys the app automatically.
   - `production` branch -> production deployment
   - `main` branch -> preview deployment
-  - all other branches -> no Vercel deployment (`vercel.json`)
+  - all other branches -> no automatic Vercel deployment (`vercel.json`)
 - **GitHub Actions** deploys Supabase migrations:
   - to `production` after CI succeeds on `production` pushes
   - to `preview` after CI succeeds on `main` pushes
+  - PR preview deployments for non-main branches only when PR has label `preview-deploy`
 
 Workflows:
 
 - `CI` runs on all pushes and pull requests.
 - `Deploy Production DB` runs only after successful CI on pushes to `production`.
 - `Deploy Preview DB` runs only after successful CI on pushes to `main`.
+- `Deploy PR Preview` runs on pull request updates only when label `preview-deploy` is present.
 
 Required GitHub secrets (Environment `production`):
 
@@ -115,6 +117,12 @@ Optional GitHub environment variables (`production`, `preview`):
 - `ADMIN_BOOTSTRAP_USERNAME` (default: `admin`)
 - `ADMIN_BOOTSTRAP_DESCRIPTION` (default: `System admin account`)
 - `ADMIN_BOOTSTRAP_LOCALE` (default: `en`)
+
+Required GitHub repository secrets for label-gated PR preview deployment:
+
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
 
 Required Vercel environment variable (server-only):
 
