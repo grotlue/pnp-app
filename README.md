@@ -69,14 +69,23 @@ yarn build
 Current mode:
 
 - **Vercel Git integration** deploys the app automatically.
-- **GitHub Actions** deploys Supabase migrations on `production` only after CI succeeds.
+- **GitHub Actions** deploys Supabase migrations:
+  - to `production` after CI succeeds on `production` pushes
+  - to `preview` after CI succeeds on non-`production` pushes
 
 Workflows:
 
-- `CI` runs on `main` and `production`.
+- `CI` runs on all pushes and pull requests.
 - `Deploy Production DB` runs only after successful CI on pushes to `production`.
+- `Deploy Preview DB` runs only after successful CI on pushes to non-`production` branches.
 
 Required GitHub secrets (Environment `production`):
+
+- `SUPABASE_ACCESS_TOKEN`
+- `SUPABASE_PROJECT_REF`
+- `SUPABASE_DB_PASSWORD`
+
+Required GitHub secrets (Environment `preview`):
 
 - `SUPABASE_ACCESS_TOKEN`
 - `SUPABASE_PROJECT_REF`

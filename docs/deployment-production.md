@@ -1,9 +1,11 @@
-# Production Deployment Setup (Vercel Auto Deploy + Supabase Migrations)
+# Deployment Setup (Vercel Auto Deploy + Supabase Migrations)
 
 This guide configures:
 
 - Vercel auto deploy via Git integration (production branch only for production releases)
-- Supabase migrations via GitHub Actions after successful CI on `production`
+- Supabase migrations via GitHub Actions:
+  - production DB after successful CI on `production` pushes
+  - preview DB after successful CI on non-`production` pushes
 
 ## 1) Preconditions
 
@@ -11,16 +13,20 @@ This guide configures:
 - Vercel project exists (production).
 - GitHub Actions enabled for the repository.
 
-## 2) Configure GitHub Environment
+## 2) Configure GitHub Environments
 
 1. Open repository `Settings`.
 2. Go to `Environments`.
 3. Create/select environment `production`.
-4. Add protection rules:
+4. Create/select environment `preview`.
+5. Add protection rules:
    - Required reviewers (recommended).
    - Optional wait timer.
 
-The deploy workflow already targets `environment: production`.
+Deploy workflows target:
+
+- `Deploy Production DB` -> `environment: production`
+- `Deploy Preview DB` -> `environment: preview`
 
 ## 2.1) Protect `production` branch (recommended)
 
@@ -41,6 +47,14 @@ In `Settings` -> `Environments` -> `production` -> `Environment secrets`, add:
 - `SUPABASE_PROJECT_REF`
 - `SUPABASE_DB_PASSWORD`
 
+## 3.1) Add GitHub Secrets (Environment: `preview`)
+
+In `Settings` -> `Environments` -> `preview` -> `Environment secrets`, add:
+
+- `SUPABASE_ACCESS_TOKEN`
+- `SUPABASE_PROJECT_REF`
+- `SUPABASE_DB_PASSWORD`
+
 ## 4) Where to find each value
 
 ### Supabase
@@ -52,12 +66,18 @@ In `Settings` -> `Environments` -> `production` -> `Environment secrets`, add:
 - `SUPABASE_DB_PASSWORD`:
   - Supabase project -> Settings -> Database
 
+Use production Supabase values in GitHub environment `production`, and preview Supabase values in GitHub environment `preview`.
+
 ## 5) Configure Vercel project env vars
 
-In Vercel project -> Settings -> Environment Variables (Production), set:
+In Vercel project -> Settings -> Environment Variables:
 
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- For `Production`:
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- For `Preview`:
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 ## 6) Configure Supabase Auth URLs
 
@@ -81,19 +101,28 @@ Optional (if you want no preview deployments from other branches):
 
 ## 8) Workflow behavior
 
-- `CI` runs on pushes/PRs to `main` and `production`.
+- `CI` runs on all pushes and pull requests.
 - `Deploy Production DB` runs only when:
   - CI finished successfully
   - event is a direct `push`
   - branch is `production`
   - workflow run originates from the same repository
+- `Deploy Preview DB` runs only when:
+  - CI finished successfully
+  - event is a direct `push`
+  - branch is not `production`
+  - workflow run originates from the same repository
 
 Deployment order:
 
-1. Push/merge to `production`
-2. Vercel auto-deploys production from Git integration
+1. Push to any branch
+2. Vercel deploys:
+  - `production` branch -> production deployment
+  - non-`production` branch -> preview deployment
 3. CI runs
-4. On successful CI, `Deploy Production DB` runs `supabase db push --linked`
+4. On successful CI:
+  - `production` branch -> `Deploy Production DB` runs `supabase db push --linked`
+  - non-`production` branch -> `Deploy Preview DB` runs `supabase db push --linked`
 
 ## 9) Trigger deployment
 
