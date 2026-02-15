@@ -68,11 +68,7 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
   const feedback = message || queryError;
   const campaigns = campaignsQuery.data?.campaigns ?? [];
   const currentUserId = campaignsQuery.data?.me.user.id;
-  const currentUserRole = campaignsQuery.data?.me.profile?.role;
-  const visibleCampaigns =
-    currentUserRole === "admin"
-      ? campaigns.filter((campaign) => campaign.owner_user_id === currentUserId)
-      : campaigns;
+  const visibleCampaigns = campaigns;
   const sortedAndFilteredCampaigns = sortCampaigns(
     searchCampaigns(visibleCampaigns, searchQuery),
     sortBy,

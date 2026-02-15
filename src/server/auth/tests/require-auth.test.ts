@@ -89,4 +89,26 @@ describe("requireAuth", () => {
     }
     expect(createServerSupabaseUserClientMock).toHaveBeenCalledWith("token-2");
   });
+
+  it("returns 500 when auth backend throws unexpectedly", async () => {
+    createServerSupabaseClientMock.mockImplementationOnce(() => {
+      throw new Error("Missing environment variable: NEXT_PUBLIC_SUPABASE_URL");
+    });
+
+    const request = new Request("http://localhost/api/test", {
+      headers: { Authorization: "Bearer token-3" },
+    });
+    const result = await requireAuth(request);
+
+    expect("response" in result).toBe(true);
+    if ("response" in result) {
+      expect(result.response.status).toBe(500);
+      await expect(result.response.json()).resolves.toEqual({
+        error: {
+          code: "auth_check_failed",
+          message: "Authentication check failed",
+        },
+      });
+    }
+  });
 });

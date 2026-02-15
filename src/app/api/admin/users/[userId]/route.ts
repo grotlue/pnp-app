@@ -42,7 +42,14 @@ export async function PATCH(request: Request, { params }: Params) {
     return jsonError(400, "invalid_payload", "invalid JSON body");
   }
 
-  const service = createServiceRoleSupabaseClient();
+  let service: ReturnType<typeof createServiceRoleSupabaseClient>;
+  try {
+    service = createServiceRoleSupabaseClient();
+  } catch (error) {
+    console.warn("admin user update failed: missing service role client", error);
+    return jsonError(500, "admin_user_update_failed", "Failed to update user");
+  }
+
   const targetRole = await getProfileRole(service, userId);
   if (!targetRole.ok) {
     return jsonError(400, "admin_user_update_failed", targetRole.errorMessage);
@@ -96,8 +103,14 @@ export async function DELETE(request: Request, { params }: Params) {
   }
 
   const { userId } = await params;
-  const service = createServiceRoleSupabaseClient();
-  const targetRole = await getProfileRole(service, userId);
+  const roleClient = (() => {
+    try {
+      return createServiceRoleSupabaseClient();
+    } catch {
+      return admin.context.client;
+    }
+  })();
+  const targetRole = await getProfileRole(roleClient, userId);
   if (!targetRole.ok) {
     return jsonError(400, "admin_delete_failed", targetRole.errorMessage);
   }
