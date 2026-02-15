@@ -7,6 +7,10 @@ import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "@/components/common/empty-state";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import { FormInput } from "@/components/common/form-controls";
+import { ListControls } from "@/components/common/list-controls";
+import { ListItemRow } from "@/components/common/list-item-row";
+import { OwnershipBadge } from "@/components/common/ownership-badge";
+import { PaginationControls } from "@/components/common/pagination-controls";
 import { ToggleTabs } from "@/components/common/toggle-tabs";
 import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
 import { Button } from "@/components/ui/button";
@@ -18,16 +22,32 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { clearSession, setSession } from "@/lib/client/session";
-import { useClientSession } from "@/lib/client/use-client-session";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { appRoutes } from "@/app/router";
 import { AppHeader } from "@/components/common/app-header";
+import { CampaignRoleBadge } from "@/features/campaigns/components/campaign-role-badge";
+import {
+  type CampaignListSort,
+  searchCampaigns,
+  sortCampaigns,
+} from "@/features/campaigns/logic/campaign-list.logic";
 import { getCampaignsQuery } from "@/features/campaigns/queries/get-campaigns.query";
+import {
+  type CharacterListSort,
+  type CharacterOwnershipFilter,
+  filterCharactersByOwnership,
+  searchCharacters,
+  sortCharacters,
+} from "@/features/characters/logic/character-list.logic";
 import { getCharacters } from "@/features/characters/queries/characters-screen.query";
 import { loginUser } from "@/features/users/queries/users-auth.query";
 import { getMe } from "@/features/users/queries/users-profile.query";
 import type { LoginResponse, MeResponse } from "@/features/users/types";
-import { appRoutes } from "@/app/router";
+import { setLocaleCookie } from "@/lib/client/locale-cookie";
+import { clearSession, setSession } from "@/lib/client/session";
+import { useClientSession } from "@/lib/client/use-client-session";
+import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
+import { textLinkClassName } from "@/lib/utils/link";
+import { clampListPage, DEFAULT_LIST_PAGE_SIZE, paginateListItems } from "@/lib/utils/list";
 
 type HomeScreenProps = {
   locale: AppLocale;
@@ -61,7 +81,17 @@ export function HomePageView({
     registeredNotice ? t("ui.feedback.registeredNowLogin") : "",
   );
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+
   const [characterTab, setCharacterTab] = useState<"player" | "npc">("player");
+  const [characterOwnershipFilter, setCharacterOwnershipFilter] =
+    useState<CharacterOwnershipFilter>("all");
+  const [characterSearchQuery, setCharacterSearchQuery] = useState("");
+  const [characterSortBy, setCharacterSortBy] = useState<CharacterListSort>("updated_desc");
+  const [characterPage, setCharacterPage] = useState(1);
+
+  const [campaignSearchQuery, setCampaignSearchQuery] = useState("");
+  const [campaignSortBy, setCampaignSortBy] = useState<CampaignListSort>("updated_desc");
+  const [campaignPage, setCampaignPage] = useState(1);
 
   const loggedInQuery = useQuery({
     queryKey: ["home", "logged-in", session?.accessToken ?? "no-session"],
@@ -95,6 +125,9 @@ export function HomePageView({
         refreshToken: response.refreshToken,
         expiresAt: response.expiresAt,
       });
+      if (response.locale) {
+        setLocaleCookie(resolveLocale(response.locale));
+      }
       router.replace("/");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
@@ -104,9 +137,7 @@ export function HomePageView({
   }
 
   if (!ready) {
-    return (
-      <main className="mx-auto min-h-screen w-full max-w-3xl p-4" />
-    );
+    return <main className="mx-auto min-h-screen w-full max-w-3xl p-4" />;
   }
 
   if (!session) {
@@ -142,11 +173,11 @@ export function HomePageView({
                 {t("ui.actions.login")}
               </Button>
               <div className="flex items-center justify-between text-xs">
-                <Link href={appRoutes.passwordReset} className="underline">
+                <Link href={appRoutes.passwordReset} className={textLinkClassName}>
                   {t("ui.nav.passwordReset")}
                 </Link>
                 {registrationEnabled ? (
-                  <Link href={appRoutes.register} className="underline">
+                  <Link href={appRoutes.register} className={textLinkClassName}>
                     {t("ui.nav.register")}
                   </Link>
                 ) : null}
@@ -167,9 +198,59 @@ export function HomePageView({
 
   const data = loggedInQuery.data;
   const me: MeResponse | null = data?.me ?? null;
+  const currentUserId = me?.user.id;
   const publicCampaigns = (data?.campaigns ?? []).filter((campaign) => !campaign.is_private);
   const publicCharacters = (data?.characters ?? []).filter((character) => !character.is_private);
-  const visibleCharacters = publicCharacters.filter((character) => character.type === characterTab);
+  const campaignById = new Map(publicCampaigns.map((campaign) => [campaign.id, campaign]));
+
+  const visibleCharactersByType = publicCharacters.filter(
+    (character) => character.type === characterTab,
+  );
+  const filteredCharacters = filterCharactersByOwnership(
+    visibleCharactersByType,
+    characterOwnershipFilter,
+    currentUserId,
+  );
+  const searchedAndSortedCharacters = sortCharacters(
+    searchCharacters(filteredCharacters, characterSearchQuery),
+    characterSortBy,
+  );
+  const safeCharacterPage = clampListPage(
+    characterPage,
+    searchedAndSortedCharacters.length,
+    DEFAULT_LIST_PAGE_SIZE,
+  );
+  const pagedCharacters = paginateListItems(
+    searchedAndSortedCharacters,
+    safeCharacterPage,
+    DEFAULT_LIST_PAGE_SIZE,
+  );
+
+  const searchedAndSortedCampaigns = sortCampaigns(
+    searchCampaigns(publicCampaigns, campaignSearchQuery),
+    campaignSortBy,
+  );
+  const safeCampaignPage = clampListPage(
+    campaignPage,
+    searchedAndSortedCampaigns.length,
+    DEFAULT_LIST_PAGE_SIZE,
+  );
+  const pagedCampaigns = paginateListItems(
+    searchedAndSortedCampaigns,
+    safeCampaignPage,
+    DEFAULT_LIST_PAGE_SIZE,
+  );
+
+  const characterSortOptions = [
+    { value: "updated_desc", label: t("ui.list.sortUpdated") },
+    { value: "created_desc", label: t("ui.list.sortCreated") },
+    { value: "name_asc", label: t("ui.list.sortName") },
+  ];
+  const campaignSortOptions = [
+    { value: "updated_desc", label: t("ui.list.sortUpdated") },
+    { value: "created_desc", label: t("ui.list.sortCreated") },
+    { value: "name_asc", label: t("ui.list.sortName") },
+  ];
 
   return (
     <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
@@ -189,58 +270,167 @@ export function HomePageView({
           <Card>
             <CardHeader>
               <CardTitle>{t("ui.characters.title")}</CardTitle>
-              <CardDescription>{t("ui.campaignDetail.subtitle")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <ToggleTabs
                 value={characterTab}
                 onChange={setCharacterTab}
                 options={[
-                  { value: "player", label: t("ui.campaignDetail.playerCharacters") },
-                  { value: "npc", label: t("ui.campaignDetail.npcs") },
+                  { value: "player", label: t("ui.labels.characterType.player") },
+                  { value: "npc", label: t("ui.labels.characterType.npc") },
                 ]}
               />
-              <div className="space-y-1 text-xs">
-                {visibleCharacters.map((character) => (
-                  <Link
-                    key={character.id}
-                    href={`/characters/${character.id}`}
-                    className="flex items-center gap-1 underline-offset-2 hover:underline"
-                  >
-                    <TitleWithPrivacy title={character.name} isPrivate={character.is_private} />
-                  </Link>
-                ))}
-                {visibleCharacters.length === 0 ? (
+              <ListControls
+                searchValue={characterSearchQuery}
+                onSearchChange={setCharacterSearchQuery}
+                searchPlaceholder={t("ui.list.searchCharacters")}
+                sortValue={characterSortBy}
+                onSortChange={(value) => setCharacterSortBy(value as CharacterListSort)}
+                sortLabel={t("ui.list.sortBy")}
+                sortOptions={characterSortOptions}
+                filterLabel={t("ui.list.filterBy")}
+                filterValue={characterOwnershipFilter}
+                onFilterChange={(value) =>
+                  setCharacterOwnershipFilter(value as CharacterOwnershipFilter)
+                }
+                filterOptions={[
+                  { value: "all", label: t("ui.labels.ownership.all") },
+                  { value: "mine", label: t("ui.labels.ownership.mine") },
+                  { value: "others", label: t("ui.labels.ownership.others") },
+                ]}
+              />
+
+              <div className="space-y-2">
+                <div className="grid gap-2 px-1 text-[11px] font-medium text-muted-foreground md:grid-cols-[1fr_170px]">
+                  <div>{t("ui.characters.title")}</div>
+                  <div>{t("ui.fields.campaign")}</div>
+                </div>
+                {pagedCharacters.map((character) => {
+                  const campaign = character.campaign_id
+                    ? campaignById.get(character.campaign_id) ?? null
+                    : null;
+
+                  return (
+                    <ListItemRow key={character.id}>
+                      <div className="grid gap-2 md:grid-cols-[1fr_170px]">
+                        <div className="space-y-1">
+                          <Link href={`/characters/${character.id}`} className={textLinkClassName}>
+                            <TitleWithPrivacy
+                              title={character.name}
+                              isPrivate={character.is_private}
+                              className="font-medium"
+                            />
+                          </Link>
+                          <div className="flex flex-wrap items-center gap-2">
+                            {character.owner_user_id === currentUserId ? (
+                              <OwnershipBadge mode="mine" t={t} />
+                            ) : null}
+                          </div>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {campaign ? (
+                            <Link href={`/campaigns/${campaign.id}`} className={textLinkClassName}>
+                              {campaign.title}
+                            </Link>
+                          ) : (
+                            "-"
+                          )}
+                        </div>
+                      </div>
+                    </ListItemRow>
+                  );
+                })}
+                {searchedAndSortedCharacters.length === 0 ? (
                   <EmptyState
                     label={t("ui.feedback.empty")}
                     className="border-0 bg-transparent p-0 text-muted-foreground"
                   />
                 ) : null}
               </div>
+
+              <PaginationControls
+                page={safeCharacterPage}
+                pageSize={DEFAULT_LIST_PAGE_SIZE}
+                totalItems={searchedAndSortedCharacters.length}
+                previousLabel={t("ui.list.previous")}
+                nextLabel={t("ui.list.next")}
+                pageLabel={t("ui.list.page")}
+                onPageChange={setCharacterPage}
+              />
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle>{t("ui.campaigns.title")}</CardTitle>
-              <CardDescription>{t("ui.campaigns.subtitle")}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-1 text-xs">
-              {publicCampaigns.map((campaign) => (
-                <Link
-                  key={campaign.id}
-                  href={`/campaigns/${campaign.id}`}
-                  className="flex items-center gap-1 underline-offset-2 hover:underline"
-                >
-                  <TitleWithPrivacy title={campaign.title} isPrivate={campaign.is_private} />
-                </Link>
-              ))}
-              {publicCampaigns.length === 0 ? (
-                <EmptyState
-                  label={t("ui.feedback.empty")}
-                  className="border-0 bg-transparent p-0 text-muted-foreground"
-                />
-              ) : null}
+            <CardContent className="space-y-3">
+              <ListControls
+                searchValue={campaignSearchQuery}
+                onSearchChange={setCampaignSearchQuery}
+                searchPlaceholder={t("ui.list.searchCampaigns")}
+                sortValue={campaignSortBy}
+                onSortChange={(value) => setCampaignSortBy(value as CampaignListSort)}
+                sortLabel={t("ui.list.sortBy")}
+                sortOptions={campaignSortOptions}
+              />
+
+              <div className="space-y-2">
+                <div className="grid gap-2 px-1 text-[11px] font-medium text-muted-foreground md:grid-cols-[1fr_150px_80px]">
+                  <div>{t("ui.campaigns.title")}</div>
+                  <div>{t("ui.admin.ownerLabel")}</div>
+                  <div>{t("ui.fields.players")}</div>
+                </div>
+                {pagedCampaigns.map((campaign) => (
+                  <ListItemRow key={campaign.id}>
+                    <div className="grid gap-2 md:grid-cols-[1fr_150px_80px]">
+                      <div className="space-y-1">
+                        <Link href={`/campaigns/${campaign.id}`} className={textLinkClassName}>
+                          <TitleWithPrivacy
+                            title={campaign.title}
+                            isPrivate={campaign.is_private}
+                            className="font-medium"
+                          />
+                        </Link>
+                        <div className="flex flex-wrap items-center gap-2">
+                          {campaign.current_user_role ? (
+                            <CampaignRoleBadge role={campaign.current_user_role} t={t} />
+                          ) : null}
+                        </div>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {campaign.owner_role === "admin" ? (
+                          <span>{campaign.owner_username ?? campaign.owner_user_id}</span>
+                        ) : (
+                          <Link
+                            href={`/users/${campaign.owner_user_id}`}
+                            className={textLinkClassName}
+                          >
+                            {campaign.owner_username ?? campaign.owner_user_id}
+                          </Link>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground">{campaign.player_count ?? 0}</div>
+                    </div>
+                  </ListItemRow>
+                ))}
+                {searchedAndSortedCampaigns.length === 0 ? (
+                  <EmptyState
+                    label={t("ui.feedback.empty")}
+                    className="border-0 bg-transparent p-0 text-muted-foreground"
+                  />
+                ) : null}
+              </div>
+
+              <PaginationControls
+                page={safeCampaignPage}
+                pageSize={DEFAULT_LIST_PAGE_SIZE}
+                totalItems={searchedAndSortedCampaigns.length}
+                previousLabel={t("ui.list.previous")}
+                nextLabel={t("ui.list.next")}
+                pageLabel={t("ui.list.page")}
+                onPageChange={setCampaignPage}
+              />
             </CardContent>
           </Card>
         </div>

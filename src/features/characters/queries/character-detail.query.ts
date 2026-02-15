@@ -1,6 +1,6 @@
 import { apiRequest, unwrapApiResponse } from "@/lib/client/api";
 import type { ClientSession } from "@/lib/client/session";
-import type { MeResponse } from "@/features/users/types";
+import type { MeResponse, UserListEntry } from "@/features/users/types";
 import type { Campaign } from "@/features/campaigns/types";
 import type {
   OutgoingRelationship,
@@ -19,6 +19,7 @@ export async function getCharacterDetailContext(
   character: Character;
   campaigns: Campaign[];
   allCharacters: Character[];
+  users: UserListEntry[];
   catalog: RelationshipCatalog;
   summary: RelationshipSummary[];
   outgoing: OutgoingRelationship[];
@@ -28,6 +29,7 @@ export async function getCharacterDetailContext(
     characterResponse,
     campaignsResponse,
     allCharactersResponse,
+    usersResponse,
     catalogResponse,
     summaryResponse,
     outgoingResponse,
@@ -36,6 +38,7 @@ export async function getCharacterDetailContext(
     apiRequest<Character>(`/api/characters/${characterId}`, { session }),
     apiRequest<Campaign[]>("/api/campaigns", { session }),
     apiRequest<Character[]>("/api/characters?limit=500", { session }),
+    apiRequest<UserListEntry[]>("/api/users?limit=1000", { session }),
     apiRequest<RelationshipCatalog>("/api/relationships/catalogs", { session }),
     apiRequest<RelationshipSummary[]>(`/api/characters/${characterId}/relations-summary`, { session }),
     apiRequest<OutgoingRelationship[]>(`/api/characters/${characterId}/outgoing-relationships`, {
@@ -48,6 +51,7 @@ export async function getCharacterDetailContext(
     character: unwrapApiResponse(characterResponse, "Failed to load character"),
     campaigns: unwrapApiResponse(campaignsResponse, "Failed to load campaigns"),
     allCharacters: unwrapApiResponse(allCharactersResponse, "Failed to load characters"),
+    users: unwrapApiResponse(usersResponse, "Failed to load users"),
     catalog: unwrapApiResponse(catalogResponse, "Failed to load relationship catalogs"),
     summary: unwrapApiResponse(summaryResponse, "Failed to load relationship summary"),
     outgoing: unwrapApiResponse(outgoingResponse, "Failed to load outgoing relationships"),

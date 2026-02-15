@@ -15,6 +15,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { textLinkClassName } from "@/lib/utils/link";
 import { registerUser } from "@/features/users/queries/users-auth.query";
 
 type RegisterScreenProps = {
@@ -82,7 +83,7 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
               {t("ui.actions.register")}
             </Button>
             <div className="text-xs">
-              <Link className="underline" href="/">
+              <Link className={textLinkClassName} href="/">
                 {t("ui.register.alreadyRegistered")}
               </Link>
             </div>

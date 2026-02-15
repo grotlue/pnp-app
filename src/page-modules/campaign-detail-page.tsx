@@ -17,6 +17,7 @@ import { VisibilityToggle } from "@/components/common/visibility-toggle";
 import { useCampaignDetailScreen } from "@/features/campaigns/hooks/use-campaign-detail-screen";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { useClientSession } from "@/lib/client/use-client-session";
+import { textLinkClassName } from "@/lib/utils/link";
 
 type CampaignDetailScreenProps = {
   locale: AppLocale;
@@ -198,7 +199,7 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                     <Link
                       key={entry.id}
                       href={`/users/${entry.user_id}`}
-                      className="block underline-offset-2 hover:underline"
+                      className={`block ${textLinkClassName}`}
                     >
                       {usernameFor(entry.user_id)}
                     </Link>
@@ -226,7 +227,7 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                       ) : (
                         <Link
                           href={`/users/${entry.user_id}`}
-                          className="underline-offset-2 hover:underline"
+                          className={textLinkClassName}
                         >
                           {usernameFor(entry.user_id)}
                         </Link>
@@ -292,7 +293,7 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
               </div>
               <div className="space-y-1 text-xs">
                 {(tab === "player" ? playerCharacters : npcCharacters).map((entry) => (
-                  <Link key={entry.id} href={`/characters/${entry.id}`} className="flex items-center gap-1 underline-offset-2 hover:underline">
+                  <Link key={entry.id} href={`/characters/${entry.id}`} className={`flex items-center gap-1 ${textLinkClassName}`}>
                     <TitleWithPrivacy title={entry.name} isPrivate={entry.is_private} />
                   </Link>
                 ))}

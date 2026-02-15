@@ -166,9 +166,38 @@
       "characterAge": "Alter",
       "campaignTitle": "Kampagnentitel",
       "campaignDescription": "Kampagnenbeschreibung",
+      "campaign": "Kampagne",
+      "players": "Spieler",
       "type": "Typ",
       "language": "Sprache",
       "visibilityPrivate": "Privat"
+    },
+    "labels": {
+      "characterType": {
+        "player": "Spielercharakter",
+        "npc": "Nichtspielercharakter"
+      },
+      "campaignRole": {
+        "owner": "Besitzer",
+        "player": "Spieler"
+      },
+      "ownership": {
+        "all": "Alle",
+        "mine": "Mein Eintrag",
+        "others": "Nicht meine"
+      }
+    },
+    "list": {
+      "searchCharacters": "Charaktere durchsuchen...",
+      "searchCampaigns": "Kampagnen durchsuchen...",
+      "sortBy": "Sortieren nach",
+      "filterBy": "Filter",
+      "sortUpdated": "Zuletzt aktualisiert",
+      "sortCreated": "Erstellungsdatum",
+      "sortName": "Name (A-Z)",
+      "page": "Seite",
+      "previous": "Zurück",
+      "next": "Weiter"
     },
     "actions": {
       "login": "Anmelden",

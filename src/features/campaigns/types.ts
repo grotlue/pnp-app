@@ -1,8 +1,15 @@
 export type Campaign = {
   id: string;
   owner_user_id: string;
+  owner_username?: string | null;
+  owner_role?: "user" | "admin" | null;
   title: string;
   description: string;
+  player_count?: number;
+  current_user_role?: "owner" | "player" | null;
+  role_for_user?: "owner" | "player" | null;
+  created_at?: string | null;
+  updated_at?: string | null;
   is_private?: boolean;
 };
 

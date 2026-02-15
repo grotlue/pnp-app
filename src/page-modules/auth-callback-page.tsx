@@ -7,6 +7,7 @@ import { FeedbackMessage } from "@/components/common/feedback-message";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { setSession } from "@/lib/client/session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { textLinkClassName } from "@/lib/utils/link";
 import { exchangeAuthCode, verifyAuthToken } from "@/features/users/queries/users-auth.query";
 import { getAuthParamsFromUrl, getSessionTokensFromUrl } from "./auth-session-from-url";
 
@@ -102,7 +103,7 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
               <div className="text-muted-foreground">{t("ui.authCallback.processing")}</div>
             )}
             {errorMessage ? (
-              <Link href="/" className="text-xs underline">
+              <Link href="/" className={`text-xs ${textLinkClassName}`}>
                 {t("ui.nav.backToLogin")}
               </Link>
             ) : null}

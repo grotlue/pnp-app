@@ -121,8 +121,8 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
                 }))
               }
             >
-              <option value="player">player</option>
-              <option value="npc">npc</option>
+              <option value="player">{t("ui.labels.characterType.player")}</option>
+              <option value="npc">{t("ui.labels.characterType.npc")}</option>
             </FormSelect>
             <FormInput
               value={form.avatarPath}

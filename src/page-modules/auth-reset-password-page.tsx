@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { setSession } from "@/lib/client/session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { textLinkClassName } from "@/lib/utils/link";
 import {
   confirmPasswordReset,
   exchangeAuthCode,
@@ -173,11 +174,13 @@ export function AuthResetPasswordPageView({ locale }: AuthResetPasswordPageViewP
               </Button>
             ) : (
               <Button asChild variant="outline">
-                <Link href="/password-reset">{t("ui.nav.passwordReset")}</Link>
+                <Link href="/password-reset" className={textLinkClassName}>
+                  {t("ui.nav.passwordReset")}
+                </Link>
               </Button>
             )}
             <div className="text-xs">
-              <Link className="underline" href="/">
+              <Link className={textLinkClassName} href="/">
                 {t("ui.nav.backToLogin")}
               </Link>
             </div>

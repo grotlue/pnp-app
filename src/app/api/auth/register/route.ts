@@ -1,5 +1,6 @@
 import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
 import { isFeatureEnabled } from "@/lib/features/feature-flags";
+import { detectLocaleFromAcceptLanguage } from "@/lib/i18n";
 import { createServerSupabaseClient } from "@/server/supabase/server-client";
 
 type RegisterBody = {
@@ -18,6 +19,8 @@ export async function POST(request: Request) {
   if (!body?.email || !body.password) {
     return jsonError(400, "invalid_payload", "email and password are required");
   }
+  const signupLocale =
+    body.locale ?? detectLocaleFromAcceptLanguage(request.headers.get("accept-language"));
 
   const client = createServerSupabaseClient();
   const redirectTo = request.headers.get("origin")
@@ -31,7 +34,7 @@ export async function POST(request: Request) {
       emailRedirectTo: redirectTo,
       data: {
         username: body.username,
-        locale: body.locale,
+        locale: signupLocale,
       },
     },
   });

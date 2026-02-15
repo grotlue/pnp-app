@@ -7,6 +7,7 @@ import { FeedbackMessage } from "@/components/common/feedback-message";
 import { FormInput, FormSelect, FormTextarea } from "@/components/common/form-controls";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { setLocaleCookie } from "@/lib/client/locale-cookie";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { getMe, updateMyProfile } from "@/features/users/queries/users-profile.query";
@@ -74,6 +75,8 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
         description: form.description,
         locale: form.locale as "en" | "de",
       });
+      setLocaleCookie(form.locale as "en" | "de");
+      router.refresh();
       setMessage(t("ui.feedback.saved"));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));

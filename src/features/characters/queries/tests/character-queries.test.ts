@@ -141,6 +141,7 @@ describe("character queries", () => {
       .mockResolvedValueOnce({ data: { id: "char1" }, error: null, status: 200 })
       .mockResolvedValueOnce({ data: [{ id: "c1" }], error: null, status: 200 })
       .mockResolvedValueOnce({ data: [{ id: "char1" }, { id: "char2" }], error: null, status: 200 })
+      .mockResolvedValueOnce({ data: [{ id: "u2", username: "alice" }], error: null, status: 200 })
       .mockResolvedValueOnce({ data: { categories: [], labels: [] }, error: null, status: 200 })
       .mockResolvedValueOnce({ data: [{ other_character_name: "B" }], error: null, status: 200 })
       .mockResolvedValueOnce({ data: [{ id: "rel1" }], error: null, status: 200 });
@@ -150,6 +151,7 @@ describe("character queries", () => {
       character: { id: "char1" },
       campaigns: [{ id: "c1" }],
       allCharacters: [{ id: "char1" }, { id: "char2" }],
+      users: [{ id: "u2", username: "alice" }],
       catalog: { categories: [], labels: [] },
       summary: [{ other_character_name: "B" }],
       outgoing: [{ id: "rel1" }],
@@ -158,14 +160,15 @@ describe("character queries", () => {
     expect(apiRequestMock).toHaveBeenNthCalledWith(2, "/api/characters/char1", { session });
     expect(apiRequestMock).toHaveBeenNthCalledWith(3, "/api/campaigns", { session });
     expect(apiRequestMock).toHaveBeenNthCalledWith(4, "/api/characters?limit=500", { session });
-    expect(apiRequestMock).toHaveBeenNthCalledWith(5, "/api/relationships/catalogs", { session });
+    expect(apiRequestMock).toHaveBeenNthCalledWith(5, "/api/users?limit=1000", { session });
+    expect(apiRequestMock).toHaveBeenNthCalledWith(6, "/api/relationships/catalogs", { session });
     expect(apiRequestMock).toHaveBeenNthCalledWith(
-      6,
+      7,
       "/api/characters/char1/relations-summary",
       { session },
     );
     expect(apiRequestMock).toHaveBeenNthCalledWith(
-      7,
+      8,
       "/api/characters/char1/outgoing-relationships",
       { session },
     );

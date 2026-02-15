@@ -41,6 +41,16 @@ describe("campaign queries", () => {
     expect(apiRequestMock).toHaveBeenCalledWith("/api/campaigns", { session });
   });
 
+  it("getCampaignsQuery supports roleForUserId option", async () => {
+    const data = [{ id: "c2", owner_user_id: "u2", title: "B", description: "" }];
+    apiRequestMock.mockResolvedValueOnce({ data, error: null, status: 200 });
+
+    await expect(getCampaignsQuery(session, { roleForUserId: "target-user" })).resolves.toEqual(data);
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/campaigns?roleForUserId=target-user", {
+      session,
+    });
+  });
+
   it("getCampaignsQuery throws on error response", async () => {
     apiRequestMock.mockResolvedValueOnce({
       data: null,

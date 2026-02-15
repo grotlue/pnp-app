@@ -17,6 +17,7 @@ export type LoginResponse = {
   accessToken: string;
   refreshToken?: string;
   expiresAt?: number;
+  locale?: "en" | "de";
 };
 
 export type RegisterResponse = {
@@ -50,4 +51,10 @@ export type PublicUserProfile = {
   description: string;
   avatar_path: string | null;
   locale: "en" | "de";
+};
+
+export type UserListEntry = {
+  id: string;
+  username: string;
+  role?: "user" | "admin";
 };

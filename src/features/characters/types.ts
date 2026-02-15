@@ -11,6 +11,8 @@ export type Character = {
   age: number | null;
   description: string;
   avatar_path?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
   is_private?: boolean;
 };
 

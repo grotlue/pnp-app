@@ -4,11 +4,19 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/common/app-header";
 import { FeedbackMessage } from "@/components/common/feedback-message";
+import { ListControls } from "@/components/common/list-controls";
 import { Modal } from "@/components/common/modal";
+import { PaginationControls } from "@/components/common/pagination-controls";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { DEFAULT_LIST_PAGE_SIZE, clampListPage, paginateListItems } from "@/lib/utils/list";
+import {
+  type CampaignListSort,
+  searchCampaigns,
+  sortCampaigns,
+} from "@/features/campaigns/logic/campaign-list.logic";
 import { isCampaignOwner } from "@/features/campaigns/logic/campaign-role.logic";
 import { useCampaignsQuery } from "@/features/campaigns/hooks/use-campaigns-query";
 import { useCampaignMutations } from "@/features/campaigns/hooks/use-campaign-mutations";
@@ -35,6 +43,9 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
   const [createOpen, setCreateOpen] = useState(false);
   const [editCampaign, setEditCampaign] = useState<Campaign | null>(null);
   const [deleteCampaign, setDeleteCampaign] = useState<Campaign | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<CampaignListSort>("updated_desc");
+  const [page, setPage] = useState(1);
   const [createForm, setCreateForm] = useState<CampaignFormValues>(defaultFormValues);
   const [editForm, setEditForm] = useState<CampaignFormValues>(defaultFormValues);
 
@@ -62,6 +73,22 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
     currentUserRole === "admin"
       ? campaigns.filter((campaign) => campaign.owner_user_id === currentUserId)
       : campaigns;
+  const sortedAndFilteredCampaigns = sortCampaigns(
+    searchCampaigns(visibleCampaigns, searchQuery),
+    sortBy,
+  );
+  const safePage = clampListPage(page, sortedAndFilteredCampaigns.length, DEFAULT_LIST_PAGE_SIZE);
+  const pagedCampaigns = paginateListItems(
+    sortedAndFilteredCampaigns,
+    safePage,
+    DEFAULT_LIST_PAGE_SIZE,
+  );
+
+  const sortOptions = [
+    { value: "updated_desc", label: t("ui.list.sortUpdated") },
+    { value: "created_desc", label: t("ui.list.sortCreated") },
+    { value: "name_asc", label: t("ui.list.sortName") },
+  ];
 
   if (!ready || !session) {
     return <main className="min-h-screen" />;
@@ -83,34 +110,55 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
 
             <FeedbackMessage message={feedback} />
 
+            <ListControls
+              searchValue={searchQuery}
+              onSearchChange={setSearchQuery}
+              searchPlaceholder={t("ui.list.searchCampaigns")}
+              sortValue={sortBy}
+              onSortChange={(value) => setSortBy(value as CampaignListSort)}
+              sortLabel={t("ui.list.sortBy")}
+              sortOptions={sortOptions}
+            />
+
             {campaignsQuery.isLoading ? (
               <div className="rounded-lg border border-border bg-background/70 p-3 text-xs text-muted-foreground">
                 {t("ui.start.loading")}
               </div>
             ) : (
-              <CampaignsList
-                campaigns={visibleCampaigns}
-                currentUserId={currentUserId}
-                ownerLabel={t("ui.campaigns.roleOwner")}
-                playerLabel={t("ui.campaigns.rolePlayer")}
-                editLabel={t("ui.actions.edit")}
-                deleteLabel={t("ui.actions.delete")}
-                emptyLabel={t("ui.feedback.empty")}
-                isOwner={isCampaignOwner}
-                canManage={(campaign, userId) =>
-                  isCampaignOwner(campaign, userId) ||
-                  campaignsQuery.data?.me.profile?.role === "admin"
-                }
-                onEdit={(campaign) => {
-                  setEditCampaign(campaign);
-                  setEditForm({
-                    title: campaign.title,
-                    description: campaign.description,
-                    isPrivate: campaign.is_private ?? false,
-                  });
-                }}
-                onDelete={setDeleteCampaign}
-              />
+              <>
+                <CampaignsList
+                  campaigns={pagedCampaigns}
+                  currentUserId={currentUserId}
+                  ownerLabel={t("ui.labels.campaignRole.owner")}
+                  playerLabel={t("ui.labels.campaignRole.player")}
+                  editLabel={t("ui.actions.edit")}
+                  deleteLabel={t("ui.actions.delete")}
+                  emptyLabel={t("ui.feedback.empty")}
+                  isOwner={isCampaignOwner}
+                  canManage={(campaign, userId) =>
+                    isCampaignOwner(campaign, userId) ||
+                    campaignsQuery.data?.me.profile?.role === "admin"
+                  }
+                  onEdit={(campaign) => {
+                    setEditCampaign(campaign);
+                    setEditForm({
+                      title: campaign.title,
+                      description: campaign.description,
+                      isPrivate: campaign.is_private ?? false,
+                    });
+                  }}
+                  onDelete={setDeleteCampaign}
+                />
+                <PaginationControls
+                  page={safePage}
+                  pageSize={DEFAULT_LIST_PAGE_SIZE}
+                  totalItems={sortedAndFilteredCampaigns.length}
+                  previousLabel={t("ui.list.previous")}
+                  nextLabel={t("ui.list.next")}
+                  pageLabel={t("ui.list.page")}
+                  onPageChange={setPage}
+                />
+              </>
             )}
           </CardContent>
         </Card>

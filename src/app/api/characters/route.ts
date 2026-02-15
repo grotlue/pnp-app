@@ -29,7 +29,7 @@ export async function GET(request: Request) {
       "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, is_private, created_at, updated_at",
     )
     .limit(limit)
-    .order("created_at", { ascending: false });
+    .order("updated_at", { ascending: false });
 
   if (error) {
     return jsonError(400, "character_list_failed", error.message);
