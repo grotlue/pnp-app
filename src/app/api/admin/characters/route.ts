@@ -19,8 +19,14 @@ export async function GET(request: Request) {
     return admin.response;
   }
 
-  const service = createServiceRoleSupabaseClient();
-  const { data, error } = await service
+  const client = (() => {
+    try {
+      return createServiceRoleSupabaseClient();
+    } catch {
+      return admin.context.client;
+    }
+  })();
+  const { data, error } = await client
     .from("characters")
     .select(
       "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, is_private, created_at, updated_at",
@@ -46,8 +52,14 @@ export async function POST(request: Request) {
     return jsonError(400, "invalid_payload", "ownerUserId, type, and name are required");
   }
 
-  const service = createServiceRoleSupabaseClient();
-  const { data, error } = await service
+  const client = (() => {
+    try {
+      return createServiceRoleSupabaseClient();
+    } catch {
+      return admin.context.client;
+    }
+  })();
+  const { data, error } = await client
     .from("characters")
     .insert({
       owner_user_id: body.ownerUserId,

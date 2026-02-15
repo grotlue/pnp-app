@@ -4,28 +4,39 @@ import { requireAuth, type AuthContext } from "@/server/auth/require-auth";
 export async function requireAdmin(
   request: Request,
 ): Promise<{ context: AuthContext } | { response: Response }> {
-  const auth = await requireAuth(request);
-  if ("response" in auth) {
-    return auth;
-  }
+  try {
+    const auth = await requireAuth(request);
+    if ("response" in auth) {
+      return auth;
+    }
 
-  const { data: profile, error } = await auth.context.client
-    .from("profiles")
-    .select("role")
-    .eq("id", auth.context.user.id)
-    .single();
+    const { data: profile, error } = await auth.context.client
+      .from("profiles")
+      .select("role")
+      .eq("id", auth.context.user.id)
+      .maybeSingle();
 
-  if (error) {
+    if (error) {
+      return {
+        response: jsonError(500, "admin_check_failed", error.message),
+      };
+    }
+
+    if (!profile || profile.role !== "admin") {
+      return {
+        response: jsonError(403, "admin_required", "Admin access required"),
+      };
+    }
+
+    return { context: auth.context };
+  } catch (error) {
+    console.warn("requireAdmin failed", error);
     return {
-      response: jsonError(500, "admin_check_failed", error.message),
+      response: jsonError(
+        500,
+        "admin_check_failed",
+        "Admin check failed",
+      ),
     };
   }
-
-  if (!profile || profile.role !== "admin") {
-    return {
-      response: jsonError(403, "admin_required", "Admin access required"),
-    };
-  }
-
-  return { context: auth.context };
 }

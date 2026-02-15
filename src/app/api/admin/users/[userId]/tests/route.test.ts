@@ -21,6 +21,7 @@ beforeEach(() => {
 
 describe("admin user detail route", () => {
   it("updates user profile and auth fields", async () => {
+    const updateEqMock = vi.fn().mockResolvedValue({ error: null });
     requireAdminMock.mockResolvedValueOnce({
       context: { user: { id: "admin-1" } },
     });
@@ -30,7 +31,6 @@ describe("admin user detail route", () => {
       data: { role: "user" },
       error: null,
     });
-    const updateEqMock = vi.fn().mockResolvedValue({ error: null });
     createServiceRoleSupabaseClientMock.mockReturnValue({
       auth: { admin: { updateUserById: updateUserByIdMock } },
       from: vi.fn(() => ({
@@ -65,6 +65,33 @@ describe("admin user detail route", () => {
     });
     expect(updateEqMock).toHaveBeenCalledWith("id", "u2");
     expect(response.status).toBe(200);
+  });
+
+  it("returns 500 when service role client is unavailable for update", async () => {
+    requireAdminMock.mockResolvedValueOnce({
+      context: { user: { id: "admin-1" } },
+    });
+    createServiceRoleSupabaseClientMock.mockImplementationOnce(() => {
+      throw new Error("Missing environment variable: SUPABASE_SERVICE_ROLE_KEY");
+    });
+
+    const response = await PATCH(
+      new Request("http://localhost/api/admin/users/u2", {
+        method: "PATCH",
+        body: JSON.stringify({
+          username: "user2",
+        }),
+      }),
+      { params: Promise.resolve({ userId: "u2" }) },
+    );
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "admin_user_update_failed",
+        message: "Failed to update user",
+      },
+    });
   });
 
   it("blocks updating admin accounts", async () => {
