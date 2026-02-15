@@ -20,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
+      actions: read
       contents: read
       statuses: write
     environment: production
@@ -29,7 +30,7 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
-      - name: Notify Vercel (production deploy db)
+      - name: Notify Vercel (deploy)
         uses: vercel/repository-dispatch/actions/status@v1
         with:
           name: "Vercel - pnp-app: deploy"
@@ -63,6 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
+      actions: read
       contents: read
       statuses: write
     environment: production

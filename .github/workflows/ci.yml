@@ -8,6 +8,7 @@ on:
   pull_request:
 
 permissions:
+  actions: read
   contents: read
   statuses: write
 
@@ -23,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Notify Vercel (lint)
+      - name: Notify Vercel (quality)
         uses: vercel/repository-dispatch/actions/status@v1
         with:
           name: "Vercel - pnp-app: quality"
