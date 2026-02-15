@@ -72,47 +72,56 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const admin = await requireAdmin(request);
-  if ("response" in admin) {
-    return admin.response;
+  try {
+    const admin = await requireAdmin(request);
+    if ("response" in admin) {
+      return admin.response;
+    }
+
+    const body = await parseJsonBody<CreateAdminUserBody>(request);
+    if (!body?.email || !body.password || !body.username) {
+      return jsonError(400, "invalid_payload", "email, password, and username are required");
+    }
+
+    const locale = body.locale === "de" ? "de" : "en";
+    const service = createServiceRoleSupabaseClient();
+
+    const { data: authData, error: authError } = await service.auth.admin.createUser({
+      email: body.email,
+      password: body.password,
+      email_confirm: true,
+      user_metadata: {
+        username: body.username,
+        locale,
+      },
+    });
+
+    if (authError || !authData.user) {
+      return jsonError(400, "admin_user_create_failed", authError?.message ?? "Failed to create user");
+    }
+
+    const { error: profileError } = await service.from("profiles").upsert(
+      {
+        id: authData.user.id,
+        username: body.username,
+        description: body.description ?? "",
+        locale,
+        role: "user",
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "id" },
+    );
+
+    if (profileError) {
+      return jsonError(400, "admin_user_create_failed", profileError.message);
+    }
+
+    return jsonOk({ userId: authData.user.id }, 201);
+  } catch (error) {
+    return jsonError(
+      500,
+      "admin_user_create_failed",
+      error instanceof Error ? error.message : "Unexpected user creation error",
+    );
   }
-
-  const body = await parseJsonBody<CreateAdminUserBody>(request);
-  if (!body?.email || !body.password || !body.username) {
-    return jsonError(400, "invalid_payload", "email, password, and username are required");
-  }
-
-  const locale = body.locale === "de" ? "de" : "en";
-  const service = createServiceRoleSupabaseClient();
-
-  const { data: authData, error: authError } = await service.auth.admin.createUser({
-    email: body.email,
-    password: body.password,
-    email_confirm: true,
-    user_metadata: {
-      username: body.username,
-    },
-  });
-
-  if (authError || !authData.user) {
-    return jsonError(400, "admin_user_create_failed", authError?.message ?? "Failed to create user");
-  }
-
-  const { error: profileError } = await service.from("profiles").upsert(
-    {
-      id: authData.user.id,
-      username: body.username,
-      description: body.description ?? "",
-      locale,
-      role: "user",
-      updated_at: new Date().toISOString(),
-    },
-    { onConflict: "id" },
-  );
-
-  if (profileError) {
-    return jsonError(400, "admin_user_create_failed", profileError.message);
-  }
-
-  return jsonOk({ userId: authData.user.id }, 201);
 }

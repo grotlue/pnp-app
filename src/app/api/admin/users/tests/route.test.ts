@@ -140,13 +140,40 @@ describe("admin users route", () => {
       email: "u2@example.com",
       password: "Secret123!",
       email_confirm: true,
-      user_metadata: { username: "user2" },
+      user_metadata: { username: "user2", locale: "de" },
     });
     expect(upsertMock).toHaveBeenCalled();
     expect(response.status).toBe(201);
     expect(body).toEqual({
       data: {
         userId: "u2",
+      },
+    });
+  });
+
+  it("returns structured 500 when user creation throws unexpectedly", async () => {
+    requireAdminMock.mockResolvedValueOnce({ context: { user: { id: "admin-1" } } });
+    createServiceRoleSupabaseClientMock.mockImplementationOnce(() => {
+      throw new Error("Missing environment variable: SUPABASE_SERVICE_ROLE_KEY");
+    });
+
+    const response = await POST(
+      new Request("http://localhost/api/admin/users", {
+        method: "POST",
+        body: JSON.stringify({
+          email: "u2@example.com",
+          password: "Secret123!",
+          username: "user2",
+          locale: "de",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(500);
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "admin_user_create_failed",
+        message: "Missing environment variable: SUPABASE_SERVICE_ROLE_KEY",
       },
     });
   });
