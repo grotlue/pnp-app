@@ -51,3 +51,9 @@ export type PublicUserProfile = {
   avatar_path: string | null;
   locale: "en" | "de";
 };
+
+export type UserListEntry = {
+  id: string;
+  username: string;
+  role?: "user" | "admin";
+};

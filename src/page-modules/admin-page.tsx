@@ -23,6 +23,7 @@ import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAdminDashboard } from "@/features/admin/hooks/use-admin-dashboard";
+import { CharacterTypeBadge } from "@/features/characters/components/character-type-badge";
 import type {
   AdminCampaign,
   AdminCharacter,
@@ -31,6 +32,7 @@ import type {
 } from "@/features/admin/types";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n";
+import { textLinkClassName } from "@/lib/utils/link";
 
 type AdminPageViewProps = {
   locale: AppLocale;
@@ -271,7 +273,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
                       </div>
                     </div>
                   ) : (
-                    <Link href={`/users/${user.id}`} className="block">
+                    <Link href={`/users/${user.id}`} className={`block ${textLinkClassName}`}>
                       <div className="font-medium">
                         {user.username} ({user.email})
                       </div>
@@ -335,11 +337,11 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
                     </>
                   }
                 >
-                  <Link href={`/campaigns/${campaign.id}`} className="block">
+                  <Link href={`/campaigns/${campaign.id}`} className={`block ${textLinkClassName}`}>
                     <TitleWithPrivacy
                       title={campaign.title}
                       isPrivate={campaign.is_private}
-                      className="font-medium underline-offset-2 hover:underline"
+                      className="font-medium"
                     />
                     <div className="text-xs text-muted-foreground">
                       {t("ui.admin.ownerLabel")}:{" "}
@@ -408,12 +410,13 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
                     </>
                   }
                 >
-                  <Link href={`/characters/${character.id}`} className="block">
+                  <Link href={`/characters/${character.id}`} className={`block ${textLinkClassName}`}>
                     <TitleWithPrivacy
-                      title={`${character.name} (${character.type})`}
+                      title={character.name}
                       isPrivate={character.is_private}
                       className="font-medium"
                     />
+                    <CharacterTypeBadge type={character.type} t={t} className="mt-1" />
                     <div className="text-xs text-muted-foreground">
                       {t("ui.admin.ownerLabel")}:{" "}
                       {userById.get(character.owner_user_id)?.username ?? character.owner_user_id}

@@ -171,8 +171,8 @@ export function CharacterFormFields({
         value={values.type}
         onChange={(event) => onChange({ ...values, type: event.target.value as "player" | "npc" })}
       >
-        <option value="player">player</option>
-        <option value="npc">npc</option>
+        <option value="player">{t("ui.labels.characterType.player")}</option>
+        <option value="npc">{t("ui.labels.characterType.npc")}</option>
       </FormSelect>
 
       <FormInput

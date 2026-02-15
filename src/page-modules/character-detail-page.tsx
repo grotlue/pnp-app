@@ -24,10 +24,12 @@ import {
   UnassignCampaignModal,
 } from "@/page-modules/character-detail-modals";
 import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
+import { CharacterTypeBadge } from "@/features/characters/components/character-type-badge";
 import { useCharacterDetailScreen } from "@/features/characters/hooks/use-character-detail-screen";
 import type { OutgoingRelationship, RelationshipDetail } from "@/features/relationships/types";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { useClientSession } from "@/lib/client/use-client-session";
+import { textLinkClassName } from "@/lib/utils/link";
 
 type CharacterDetailScreenProps = {
   locale: AppLocale;
@@ -115,12 +117,13 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
   const queryError = detailQuery.error instanceof Error ? detailQuery.error.message : "";
   const feedback = message || queryError;
 
-  const { me, character, campaigns, allCharacters, catalog, summary, outgoing } = detailQuery.data;
+  const { me, character, campaigns, allCharacters, users, catalog, summary, outgoing } = detailQuery.data;
   const isOwner = me.user.id === character.owner_user_id;
   const canManage = isOwner || (me.profile.role === "admin" && !character.is_private);
   const isForeignAdminView = me.profile.role === "admin" && !isOwner;
   const avatarUrl = avatarQuery.data ?? null;
   const assignedCampaign = campaigns.find((entry) => entry.id === character.campaign_id) ?? null;
+  const ownerUser = users.find((entry) => entry.id === character.owner_user_id) ?? null;
   const defaultCategoryId = catalog.categories[0] ? String(catalog.categories[0].id) : "";
   const defaultLabelPresetId = catalog.labels[0] ? String(catalog.labels[0].id) : "";
 
@@ -228,11 +231,28 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
                   <strong>{t("ui.fields.characterAge")}</strong>: {character.age ?? "-"}
                 </div>
                 <div>
-                  <strong>{t("ui.fields.type")}</strong>: {character.type}
+                  <strong>{t("ui.fields.type")}</strong>:{" "}
+                  <CharacterTypeBadge type={character.type} t={t} />
+                </div>
+                <div>
+                  <strong>{t("ui.admin.ownerLabel")}</strong>:{" "}
+                  {ownerUser?.role === "admin" ? (
+                    <span>{ownerUser.username ?? character.owner_user_id}</span>
+                  ) : (
+                    <Link href={`/users/${character.owner_user_id}`} className={textLinkClassName}>
+                      {ownerUser?.username ?? character.owner_user_id}
+                    </Link>
+                  )}
                 </div>
                 <div>
                   <strong>{t("ui.characterDetail.assignedCampaign")}</strong>:{" "}
-                  {assignedCampaign?.title ?? "-"}
+                  {assignedCampaign ? (
+                    <Link href={`/campaigns/${assignedCampaign.id}`} className={textLinkClassName}>
+                      {assignedCampaign.title}
+                    </Link>
+                  ) : (
+                    "-"
+                  )}
                 </div>
                 <div>
                   <strong>{t("ui.fields.description")}</strong>: {character.description || "-"}
