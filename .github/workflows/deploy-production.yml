@@ -27,10 +27,18 @@ jobs:
         with:
           ref: ${{ github.event.inputs.checkout_ref || github.sha }}
 
-      - name: Notify Vercel (deploy)
-        uses: vercel/repository-dispatch/actions/status@v1
-        with:
-          name: "Vercel - pnp-app: deploy-production-db"
+      - name: Set commit status (deploy DB pending)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATUS_CONTEXT: "Vercel - pnp-app: deploy-production-db"
+          STATUS_SHA: ${{ github.event.inputs.checkout_ref || github.sha }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "${{ github.api_url }}/repos/${{ github.repository }}/statuses/${STATUS_SHA}" \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --data "{\"state\":\"pending\",\"context\":\"${STATUS_CONTEXT}\",\"description\":\"Running database deployment.\",\"target_url\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -55,6 +63,30 @@ jobs:
           supabase link --project-ref "$SUPABASE_PROJECT_REF"
           supabase db push --linked
 
+      - name: Set commit status (deploy DB final)
+        if: ${{ always() }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATUS_CONTEXT: "Vercel - pnp-app: deploy-production-db"
+          STATUS_SHA: ${{ github.event.inputs.checkout_ref || github.sha }}
+        run: |
+          status_state="failure"
+          status_description="Database deployment failed."
+          if [ "${{ job.status }}" = "success" ]; then
+            status_state="success"
+            status_description="Database deployment finished successfully."
+          elif [ "${{ job.status }}" = "cancelled" ]; then
+            status_state="error"
+            status_description="Database deployment was cancelled."
+          fi
+
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "${{ github.api_url }}/repos/${{ github.repository }}/statuses/${STATUS_SHA}" \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --data "{\"state\":\"${status_state}\",\"context\":\"${STATUS_CONTEXT}\",\"description\":\"${status_description}\",\"target_url\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+
   bootstrap_admin:
     needs: deploy_db
     if: ${{ needs.deploy_db.result == 'success' }}
@@ -71,10 +103,18 @@ jobs:
         with:
           ref: ${{ github.event.inputs.checkout_ref || github.sha }}
 
-      - name: Notify Vercel (production bootstrap admin)
-        uses: vercel/repository-dispatch/actions/status@v1
-        with:
-          name: "Vercel - pnp-app: deploy-production-admin"
+      - name: Set commit status (bootstrap admin pending)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATUS_CONTEXT: "Vercel - pnp-app: deploy-production-admin"
+          STATUS_SHA: ${{ github.event.inputs.checkout_ref || github.sha }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "${{ github.api_url }}/repos/${{ github.repository }}/statuses/${STATUS_SHA}" \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --data "{\"state\":\"pending\",\"context\":\"${STATUS_CONTEXT}\",\"description\":\"Running admin bootstrap.\",\"target_url\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -106,3 +146,27 @@ jobs:
           ADMIN_BOOTSTRAP_DESCRIPTION: ${{ vars.ADMIN_BOOTSTRAP_DESCRIPTION }}
           ADMIN_BOOTSTRAP_LOCALE: ${{ vars.ADMIN_BOOTSTRAP_LOCALE }}
         run: node scripts/ensure-admin-user.mjs
+
+      - name: Set commit status (bootstrap admin final)
+        if: ${{ always() }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATUS_CONTEXT: "Vercel - pnp-app: deploy-production-admin"
+          STATUS_SHA: ${{ github.event.inputs.checkout_ref || github.sha }}
+        run: |
+          status_state="failure"
+          status_description="Admin bootstrap failed."
+          if [ "${{ job.status }}" = "success" ]; then
+            status_state="success"
+            status_description="Admin bootstrap finished successfully."
+          elif [ "${{ job.status }}" = "cancelled" ]; then
+            status_state="error"
+            status_description="Admin bootstrap was cancelled."
+          fi
+
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "${{ github.api_url }}/repos/${{ github.repository }}/statuses/${STATUS_SHA}" \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --data "{\"state\":\"${status_state}\",\"context\":\"${STATUS_CONTEXT}\",\"description\":\"${status_description}\",\"target_url\":\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
