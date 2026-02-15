@@ -21,6 +21,7 @@ type IconActionLinkButtonProps = {
   href: string;
   variant?: ButtonVariant;
   size?: ButtonSize;
+  badgeCount?: number;
 };
 
 export function IconActionButton({
@@ -52,11 +53,20 @@ export function IconActionLinkButton({
   href,
   variant = "outline",
   size = "icon-sm",
+  badgeCount = 0,
 }: IconActionLinkButtonProps) {
+  const showBadge = badgeCount > 0;
+  const badgeLabel = badgeCount > 99 ? "99+" : String(badgeCount);
+
   return (
-    <Button asChild variant={variant} size={size} title={label}>
+    <Button asChild variant={variant} size={size} title={label} className="relative">
       <Link href={href} aria-label={label}>
         <Icon />
+        {showBadge ? (
+          <span className="absolute -right-2 -top-2 inline-flex min-w-5 items-center justify-center rounded-full border border-background bg-destructive px-1.5 text-[10px] font-semibold leading-none text-white">
+            {badgeLabel}
+          </span>
+        ) : null}
         <span className="sr-only">{label}</span>
       </Link>
     </Button>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, Settings, Shield, User } from "lucide-react";
+import { Bell, LogOut, Settings, Shield, User } from "lucide-react";
 import { IconActionButton, IconActionLinkButton } from "@/components/common/icon-action-button";
 import { clearLocaleCookie, readLocaleCookie, setLocaleCookie } from "@/lib/client/locale-cookie";
 import { clearSession } from "@/lib/client/session";
@@ -12,6 +12,8 @@ import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
 import type { ClientSession } from "@/lib/client/session";
 import { logoutUser } from "@/features/users/queries/users-auth.query";
 import { getMe } from "@/features/users/queries/users-profile.query";
+import { useNotificationsQuery } from "@/features/notifications/hooks/use-notifications-query";
+import { getNotificationUnreadCount } from "@/features/notifications/logic/notification-list.logic";
 import { appNavigationRoutes, appRoutes } from "@/app/router";
 
 type AppHeaderProps = {
@@ -31,6 +33,8 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
   const role = meQuery.data?.profile.role;
   const roleResolved = meQuery.isSuccess;
   const profileLocale = meQuery.data?.profile.locale;
+  const notificationsQuery = useNotificationsQuery(session, { limit: 100 });
+  const unreadNotifications = getNotificationUnreadCount(notificationsQuery.data ?? []);
 
   useEffect(() => {
     if (!profileLocale) {
@@ -88,6 +92,13 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
           })}
         </nav>
         <div className="ml-auto flex items-center gap-1">
+          <IconActionLinkButton
+            label={t("ui.menu.notifications")}
+            icon={Bell}
+            href={appRoutes.notifications}
+            variant="ghost"
+            badgeCount={unreadNotifications}
+          />
           {roleResolved && role !== "admin" ? (
             <>
               <IconActionLinkButton
