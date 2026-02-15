@@ -30,6 +30,7 @@ src/
     common/                     # shared composed components
   lib/
     client/                     # client session/api helpers
+    features/                   # runtime feature flags
     i18n/                       # localization helpers
     supabase/                   # browser supabase setup
     utils/
@@ -67,6 +68,16 @@ src/
 - Server-side authorization is enforced in API route handlers.
 - Client-side guards are only UX-level (redirect/gating).
 - Supabase RLS remains the primary data access control layer.
+
+## Feature Flags
+
+- Runtime feature flags are centralized in `src/lib/features/feature-flags.ts`.
+- Flags can be enabled/disabled per environment (`development`, `preview`, `production`).
+- Registration is disabled by default in `production` via `selfRegistration`.
+- Optional overrides:
+  - `FEATURE_FLAGS_ENABLE` (comma-separated)
+  - `FEATURE_FLAGS_DISABLE` (comma-separated)
+  - `APP_ENV` to force runtime environment resolution.
 
 ## Naming Conventions
 

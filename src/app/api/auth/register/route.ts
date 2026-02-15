@@ -1,4 +1,5 @@
 import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { isFeatureEnabled } from "@/lib/features/feature-flags";
 import { createServerSupabaseClient } from "@/server/supabase/server-client";
 
 type RegisterBody = {
@@ -9,6 +10,10 @@ type RegisterBody = {
 };
 
 export async function POST(request: Request) {
+  if (!isFeatureEnabled("selfRegistration")) {
+    return jsonError(404, "not_found", "Not Found");
+  }
+
   const body = await parseJsonBody<RegisterBody>(request);
   if (!body?.email || !body.password) {
     return jsonError(400, "invalid_payload", "email and password are required");

@@ -23,13 +23,18 @@ import { appNavigationRoutes, appRoutes } from "@/app/router";
 
 type HomeScreenProps = {
   locale: AppLocale;
+  registrationEnabled: boolean;
   registeredNotice?: boolean;
 };
 
 const fieldClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary";
 
-export function HomePageView({ locale, registeredNotice = false }: HomeScreenProps) {
+export function HomePageView({
+  locale,
+  registrationEnabled,
+  registeredNotice = false,
+}: HomeScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
   const { session, ready } = useClientSession();
   const router = useRouter();
@@ -122,9 +127,11 @@ export function HomePageView({ locale, registeredNotice = false }: HomeScreenPro
                 <Link href={appRoutes.passwordReset} className="underline">
                   {t("ui.nav.passwordReset")}
                 </Link>
-                <Link href={appRoutes.register} className="underline">
-                  {t("ui.nav.register")}
-                </Link>
+                {registrationEnabled ? (
+                  <Link href={appRoutes.register} className="underline">
+                    {t("ui.nav.register")}
+                  </Link>
+                ) : null}
               </div>
             </CardFooter>
           </Card>

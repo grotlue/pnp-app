@@ -104,3 +104,13 @@ Step-by-step setup:
 - I18n: `src/lib/i18n/`
 - Supabase migrations: `supabase/migrations/`
 - Local fixture logins: `docs/development/LOCAL_DEV_FIXTURE_USERS.md`
+
+## Feature flags
+
+- Central feature flag registry: `src/lib/features/feature-flags.ts`
+- Default behavior:
+  - `selfRegistration` is disabled in `production`
+- Optional overrides:
+  - `APP_ENV=development|preview|production`
+  - `FEATURE_FLAGS_ENABLE=<comma-separated-flags>`
+  - `FEATURE_FLAGS_DISABLE=<comma-separated-flags>`

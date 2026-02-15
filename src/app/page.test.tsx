@@ -20,4 +20,19 @@ describe("Home page", () => {
     expect(screen.getByRole("link", { name: "Register" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Forgot password?" })).toBeInTheDocument();
   });
+
+  it("hides register link when self-registration is disabled", async () => {
+    process.env.APP_ENV = "production";
+    try {
+      const ui = await HomePage({
+        searchParams: Promise.resolve({}),
+      });
+      render(ui);
+
+      expect(await screen.findByRole("button", { name: "Login" })).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: "Register" })).not.toBeInTheDocument();
+    } finally {
+      delete process.env.APP_ENV;
+    }
+  });
 });
