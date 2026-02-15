@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "@/components/common/empty-state";
 import { FeedbackMessage } from "@/components/common/feedback-message";
-import { ListControls } from "@/components/common/list-controls";
 import { ListItemRow } from "@/components/common/list-item-row";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { SectionBox } from "@/components/common/section-box";
@@ -16,16 +15,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AppHeader } from "@/components/common/app-header";
 import { CampaignRoleBadge } from "@/features/campaigns/components/campaign-role-badge";
 import {
-  type CampaignListSort,
-  searchCampaigns,
   sortCampaigns,
 } from "@/features/campaigns/logic/campaign-list.logic";
 import { getCampaignDetail } from "@/features/campaigns/queries/get-campaign.query";
 import { getCampaignsQuery } from "@/features/campaigns/queries/get-campaigns.query";
-import { CharacterTypeBadge } from "@/features/characters/components/character-type-badge";
 import {
-  type CharacterListSort,
-  searchCharacters,
   sortCharacters,
 } from "@/features/characters/logic/character-list.logic";
 import { getCharacters } from "@/features/characters/queries/characters-screen.query";
@@ -51,11 +45,7 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
   const router = useRouter();
   const { session, ready } = useClientSession();
   const [characterTab, setCharacterTab] = useState<"player" | "npc">("player");
-  const [characterSearchQuery, setCharacterSearchQuery] = useState("");
-  const [characterSortBy, setCharacterSortBy] = useState<CharacterListSort>("updated_desc");
   const [characterPage, setCharacterPage] = useState(1);
-  const [campaignSearchQuery, setCampaignSearchQuery] = useState("");
-  const [campaignSortBy, setCampaignSortBy] = useState<CampaignListSort>("updated_desc");
   const [campaignPage, setCampaignPage] = useState(1);
 
   useEffect(() => {
@@ -147,10 +137,7 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
   const visibleCharactersByType = profile.characters.filter(
     (character) => character.type === characterTab,
   );
-  const searchedAndSortedCharacters = sortCharacters(
-    searchCharacters(visibleCharactersByType, characterSearchQuery),
-    characterSortBy,
-  );
+  const searchedAndSortedCharacters = sortCharacters(visibleCharactersByType, "updated_desc");
   const safeCharacterPage = clampListPage(
     characterPage,
     searchedAndSortedCharacters.length,
@@ -163,11 +150,8 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
   );
 
   const sortedCampaignEntries = sortCampaigns(
-    searchCampaigns(
-      profile.campaigns.map((entry) => entry.campaign),
-      campaignSearchQuery,
-    ),
-    campaignSortBy,
+    profile.campaigns.map((entry) => entry.campaign),
+    "updated_desc",
   );
   const roleByCampaignId = new Map(profile.campaigns.map((entry) => [entry.campaign.id, entry.role]));
   const safeCampaignPage = clampListPage(
@@ -180,12 +164,6 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
     safeCampaignPage,
     DEFAULT_LIST_PAGE_SIZE,
   );
-
-  const sortOptions = [
-    { value: "updated_desc", label: t("ui.list.sortUpdated") },
-    { value: "created_desc", label: t("ui.list.sortCreated") },
-    { value: "name_asc", label: t("ui.list.sortName") },
-  ];
 
   return (
     <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
@@ -216,16 +194,6 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
                   ]}
                 />
 
-                <ListControls
-                  searchValue={characterSearchQuery}
-                  onSearchChange={setCharacterSearchQuery}
-                  searchPlaceholder={t("ui.list.searchCharacters")}
-                  sortValue={characterSortBy}
-                  onSortChange={(value) => setCharacterSortBy(value as CharacterListSort)}
-                  sortLabel={t("ui.list.sortBy")}
-                  sortOptions={sortOptions}
-                />
-
                 <div className="space-y-1">
                   {pagedCharacters.map((character) => (
                     <ListItemRow key={character.id}>
@@ -233,7 +201,6 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
                         <Link href={`/characters/${character.id}`} className={textLinkClassName}>
                           <TitleWithPrivacy title={character.name} isPrivate={character.is_private} />
                         </Link>
-                        <CharacterTypeBadge type={character.type} t={t} />
                       </div>
                     </ListItemRow>
                   ))}
@@ -257,16 +224,6 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
               </SectionBox>
 
               <SectionBox title={t("ui.campaigns.title")} className="space-y-2">
-                <ListControls
-                  searchValue={campaignSearchQuery}
-                  onSearchChange={setCampaignSearchQuery}
-                  searchPlaceholder={t("ui.list.searchCampaigns")}
-                  sortValue={campaignSortBy}
-                  onSortChange={(value) => setCampaignSortBy(value as CampaignListSort)}
-                  sortLabel={t("ui.list.sortBy")}
-                  sortOptions={sortOptions}
-                />
-
                 <div className="space-y-1">
                   {pagedCampaigns.map((campaign) => {
                     const role = roleByCampaignId.get(campaign.id) ?? "player";

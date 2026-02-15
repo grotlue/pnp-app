@@ -19,6 +19,10 @@ export function PaginationControls({
   pageLabel,
   onPageChange,
 }: PaginationControlsProps) {
+  if (totalItems <= pageSize) {
+    return null;
+  }
+
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safePage = Math.min(Math.max(page, 1), totalPages);
 

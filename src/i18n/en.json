@@ -182,8 +182,9 @@
         "player": "Player"
       },
       "ownership": {
+        "all": "All",
         "mine": "Mine",
-        "others": "Other user"
+        "others": "Not mine"
       }
     },
     "list": {

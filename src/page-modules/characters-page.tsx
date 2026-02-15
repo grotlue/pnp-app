@@ -13,7 +13,6 @@ import { IconActionButton, IconActionLinkButton } from "@/components/common/icon
 import { ListControls } from "@/components/common/list-controls";
 import { ListItemRow } from "@/components/common/list-item-row";
 import { Modal } from "@/components/common/modal";
-import { OwnershipBadge } from "@/components/common/ownership-badge";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
 import { VisibilityToggle } from "@/components/common/visibility-toggle";
@@ -210,7 +209,6 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
                       </Link>
                       <div className="flex flex-wrap items-center gap-2">
                         <CharacterTypeBadge type={character.type} t={t} />
-                        <OwnershipBadge mode="mine" t={t} />
                         {campaign ? (
                           <Link
                             href={`/campaigns/${campaign.id}`}

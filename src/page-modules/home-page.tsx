@@ -31,7 +31,6 @@ import {
   sortCampaigns,
 } from "@/features/campaigns/logic/campaign-list.logic";
 import { getCampaignsQuery } from "@/features/campaigns/queries/get-campaigns.query";
-import { CharacterTypeBadge } from "@/features/characters/components/character-type-badge";
 import {
   type CharacterListSort,
   type CharacterOwnershipFilter,
@@ -84,7 +83,7 @@ export function HomePageView({
 
   const [characterTab, setCharacterTab] = useState<"player" | "npc">("player");
   const [characterOwnershipFilter, setCharacterOwnershipFilter] =
-    useState<CharacterOwnershipFilter>("mine");
+    useState<CharacterOwnershipFilter>("all");
   const [characterSearchQuery, setCharacterSearchQuery] = useState("");
   const [characterSortBy, setCharacterSortBy] = useState<CharacterListSort>("updated_desc");
   const [characterPage, setCharacterPage] = useState(1);
@@ -291,6 +290,7 @@ export function HomePageView({
                   setCharacterOwnershipFilter(value as CharacterOwnershipFilter)
                 }
                 filterOptions={[
+                  { value: "all", label: t("ui.labels.ownership.all") },
                   { value: "mine", label: t("ui.labels.ownership.mine") },
                   { value: "others", label: t("ui.labels.ownership.others") },
                 ]}
@@ -318,12 +318,9 @@ export function HomePageView({
                             />
                           </Link>
                           <div className="flex flex-wrap items-center gap-2">
-                            <CharacterTypeBadge type={character.type} t={t} />
                             {character.owner_user_id === currentUserId ? (
                               <OwnershipBadge mode="mine" t={t} />
-                            ) : (
-                              <OwnershipBadge mode="others" t={t} />
-                            )}
+                            ) : null}
                           </div>
                         </div>
                         <div className="text-xs text-muted-foreground">

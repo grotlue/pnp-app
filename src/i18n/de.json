@@ -182,8 +182,9 @@
         "player": "Spieler"
       },
       "ownership": {
+        "all": "Alle",
         "mine": "Mein Eintrag",
-        "others": "Anderer Nutzer"
+        "others": "Nicht meine"
       }
     },
     "list": {
