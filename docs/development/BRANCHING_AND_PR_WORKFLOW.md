@@ -6,6 +6,7 @@ This project uses a strict branch-first workflow.
 
 - Never implement changes directly on `main` or `production`.
 - Every change must be done in a short-lived working branch.
+- New working branches must always be cut from the current `main` branch.
 - One branch should contain one coherent change package.
 - When the package is complete, open a Pull Request.
 
@@ -28,8 +29,10 @@ Examples:
 
 ## Standard flow
 
-1. Start from latest `main` (or relevant base branch).
-2. Create a branch for the task.
+1. Update local `main` from remote:
+   - `git checkout main`
+   - `git pull origin main`
+2. Create a branch for the task from that updated `main`.
 3. Implement and verify:
    - `yarn typecheck`
    - `yarn lint`
@@ -51,6 +54,7 @@ If a new prompt/task is not aligned with the current branch theme:
 Automated agents must:
 
 - check current branch before editing files
+- ensure new branch base is updated `main` (`origin/main`)
 - create a new branch if currently on `main` or `production`
 - ask before branching when task scope does not match current branch
 - open a PR after finishing a coherent change package

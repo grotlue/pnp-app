@@ -69,6 +69,7 @@ yarn build
 
 - Do not implement changes directly on `main` or `production`.
 - Create a dedicated working branch per coherent change package.
+- Always create new working branches from the latest `main`.
 - Open a PR after the package is complete.
 - See: `docs/development/BRANCHING_AND_PR_WORKFLOW.md`
 

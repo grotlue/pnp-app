@@ -155,6 +155,8 @@ Minimum expectations:
 When working as an automated coding agent:
 
 - At task start, check current branch before any edits.
+- New working branches must always be created from the latest `main`.
+- Before creating a branch, update local `main` to current remote `origin/main`.
 - If current branch is `main` or `production`, create a new working branch first.
 - If current task scope does not fit the current working branch scope, ask whether to create a new branch.
 - If user confirms, create the new branch before making changes.
