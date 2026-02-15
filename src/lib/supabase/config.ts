@@ -7,5 +7,10 @@ function requireEnv(name: string): string {
   return value;
 }
 
-export const supabaseUrl = requireEnv("NEXT_PUBLIC_SUPABASE_URL");
-export const supabaseAnonKey = requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+export function getSupabaseUrl(): string {
+  return requireEnv("NEXT_PUBLIC_SUPABASE_URL");
+}
+
+export function getSupabaseAnonKey(): string {
+  return requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+}

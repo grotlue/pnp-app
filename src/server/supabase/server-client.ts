@@ -1,7 +1,10 @@
 import { createClient } from "@supabase/supabase-js";
-import { supabaseAnonKey, supabaseUrl } from "@/lib/supabase/config";
+import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/config";
 
 export function createServerSupabaseClient(accessToken?: string) {
+  const supabaseUrl = getSupabaseUrl();
+  const supabaseAnonKey = getSupabaseAnonKey();
+
   return createClient(supabaseUrl, supabaseAnonKey, {
     global: accessToken
       ? {
