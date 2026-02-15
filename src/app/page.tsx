@@ -9,7 +9,7 @@ type HomePageProps = {
 export default async function HomePage({ searchParams }: HomePageProps) {
   const locale = await getRequestLocale();
   const params = await searchParams;
-  const registrationEnabled = isFeatureEnabled("selfRegistration");
+  const registrationEnabled = await isFeatureEnabled("selfRegistration");
 
   return (
     <HomePageView

@@ -132,7 +132,13 @@ Step-by-step setup:
 - Central feature flag registry: `src/lib/features/feature-flags.ts`
 - Default behavior:
   - `selfRegistration` is disabled in `production`
+- Provider model:
+  - `rules` (default fallback, no external provider required)
+  - `vercel` (uses `flags-sdk.dev` with `@flags-sdk/vercel`)
 - Optional overrides:
   - `APP_ENV=development|preview|production`
+  - `FEATURE_FLAGS_PROVIDER=rules|vercel`
+  - `FLAGS=<vercel-flags-connection-string>`
+  - `FLAGS_SECRET=<32-byte-base64url-secret>` (recommended for encrypted overrides / toolbar)
   - `FEATURE_FLAGS_ENABLE=<comma-separated-flags>`
   - `FEATURE_FLAGS_DISABLE=<comma-separated-flags>`

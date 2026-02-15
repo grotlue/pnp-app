@@ -76,10 +76,16 @@ src/
 - Runtime feature flags are centralized in `src/lib/features/feature-flags.ts`.
 - Flags can be enabled/disabled per environment (`development`, `preview`, `production`).
 - Registration is disabled by default in `production` via `selfRegistration`.
+- Feature provider strategy supports:
+  - `rules` (default/fallback provider)
+  - `vercel` (via `flags-sdk.dev` + `@flags-sdk/vercel`)
 - Optional overrides:
   - `FEATURE_FLAGS_ENABLE` (comma-separated)
   - `FEATURE_FLAGS_DISABLE` (comma-separated)
-  - `APP_ENV` to force runtime environment resolution.
+  - `APP_ENV` to force runtime environment resolution
+  - `FEATURE_FLAGS_PROVIDER` to select provider (`rules` or `vercel`)
+  - `FLAGS` (Vercel flags connection string, required for Vercel provider)
+  - `FLAGS_SECRET` (recommended for encrypted toolbar overrides)
 
 ## Naming Conventions
 

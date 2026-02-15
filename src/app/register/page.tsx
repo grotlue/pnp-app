@@ -4,7 +4,7 @@ import { RegisterPageView } from "@/page-modules/register-page";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 export default async function RegisterPage() {
-  if (!isFeatureEnabled("selfRegistration")) {
+  if (!(await isFeatureEnabled("selfRegistration"))) {
     notFound();
   }
 

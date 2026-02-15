@@ -10,7 +10,7 @@ type RegisterBody = {
 };
 
 export async function POST(request: Request) {
-  if (!isFeatureEnabled("selfRegistration")) {
+  if (!(await isFeatureEnabled("selfRegistration"))) {
     return jsonError(404, "not_found", "Not Found");
   }
 
