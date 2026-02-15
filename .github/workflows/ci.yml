@@ -39,3 +39,15 @@ jobs:
 
       - name: Build
         run: yarn build
+
+  deploy_preview:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: quality
+    uses: ./.github/workflows/deploy-preview.yml
+    secrets: inherit
+
+  deploy_production:
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/production' }}
+    needs: quality
+    uses: ./.github/workflows/deploy-production.yml
+    secrets: inherit
