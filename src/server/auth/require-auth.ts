@@ -71,11 +71,12 @@ export async function requireAuth(
       },
     };
   } catch (error) {
+    console.warn("requireAuth failed", error);
     return {
       response: jsonError(
         500,
         "auth_check_failed",
-        error instanceof Error ? error.message : "Unexpected auth error",
+        "Authentication check failed",
       ),
     };
   }

@@ -42,14 +42,15 @@ export async function PATCH(request: Request, { params }: Params) {
     return jsonError(400, "invalid_payload", "invalid JSON body");
   }
 
-  const roleClient = (() => {
-    try {
-      return createServiceRoleSupabaseClient();
-    } catch {
-      return admin.context.client;
-    }
-  })();
-  const targetRole = await getProfileRole(roleClient, userId);
+  let service: ReturnType<typeof createServiceRoleSupabaseClient>;
+  try {
+    service = createServiceRoleSupabaseClient();
+  } catch (error) {
+    console.warn("admin user update failed: missing service role client", error);
+    return jsonError(500, "admin_user_update_failed", "Failed to update user");
+  }
+
+  const targetRole = await getProfileRole(service, userId);
   if (!targetRole.ok) {
     return jsonError(400, "admin_user_update_failed", targetRole.errorMessage);
   }
@@ -59,17 +60,6 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 
   if (body.email || body.password) {
-    let service: ReturnType<typeof createServiceRoleSupabaseClient>;
-    try {
-      service = createServiceRoleSupabaseClient();
-    } catch (error) {
-      return jsonError(
-        500,
-        "admin_user_update_failed",
-        error instanceof Error ? error.message : "Unexpected admin user update error",
-      );
-    }
-
     const { error: authError } = await service.auth.admin.updateUserById(userId, {
       email: body.email,
       password: body.password,
@@ -93,7 +83,7 @@ export async function PATCH(request: Request, { params }: Params) {
 
   if (Object.keys(patch).length > 0) {
     patch.updated_at = new Date().toISOString();
-    const { error: profileError } = await admin.context.client
+    const { error: profileError } = await service
       .from("profiles")
       .update(patch)
       .eq("id", userId);

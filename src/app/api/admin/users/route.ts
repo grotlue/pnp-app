@@ -127,10 +127,11 @@ export async function POST(request: Request) {
 
     return jsonOk({ userId: authData.user.id }, 201);
   } catch (error) {
+    console.warn("admin users create failed", error);
     return jsonError(
       500,
       "admin_user_create_failed",
-      error instanceof Error ? error.message : "Unexpected user creation error",
+      "Failed to create user",
     );
   }
 }

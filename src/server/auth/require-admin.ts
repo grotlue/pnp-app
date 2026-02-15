@@ -30,11 +30,12 @@ export async function requireAdmin(
 
     return { context: auth.context };
   } catch (error) {
+    console.warn("requireAdmin failed", error);
     return {
       response: jsonError(
         500,
         "admin_check_failed",
-        error instanceof Error ? error.message : "Unexpected admin check error",
+        "Admin check failed",
       ),
     };
   }

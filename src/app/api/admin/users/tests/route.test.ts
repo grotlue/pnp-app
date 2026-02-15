@@ -173,7 +173,7 @@ describe("admin users route", () => {
     await expect(response.json()).resolves.toEqual({
       error: {
         code: "admin_user_create_failed",
-        message: "Missing environment variable: SUPABASE_SERVICE_ROLE_KEY",
+        message: "Failed to create user",
       },
     });
   });

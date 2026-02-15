@@ -106,7 +106,7 @@ describe("requireAuth", () => {
       await expect(result.response.json()).resolves.toEqual({
         error: {
           code: "auth_check_failed",
-          message: "Missing environment variable: NEXT_PUBLIC_SUPABASE_URL",
+          message: "Authentication check failed",
         },
       });
     }
