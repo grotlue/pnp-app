@@ -1,13 +1,20 @@
 name: Deploy PR Preview
 
 on:
-  pull_request_target:
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - labeled
-      - unlabeled
+  workflow_dispatch:
+    inputs:
+      checkout_ref:
+        description: Git ref to checkout.
+        required: true
+        type: string
+      pr_number:
+        description: Pull request number.
+        required: true
+        type: string
+      pr_head_sha:
+        description: Pull request head SHA.
+        required: true
+        type: string
 
 permissions:
   actions: read
@@ -16,12 +23,11 @@ permissions:
   statuses: write
 
 concurrency:
-  group: deploy-pr-preview-${{ github.event.pull_request.number }}
+  group: deploy-pr-preview-${{ github.event.inputs.pr_number || github.run_id }}
   cancel-in-progress: true
 
 jobs:
   deploy_preview:
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'preview-deploy') && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.base.ref == 'main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: preview
@@ -43,7 +49,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.inputs.checkout_ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -110,15 +116,17 @@ jobs:
         uses: actions/github-script@v7
         env:
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment_url }}
+          PR_NUMBER: ${{ github.event.inputs.pr_number }}
+          PR_HEAD_SHA: ${{ github.event.inputs.pr_head_sha }}
         with:
           script: |
             const marker = '<!-- pr-preview-deploy -->';
-            const issue_number = context.payload.pull_request.number;
+            const issue_number = Number(process.env.PR_NUMBER);
             const body = `${marker}
             Preview deployment for label \`preview-deploy\`:
             ${process.env.DEPLOYMENT_URL}
 
-            Commit: \`${context.payload.pull_request.head.sha}\``;
+            Commit: \`${process.env.PR_HEAD_SHA}\``;
 
             const comments = await github.paginate(github.rest.issues.listComments, {
               owner: context.repo.owner,
