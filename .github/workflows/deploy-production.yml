@@ -1,7 +1,13 @@
 name: Deploy Production DB
 
 on:
-  workflow_call:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+    branches:
+      - production
   workflow_dispatch:
 
 concurrency:
@@ -10,16 +16,23 @@ concurrency:
 
 jobs:
   deploy_db:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
       contents: read
+      statuses: write
     environment: production
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Notify Vercel (production deploy db)
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: "Vercel - pnp-app: deploy"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -51,12 +64,18 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+      statuses: write
     environment: production
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Notify Vercel (production bootstrap admin)
+        uses: vercel/repository-dispatch/actions/status@v1
+        with:
+          name: "Vercel - pnp-app: deploy-production-admin"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
