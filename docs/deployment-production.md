@@ -94,10 +94,13 @@ In Supabase -> Authentication -> URL Configuration:
 In Vercel project -> Settings -> Git:
 
 - Set **Production Branch** to `production`.
+- Keep `main` as your preview branch.
 
-Optional (if you want no preview deployments from other branches):
+Repository configuration (`vercel.json`) already restricts branch deploys:
 
-- Use an ignored build step condition for non-`production` branches.
+- `production` -> production deployment
+- `main` -> preview deployment
+- all other branches -> no Vercel deployment
 
 ## 8) Workflow behavior
 
@@ -115,10 +118,11 @@ Optional (if you want no preview deployments from other branches):
 
 Deployment order:
 
-1. Push to any branch
+1. Push to branch
 2. Vercel deploys:
   - `production` branch -> production deployment
-  - non-`production` branch -> preview deployment
+  - `main` branch -> preview deployment
+  - all other branches -> skipped by Vercel
 3. CI runs
 4. On successful CI:
   - `production` branch -> `Deploy Production DB` runs `supabase db push --linked`

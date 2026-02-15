@@ -69,6 +69,9 @@ yarn build
 Current mode:
 
 - **Vercel Git integration** deploys the app automatically.
+  - `production` branch -> production deployment
+  - `main` branch -> preview deployment
+  - all other branches -> no Vercel deployment (`vercel.json`)
 - **GitHub Actions** deploys Supabase migrations:
   - to `production` after CI succeeds on `production` pushes
   - to `preview` after CI succeeds on non-`production` pushes
