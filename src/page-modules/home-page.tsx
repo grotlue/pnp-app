@@ -42,9 +42,10 @@ import { getCharacters } from "@/features/characters/queries/characters-screen.q
 import { loginUser } from "@/features/users/queries/users-auth.query";
 import { getMe } from "@/features/users/queries/users-profile.query";
 import type { LoginResponse, MeResponse } from "@/features/users/types";
+import { setLocaleCookie } from "@/lib/client/locale-cookie";
 import { clearSession, setSession } from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
 import { textLinkClassName } from "@/lib/utils/link";
 import { clampListPage, DEFAULT_LIST_PAGE_SIZE, paginateListItems } from "@/lib/utils/list";
 
@@ -124,6 +125,9 @@ export function HomePageView({
         refreshToken: response.refreshToken,
         expiresAt: response.expiresAt,
       });
+      if (response.locale) {
+        setLocaleCookie(resolveLocale(response.locale));
+      }
       router.replace("/");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));

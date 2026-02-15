@@ -130,4 +130,41 @@ describe("POST /api/auth/register", () => {
       },
     });
   });
+
+  it("uses accept-language locale when payload locale is missing", async () => {
+    const signUpMock = vi.fn().mockResolvedValue({
+      data: {
+        user: { id: "u2" },
+        session: null,
+      },
+      error: null,
+    });
+    createServerSupabaseClientMock.mockReturnValue({
+      auth: { signUp: signUpMock },
+    });
+
+    const request = new Request("http://localhost/api/auth/register", {
+      method: "POST",
+      headers: { "accept-language": "de-DE,de;q=0.9,en;q=0.8" },
+      body: JSON.stringify({
+        email: "z@example.com",
+        password: "secret",
+        username: "z",
+      }),
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(201);
+    expect(signUpMock).toHaveBeenCalledWith({
+      email: "z@example.com",
+      password: "secret",
+      options: {
+        emailRedirectTo: undefined,
+        data: {
+          username: "z",
+          locale: "de",
+        },
+      },
+    });
+  });
 });

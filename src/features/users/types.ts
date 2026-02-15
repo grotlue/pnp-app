@@ -17,6 +17,7 @@ export type LoginResponse = {
   accessToken: string;
   refreshToken?: string;
   expiresAt?: number;
+  locale?: "en" | "de";
 };
 
 export type RegisterResponse = {

@@ -22,8 +22,15 @@ export async function POST(request: Request) {
     return jsonError(401, "login_failed", error?.message ?? "login failed");
   }
 
+  const { data: profile } = await client
+    .from("profiles")
+    .select("locale")
+    .eq("id", data.user.id)
+    .single();
+
   return jsonOk({
     user: data.user,
+    locale: profile?.locale === "de" ? "de" : "en",
     accessToken: data.session.access_token,
     refreshToken: data.session.refresh_token,
     expiresAt: data.session.expires_at,

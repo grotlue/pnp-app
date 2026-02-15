@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { LogOut, Settings, Shield, User } from "lucide-react";
 import { IconActionButton, IconActionLinkButton } from "@/components/common/icon-action-button";
+import { clearLocaleCookie, readLocaleCookie, setLocaleCookie } from "@/lib/client/locale-cookie";
 import { clearSession } from "@/lib/client/session";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
 import type { ClientSession } from "@/lib/client/session";
 import { logoutUser } from "@/features/users/queries/users-auth.query";
 import { getMe } from "@/features/users/queries/users-profile.query";
@@ -28,6 +30,25 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
   });
   const role = meQuery.data?.profile.role;
   const roleResolved = meQuery.isSuccess;
+  const profileLocale = meQuery.data?.profile.locale;
+
+  useEffect(() => {
+    if (!profileLocale) {
+      return;
+    }
+
+    const normalizedProfileLocale = resolveLocale(profileLocale);
+    const cookieLocale = readLocaleCookie();
+    const cookieOutdated = cookieLocale !== normalizedProfileLocale;
+    if (!cookieOutdated) {
+      return;
+    }
+
+    setLocaleCookie(normalizedProfileLocale);
+    if (normalizedProfileLocale !== locale) {
+      router.refresh();
+    }
+  }, [locale, profileLocale, router]);
 
   async function onLogout() {
     try {
@@ -37,6 +58,7 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
     } finally {
       // Always clear local session even when backend sign-out fails.
       clearSession();
+      clearLocaleCookie();
       router.replace("/");
       router.refresh();
     }
