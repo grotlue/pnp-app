@@ -42,8 +42,14 @@ export async function PATCH(request: Request, { params }: Params) {
     return jsonError(400, "invalid_payload", "invalid JSON body");
   }
 
-  const service = createServiceRoleSupabaseClient();
-  const targetRole = await getProfileRole(service, userId);
+  const roleClient = (() => {
+    try {
+      return createServiceRoleSupabaseClient();
+    } catch {
+      return admin.context.client;
+    }
+  })();
+  const targetRole = await getProfileRole(roleClient, userId);
   if (!targetRole.ok) {
     return jsonError(400, "admin_user_update_failed", targetRole.errorMessage);
   }
@@ -53,6 +59,17 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 
   if (body.email || body.password) {
+    let service: ReturnType<typeof createServiceRoleSupabaseClient>;
+    try {
+      service = createServiceRoleSupabaseClient();
+    } catch (error) {
+      return jsonError(
+        500,
+        "admin_user_update_failed",
+        error instanceof Error ? error.message : "Unexpected admin user update error",
+      );
+    }
+
     const { error: authError } = await service.auth.admin.updateUserById(userId, {
       email: body.email,
       password: body.password,
@@ -76,7 +93,7 @@ export async function PATCH(request: Request, { params }: Params) {
 
   if (Object.keys(patch).length > 0) {
     patch.updated_at = new Date().toISOString();
-    const { error: profileError } = await service
+    const { error: profileError } = await admin.context.client
       .from("profiles")
       .update(patch)
       .eq("id", userId);
@@ -96,8 +113,14 @@ export async function DELETE(request: Request, { params }: Params) {
   }
 
   const { userId } = await params;
-  const service = createServiceRoleSupabaseClient();
-  const targetRole = await getProfileRole(service, userId);
+  const roleClient = (() => {
+    try {
+      return createServiceRoleSupabaseClient();
+    } catch {
+      return admin.context.client;
+    }
+  })();
+  const targetRole = await getProfileRole(roleClient, userId);
   if (!targetRole.ok) {
     return jsonError(400, "admin_delete_failed", targetRole.errorMessage);
   }

@@ -15,8 +15,14 @@ export async function GET(request: Request) {
     return admin.response;
   }
 
-  const service = createServiceRoleSupabaseClient();
-  const { data, error } = await service
+  const client = (() => {
+    try {
+      return createServiceRoleSupabaseClient();
+    } catch {
+      return admin.context.client;
+    }
+  })();
+  const { data, error } = await client
     .from("campaigns")
     .select("id, owner_user_id, title, description, is_private, created_at, updated_at")
     .order("created_at", { ascending: false })
@@ -40,8 +46,14 @@ export async function POST(request: Request) {
     return jsonError(400, "invalid_payload", "ownerUserId and title are required");
   }
 
-  const service = createServiceRoleSupabaseClient();
-  const { data, error } = await service
+  const client = (() => {
+    try {
+      return createServiceRoleSupabaseClient();
+    } catch {
+      return admin.context.client;
+    }
+  })();
+  const { data, error } = await client
     .from("campaigns")
     .insert({
       owner_user_id: body.ownerUserId,

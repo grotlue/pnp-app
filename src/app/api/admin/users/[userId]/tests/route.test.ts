@@ -21,8 +21,18 @@ beforeEach(() => {
 
 describe("admin user detail route", () => {
   it("updates user profile and auth fields", async () => {
+    const updateEqMock = vi.fn().mockResolvedValue({ error: null });
     requireAdminMock.mockResolvedValueOnce({
-      context: { user: { id: "admin-1" } },
+      context: {
+        user: { id: "admin-1" },
+        client: {
+          from: vi.fn(() => ({
+            update: vi.fn(() => ({
+              eq: updateEqMock,
+            })),
+          })),
+        },
+      },
     });
 
     const updateUserByIdMock = vi.fn().mockResolvedValue({ error: null });
@@ -30,7 +40,6 @@ describe("admin user detail route", () => {
       data: { role: "user" },
       error: null,
     });
-    const updateEqMock = vi.fn().mockResolvedValue({ error: null });
     createServiceRoleSupabaseClientMock.mockReturnValue({
       auth: { admin: { updateUserById: updateUserByIdMock } },
       from: vi.fn(() => ({

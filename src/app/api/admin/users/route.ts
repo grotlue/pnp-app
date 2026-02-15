@@ -42,13 +42,22 @@ export async function GET(request: Request) {
     return admin.response;
   }
 
-  const service = createServiceRoleSupabaseClient();
+  const service = (() => {
+    try {
+      return createServiceRoleSupabaseClient();
+    } catch {
+      return null;
+    }
+  })();
+  const dataClient = service ?? admin.context.client;
   const [{ data: profiles, error: profilesError }, authUsersResult] = await Promise.all([
-    service
+    dataClient
       .from("profiles")
       .select("id, username, description, role, locale, created_at, updated_at")
       .order("created_at", { ascending: false }),
-    listAllAuthUsers(service),
+    service
+      ? listAllAuthUsers(service)
+      : Promise.resolve({ ok: true as const, users: [] as Array<{ id: string; email?: string | null }> }),
   ]);
 
   if (profilesError) {

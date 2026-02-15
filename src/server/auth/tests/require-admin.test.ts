@@ -31,7 +31,7 @@ describe("requireAdmin", () => {
           from: vi.fn(() => ({
             select: vi.fn(() => ({
               eq: vi.fn(() => ({
-                single: vi.fn().mockResolvedValue({
+                maybeSingle: vi.fn().mockResolvedValue({
                   data: { role: "user" },
                   error: null,
                 }),
@@ -56,7 +56,7 @@ describe("requireAdmin", () => {
         from: vi.fn(() => ({
           select: vi.fn(() => ({
             eq: vi.fn(() => ({
-              single: vi.fn().mockResolvedValue({
+              maybeSingle: vi.fn().mockResolvedValue({
                 data: { role: "admin" },
                 error: null,
               }),
@@ -69,5 +69,31 @@ describe("requireAdmin", () => {
 
     const result = await requireAdmin(new Request("http://localhost/api/x"));
     expect(result).toEqual({ context });
+  });
+
+  it("returns 403 when admin profile row is missing", async () => {
+    requireAuthMock.mockResolvedValueOnce({
+      context: {
+        user: { id: "u1" },
+        client: {
+          from: vi.fn(() => ({
+            select: vi.fn(() => ({
+              eq: vi.fn(() => ({
+                maybeSingle: vi.fn().mockResolvedValue({
+                  data: null,
+                  error: null,
+                }),
+              })),
+            })),
+          })),
+        },
+      },
+    });
+
+    const result = await requireAdmin(new Request("http://localhost/api/x"));
+    expect("response" in result).toBe(true);
+    if ("response" in result) {
+      expect(result.response.status).toBe(403);
+    }
   });
 });
