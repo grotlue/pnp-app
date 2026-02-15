@@ -6,9 +6,15 @@ on:
       - main
       - production
   pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+      - unlabeled
 
 permissions:
-  actions: read
+  actions: write
   contents: read
   statuses: write
 
@@ -49,3 +55,51 @@ jobs:
 
       - name: Build
         run: yarn build
+
+  dispatch_deploy_preview_main:
+    needs: quality
+    if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch Deploy Preview DB
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy-preview.yml/dispatches" \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --data '{"ref":"main","inputs":{"checkout_ref":"${{ github.sha }}"}}'
+
+  dispatch_deploy_production:
+    needs: quality
+    if: ${{ github.event_name == 'push' && github.ref_name == 'production' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch Deploy Production DB
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy-production.yml/dispatches" \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --data '{"ref":"production","inputs":{"checkout_ref":"${{ github.sha }}"}}'
+
+  dispatch_deploy_pr_preview:
+    needs: quality
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main' && github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.pull_request.labels.*.name, 'preview-deploy') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch Deploy PR Preview
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy-pr-preview.yml/dispatches" \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GITHUB_TOKEN" \
+            --data '{"ref":"main","inputs":{"checkout_ref":"${{ github.event.pull_request.head.sha }}","pr_number":"${{ github.event.pull_request.number }}","pr_head_sha":"${{ github.event.pull_request.head.sha }}"}}'
