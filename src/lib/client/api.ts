@@ -1,4 +1,4 @@
-import type { ClientSession } from "@/lib/client/session";
+import { clearSession, type ClientSession } from "@/lib/client/session";
 
 export type ApiError = {
   code: string;
@@ -54,11 +54,18 @@ export async function apiRequest<T>(
 
   if (!response.ok) {
     const err = payload as { error?: { code?: string; message?: string } } | null;
+    const errorCode = err?.error?.code ?? "request_failed";
+    const errorMessage = err?.error?.message ?? "Request failed";
+
+    if (response.status === 401 && (errorCode === "invalid_token" || errorCode === "auth_required")) {
+      clearSession();
+    }
+
     return {
       data: null,
       error: {
-        code: err?.error?.code ?? "request_failed",
-        message: err?.error?.message ?? "Request failed",
+        code: errorCode,
+        message: errorMessage,
       },
       status: response.status,
     };

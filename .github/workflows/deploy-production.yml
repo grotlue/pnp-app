@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  deploy_db:
     if: >-
       ${{
         github.event.workflow_run.conclusion == 'success' &&
@@ -55,6 +55,32 @@ jobs:
         run: |
           supabase link --project-ref "$SUPABASE_PROJECT_REF"
           supabase db push --linked
+
+  bootstrap_admin:
+    needs: deploy_db
+    if: >-
+      ${{
+        needs.deploy_db.result == 'success'
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
 
       - name: Validate admin bootstrap env (production)
         env:

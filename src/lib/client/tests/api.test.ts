@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { apiRequest, unwrapApiResponse } from "../api";
+import { getSession, setSession } from "@/lib/client/session";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -130,5 +131,30 @@ describe("apiRequest", () => {
       error: { code: "request_failed", message: "Request failed" },
       status: 500,
     });
+  });
+
+  it("clears local session on auth 401 invalid_token", async () => {
+    setSession({ accessToken: "token-1" });
+
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          error: { code: "invalid_token", message: "Access token is invalid or expired." },
+        }),
+        { status: 401 },
+      ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await apiRequest("/api/me", {
+      session: { accessToken: "token-1" },
+    });
+
+    expect(response).toEqual({
+      data: null,
+      error: { code: "invalid_token", message: "Access token is invalid or expired." },
+      status: 401,
+    });
+    expect(getSession()).toBeNull();
   });
 });

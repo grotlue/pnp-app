@@ -20,6 +20,20 @@ function optionalEnv(name) {
   return normalized.length > 0 ? normalized : null;
 }
 
+function normalizeAdminLocale(rawLocale) {
+  if (!rawLocale) {
+    return "en";
+  }
+
+  const normalized = rawLocale.trim().toLowerCase();
+  if (normalized === "en" || normalized === "de") {
+    return normalized;
+  }
+
+  console.warn(`Unsupported ADMIN_BOOTSTRAP_LOCALE "${rawLocale}". Falling back to "en".`);
+  return "en";
+}
+
 async function listAllUsers(client) {
   const users = [];
   let page = 1;
@@ -56,10 +70,9 @@ async function main() {
   const serviceRoleKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
   const adminEmail = requireEnv("ADMIN_BOOTSTRAP_EMAIL").toLowerCase();
   const adminPassword = requireEnv("ADMIN_BOOTSTRAP_PASSWORD");
-  const adminUsername = process.env.ADMIN_BOOTSTRAP_USERNAME ?? "admin";
-  const adminDescription =
-    process.env.ADMIN_BOOTSTRAP_DESCRIPTION ?? "System admin account";
-  const adminLocale = process.env.ADMIN_BOOTSTRAP_LOCALE ?? "en";
+  const adminUsername = optionalEnv("ADMIN_BOOTSTRAP_USERNAME") ?? "admin";
+  const adminDescription = optionalEnv("ADMIN_BOOTSTRAP_DESCRIPTION") ?? "System admin account";
+  const adminLocale = normalizeAdminLocale(optionalEnv("ADMIN_BOOTSTRAP_LOCALE"));
 
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
     auth: {

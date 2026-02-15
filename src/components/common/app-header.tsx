@@ -21,9 +21,16 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
   const currentPath = pathname ?? "";
 
   async function onLogout() {
-    await logoutUser(session);
-    clearSession();
-    router.replace("/");
+    try {
+      await logoutUser(session);
+    } catch {
+      // Session cleanup below is the source of truth for client state.
+    } finally {
+      // Always clear local session even when backend sign-out fails.
+      clearSession();
+      router.replace("/");
+      router.refresh();
+    }
   }
 
   return (

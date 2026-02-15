@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { setSession } from "@/lib/client/session";
+import { clearSession, setSession } from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { AppHeader } from "@/components/common/app-header";
@@ -29,6 +29,18 @@ type HomeScreenProps = {
 
 const fieldClass =
   "w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary";
+
+function isAuthSessionError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("invalid or expired") ||
+    message.includes("authorization bearer token is required")
+  );
+}
 
 export function HomePageView({
   locale,
@@ -48,6 +60,7 @@ export function HomePageView({
 
   useEffect(() => {
     if (!session) {
+      setMe(null);
       return;
     }
 
@@ -55,11 +68,16 @@ export function HomePageView({
       try {
         const meResponse = await getMe(session);
         setMe(meResponse);
-      } catch {
-        return;
+      } catch (error) {
+        if (isAuthSessionError(error)) {
+          clearSession();
+          setMe(null);
+          router.replace("/");
+          router.refresh();
+        }
       }
     })();
-  }, [session]);
+  }, [session, router]);
 
   async function onLogin() {
     setBusy(true);
