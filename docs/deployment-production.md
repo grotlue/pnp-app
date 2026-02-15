@@ -126,16 +126,15 @@ Repository configuration (`vercel.json`) already restricts branch deploys:
 ## 8) Workflow behavior
 
 - `CI` runs on all pushes and pull requests.
-- `Deploy Production DB` runs only when:
-  - CI finished successfully
-  - event is a direct `push`
+- Deployment jobs are triggered from `CI` (reusable workflows), not via `workflow_run`.
+- `deploy_production` runs only when:
+  - `quality` in `CI` succeeded
+  - event is `push`
   - branch is `production`
-  - workflow run originates from the same repository
-- `Deploy Preview DB` runs only when:
-  - CI finished successfully
-  - event is a direct `push`
+- `deploy_preview` runs only when:
+  - `quality` in `CI` succeeded
+  - event is `push`
   - branch is `main`
-  - workflow run originates from the same repository
 
 Deployment order:
 
@@ -144,8 +143,8 @@ Deployment order:
   - `production` branch -> production deployment
   - `main` branch -> preview deployment
   - all other branches -> skipped by Vercel
-3. CI runs
-4. On successful CI:
+3. `CI` runs
+4. On successful `quality` job:
   - `production` branch -> `Deploy Production DB` runs `supabase db push --linked`
   - `main` branch -> `Deploy Preview DB` runs `supabase db push --linked`
 5. Workflow then runs admin bootstrap script:

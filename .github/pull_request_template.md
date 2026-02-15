@@ -1,69 +1,36 @@
 ## Summary
 
-Describe what changed and why.
+- What changed?
+- Why was this needed?
 
 ## Scope
 
-- [ ] Scope is focused and limited to one primary concern
-- [ ] No unrelated refactors mixed in
+- [ ] This PR contains one coherent change package.
+- [ ] Unrelated work was moved to a separate branch/PR.
+- [ ] Branch was created from the latest `main`.
 
-## Architecture
-
-- [ ] Changes follow `AGENTS.md` and `docs/app-architecture.md`
-- [ ] `src/app/**/page.tsx` remains thin (entry + composition)
-- [ ] UI does not perform direct data access (use feature hooks/queries)
-- [ ] Features do not import from route files
-
-## Security
-
-- [ ] Server-side authorization checks are correct
-- [ ] RLS assumptions remain valid
-- [ ] Inputs are validated/sanitized
-- [ ] No sensitive data/secrets exposed
-
-## Performance
-
-- [ ] No obvious N+1 or unnecessary refetch patterns introduced
-- [ ] Query invalidation/caching strategy is correct
-- [ ] No unnecessary bundle bloat introduced
-
-## Data / Migrations
-
-- [ ] No schema change
-- [ ] Schema change included and documented
-- [ ] Migration tested locally (`yarn supabase:db:reset`)
-
-## Testing
-
-- [ ] Added/updated tests where behavior changed
-- [ ] Manual test steps provided below
-
-### Manual Test Steps
-
-1.
-2.
-3.
-
-## Quality Gates
+## Verification
 
 - [ ] `yarn typecheck`
 - [ ] `yarn lint`
 - [ ] `yarn test:run`
-- [ ] `yarn build`
+- [ ] `yarn build` (required for release-impacting changes)
 
-## UI Evidence (if UI changed)
+## Security / Data / Performance
 
-- [ ] Screenshot(s) attached
-- [ ] Short video attached
-- [ ] Not applicable
+- [ ] Server-side authorization impact reviewed
+- [ ] RLS / data access boundaries reviewed
+- [ ] Query/performance impact reviewed
+
+## UI changes
+
+- [ ] Screenshots or short recording attached (if applicable)
 
 ## Documentation
 
-- [ ] No doc changes needed
-- [ ] Updated docs (`docs/app-architecture.md` and/or relevant docs)
+- [ ] Relevant docs updated (`AGENTS.md`, `README.md`, `docs/*`) if conventions/behavior changed
 
-## Definition of Done
+## Risk and Rollback
 
-- [ ] Functional requirements are complete
-- [ ] Error/loading/success UX states are handled
-- [ ] No known regressions remaining
+- Risk notes:
+- Rollback approach:
