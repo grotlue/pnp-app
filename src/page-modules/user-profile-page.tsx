@@ -17,7 +17,6 @@ import { CampaignRoleBadge } from "@/features/campaigns/components/campaign-role
 import {
   sortCampaigns,
 } from "@/features/campaigns/logic/campaign-list.logic";
-import { getCampaignDetail } from "@/features/campaigns/queries/get-campaign.query";
 import { getCampaignsQuery } from "@/features/campaigns/queries/get-campaigns.query";
 import {
   sortCharacters,
@@ -67,28 +66,15 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
 
       const [profile, campaigns, characters] = await Promise.all([
         getPublicUserProfile(session, userId),
-        getCampaignsQuery(session),
+        getCampaignsQuery(session, { roleForUserId: userId }),
         getCharacters(session),
       ]);
-
-      const campaignDetails = await Promise.all(
-        campaigns.map((campaign) => getCampaignDetail(session, campaign.id)),
-      );
-
-      const profileCampaigns: ProfileCampaignEntry[] = [];
-      for (const campaignDetail of campaignDetails) {
-        if (campaignDetail.campaign.owner_user_id === userId) {
-          profileCampaigns.push({ campaign: campaignDetail.campaign, role: "owner" });
-          continue;
-        }
-
-        const isAcceptedPlayer = campaignDetail.memberships.some(
-          (membership) => membership.user_id === userId && membership.state === "accepted",
-        );
-        if (isAcceptedPlayer) {
-          profileCampaigns.push({ campaign: campaignDetail.campaign, role: "player" });
-        }
-      }
+      const profileCampaigns: ProfileCampaignEntry[] = campaigns
+        .filter((campaign) => campaign.role_for_user === "owner" || campaign.role_for_user === "player")
+        .map((campaign) => ({
+          campaign,
+          role: campaign.role_for_user === "owner" ? "owner" : "player",
+        }));
 
       return {
         profile,
@@ -149,10 +135,7 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
     DEFAULT_LIST_PAGE_SIZE,
   );
 
-  const sortedCampaignEntries = sortCampaigns(
-    profile.campaigns.map((entry) => entry.campaign),
-    "updated_desc",
-  );
+  const sortedCampaignEntries = sortCampaigns(profile.campaigns.map((entry) => entry.campaign), "updated_desc");
   const roleByCampaignId = new Map(profile.campaigns.map((entry) => [entry.campaign.id, entry.role]));
   const safeCampaignPage = clampListPage(
     campaignPage,

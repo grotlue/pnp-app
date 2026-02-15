@@ -15,6 +15,7 @@ export async function GET(request: Request) {
 
   const { client, user } = auth.context;
   const url = new URL(request.url);
+  const roleForUserId = url.searchParams.get("roleForUserId");
   const limitParam = Number(url.searchParams.get("limit") ?? "100");
   const limit = Number.isFinite(limitParam)
     ? Math.min(Math.max(limitParam, 1), 500)
@@ -38,7 +39,11 @@ export async function GET(request: Request) {
   const campaignIds = campaigns.map((campaign) => campaign.id);
   const ownerIds = [...new Set(campaigns.map((campaign) => campaign.owner_user_id))];
 
-  const [{ data: memberships, error: membershipError }, { data: owners, error: ownersError }] =
+  const [
+    { data: memberships, error: membershipError },
+    { data: owners, error: ownersError },
+    { data: membershipsForTargetUser, error: membershipsForTargetUserError },
+  ] =
     await Promise.all([
       client
         .from("campaign_memberships")
@@ -46,6 +51,14 @@ export async function GET(request: Request) {
         .in("campaign_id", campaignIds)
         .eq("state", "accepted"),
       client.from("profiles").select("id, username, role").in("id", ownerIds),
+      roleForUserId
+        ? client
+            .from("campaign_memberships")
+            .select("campaign_id")
+            .in("campaign_id", campaignIds)
+            .eq("state", "accepted")
+            .eq("user_id", roleForUserId)
+        : Promise.resolve({ data: null, error: null }),
     ]);
 
   if (membershipError) {
@@ -53,6 +66,9 @@ export async function GET(request: Request) {
   }
   if (ownersError) {
     return jsonError(400, "campaign_list_failed", ownersError.message);
+  }
+  if (membershipsForTargetUserError) {
+    return jsonError(400, "campaign_list_failed", membershipsForTargetUserError.message);
   }
 
   const ownerMap = new Map(
@@ -64,6 +80,9 @@ export async function GET(request: Request) {
     campaignMemberIds.push(membership.user_id);
     acceptedMembersByCampaign.set(membership.campaign_id, campaignMemberIds);
   }
+  const acceptedTargetCampaignIds = new Set(
+    (membershipsForTargetUser ?? []).map((membership) => membership.campaign_id),
+  );
 
   return jsonOk(
     campaigns.map((campaign) => {
@@ -72,6 +91,13 @@ export async function GET(request: Request) {
       const isAcceptedPlayer =
         !isOwner && acceptedMemberIds.some((memberUserId) => memberUserId === user.id);
       const owner = ownerMap.get(campaign.owner_user_id);
+      const roleForTargetUser = roleForUserId
+        ? campaign.owner_user_id === roleForUserId
+          ? "owner"
+          : acceptedTargetCampaignIds.has(campaign.id)
+            ? "player"
+            : null
+        : null;
 
       return {
         ...campaign,
@@ -80,6 +106,7 @@ export async function GET(request: Request) {
         player_count: acceptedMemberIds.filter((memberUserId) => memberUserId !== campaign.owner_user_id)
           .length,
         current_user_role: isOwner ? "owner" : isAcceptedPlayer ? "player" : null,
+        role_for_user: roleForTargetUser,
       };
     }),
   );
