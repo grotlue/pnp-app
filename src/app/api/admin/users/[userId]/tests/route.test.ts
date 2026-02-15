@@ -26,12 +26,21 @@ describe("admin user detail route", () => {
     });
 
     const updateUserByIdMock = vi.fn().mockResolvedValue({ error: null });
-    const updateMock = vi.fn().mockResolvedValue({ error: null });
+    const maybeSingleMock = vi.fn().mockResolvedValue({
+      data: { role: "user" },
+      error: null,
+    });
+    const updateEqMock = vi.fn().mockResolvedValue({ error: null });
     createServiceRoleSupabaseClientMock.mockReturnValue({
       auth: { admin: { updateUserById: updateUserByIdMock } },
       from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            maybeSingle: maybeSingleMock,
+          })),
+        })),
         update: vi.fn(() => ({
-          eq: updateMock,
+          eq: updateEqMock,
         })),
       })),
     });
@@ -54,11 +63,51 @@ describe("admin user detail route", () => {
       email: "u2@example.com",
       password: "Secret123!",
     });
-    expect(updateMock).toHaveBeenCalledWith("id", "u2");
+    expect(updateEqMock).toHaveBeenCalledWith("id", "u2");
     expect(response.status).toBe(200);
   });
 
-  it("blocks deleting own admin user", async () => {
+  it("blocks updating admin accounts", async () => {
+    requireAdminMock.mockResolvedValueOnce({
+      context: { user: { id: "admin-1" } },
+    });
+
+    const updateUserByIdMock = vi.fn();
+    createServiceRoleSupabaseClientMock.mockReturnValue({
+      auth: { admin: { updateUserById: updateUserByIdMock } },
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            maybeSingle: vi.fn().mockResolvedValue({
+              data: { role: "admin" },
+              error: null,
+            }),
+          })),
+        })),
+      })),
+    });
+
+    const response = await PATCH(
+      new Request("http://localhost/api/admin/users/admin-2", {
+        method: "PATCH",
+        body: JSON.stringify({
+          username: "new-name",
+        }),
+      }),
+      { params: Promise.resolve({ userId: "admin-2" }) },
+    );
+
+    expect(response.status).toBe(403);
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "admin_user_update_forbidden",
+        message: "Admin accounts cannot be edited",
+      },
+    });
+    expect(updateUserByIdMock).not.toHaveBeenCalled();
+  });
+
+  it("blocks deleting admin accounts", async () => {
     requireAdminMock.mockResolvedValueOnce({
       context: {
         user: { id: "admin-1" },
@@ -67,16 +116,28 @@ describe("admin user detail route", () => {
         },
       },
     });
-
-    const response = await DELETE(new Request("http://localhost/api/admin/users/admin-1"), {
-      params: Promise.resolve({ userId: "admin-1" }),
+    createServiceRoleSupabaseClientMock.mockReturnValue({
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            maybeSingle: vi.fn().mockResolvedValue({
+              data: { role: "admin" },
+              error: null,
+            }),
+          })),
+        })),
+      })),
     });
 
-    expect(response.status).toBe(400);
+    const response = await DELETE(new Request("http://localhost/api/admin/users/admin-2"), {
+      params: Promise.resolve({ userId: "admin-2" }),
+    });
+
+    expect(response.status).toBe(403);
     await expect(response.json()).resolves.toEqual({
       error: {
         code: "admin_delete_failed",
-        message: "Admin cannot delete own account",
+        message: "Admin accounts cannot be deleted",
       },
     });
   });

@@ -16,6 +16,20 @@ type UpdateAdminUserBody = {
   locale?: "en" | "de";
 };
 
+async function getProfileRole(service: ReturnType<typeof createServiceRoleSupabaseClient>, userId: string) {
+  const { data, error } = await service
+    .from("profiles")
+    .select("role")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) {
+    return { ok: false as const, errorMessage: error.message };
+  }
+
+  return { ok: true as const, role: data?.role as "admin" | "user" | null };
+}
+
 export async function PATCH(request: Request, { params }: Params) {
   const admin = await requireAdmin(request);
   if ("response" in admin) {
@@ -29,6 +43,14 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 
   const service = createServiceRoleSupabaseClient();
+  const targetRole = await getProfileRole(service, userId);
+  if (!targetRole.ok) {
+    return jsonError(400, "admin_user_update_failed", targetRole.errorMessage);
+  }
+
+  if (targetRole.role === "admin") {
+    return jsonError(403, "admin_user_update_forbidden", "Admin accounts cannot be edited");
+  }
 
   if (body.email || body.password) {
     const { error: authError } = await service.auth.admin.updateUserById(userId, {
@@ -74,8 +96,14 @@ export async function DELETE(request: Request, { params }: Params) {
   }
 
   const { userId } = await params;
-  if (userId === admin.context.user.id) {
-    return jsonError(400, "admin_delete_failed", "Admin cannot delete own account");
+  const service = createServiceRoleSupabaseClient();
+  const targetRole = await getProfileRole(service, userId);
+  if (!targetRole.ok) {
+    return jsonError(400, "admin_delete_failed", targetRole.errorMessage);
+  }
+
+  if (targetRole.role === "admin" || userId === admin.context.user.id) {
+    return jsonError(403, "admin_delete_failed", "Admin accounts cannot be deleted");
   }
 
   const { error } = await admin.context.client.rpc("rpc_admin_delete_user", {

@@ -48,7 +48,9 @@ export async function POST(request: Request) {
     return jsonError(400, "invalid_payload", "type and name are required");
   }
 
+  const characterId = crypto.randomUUID();
   const insertPayload = {
+    id: characterId,
     owner_user_id: auth.context.user.id,
     type: body.type,
     name: body.name,
@@ -58,17 +60,23 @@ export async function POST(request: Request) {
     campaign_id: body.campaignId ?? null,
   };
 
-  const { data, error } = await auth.context.client
-    .from("characters")
-    .insert(insertPayload)
-    .select(
-      "id, owner_user_id, campaign_id, type, name, age, description, avatar_path, created_at, updated_at",
-    )
-    .single();
+  const { error } = await auth.context.client.from("characters").insert(insertPayload);
 
   if (error) {
     return jsonError(400, "character_create_failed", error.message);
   }
 
-  return jsonOk(data, 201);
+  return jsonOk(
+    {
+      id: characterId,
+      owner_user_id: insertPayload.owner_user_id,
+      campaign_id: insertPayload.campaign_id,
+      type: insertPayload.type,
+      name: insertPayload.name,
+      age: insertPayload.age,
+      description: insertPayload.description,
+      avatar_path: insertPayload.avatar_path,
+    },
+    201,
+  );
 }

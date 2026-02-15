@@ -57,6 +57,10 @@ function parseNumberOrNull(value: string): number | null {
   return Number.isFinite(numeric) ? numeric : null;
 }
 
+function isProtectedAdminUser(user: AdminUser): boolean {
+  return user.role === "admin";
+}
+
 export function AdminPageView({ locale }: AdminPageViewProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
   const router = useRouter();
@@ -209,32 +213,34 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
                       {user.role} - {user.id}
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setEditUser(user);
-                        setEditUserForm({
-                          email: user.email,
-                          password: "",
-                          username: user.username,
-                          description: user.description ?? "",
-                          locale: user.locale,
-                        });
-                      }}
-                    >
-                      {t("ui.actions.edit")}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      disabled={user.id === admin.meQuery.data?.user.id}
-                      onClick={() => setDeleteUser(user)}
-                    >
-                      {t("ui.actions.delete")}
-                    </Button>
-                  </div>
+                  {!isProtectedAdminUser(user) ? (
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setEditUser(user);
+                          setEditUserForm({
+                            email: user.email,
+                            password: "",
+                            username: user.username,
+                            description: user.description ?? "",
+                            locale: user.locale,
+                          });
+                        }}
+                      >
+                        {t("ui.actions.edit")}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        disabled={user.id === admin.meQuery.data?.user.id}
+                        onClick={() => setDeleteUser(user)}
+                      >
+                        {t("ui.actions.delete")}
+                      </Button>
+                    </div>
+                  ) : null}
                 </div>
               ))
             )}
@@ -458,10 +464,13 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
               {t("ui.actions.close")}
             </Button>
             <Button
-              disabled={admin.anyPending || !editUser}
+              disabled={admin.anyPending || !editUser || (editUser ? isProtectedAdminUser(editUser) : false)}
               onClick={() =>
                 void (async () => {
                   if (!editUser) {
+                    return;
+                  }
+                  if (isProtectedAdminUser(editUser)) {
                     return;
                   }
                   try {
@@ -543,10 +552,17 @@ export function AdminPageView({ locale }: AdminPageViewProps) {
             </Button>
             <Button
               variant="destructive"
-              disabled={admin.anyPending || !deleteUser}
+              disabled={
+                admin.anyPending ||
+                !deleteUser ||
+                (deleteUser ? isProtectedAdminUser(deleteUser) : false)
+              }
               onClick={() =>
                 void (async () => {
                   if (!deleteUser) {
+                    return;
+                  }
+                  if (isProtectedAdminUser(deleteUser)) {
                     return;
                   }
                   try {

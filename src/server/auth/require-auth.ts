@@ -1,10 +1,13 @@
 import type { User } from "@supabase/supabase-js";
-import { createServerSupabaseClient } from "@/server/supabase/server-client";
+import {
+  createServerSupabaseClient,
+  createServerSupabaseUserClient,
+} from "@/server/supabase/server-client";
 
 export type AuthContext = {
   accessToken: string;
   user: User;
-  client: ReturnType<typeof createServerSupabaseClient>;
+  client: ReturnType<typeof createServerSupabaseUserClient>;
 };
 
 function extractBearerToken(request: Request): string | null {
@@ -39,8 +42,8 @@ export async function requireAuth(
     };
   }
 
-  const client = createServerSupabaseClient(token);
-  const { data, error } = await client.auth.getUser(token);
+  const authClient = createServerSupabaseClient();
+  const { data, error } = await authClient.auth.getUser(token);
 
   if (error || !data.user) {
     return {
@@ -55,6 +58,8 @@ export async function requireAuth(
       ),
     };
   }
+
+  const client = createServerSupabaseUserClient(token);
 
   return {
     context: {

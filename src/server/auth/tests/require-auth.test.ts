@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { createServerSupabaseClientMock } = vi.hoisted(() => ({
+const { createServerSupabaseClientMock, createServerSupabaseUserClientMock } = vi.hoisted(() => ({
   createServerSupabaseClientMock: vi.fn(),
+  createServerSupabaseUserClientMock: vi.fn(),
 }));
 
 vi.mock("@/server/supabase/server-client", () => ({
   createServerSupabaseClient: createServerSupabaseClientMock,
+  createServerSupabaseUserClient: createServerSupabaseUserClientMock,
 }));
 
 import { requireAuth } from "../require-auth";
@@ -45,8 +47,9 @@ describe("requireAuth", () => {
     });
     const result = await requireAuth(request);
 
-    expect(createServerSupabaseClientMock).toHaveBeenCalledWith("token-1");
+    expect(createServerSupabaseClientMock).toHaveBeenCalledWith();
     expect(getUserMock).toHaveBeenCalledWith("token-1");
+    expect(createServerSupabaseUserClientMock).not.toHaveBeenCalled();
     expect("response" in result).toBe(true);
     if ("response" in result) {
       expect(result.response.status).toBe(401);
@@ -61,7 +64,7 @@ describe("requireAuth", () => {
 
   it("returns auth context when token is valid", async () => {
     const user = { id: "user-1", email: "a@example.com" };
-    const client = {
+    const authClient = {
       auth: {
         getUser: vi.fn().mockResolvedValue({
           data: { user },
@@ -69,7 +72,9 @@ describe("requireAuth", () => {
         }),
       },
     };
-    createServerSupabaseClientMock.mockReturnValue(client);
+    const dataClient = { from: vi.fn() };
+    createServerSupabaseClientMock.mockReturnValue(authClient);
+    createServerSupabaseUserClientMock.mockReturnValue(dataClient);
 
     const request = new Request("http://localhost/api/test", {
       headers: { Authorization: "Bearer token-2" },
@@ -80,7 +85,8 @@ describe("requireAuth", () => {
     if ("context" in result) {
       expect(result.context.accessToken).toBe("token-2");
       expect(result.context.user).toEqual(user);
-      expect(result.context.client).toBe(client);
+      expect(result.context.client).toBe(dataClient);
     }
+    expect(createServerSupabaseUserClientMock).toHaveBeenCalledWith("token-2");
   });
 });
