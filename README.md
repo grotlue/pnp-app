@@ -91,7 +91,7 @@ Workflows:
 - `CI` runs on all pushes and pull requests.
 - `Deploy Production DB` runs only after successful CI on pushes to `production`.
 - `Deploy Preview DB` runs only after successful CI on pushes to `main`.
-- `Deploy PR Preview` runs on pull request updates only when label `preview-deploy` is present.
+- `Deploy PR Preview` runs on pull request updates only when label `preview-deploy` is present, only for PRs targeting `main`, and includes preview DB deploy plus Vercel preview deploy.
 
 Required GitHub secrets (Environment `production`):
 
