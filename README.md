@@ -75,13 +75,13 @@ Current mode:
   - all other branches -> no Vercel deployment (`vercel.json`)
 - **GitHub Actions** deploys Supabase migrations:
   - to `production` after CI succeeds on `production` pushes
-  - to `preview` after CI succeeds on non-`production` pushes
+  - to `preview` after CI succeeds on `main` pushes
 
 Workflows:
 
 - `CI` runs on all pushes and pull requests.
 - `Deploy Production DB` runs only after successful CI on pushes to `production`.
-- `Deploy Preview DB` runs only after successful CI on pushes to non-`production` branches.
+- `Deploy Preview DB` runs only after successful CI on pushes to `main`.
 
 Required GitHub secrets (Environment `production`):
 
@@ -139,6 +139,21 @@ Step-by-step setup:
   - `APP_ENV=development|preview|production`
   - `FEATURE_FLAGS_PROVIDER=rules|vercel`
   - `FLAGS=<vercel-flags-connection-string>`
-  - `FLAGS_SECRET=<32-byte-base64url-secret>` (recommended for encrypted overrides / toolbar)
+  - `FLAGS_SECRET=<32-byte-base64url-secret>` (required for Flags Explorer / encrypted toolbar overrides)
+  - `NEXT_PUBLIC_ENABLE_VERCEL_TOOLBAR=true|false` (optional manual toggle outside development)
   - `FEATURE_FLAGS_ENABLE=<comma-separated-flags>`
   - `FEATURE_FLAGS_DISABLE=<comma-separated-flags>`
+- Flags discovery endpoint (for Vercel Toolbar / Flags Explorer):
+  - `src/app/.well-known/vercel/flags/route.ts`
+
+### Local Flags UI (Toolbar + Flags Explorer)
+
+1. Run `vc link` once in the repository to connect to your Vercel project.
+2. Set `FLAGS_SECRET` in `.env.local`.
+3. Start dev server with `yarn dev` (toolbar is auto-enabled in development).
+4. Open app, authenticate in Vercel Toolbar, and use Flags Explorer.
+
+If you want live values from Vercel Flags locally, also set:
+
+- `FEATURE_FLAGS_PROVIDER=vercel`
+- `FLAGS=<vercel-flags-connection-string>`

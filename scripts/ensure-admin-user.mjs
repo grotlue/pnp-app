@@ -10,6 +10,16 @@ function requireEnv(name) {
   return value;
 }
 
+function optionalEnv(name) {
+  const value = process.env[name];
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
 async function listAllUsers(client) {
   const users = [];
   let page = 1;
@@ -33,11 +43,9 @@ async function listAllUsers(client) {
 }
 
 async function main() {
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ??
-    (process.env.SUPABASE_PROJECT_REF
-      ? `https://${process.env.SUPABASE_PROJECT_REF}.supabase.co`
-      : null);
+  const explicitSupabaseUrl = optionalEnv("NEXT_PUBLIC_SUPABASE_URL");
+  const projectRef = optionalEnv("SUPABASE_PROJECT_REF");
+  const supabaseUrl = explicitSupabaseUrl ?? (projectRef ? `https://${projectRef}.supabase.co` : null);
 
   if (!supabaseUrl) {
     throw new Error(

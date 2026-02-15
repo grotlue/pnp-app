@@ -5,7 +5,7 @@ This guide configures:
 - Vercel auto deploy via Git integration (production branch only for production releases)
 - Supabase migrations via GitHub Actions:
   - production DB after successful CI on `production` pushes
-  - preview DB after successful CI on non-`production` pushes
+  - preview DB after successful CI on `main` pushes
 - Admin bootstrap user creation on both environments (idempotent)
 
 ## 1) Preconditions
@@ -134,7 +134,7 @@ Repository configuration (`vercel.json`) already restricts branch deploys:
 - `Deploy Preview DB` runs only when:
   - CI finished successfully
   - event is a direct `push`
-  - branch is not `production`
+  - branch is `main`
   - workflow run originates from the same repository
 
 Deployment order:
@@ -147,7 +147,7 @@ Deployment order:
 3. CI runs
 4. On successful CI:
   - `production` branch -> `Deploy Production DB` runs `supabase db push --linked`
-  - non-`production` branch -> `Deploy Preview DB` runs `supabase db push --linked`
+  - `main` branch -> `Deploy Preview DB` runs `supabase db push --linked`
 5. Workflow then runs admin bootstrap script:
   - creates admin user when missing
   - enforces `profiles.role = 'admin'` for that user

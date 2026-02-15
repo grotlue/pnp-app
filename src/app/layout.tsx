@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { VercelToolbar } from "@vercel/toolbar/next";
 import { getTranslator } from "@/lib/i18n/index";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 import "./globals.css";
@@ -30,10 +31,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getRequestLocale();
+  const enableToolbar =
+    process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_ENABLE_VERCEL_TOOLBAR === "true";
 
   return (
     <html lang={locale}>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {children}
+        {enableToolbar ? <VercelToolbar /> : null}
+      </body>
     </html>
   );
 }

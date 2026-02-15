@@ -79,13 +79,18 @@ src/
 - Feature provider strategy supports:
   - `rules` (default/fallback provider)
   - `vercel` (via `flags-sdk.dev` + `@flags-sdk/vercel`)
+- Vercel Toolbar integration:
+  - Toolbar script injected in `src/app/layout.tsx`
+  - Next plugin enabled in `next.config.ts`
+  - Flags discovery endpoint at `src/app/.well-known/vercel/flags/route.ts`
 - Optional overrides:
   - `FEATURE_FLAGS_ENABLE` (comma-separated)
   - `FEATURE_FLAGS_DISABLE` (comma-separated)
   - `APP_ENV` to force runtime environment resolution
   - `FEATURE_FLAGS_PROVIDER` to select provider (`rules` or `vercel`)
   - `FLAGS` (Vercel flags connection string, required for Vercel provider)
-  - `FLAGS_SECRET` (recommended for encrypted toolbar overrides)
+  - `FLAGS_SECRET` (required for Flags Explorer / encrypted toolbar overrides)
+  - `NEXT_PUBLIC_ENABLE_VERCEL_TOOLBAR` (optional manual toggle outside development)
 
 ## Naming Conventions
 
