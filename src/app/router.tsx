@@ -10,6 +10,7 @@ export const appRoutes = {
   campaigns: "/campaigns",
   profile: "/profile",
   settings: "/settings",
+  admin: "/admin",
   dashboard: "/dashboard",
 } as const;
 

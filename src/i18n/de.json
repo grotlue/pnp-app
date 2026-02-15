@@ -8,7 +8,8 @@
       "characters": "Charaktere",
       "campaigns": "Kampagnen",
       "profile": "Profil",
-      "settings": "Einstellungen"
+      "settings": "Einstellungen",
+      "admin": "Admin"
     },
     "nav": {
       "register": "Registrieren",
@@ -90,6 +91,30 @@
       "joinConfirm": "Beitrittsanfrage an Kampagnenbesitzer senden?",
       "joinPending": "Deine Beitrittsanfrage ist noch offen.",
       "pendingRequests": "Offene Beitrittsanfragen"
+    },
+    "admin": {
+      "title": "Admin-Dashboard",
+      "subtitle": "Verwalte Nutzer, Kampagnen und Charaktere im gesamten System.",
+      "usersTitle": "Nutzer",
+      "usersSubtitle": "Nutzerkonten erstellen, bearbeiten und löschen.",
+      "campaignsTitle": "Kampagnen",
+      "campaignsSubtitle": "Kampagnen erstellen, bearbeiten und löschen.",
+      "charactersTitle": "Charaktere",
+      "charactersSubtitle": "Charaktere erstellen, bearbeiten und löschen.",
+      "createUser": "Nutzer erstellen",
+      "editUser": "Nutzer bearbeiten",
+      "deleteUser": "Nutzer löschen",
+      "deleteUserConfirm": "Diesen Nutzer dauerhaft löschen?",
+      "newPasswordOptional": "Neues Passwort (optional)",
+      "createCampaign": "Kampagne erstellen",
+      "editCampaign": "Kampagne bearbeiten",
+      "deleteCampaign": "Kampagne löschen",
+      "createCharacter": "Charakter erstellen",
+      "editCharacter": "Charakter bearbeiten",
+      "deleteCharacter": "Charakter löschen",
+      "ownerLabel": "Besitzer",
+      "campaignLabel": "Kampagne",
+      "noCampaign": "Keine Kampagne"
     },
     "characterDetail": {
       "subtitle": "Charakter-Detailansicht",

@@ -1,7 +1,7 @@
 import type { User } from "@supabase/supabase-js";
 import { createServerSupabaseClient } from "@/server/supabase/server-client";
 
-type AuthContext = {
+export type AuthContext = {
   accessToken: string;
   user: User;
   client: ReturnType<typeof createServerSupabaseClient>;

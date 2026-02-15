@@ -55,3 +55,15 @@ jobs:
         run: |
           supabase link --project-ref "$SUPABASE_PROJECT_REF"
           supabase db push --linked
+
+      - name: Ensure admin user (production)
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          ADMIN_BOOTSTRAP_EMAIL: ${{ secrets.ADMIN_BOOTSTRAP_EMAIL }}
+          ADMIN_BOOTSTRAP_PASSWORD: ${{ secrets.ADMIN_BOOTSTRAP_PASSWORD }}
+          ADMIN_BOOTSTRAP_USERNAME: ${{ vars.ADMIN_BOOTSTRAP_USERNAME }}
+          ADMIN_BOOTSTRAP_DESCRIPTION: ${{ vars.ADMIN_BOOTSTRAP_DESCRIPTION }}
+          ADMIN_BOOTSTRAP_LOCALE: ${{ vars.ADMIN_BOOTSTRAP_LOCALE }}
+        run: node scripts/ensure-admin-user.mjs

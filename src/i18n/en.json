@@ -8,7 +8,8 @@
       "characters": "Characters",
       "campaigns": "Campaigns",
       "profile": "Profile",
-      "settings": "Settings"
+      "settings": "Settings",
+      "admin": "Admin"
     },
     "nav": {
       "register": "Register",
@@ -90,6 +91,30 @@
       "joinConfirm": "Send join request to campaign owner?",
       "joinPending": "Your join request is pending.",
       "pendingRequests": "Pending join requests"
+    },
+    "admin": {
+      "title": "Admin Dashboard",
+      "subtitle": "Manage users, campaigns, and characters across the whole system.",
+      "usersTitle": "Users",
+      "usersSubtitle": "Create, edit, and delete user accounts.",
+      "campaignsTitle": "Campaigns",
+      "campaignsSubtitle": "Create, edit, and delete campaigns.",
+      "charactersTitle": "Characters",
+      "charactersSubtitle": "Create, edit, and delete characters.",
+      "createUser": "Create user",
+      "editUser": "Edit user",
+      "deleteUser": "Delete user",
+      "deleteUserConfirm": "Delete this user account permanently?",
+      "newPasswordOptional": "New password (optional)",
+      "createCampaign": "Create campaign",
+      "editCampaign": "Edit campaign",
+      "deleteCampaign": "Delete campaign",
+      "createCharacter": "Create character",
+      "editCharacter": "Edit character",
+      "deleteCharacter": "Delete character",
+      "ownerLabel": "Owner",
+      "campaignLabel": "Campaign",
+      "noCampaign": "No campaign"
     },
     "characterDetail": {
       "subtitle": "Character detail view",

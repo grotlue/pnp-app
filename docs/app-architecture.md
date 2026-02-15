@@ -68,6 +68,8 @@ src/
 - Server-side authorization is enforced in API route handlers.
 - Client-side guards are only UX-level (redirect/gating).
 - Supabase RLS remains the primary data access control layer.
+- Admin-only routes use explicit server-side admin checks (`requireAdmin`).
+- Service role access is limited to server-only modules (`src/server/supabase/*`).
 
 ## Feature Flags
 

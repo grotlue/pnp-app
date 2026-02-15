@@ -5,7 +5,7 @@ with fixture_users as (
   select *
   from (
     values
-      ('00000000-0000-0000-0000-0000000000a1'::uuid, 'admin.local@pnp.test', 'admin_local', 'Local admin account', 'admin'::public.app_role),
+      ('00000000-0000-0000-0000-0000000000a1'::uuid, 'admin@pnp.test', 'admin', 'Local admin account', 'admin'::public.app_role),
       ('00000000-0000-0000-0000-0000000000a2'::uuid, 'owner.local@pnp.test', 'owner_local', 'Campaign owner account', 'user'::public.app_role),
       ('00000000-0000-0000-0000-0000000000a3'::uuid, 'player1.local@pnp.test', 'player_one', 'Campaign player #1', 'user'::public.app_role),
       ('00000000-0000-0000-0000-0000000000a4'::uuid, 'player2.local@pnp.test', 'player_two', 'Campaign player #2', 'user'::public.app_role),
@@ -58,7 +58,13 @@ select
   'authenticated',
   'authenticated',
   u.email,
-  crypt('DevPass123!', gen_salt('bf')),
+  crypt(
+    case
+      when u.role = 'admin' then 'admin'
+      else 'DevPass123!'
+    end,
+    gen_salt('bf')
+  ),
   now(),
   null,
   '',
@@ -93,7 +99,7 @@ with fixture_users as (
   select *
   from (
     values
-      ('00000000-0000-0000-0000-0000000000a1'::uuid, 'admin.local@pnp.test', 'admin_local', 'Local admin account', 'admin'::public.app_role),
+      ('00000000-0000-0000-0000-0000000000a1'::uuid, 'admin@pnp.test', 'admin', 'Local admin account', 'admin'::public.app_role),
       ('00000000-0000-0000-0000-0000000000a2'::uuid, 'owner.local@pnp.test', 'owner_local', 'Campaign owner account', 'user'::public.app_role),
       ('00000000-0000-0000-0000-0000000000a3'::uuid, 'player1.local@pnp.test', 'player_one', 'Campaign player #1', 'user'::public.app_role),
       ('00000000-0000-0000-0000-0000000000a4'::uuid, 'player2.local@pnp.test', 'player_two', 'Campaign player #2', 'user'::public.app_role),
@@ -127,7 +133,7 @@ with fixture_users as (
   select *
   from (
     values
-      ('00000000-0000-0000-0000-0000000000a1'::uuid, 'admin.local@pnp.test', 'admin_local', 'Local admin account', 'admin'::public.app_role),
+      ('00000000-0000-0000-0000-0000000000a1'::uuid, 'admin@pnp.test', 'admin', 'Local admin account', 'admin'::public.app_role),
       ('00000000-0000-0000-0000-0000000000a2'::uuid, 'owner.local@pnp.test', 'owner_local', 'Campaign owner account', 'user'::public.app_role),
       ('00000000-0000-0000-0000-0000000000a3'::uuid, 'player1.local@pnp.test', 'player_one', 'Campaign player #1', 'user'::public.app_role),
       ('00000000-0000-0000-0000-0000000000a4'::uuid, 'player2.local@pnp.test', 'player_two', 'Campaign player #2', 'user'::public.app_role),

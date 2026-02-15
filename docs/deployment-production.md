@@ -6,6 +6,7 @@ This guide configures:
 - Supabase migrations via GitHub Actions:
   - production DB after successful CI on `production` pushes
   - preview DB after successful CI on non-`production` pushes
+- Admin bootstrap user creation on both environments (idempotent)
 
 ## 1) Preconditions
 
@@ -46,6 +47,9 @@ In `Settings` -> `Environments` -> `production` -> `Environment secrets`, add:
 - `SUPABASE_ACCESS_TOKEN`
 - `SUPABASE_PROJECT_REF`
 - `SUPABASE_DB_PASSWORD`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_BOOTSTRAP_EMAIL`
+- `ADMIN_BOOTSTRAP_PASSWORD`
 
 ## 3.1) Add GitHub Secrets (Environment: `preview`)
 
@@ -54,6 +58,16 @@ In `Settings` -> `Environments` -> `preview` -> `Environment secrets`, add:
 - `SUPABASE_ACCESS_TOKEN`
 - `SUPABASE_PROJECT_REF`
 - `SUPABASE_DB_PASSWORD`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_BOOTSTRAP_EMAIL`
+- `ADMIN_BOOTSTRAP_PASSWORD`
+
+Optional environment variables in both environments:
+
+- `NEXT_PUBLIC_SUPABASE_URL` (if omitted, the workflow derives URL from `SUPABASE_PROJECT_REF`)
+- `ADMIN_BOOTSTRAP_USERNAME` (default: `admin`)
+- `ADMIN_BOOTSTRAP_DESCRIPTION` (default: `System admin account`)
+- `ADMIN_BOOTSTRAP_LOCALE` (default: `en`)
 
 ## 4) Where to find each value
 
@@ -65,6 +79,11 @@ In `Settings` -> `Environments` -> `preview` -> `Environment secrets`, add:
   - Supabase project -> Settings -> General -> Reference ID
 - `SUPABASE_DB_PASSWORD`:
   - Supabase project -> Settings -> Database
+- `SUPABASE_SERVICE_ROLE_KEY`:
+  - Supabase project -> Settings -> API -> service role key
+- `ADMIN_BOOTSTRAP_EMAIL` / `ADMIN_BOOTSTRAP_PASSWORD`:
+  - You define these values.
+  - Store them in a password manager, not in the repository.
 
 Use production Supabase values in GitHub environment `production`, and preview Supabase values in GitHub environment `preview`.
 
@@ -75,9 +94,11 @@ In Vercel project -> Settings -> Environment Variables:
 - For `Production`:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `SUPABASE_SERVICE_ROLE_KEY`
 - For `Preview`:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  - `SUPABASE_SERVICE_ROLE_KEY`
 
 ## 6) Configure Supabase Auth URLs
 
@@ -127,6 +148,10 @@ Deployment order:
 4. On successful CI:
   - `production` branch -> `Deploy Production DB` runs `supabase db push --linked`
   - non-`production` branch -> `Deploy Preview DB` runs `supabase db push --linked`
+5. Workflow then runs admin bootstrap script:
+  - creates admin user when missing
+  - enforces `profiles.role = 'admin'` for that user
+  - keeps existing admin account idempotently
 
 ## 9) Trigger deployment
 

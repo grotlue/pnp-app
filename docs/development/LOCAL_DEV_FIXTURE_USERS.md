@@ -2,17 +2,19 @@
 
 These login credentials apply to the local fixture defined in `supabase/seed.sql`.
 
-## Password
+## Passwords
 
-All fixture users share the same password:
-
-`DevPass123!`
+- Admin user:
+  - Email: `admin@pnp.test`
+  - Password: `admin`
+- All other fixture users:
+  - Password: `DevPass123!`
 
 ## Users
 
 | Rolle                                    | E-Mail                             |
 | ---------------------------------------- | ---------------------------------- |
-| Admin                                    | `admin.local@pnp.test`             |
+| Admin                                    | `admin@pnp.test`                   |
 | Campaign Owner                           | `owner.local@pnp.test`             |
 | Player 1 (Character assigned)            | `player1.local@pnp.test`           |
 | Player 2 (Character assigned)            | `player2.local@pnp.test`           |

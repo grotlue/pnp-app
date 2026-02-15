@@ -9,6 +9,7 @@ export type MeResponse = {
     username: string;
     description: string;
     locale: "en" | "de";
+    role?: "user" | "admin";
   };
 };
 

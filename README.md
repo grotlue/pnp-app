@@ -11,6 +11,7 @@ Implemented:
 - Campaigns + Memberships (Invite/Request/Decision)
 - Characters (PC/NPC) with campaign assignment
 - Relationships + Timeline + Notifications
+- Admin dashboard (users, campaigns, characters management)
 - Localization (`en`, `de`)
 - Supabase RLS + server-side permission checks via API routes
 
@@ -87,12 +88,29 @@ Required GitHub secrets (Environment `production`):
 - `SUPABASE_ACCESS_TOKEN`
 - `SUPABASE_PROJECT_REF`
 - `SUPABASE_DB_PASSWORD`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_BOOTSTRAP_EMAIL`
+- `ADMIN_BOOTSTRAP_PASSWORD`
 
 Required GitHub secrets (Environment `preview`):
 
 - `SUPABASE_ACCESS_TOKEN`
 - `SUPABASE_PROJECT_REF`
 - `SUPABASE_DB_PASSWORD`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_BOOTSTRAP_EMAIL`
+- `ADMIN_BOOTSTRAP_PASSWORD`
+
+Optional GitHub environment variables (`production`, `preview`):
+
+- `NEXT_PUBLIC_SUPABASE_URL` (if omitted, derived from `SUPABASE_PROJECT_REF`)
+- `ADMIN_BOOTSTRAP_USERNAME` (default: `admin`)
+- `ADMIN_BOOTSTRAP_DESCRIPTION` (default: `System admin account`)
+- `ADMIN_BOOTSTRAP_LOCALE` (default: `en`)
+
+Required Vercel environment variable (server-only):
+
+- `SUPABASE_SERVICE_ROLE_KEY`
 
 Step-by-step setup:
 
@@ -107,6 +125,7 @@ Step-by-step setup:
 - I18n: `src/lib/i18n/`
 - Supabase migrations: `supabase/migrations/`
 - Local fixture logins: `docs/development/LOCAL_DEV_FIXTURE_USERS.md`
+- Admin credential template: `docs/development/ADMIN_BOOTSTRAP_CREDENTIALS_TEMPLATE.md`
 
 ## Feature flags
 

@@ -164,6 +164,11 @@ export function HomePageView({
                 <Link href={route.href}>{t(route.key)}</Link>
               </Button>
             ))}
+            {me?.profile.role === "admin" ? (
+              <Button asChild variant="outline">
+                <Link href={appRoutes.admin}>{t("ui.menu.admin")}</Link>
+              </Button>
+            ) : null}
           </CardContent>
         </Card>
       </main>
