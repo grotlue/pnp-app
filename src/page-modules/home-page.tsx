@@ -196,7 +196,7 @@ export function HomePageView({
             </CardContent>
             <CardFooter className="flex-col items-stretch gap-2">
               <Button
-                disabled={busy || (authCaptchaConfig.required && !captchaToken)}
+                disabled={busy}
                 onClick={onLogin}
               >
                 {t("ui.actions.login")}

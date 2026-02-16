@@ -103,7 +103,7 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-2">
             <Button
-              disabled={busy || (authCaptchaConfig.required && !captchaToken)}
+              disabled={busy}
               onClick={onSubmit}
             >
               {t("ui.actions.register")}
