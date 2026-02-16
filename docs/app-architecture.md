@@ -92,6 +92,7 @@ src/
 - New public-schema tables must enable RLS in the same migration.
 - Admin APIs enforce role checks plus MFA `aal2` session level in preview/production by default.
 - Auth CAPTCHA support is centralized and env-driven (`AUTH_CAPTCHA_MODE`).
+- Admin MFA setup/verification flow is available in settings and backed by `GET/POST/PATCH /api/auth/mfa/totp`.
 
 ## API Patterns
 
