@@ -1,12 +1,15 @@
 import { randomUUID } from "crypto";
 import { requireAuth } from "@/server/auth/require-auth";
 import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { isWithinImageUploadSizeLimit } from "@/lib/storage/image-upload";
 import { isSquare, sanitizeFileName } from "@/lib/storage/files";
+import { enforceRateLimit } from "@/server/rate-limit/enforce-rate-limit";
 
 type Body = {
   fileName?: string;
   width?: number;
   height?: number;
+  fileSize?: number;
 };
 
 export async function POST(request: Request) {
@@ -15,12 +18,27 @@ export async function POST(request: Request) {
     return auth.response;
   }
 
+  const rateLimited = await enforceRateLimit({
+    request,
+    route: "storage:profile-images:signed-upload",
+    limit: 20,
+    windowMs: 15 * 60_000,
+    userId: auth.context.user.id,
+  });
+  if (rateLimited) {
+    return rateLimited;
+  }
+
   const body = await parseJsonBody<Body>(request);
-  if (!body?.fileName || !isSquare(body.width, body.height)) {
+  if (
+    !body?.fileName ||
+    !isSquare(body.width, body.height) ||
+    !isWithinImageUploadSizeLimit(body.fileSize)
+  ) {
     return jsonError(
       400,
       "invalid_payload",
-      "fileName is required and image dimensions must be square",
+      "fileName is required, image must be square, and fileSize must be within limits",
     );
   }
 
