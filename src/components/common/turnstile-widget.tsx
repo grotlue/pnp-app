@@ -31,6 +31,55 @@ declare global {
 }
 
 let turnstileScriptPromise: Promise<void> | null = null;
+const TURNSTILE_SCRIPT_TIMEOUT_MS = 5_000;
+
+function waitForExistingTurnstileScript(script: HTMLScriptElement): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (window.turnstile) {
+      resolve();
+      return;
+    }
+
+    let settled = false;
+
+    const onLoad = () => {
+      if (window.turnstile) {
+        finalize(() => resolve());
+        return;
+      }
+      finalize(() => reject(new Error("turnstile_script_unavailable")));
+    };
+
+    const onError = () => {
+      finalize(() => reject(new Error("turnstile_script_failed")));
+    };
+
+    const intervalId = window.setInterval(() => {
+      if (window.turnstile) {
+        finalize(() => resolve());
+      }
+    }, 100);
+
+    const timeoutId = window.setTimeout(() => {
+      finalize(() => reject(new Error("turnstile_script_timeout")));
+    }, TURNSTILE_SCRIPT_TIMEOUT_MS);
+
+    function finalize(callback: () => void) {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      window.clearInterval(intervalId);
+      window.clearTimeout(timeoutId);
+      script.removeEventListener("load", onLoad);
+      script.removeEventListener("error", onError);
+      callback();
+    }
+
+    script.addEventListener("load", onLoad, { once: true });
+    script.addEventListener("error", onError, { once: true });
+  });
+}
 
 function ensureTurnstileScript(): Promise<void> {
   if (window.turnstile) {
@@ -41,13 +90,10 @@ function ensureTurnstileScript(): Promise<void> {
     return turnstileScriptPromise;
   }
 
-  turnstileScriptPromise = new Promise((resolve, reject) => {
+  const promise = new Promise<void>((resolve, reject) => {
     const existingScript = document.getElementById("cloudflare-turnstile-script");
     if (existingScript) {
-      existingScript.addEventListener("load", () => resolve(), { once: true });
-      existingScript.addEventListener("error", () => reject(new Error("turnstile_script_failed")), {
-        once: true,
-      });
+      void waitForExistingTurnstileScript(existingScript as HTMLScriptElement).then(resolve).catch(reject);
       return;
     }
 
@@ -56,9 +102,20 @@ function ensureTurnstileScript(): Promise<void> {
     script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
     script.async = true;
     script.defer = true;
-    script.onload = () => resolve();
+    script.onload = () => {
+      if (window.turnstile) {
+        resolve();
+        return;
+      }
+      reject(new Error("turnstile_script_unavailable"));
+    };
     script.onerror = () => reject(new Error("turnstile_script_failed"));
     document.head.appendChild(script);
+  });
+
+  turnstileScriptPromise = promise.catch((error) => {
+    turnstileScriptPromise = null;
+    throw error;
   });
 
   return turnstileScriptPromise;
