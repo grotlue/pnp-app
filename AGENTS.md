@@ -80,6 +80,16 @@ src/
 - Mutations must invalidate relevant keys.
 - Avoid duplicate fetching patterns between server/client for the same view.
 
+### 4.4 Backend Runtime Choice
+
+- Default backend runtime for product APIs remains Next.js Route Handlers in `src/app/api/**`.
+- Do not move existing product APIs to Supabase Edge Functions by default.
+- Supabase Edge Functions are acceptable only for bounded use cases:
+  - third-party webhook receivers
+  - async/background orchestration decoupled from page request latency
+  - jobs that are clearly better colocated with Supabase data/services
+- Any Edge Function adoption must keep the same security model (server authorization + RLS) and include observability and rollback plan.
+
 ## 5) Security Rules
 
 - Never trust client gating for authorization.

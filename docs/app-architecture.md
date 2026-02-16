@@ -99,6 +99,15 @@ src/
   - API client request diagnostics logging in `src/lib/client/api.ts`
 - Vercel Speed Insights is mounted in `src/app/layout.tsx` and defaults to enabled in preview/production.
 
+## Runtime Boundary
+
+- Product APIs stay in Next.js Route Handlers (`src/app/api/**`) as the default backend runtime.
+- Supabase Edge Functions are optional and reserved for specific non-default use cases:
+  - external webhooks
+  - asynchronous/background jobs
+  - narrowly scoped tasks that benefit from explicit Supabase-side execution
+- Keep one source of truth for authz/RLS semantics regardless of runtime.
+
 ## Feature Flags
 
 - Runtime feature flags are centralized in `src/lib/features/feature-flags.ts`.
