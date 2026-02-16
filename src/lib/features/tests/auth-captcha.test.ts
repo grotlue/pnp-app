@@ -32,6 +32,11 @@ describe("auth captcha client config", () => {
     expect(resolveClientAuthCaptchaMode()).toBe("required");
   });
 
+  it("accepts quoted explicit mode override", () => {
+    process.env.NEXT_PUBLIC_AUTH_CAPTCHA_MODE = "'off'";
+    expect(resolveClientAuthCaptchaMode()).toBe("off");
+  });
+
   it("trims and returns site key", () => {
     process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY = "  site-key  ";
     expect(getTurnstileSiteKey()).toBe("site-key");

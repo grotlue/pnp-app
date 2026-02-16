@@ -257,6 +257,8 @@
       "requestFailed": "Request failed.",
       "captchaRequired": "Please complete the CAPTCHA challenge.",
       "captchaUnavailable": "CAPTCHA could not be loaded. Please reload the page and try again.",
+      "captchaInitializationFailed": "CAPTCHA could not be initialized. Check Turnstile allowed hostnames and reload.",
+      "captchaMisconfigured": "CAPTCHA is required but not configured correctly. Verify site key and deployment environment.",
       "empty": "No entries yet.",
       "created": "Created successfully.",
       "saved": "Saved successfully.",

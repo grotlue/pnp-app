@@ -1,13 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { createServerSupabaseClientMock, createServerSupabaseUserClientMock } = vi.hoisted(() => ({
+const {
+  createServerSupabaseClientMock,
+  createServerSupabaseUserClientMock,
+  createServerSupabaseUserAuthClientMock,
+} = vi.hoisted(() => ({
   createServerSupabaseClientMock: vi.fn(),
   createServerSupabaseUserClientMock: vi.fn(),
+  createServerSupabaseUserAuthClientMock: vi.fn(),
 }));
 
 vi.mock("@/server/supabase/server-client", () => ({
   createServerSupabaseClient: createServerSupabaseClientMock,
   createServerSupabaseUserClient: createServerSupabaseUserClientMock,
+  createServerSupabaseUserAuthClient: createServerSupabaseUserAuthClientMock,
 }));
 
 import { requireAuth } from "../require-auth";
@@ -50,6 +56,7 @@ describe("requireAuth", () => {
     expect(createServerSupabaseClientMock).toHaveBeenCalledWith();
     expect(getUserMock).toHaveBeenCalledWith("token-1");
     expect(createServerSupabaseUserClientMock).not.toHaveBeenCalled();
+    expect(createServerSupabaseUserAuthClientMock).not.toHaveBeenCalled();
     expect("response" in result).toBe(true);
     if ("response" in result) {
       expect(result.response.status).toBe(401);
@@ -73,8 +80,10 @@ describe("requireAuth", () => {
       },
     };
     const dataClient = { from: vi.fn() };
+    const authUserClient = { auth: { getUser: vi.fn() } };
     createServerSupabaseClientMock.mockReturnValue(authClient);
     createServerSupabaseUserClientMock.mockReturnValue(dataClient);
+    createServerSupabaseUserAuthClientMock.mockReturnValue(authUserClient);
 
     const request = new Request("http://localhost/api/test", {
       headers: { cookie: "pnp_access_token=token-cookie" },
@@ -82,7 +91,11 @@ describe("requireAuth", () => {
     const result = await requireAuth(request);
 
     expect(createServerSupabaseUserClientMock).toHaveBeenCalledWith("token-cookie");
+    expect(createServerSupabaseUserAuthClientMock).toHaveBeenCalledWith("token-cookie");
     expect("context" in result).toBe(true);
+    if ("context" in result) {
+      expect(result.context.authClient).toBe(authUserClient);
+    }
   });
 
   it("returns auth context when token is valid", async () => {
@@ -96,8 +109,10 @@ describe("requireAuth", () => {
       },
     };
     const dataClient = { from: vi.fn() };
+    const authUserClient = { auth: { getUser: vi.fn() } };
     createServerSupabaseClientMock.mockReturnValue(authClient);
     createServerSupabaseUserClientMock.mockReturnValue(dataClient);
+    createServerSupabaseUserAuthClientMock.mockReturnValue(authUserClient);
 
     const request = new Request("http://localhost/api/test", {
       headers: { Authorization: "Bearer token-2" },
@@ -109,8 +124,10 @@ describe("requireAuth", () => {
       expect(result.context.accessToken).toBe("token-2");
       expect(result.context.user).toEqual(user);
       expect(result.context.client).toBe(dataClient);
+      expect(result.context.authClient).toBe(authUserClient);
     }
     expect(createServerSupabaseUserClientMock).toHaveBeenCalledWith("token-2");
+    expect(createServerSupabaseUserAuthClientMock).toHaveBeenCalledWith("token-2");
   });
 
   it("returns 500 when auth backend throws unexpectedly", async () => {

@@ -10,24 +10,48 @@ type AuthCaptchaClientConfig = {
 
 const KNOWN_CAPTCHA_MODES = new Set<AuthCaptchaMode>(["off", "optional", "required"]);
 
-function normalizeRuntimeEnvironment(value?: string | null): RuntimeEnvironment | null {
+function normalizeEnvValue(value?: string | null): string | null {
   if (!value) {
     return null;
   }
 
-  if (value === "development" || value === "preview" || value === "production") {
-    return value;
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const unquoted =
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+      ? trimmed.slice(1, -1).trim()
+      : trimmed;
+
+  return unquoted ? unquoted.toLowerCase() : null;
+}
+
+function normalizeRuntimeEnvironment(value?: string | null): RuntimeEnvironment | null {
+  const normalized = normalizeEnvValue(value);
+  if (!normalized) {
+    return null;
+  }
+
+  if (
+    normalized === "development" ||
+    normalized === "preview" ||
+    normalized === "production"
+  ) {
+    return normalized;
   }
 
   return null;
 }
 
 function normalizeCaptchaMode(value?: string | null): AuthCaptchaMode | null {
-  if (!value) {
+  const normalized = normalizeEnvValue(value);
+  if (!normalized) {
     return null;
   }
 
-  const normalized = value.trim().toLowerCase();
   if (KNOWN_CAPTCHA_MODES.has(normalized as AuthCaptchaMode)) {
     return normalized as AuthCaptchaMode;
   }

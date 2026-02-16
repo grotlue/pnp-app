@@ -31,7 +31,8 @@ describe("auth mfa totp route", () => {
       context: {
         accessToken: "token",
         user: { id: "u1" },
-        client: { auth: { mfa: {} } },
+        client: { from: vi.fn() },
+        authClient: { auth: { mfa: {} } },
       },
     });
     getUserRoleMock.mockResolvedValueOnce({ role: "user" });
@@ -64,7 +65,8 @@ describe("auth mfa totp route", () => {
       context: {
         accessToken: "token",
         user: { id: "u1" },
-        client: { auth: { mfa: { enroll: enrollMock } } },
+        client: { from: vi.fn() },
+        authClient: { auth: { mfa: { enroll: enrollMock } } },
       },
     });
     getUserRoleMock.mockResolvedValueOnce({ role: "admin" });
@@ -94,12 +96,44 @@ describe("auth mfa totp route", () => {
     });
   });
 
+  it("returns 400 when enrollment response is incomplete", async () => {
+    const enrollMock = vi.fn().mockResolvedValue({
+      data: null,
+      error: null,
+    });
+    requireAuthMock.mockResolvedValueOnce({
+      context: {
+        accessToken: "token",
+        user: { id: "u1" },
+        client: { from: vi.fn() },
+        authClient: { auth: { mfa: { enroll: enrollMock } } },
+      },
+    });
+    getUserRoleMock.mockResolvedValueOnce({ role: "admin" });
+
+    const response = await POST(
+      new Request("http://localhost/api/auth/mfa/totp", {
+        method: "POST",
+        body: JSON.stringify({ friendlyName: "admin-factor" }),
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "mfa_enroll_failed",
+        message: "MFA enrollment response was incomplete",
+      },
+    });
+  });
+
   it("rejects invalid verify code", async () => {
     requireAuthMock.mockResolvedValueOnce({
       context: {
         accessToken: "token",
         user: { id: "u1" },
-        client: { auth: { mfa: {} } },
+        client: { from: vi.fn() },
+        authClient: { auth: { mfa: {} } },
       },
     });
     getUserRoleMock.mockResolvedValueOnce({ role: "admin" });
@@ -116,6 +150,41 @@ describe("auth mfa totp route", () => {
       error: {
         code: "invalid_payload",
         message: "valid code is required",
+      },
+    });
+  });
+
+  it("returns 400 when verification response is incomplete", async () => {
+    const challengeMock = vi.fn().mockResolvedValue({
+      data: { id: "challenge-1" },
+      error: null,
+    });
+    const verifyMock = vi.fn().mockResolvedValue({
+      data: null,
+      error: null,
+    });
+    requireAuthMock.mockResolvedValueOnce({
+      context: {
+        accessToken: "token",
+        user: { id: "u1" },
+        client: { from: vi.fn() },
+        authClient: { auth: { mfa: { challenge: challengeMock, verify: verifyMock } } },
+      },
+    });
+    getUserRoleMock.mockResolvedValueOnce({ role: "admin" });
+
+    const response = await PATCH(
+      new Request("http://localhost/api/auth/mfa/totp", {
+        method: "PATCH",
+        body: JSON.stringify({ factorId: "factor-1", code: "123456" }),
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "mfa_verify_failed",
+        message: "MFA verification response was incomplete",
       },
     });
   });

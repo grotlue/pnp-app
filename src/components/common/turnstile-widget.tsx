@@ -9,6 +9,7 @@ type TurnstileWidgetProps = {
   className?: string;
   loadErrorMessage?: string;
   onTokenChange: (token: string | null) => void;
+  onErrorReason?: (reason: TurnstileErrorReason | null) => void;
 };
 
 type TurnstileInstance = {
@@ -30,7 +31,77 @@ declare global {
   }
 }
 
+export type TurnstileErrorReason =
+  | "script_failed"
+  | "script_timeout"
+  | "script_unavailable"
+  | "render_failed"
+  | "widget_error";
+
 let turnstileScriptPromise: Promise<void> | null = null;
+const TURNSTILE_SCRIPT_TIMEOUT_MS = 12_000;
+
+function mapTurnstileErrorReason(error: unknown): TurnstileErrorReason {
+  if (!(error instanceof Error)) {
+    return "script_failed";
+  }
+
+  if (error.message === "turnstile_script_timeout") {
+    return "script_timeout";
+  }
+  if (error.message === "turnstile_script_unavailable") {
+    return "script_unavailable";
+  }
+  return "script_failed";
+}
+
+function waitForExistingTurnstileScript(script: HTMLScriptElement): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (window.turnstile) {
+      resolve();
+      return;
+    }
+
+    let settled = false;
+
+    const onLoad = () => {
+      if (window.turnstile) {
+        finalize(() => resolve());
+        return;
+      }
+      finalize(() => reject(new Error("turnstile_script_unavailable")));
+    };
+
+    const onError = () => {
+      finalize(() => reject(new Error("turnstile_script_failed")));
+    };
+
+    const intervalId = window.setInterval(() => {
+      if (window.turnstile) {
+        finalize(() => resolve());
+      }
+    }, 100);
+
+    const timeoutId = window.setTimeout(() => {
+      finalize(() => reject(new Error("turnstile_script_timeout")));
+    }, TURNSTILE_SCRIPT_TIMEOUT_MS);
+
+    function finalize(callback: () => void) {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      window.clearInterval(intervalId);
+      window.clearTimeout(timeoutId);
+      script.removeEventListener("load", onLoad);
+      script.removeEventListener("error", onError);
+      callback();
+    }
+
+    script.addEventListener("load", onLoad, { once: true });
+    script.addEventListener("error", onError, { once: true });
+  });
+}
 
 function ensureTurnstileScript(): Promise<void> {
   if (window.turnstile) {
@@ -41,13 +112,10 @@ function ensureTurnstileScript(): Promise<void> {
     return turnstileScriptPromise;
   }
 
-  turnstileScriptPromise = new Promise((resolve, reject) => {
+  const promise = new Promise<void>((resolve, reject) => {
     const existingScript = document.getElementById("cloudflare-turnstile-script");
     if (existingScript) {
-      existingScript.addEventListener("load", () => resolve(), { once: true });
-      existingScript.addEventListener("error", () => reject(new Error("turnstile_script_failed")), {
-        once: true,
-      });
+      void waitForExistingTurnstileScript(existingScript as HTMLScriptElement).then(resolve).catch(reject);
       return;
     }
 
@@ -56,9 +124,20 @@ function ensureTurnstileScript(): Promise<void> {
     script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
     script.async = true;
     script.defer = true;
-    script.onload = () => resolve();
+    script.onload = () => {
+      if (window.turnstile) {
+        resolve();
+        return;
+      }
+      reject(new Error("turnstile_script_unavailable"));
+    };
     script.onerror = () => reject(new Error("turnstile_script_failed"));
     document.head.appendChild(script);
+  });
+
+  turnstileScriptPromise = promise.catch((error) => {
+    turnstileScriptPromise = null;
+    throw error;
   });
 
   return turnstileScriptPromise;
@@ -70,33 +149,58 @@ export function TurnstileWidget({
   className,
   loadErrorMessage,
   onTokenChange,
+  onErrorReason,
 }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
+  const onTokenChangeRef = useRef(onTokenChange);
+  const onErrorReasonRef = useRef(onErrorReason);
   const [failedResetKey, setFailedResetKey] = useState<number | null>(null);
   const loadError = failedResetKey === resetKey;
 
   useEffect(() => {
+    onTokenChangeRef.current = onTokenChange;
+  }, [onTokenChange]);
+
+  useEffect(() => {
+    onErrorReasonRef.current = onErrorReason;
+  }, [onErrorReason]);
+
+  useEffect(() => {
     let cancelled = false;
 
-    onTokenChange(null);
+    onTokenChangeRef.current(null);
+    onErrorReasonRef.current?.(null);
     void ensureTurnstileScript()
       .then(() => {
         if (cancelled || !containerRef.current || !window.turnstile) {
           return;
         }
 
-        widgetIdRef.current = window.turnstile.render(containerRef.current, {
-          sitekey: siteKey,
-          callback: (token) => onTokenChange(token),
-          "expired-callback": () => onTokenChange(null),
-          "error-callback": () => onTokenChange(null),
-        });
+        try {
+          widgetIdRef.current = window.turnstile.render(containerRef.current, {
+            sitekey: siteKey,
+            callback: (token) => {
+              onErrorReasonRef.current?.(null);
+              onTokenChangeRef.current(token);
+            },
+            "expired-callback": () => onTokenChangeRef.current(null),
+            "error-callback": () => {
+              onErrorReasonRef.current?.("widget_error");
+              onTokenChangeRef.current(null);
+            },
+          });
+        } catch {
+          setFailedResetKey(resetKey);
+          onErrorReasonRef.current?.("render_failed");
+          onTokenChangeRef.current(null);
+        }
       })
-      .catch(() => {
+      .catch((error) => {
         if (!cancelled) {
           setFailedResetKey(resetKey);
-          onTokenChange(null);
+          onErrorReasonRef.current?.(mapTurnstileErrorReason(error));
+          onTokenChangeRef.current(null);
         }
       });
 
@@ -107,7 +211,7 @@ export function TurnstileWidget({
       }
       widgetIdRef.current = null;
     };
-  }, [siteKey, resetKey, onTokenChange]);
+  }, [siteKey, resetKey]);
 
   if (loadError) {
     return loadErrorMessage ? (
