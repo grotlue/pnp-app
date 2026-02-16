@@ -29,6 +29,49 @@ function normalizeFriendlyName(value: unknown): string | undefined {
   return trimmed.slice(0, 64);
 }
 
+function isCompleteTotpEnrollment(data: unknown): data is {
+  id: string;
+  friendly_name?: string;
+  totp: { qr_code: string; secret: string; uri: string };
+} {
+  if (!data || typeof data !== "object") {
+    return false;
+  }
+
+  const candidate = data as {
+    id?: unknown;
+    totp?: { qr_code?: unknown; secret?: unknown; uri?: unknown } | null;
+  };
+
+  return (
+    typeof candidate.id === "string" &&
+    !!candidate.totp &&
+    typeof candidate.totp.qr_code === "string" &&
+    typeof candidate.totp.secret === "string" &&
+    typeof candidate.totp.uri === "string"
+  );
+}
+
+function isCompleteMfaVerification(data: unknown): data is {
+  access_token: string;
+  refresh_token?: string;
+} {
+  if (!data || typeof data !== "object") {
+    return false;
+  }
+
+  const candidate = data as { access_token?: unknown; refresh_token?: unknown };
+  if (typeof candidate.access_token !== "string") {
+    return false;
+  }
+
+  if (candidate.refresh_token !== undefined && typeof candidate.refresh_token !== "string") {
+    return false;
+  }
+
+  return true;
+}
+
 export async function GET(request: Request) {
   const auth = await requireAuth(request);
   if ("response" in auth) {
@@ -114,6 +157,10 @@ export async function POST(request: Request) {
     return jsonError(400, "mfa_enroll_failed", error.message);
   }
 
+  if (!isCompleteTotpEnrollment(data)) {
+    return jsonError(400, "mfa_enroll_failed", "MFA enrollment response was incomplete");
+  }
+
   return jsonOk({
     factorId: data.id,
     friendlyName: data.friendly_name ?? null,
@@ -173,6 +220,10 @@ export async function PATCH(request: Request) {
 
   if (error) {
     return jsonError(400, "mfa_verify_failed", error.message);
+  }
+
+  if (!isCompleteMfaVerification(data)) {
+    return jsonError(400, "mfa_verify_failed", "MFA verification response was incomplete");
   }
 
   return setSessionCookies(
