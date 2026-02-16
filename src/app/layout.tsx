@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { VercelToolbar } from "@vercel/toolbar/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { resolveSpeedInsightsEnabled } from "@/lib/features/performance-observability";
 import { getTranslator } from "@/lib/i18n/index";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 import "./globals.css";
@@ -33,12 +35,14 @@ export default async function RootLayout({
   const locale = await getRequestLocale();
   const enableToolbar =
     process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_ENABLE_VERCEL_TOOLBAR === "true";
+  const enableSpeedInsights = resolveSpeedInsightsEnabled();
 
   return (
     <html lang={locale}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
         {enableToolbar ? <VercelToolbar /> : null}
+        {enableSpeedInsights ? <SpeedInsights /> : null}
       </body>
     </html>
   );

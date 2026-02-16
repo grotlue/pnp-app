@@ -1,4 +1,5 @@
 import { requireAuth } from "@/server/auth/require-auth";
+import { normalizeAndValidateEmail } from "@/lib/api/auth-validation";
 import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
 
 type UpdateEmailBody = {
@@ -15,9 +16,13 @@ export async function PATCH(request: Request) {
   if (!body?.newEmail) {
     return jsonError(400, "invalid_payload", "newEmail is required");
   }
+  const email = normalizeAndValidateEmail(body.newEmail);
+  if (!email) {
+    return jsonError(400, "invalid_payload", "valid newEmail is required");
+  }
 
   const { data, error } = await auth.context.client.auth.updateUser({
-    email: body.newEmail,
+    email,
   });
 
   if (error) {

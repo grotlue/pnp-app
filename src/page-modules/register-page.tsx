@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import { FormInput } from "@/components/common/form-controls";
+import { TurnstileWidget } from "@/components/common/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { textLinkClassName } from "@/lib/utils/link";
+import { resolveAuthCaptchaClientConfig } from "@/lib/features/auth-captcha";
 import { registerUser } from "@/features/users/queries/users-auth.query";
 
 type RegisterScreenProps = {
@@ -24,10 +26,13 @@ type RegisterScreenProps = {
 
 export function RegisterPageView({ locale }: RegisterScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
+  const authCaptchaConfig = useMemo(() => resolveAuthCaptchaClientConfig(), []);
   const router = useRouter();
 
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaResetKey, setCaptchaResetKey] = useState(0);
   const [form, setForm] = useState({
     username: "",
     email: "",
@@ -35,17 +40,27 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
   });
 
   async function onSubmit() {
+    if (authCaptchaConfig.required && !captchaToken) {
+      setMessage(t("ui.feedback.captchaRequired"));
+      return;
+    }
+
     setBusy(true);
     setMessage("");
     try {
       await registerUser({
         ...form,
         locale,
+        ...(captchaToken ? { captchaToken } : {}),
       });
       router.push("/?registered=1");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
     } finally {
+      if (authCaptchaConfig.enabled) {
+        setCaptchaToken(null);
+        setCaptchaResetKey((prev) => prev + 1);
+      }
       setBusy(false);
     }
   }
@@ -76,10 +91,21 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
               value={form.password}
               onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
             />
+            {authCaptchaConfig.enabled && authCaptchaConfig.siteKey ? (
+              <TurnstileWidget
+                siteKey={authCaptchaConfig.siteKey}
+                resetKey={captchaResetKey}
+                loadErrorMessage={t("ui.feedback.captchaUnavailable")}
+                onTokenChange={setCaptchaToken}
+              />
+            ) : null}
             <FeedbackMessage message={message} />
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-2">
-            <Button disabled={busy} onClick={onSubmit}>
+            <Button
+              disabled={busy || (authCaptchaConfig.required && !captchaToken)}
+              onClick={onSubmit}
+            >
               {t("ui.actions.register")}
             </Button>
             <div className="text-xs">

@@ -30,6 +30,7 @@ src/
     common/                     # shared composed components
   lib/
     client/                     # client session/api helpers
+    logic/                      # shared pure helper logic (e.g. hasItems)
     features/                   # runtime feature flags
     i18n/                       # localization helpers
     supabase/                   # browser supabase setup
@@ -60,8 +61,18 @@ src/
 ## React Query
 
 - One global provider: `src/app/providers.tsx`.
+- Query keys are centralized in `src/lib/client/query-keys.ts`.
 - Interactive flows use `useQuery` / `useMutation` in feature hooks.
 - Mutations invalidate domain query keys.
+- Prefer shared hooks for common identity reads (e.g. `use-me-query`) to avoid duplicate fetches.
+
+## Loading UX
+
+- Reusable loading card lives in `src/components/common/page-loading-state.tsx`.
+- Use dedicated i18n keys for loading contexts:
+  - `ui.loading.page`
+  - `ui.loading.section`
+  - `ui.loading.auth`
 
 ## Security
 
@@ -70,6 +81,36 @@ src/
 - Supabase RLS remains the primary data access control layer.
 - Admin-only routes use explicit server-side admin checks (`requireAdmin`).
 - Service role access is limited to server-only modules (`src/server/supabase/*`).
+- Auth-sensitive endpoints use server rate limiting (`src/server/rate-limit/*`).
+- Auth input hardening is centralized (`src/lib/api/auth-validation.ts`):
+  - email normalization/validation
+  - password complexity checks
+  - captcha token normalization
+- API responses are marked `no-store` via shared HTTP/security helpers.
+- Access tokens are accepted from bearer headers and secure HttpOnly cookies.
+- Security headers (including CSP) are applied centrally via `src/proxy.ts`.
+- New public-schema tables must enable RLS in the same migration.
+- Admin APIs enforce role checks plus MFA `aal2` session level in preview/production by default.
+- Auth CAPTCHA support is centralized and env-driven (`AUTH_CAPTCHA_MODE`, `NEXT_PUBLIC_AUTH_CAPTCHA_MODE`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`).
+- Admin MFA setup/verification flow is available in settings and backed by `GET/POST/PATCH /api/auth/mfa/totp`.
+
+## API Patterns
+
+- Use bootstrap/context endpoints for high-latency screens:
+  - Admin dashboard: `GET /api/admin/bootstrap`
+- Prefer fetching exactly-needed payloads over loading multiple global lists.
+- Keep route handler validation and error response logic centralized in `src/lib/api/*`.
+- Vercel Speed Insights is mounted in `src/app/layout.tsx` and defaults to enabled in preview/production.
+- Supabase built-in observability should be used for DB-side performance analysis (linter, outliers, query stats).
+
+## Runtime Boundary
+
+- Product APIs stay in Next.js Route Handlers (`src/app/api/**`) as the default backend runtime.
+- Supabase Edge Functions are optional and reserved for specific non-default use cases:
+  - external webhooks
+  - asynchronous/background jobs
+  - narrowly scoped tasks that benefit from explicit Supabase-side execution
+- Keep one source of truth for authz/RLS semantics regardless of runtime.
 
 ## Feature Flags
 

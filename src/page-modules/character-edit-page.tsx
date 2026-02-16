@@ -16,6 +16,7 @@ import { uploadImageToSignedPath } from "@/lib/client/storage-upload";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { useCharacterEditScreen } from "@/features/characters/hooks/use-character-edit-screen";
+import { canManageCharacter, isAdmin } from "@/features/users/logic/role.logic";
 
 type CharacterEditScreenProps = {
   locale: AppLocale;
@@ -101,11 +102,13 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
     isPrivate: formEdits.isPrivate ?? (character.is_private ?? false),
   };
 
-  const canManage = editQuery.data.me.user.id === character.owner_user_id
-    || (editQuery.data.me.profile.role === "admin" && !character.is_private);
-  const isForeignAdminView =
-    editQuery.data.me.profile.role === "admin" &&
-    editQuery.data.me.user.id !== character.owner_user_id;
+  const isOwner = editQuery.data.me.user.id === character.owner_user_id;
+  const canManage = canManageCharacter({
+    isOwner,
+    role: editQuery.data.me.profile.role,
+    isPrivate: character.is_private,
+  });
+  const isForeignAdminView = isAdmin(editQuery.data.me.profile.role) && !isOwner;
   if (!canManage) {
     return (
       <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">

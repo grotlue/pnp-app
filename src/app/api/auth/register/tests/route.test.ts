@@ -5,9 +5,16 @@ const { isFeatureEnabledMock, createServerSupabaseClientMock } = vi.hoisted(() =
   createServerSupabaseClientMock: vi.fn(),
 }));
 
-vi.mock("@/lib/features/feature-flags", () => ({
-  isFeatureEnabled: isFeatureEnabledMock,
-}));
+vi.mock("@/lib/features/feature-flags", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/features/feature-flags")>(
+    "@/lib/features/feature-flags",
+  );
+
+  return {
+    ...actual,
+    isFeatureEnabled: isFeatureEnabledMock,
+  };
+});
 
 vi.mock("@/server/supabase/server-client", () => ({
   createServerSupabaseClient: createServerSupabaseClientMock,
@@ -26,7 +33,7 @@ describe("POST /api/auth/register", () => {
 
     const request = new Request("http://localhost/api/auth/register", {
       method: "POST",
-      body: JSON.stringify({ email: "x@example.com", password: "secret" }),
+      body: JSON.stringify({ email: "x@example.com", password: "SecretPass123" }),
     });
     const response = await POST(request);
 
@@ -56,6 +63,23 @@ describe("POST /api/auth/register", () => {
     });
   });
 
+  it("returns 400 for weak passwords", async () => {
+    const request = new Request("http://localhost/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ email: "x@example.com", password: "weakpass" }),
+    });
+    const response = await POST(request);
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "invalid_payload",
+        message: "password must be at least 12 characters",
+      },
+    });
+    expect(createServerSupabaseClientMock).not.toHaveBeenCalled();
+  });
+
   it("returns 400 when supabase signUp fails", async () => {
     const signUpMock = vi.fn().mockResolvedValue({
       data: { user: null, session: null },
@@ -70,7 +94,7 @@ describe("POST /api/auth/register", () => {
       headers: { origin: "https://app.example.com" },
       body: JSON.stringify({
         email: "x@example.com",
-        password: "secret",
+        password: "SecretPass123",
         username: "x",
         locale: "en",
       }),
@@ -79,7 +103,7 @@ describe("POST /api/auth/register", () => {
 
     expect(signUpMock).toHaveBeenCalledWith({
       email: "x@example.com",
-      password: "secret",
+      password: "SecretPass123",
       options: {
         emailRedirectTo: "https://app.example.com/auth/callback",
         data: {
@@ -113,7 +137,7 @@ describe("POST /api/auth/register", () => {
       method: "POST",
       body: JSON.stringify({
         email: "x@example.com",
-        password: "secret",
+        password: "SecretPass123",
         username: "x",
         locale: "de",
       }),
@@ -148,7 +172,7 @@ describe("POST /api/auth/register", () => {
       headers: { "accept-language": "de-DE,de;q=0.9,en;q=0.8" },
       body: JSON.stringify({
         email: "z@example.com",
-        password: "secret",
+        password: "SecretPass123",
         username: "z",
       }),
     });
@@ -157,7 +181,7 @@ describe("POST /api/auth/register", () => {
     expect(response.status).toBe(201);
     expect(signUpMock).toHaveBeenCalledWith({
       email: "z@example.com",
-      password: "secret",
+      password: "SecretPass123",
       options: {
         emailRedirectTo: undefined,
         data: {
@@ -166,5 +190,34 @@ describe("POST /api/auth/register", () => {
         },
       },
     });
+  });
+
+  it("normalizes email before calling signUp", async () => {
+    const signUpMock = vi.fn().mockResolvedValue({
+      data: {
+        user: { id: "u3" },
+        session: null,
+      },
+      error: null,
+    });
+    createServerSupabaseClientMock.mockReturnValue({
+      auth: { signUp: signUpMock },
+    });
+
+    const request = new Request("http://localhost/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({
+        email: "  MixedCase@Example.com  ",
+        password: "SecretPass123",
+      }),
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(201);
+    expect(signUpMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: "mixedcase@example.com",
+      }),
+    );
   });
 });

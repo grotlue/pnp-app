@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "@/components/common/empty-state";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import { ListItemRow } from "@/components/common/list-item-row";
+import { PageLoadingState } from "@/components/common/page-loading-state";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { SectionBox } from "@/components/common/section-box";
 import { ToggleTabs } from "@/components/common/toggle-tabs";
@@ -26,6 +27,7 @@ import type { Campaign } from "@/features/campaigns/types";
 import { getPublicUserProfile } from "@/features/users/queries/users-public-profile.query";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { hasItems } from "@/lib/logic/collections";
 import { textLinkClassName } from "@/lib/utils/link";
 import { clampListPage, DEFAULT_LIST_PAGE_SIZE, paginateListItems } from "@/lib/utils/list";
 
@@ -93,11 +95,7 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
       <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
         <AppHeader locale={locale} session={session} />
         <main className="mx-auto w-full max-w-4xl px-4 py-8">
-          <Card>
-            <CardContent className="py-8 text-sm text-muted-foreground">
-              {t("ui.start.loading")}
-            </CardContent>
-          </Card>
+          <PageLoadingState label={t("ui.loading.page")} />
         </main>
       </div>
     );
@@ -187,7 +185,7 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
                       </div>
                     </ListItemRow>
                   ))}
-                  {searchedAndSortedCharacters.length === 0 ? (
+                  {!hasItems(searchedAndSortedCharacters) ? (
                     <EmptyState
                       label={t("ui.feedback.empty")}
                       className="border-0 bg-transparent p-0 text-muted-foreground"
@@ -222,7 +220,7 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
                       </ListItemRow>
                     );
                   })}
-                  {sortedCampaignEntries.length === 0 ? (
+                  {!hasItems(sortedCampaignEntries) ? (
                     <EmptyState
                       label={t("ui.feedback.empty")}
                       className="border-0 bg-transparent p-0 text-muted-foreground"

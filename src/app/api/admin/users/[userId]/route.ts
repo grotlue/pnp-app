@@ -1,4 +1,8 @@
 import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
+import {
+  normalizeAndValidateEmail,
+  validatePasswordStrength,
+} from "@/lib/api/auth-validation";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { createServiceRoleSupabaseClient } from "@/server/supabase/service-role-client";
 
@@ -57,6 +61,21 @@ export async function PATCH(request: Request, { params }: Params) {
 
   if (targetRole.role === "admin") {
     return jsonError(403, "admin_user_update_forbidden", "Admin accounts cannot be edited");
+  }
+
+  if (body.email !== undefined) {
+    const email = normalizeAndValidateEmail(body.email);
+    if (!email) {
+      return jsonError(400, "invalid_payload", "valid email is required");
+    }
+    body.email = email;
+  }
+
+  if (body.password !== undefined) {
+    const passwordError = validatePasswordStrength(body.password);
+    if (passwordError) {
+      return jsonError(400, "invalid_payload", passwordError);
+    }
   }
 
   if (body.email || body.password) {

@@ -1,3 +1,6 @@
+import { toPublicErrorMessage } from "@/lib/api/errors";
+import { withDefaultSecurityHeaders } from "@/lib/api/security";
+
 export type ApiErrorBody = {
   error: {
     code: string;
@@ -6,7 +9,7 @@ export type ApiErrorBody = {
 };
 
 export function jsonOk(data: unknown, status = 200): Response {
-  return Response.json({ data }, { status });
+  return withDefaultSecurityHeaders(Response.json({ data }, { status }));
 }
 
 export function jsonError(
@@ -15,10 +18,10 @@ export function jsonError(
   message: string,
 ): Response {
   const body: ApiErrorBody = {
-    error: { code, message },
+    error: { code, message: toPublicErrorMessage(code, message) },
   };
 
-  return Response.json(body, { status });
+  return withDefaultSecurityHeaders(Response.json(body, { status }));
 }
 
 export async function parseJsonBody<T>(req: Request): Promise<T | null> {

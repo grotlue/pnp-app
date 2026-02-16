@@ -62,6 +62,29 @@ describe("requireAuth", () => {
     }
   });
 
+  it("uses access token cookie when bearer header is missing", async () => {
+    const user = { id: "user-cookie", email: "cookie@example.com" };
+    const authClient = {
+      auth: {
+        getUser: vi.fn().mockResolvedValue({
+          data: { user },
+          error: null,
+        }),
+      },
+    };
+    const dataClient = { from: vi.fn() };
+    createServerSupabaseClientMock.mockReturnValue(authClient);
+    createServerSupabaseUserClientMock.mockReturnValue(dataClient);
+
+    const request = new Request("http://localhost/api/test", {
+      headers: { cookie: "pnp_access_token=token-cookie" },
+    });
+    const result = await requireAuth(request);
+
+    expect(createServerSupabaseUserClientMock).toHaveBeenCalledWith("token-cookie");
+    expect("context" in result).toBe(true);
+  });
+
   it("returns auth context when token is valid", async () => {
     const user = { id: "user-1", email: "a@example.com" };
     const authClient = {

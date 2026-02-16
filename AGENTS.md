@@ -44,6 +44,7 @@ src/
     common/                   # shared composed UI
   lib/
     client/
+    logic/
     i18n/
     supabase/
     utils/
@@ -68,14 +69,26 @@ src/
 - **Queries modules**: all external I/O (API calls, persistence adapters).
 - **Logic modules**: pure functions only (no I/O, no random, no env reads).
 - **Hooks**: orchestrate query + mutation + invalidation; keep hooks focused.
+- Repeated session/role/list checks must be extracted into reusable helpers/hooks instead of duplicating inline conditionals.
 - Features must not import from route files.
 
 ### 4.3 React Query
 
 - Single global `QueryClientProvider` in `src/app/providers.tsx`.
 - Prefer domain-scoped query keys (`["campaigns", ...]`, `["characters", ...]`).
+- Keep canonical key factories in `src/lib/client/query-keys.ts`; avoid ad-hoc key strings in page modules.
 - Mutations must invalidate relevant keys.
 - Avoid duplicate fetching patterns between server/client for the same view.
+
+### 4.4 Backend Runtime Choice
+
+- Default backend runtime for product APIs remains Next.js Route Handlers in `src/app/api/**`.
+- Do not move existing product APIs to Supabase Edge Functions by default.
+- Supabase Edge Functions are acceptable only for bounded use cases:
+  - third-party webhook receivers
+  - async/background orchestration decoupled from page request latency
+  - jobs that are clearly better colocated with Supabase data/services
+- Any Edge Function adoption must keep the same security model (server authorization + RLS) and include observability and rollback plan.
 
 ## 5) Security Rules
 
@@ -85,12 +98,28 @@ src/
 - Validate and sanitize route/action inputs.
 - Do not expose internal errors or secrets in user-facing messages.
 - Keep storage access signed/private unless explicitly public.
+- Apply rate limiting to auth-sensitive endpoints (login/register/password reset/auth callback).
+- Centralize auth input hardening (email normalization/validation, password policy validation, captcha token handling) in reusable helpers.
+- Enforce admin MFA step-up (`aal2`) server-side for admin APIs in preview/production unless explicitly disabled for emergency rollback.
+- Use Supabase Auth security baseline in deployed environments:
+  - custom SMTP + maintained auth email templates
+  - CAPTCHA provider configured when `AUTH_CAPTCHA_MODE=required`
+  - MFA factors enabled for admin users
+  - Supabase dashboard auth rate limits reviewed periodically
+- Keep auth/session-sensitive API responses `no-store`.
+- Keep security headers and CSP centrally enforced.
+- Every new table in `public` (or any API-exposed schema) must have RLS enabled in the same migration.
+- New internal-only operational tables should not be left broadly accessible; grant only minimal required roles.
 
 ## 6) Performance Rules
 
 - Avoid N+1 fetch patterns in UI flows.
 - Keep heavy data shaping out of render paths (memoize derived lists where needed).
 - Use React Query `staleTime`/cache intentionally; avoid unnecessary refetches.
+- Prefer bootstrap/context endpoints for complex screens to reduce request waterfalls.
+- In RLS policies, prefer `(select auth.uid())` / `(select auth.<fn>())` patterns to avoid per-row auth re-evaluation.
+- Avoid multiple permissive policies for the same table+role+action when one merged policy can express the rule.
+- Prefer built-in observability first (Vercel Speed Insights + Supabase query/linter tooling); avoid adding custom performance logging/instrumentation unless strictly necessary for an active incident.
 - Minimize client bundle growth:
   - keep server-only code out of client imports
   - avoid oversized dependencies
@@ -122,6 +151,8 @@ Minimum expectations:
 - new logic: unit tests where feasible
 - regression-prone flows: integration-style tests where practical
 - no unresolved lint/type errors
+- database changes: pass Supabase DB lint checks for `public` schema without warnings in preview before production deploy
+- database changes: review slow-query outliers (`supabase inspect db outliers`) and address user-facing bottlenecks before merge
 
 ## 9) Migration and Refactor Safety
 
@@ -129,6 +160,7 @@ Minimum expectations:
 - Prefer move-first, then refactor, then cleanup.
 - Keep imports stable where possible.
 - Remove dead compatibility layers once safe.
+- Large refactors must be split into multiple sensible commits by step (for example: move, behavior change, cleanup, docs) so each commit is easy to review and revert.
 
 ## 10) Documentation Policy
 
@@ -180,6 +212,7 @@ When working as an automated coding agent:
   - `chore(scope): ...`
 - Commit messages must describe intent, not just file moves.
 - Keep commits atomic and reversible.
+- In general, do not bundle unrelated edits into one commit; always split work into sensible, logically grouped commits with clear intent per step.
 - No `WIP` commits on review-ready branches.
 
 ## 13) Pull Request Checklist
@@ -190,6 +223,7 @@ Before opening or merging a PR, ensure all points are addressed:
 - Security impact reviewed (auth, RLS, input validation, data exposure).
 - Performance impact reviewed (query count, payload size, avoid unnecessary refetching).
 - Data model / migration impact documented (if any).
+- Reusable helper/hook extraction reviewed for duplicated logic.
 - Quality gates pass:
   - `yarn typecheck`
   - `yarn lint`

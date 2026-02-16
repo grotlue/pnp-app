@@ -18,6 +18,7 @@ import {
   getProfileAvatarSignedUrl,
   updateMyProfile,
 } from "@/features/users/queries/users-profile.query";
+import { isAdmin } from "@/features/users/logic/role.logic";
 import type { MeResponse } from "@/features/users/types";
 
 type ProfileScreenProps = {
@@ -56,7 +57,7 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
     }
     try {
       const response: MeResponse = await getMe(session);
-      if (response.profile.role === "admin") {
+      if (isAdmin(response.profile.role)) {
         router.replace("/admin/users");
         return;
       }
