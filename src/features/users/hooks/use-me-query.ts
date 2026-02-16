@@ -5,12 +5,17 @@ import { queryKeys } from "@/lib/client/query-keys";
 import type { ClientSession } from "@/lib/client/session";
 import { getMe } from "@/features/users/queries/users-profile.query";
 
-export function useMeQuery(session: ClientSession | null) {
+type UseMeQueryOptions = {
+  enabled?: boolean;
+};
+
+export function useMeQuery(session: ClientSession | null, options?: UseMeQueryOptions) {
   const token = session?.accessToken ?? "no-session";
+  const enabled = options?.enabled ?? true;
 
   return useQuery({
     queryKey: queryKeys.me(token),
-    enabled: Boolean(session),
+    enabled: Boolean(session) && enabled,
     staleTime: 60_000,
     queryFn: async () => {
       if (!session) {

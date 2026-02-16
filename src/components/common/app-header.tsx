@@ -11,22 +11,26 @@ import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
 import type { ClientSession } from "@/lib/client/session";
 import { logoutUser } from "@/features/users/queries/users-auth.query";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
+import type { MeResponse } from "@/features/users/types";
 import { appNavigationRoutes, appRoutes } from "@/app/router";
 
 type AppHeaderProps = {
   locale: AppLocale;
   session: ClientSession;
+  me?: MeResponse | null;
+  fetchMe?: boolean;
 };
 
-export function AppHeader({ locale, session }: AppHeaderProps) {
+export function AppHeader({ locale, session, me: providedMe = null, fetchMe = true }: AppHeaderProps) {
   const t = getTranslator(locale);
   const pathname = usePathname();
   const router = useRouter();
   const currentPath = pathname ?? "";
-  const meQuery = useMeQuery(session);
-  const role = meQuery.data?.profile.role;
-  const roleResolved = meQuery.isSuccess;
-  const profileLocale = meQuery.data?.profile.locale;
+  const meQuery = useMeQuery(session, { enabled: fetchMe });
+  const me = providedMe ?? meQuery.data ?? null;
+  const role = me?.profile.role;
+  const roleResolved = me !== null || (fetchMe && meQuery.isSuccess);
+  const profileLocale = me?.profile.locale;
 
   useEffect(() => {
     if (!profileLocale) {
