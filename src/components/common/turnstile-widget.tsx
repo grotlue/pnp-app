@@ -9,6 +9,7 @@ type TurnstileWidgetProps = {
   className?: string;
   loadErrorMessage?: string;
   onTokenChange: (token: string | null) => void;
+  onErrorReason?: (reason: TurnstileErrorReason | null) => void;
 };
 
 type TurnstileInstance = {
@@ -30,8 +31,29 @@ declare global {
   }
 }
 
+export type TurnstileErrorReason =
+  | "script_failed"
+  | "script_timeout"
+  | "script_unavailable"
+  | "render_failed"
+  | "widget_error";
+
 let turnstileScriptPromise: Promise<void> | null = null;
 const TURNSTILE_SCRIPT_TIMEOUT_MS = 5_000;
+
+function mapTurnstileErrorReason(error: unknown): TurnstileErrorReason {
+  if (!(error instanceof Error)) {
+    return "script_failed";
+  }
+
+  if (error.message === "turnstile_script_timeout") {
+    return "script_timeout";
+  }
+  if (error.message === "turnstile_script_unavailable") {
+    return "script_unavailable";
+  }
+  return "script_failed";
+}
 
 function waitForExistingTurnstileScript(script: HTMLScriptElement): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -127,6 +149,7 @@ export function TurnstileWidget({
   className,
   loadErrorMessage,
   onTokenChange,
+  onErrorReason,
 }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
@@ -137,22 +160,36 @@ export function TurnstileWidget({
     let cancelled = false;
 
     onTokenChange(null);
+    onErrorReason?.(null);
     void ensureTurnstileScript()
       .then(() => {
         if (cancelled || !containerRef.current || !window.turnstile) {
           return;
         }
 
-        widgetIdRef.current = window.turnstile.render(containerRef.current, {
-          sitekey: siteKey,
-          callback: (token) => onTokenChange(token),
-          "expired-callback": () => onTokenChange(null),
-          "error-callback": () => onTokenChange(null),
-        });
+        try {
+          widgetIdRef.current = window.turnstile.render(containerRef.current, {
+            sitekey: siteKey,
+            callback: (token) => {
+              onErrorReason?.(null);
+              onTokenChange(token);
+            },
+            "expired-callback": () => onTokenChange(null),
+            "error-callback": () => {
+              onErrorReason?.("widget_error");
+              onTokenChange(null);
+            },
+          });
+        } catch {
+          setFailedResetKey(resetKey);
+          onErrorReason?.("render_failed");
+          onTokenChange(null);
+        }
       })
-      .catch(() => {
+      .catch((error) => {
         if (!cancelled) {
           setFailedResetKey(resetKey);
+          onErrorReason?.(mapTurnstileErrorReason(error));
           onTokenChange(null);
         }
       });
@@ -164,7 +201,7 @@ export function TurnstileWidget({
       }
       widgetIdRef.current = null;
     };
-  }, [siteKey, resetKey, onTokenChange]);
+  }, [siteKey, resetKey, onTokenChange, onErrorReason]);
 
   if (loadError) {
     return loadErrorMessage ? (

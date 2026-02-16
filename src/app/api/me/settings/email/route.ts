@@ -21,7 +21,7 @@ export async function PATCH(request: Request) {
     return jsonError(400, "invalid_payload", "valid newEmail is required");
   }
 
-  const { data, error } = await auth.context.client.auth.updateUser({
+  const { data, error } = await auth.context.authClient.auth.updateUser({
     email,
   });
 
