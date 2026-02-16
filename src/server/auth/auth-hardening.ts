@@ -4,12 +4,31 @@ export type AuthCaptchaMode = "off" | "optional" | "required";
 
 const KNOWN_CAPTCHA_MODES = new Set<AuthCaptchaMode>(["off", "optional", "required"]);
 
-function parseBooleanEnv(value?: string): boolean | null {
+function normalizeEnvValue(value?: string): string | null {
   if (!value) {
     return null;
   }
 
-  const normalized = value.trim().toLowerCase();
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const unquoted =
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+      ? trimmed.slice(1, -1).trim()
+      : trimmed;
+
+  return unquoted ? unquoted.toLowerCase() : null;
+}
+
+function parseBooleanEnv(value?: string): boolean | null {
+  const normalized = normalizeEnvValue(value);
+  if (!normalized) {
+    return null;
+  }
+
   if (normalized === "true") {
     return true;
   }
@@ -45,7 +64,7 @@ export function isAdminMfaRequired(): boolean {
 }
 
 export function resolveAuthCaptchaMode(): AuthCaptchaMode {
-  const rawMode = process.env.AUTH_CAPTCHA_MODE?.trim().toLowerCase();
+  const rawMode = normalizeEnvValue(process.env.AUTH_CAPTCHA_MODE);
   if (rawMode && KNOWN_CAPTCHA_MODES.has(rawMode as AuthCaptchaMode)) {
     return rawMode as AuthCaptchaMode;
   }

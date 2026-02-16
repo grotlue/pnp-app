@@ -54,6 +54,11 @@ describe("auth hardening", () => {
     expect(resolveAuthCaptchaMode()).toBe("required");
   });
 
+  it("accepts quoted auth captcha mode", () => {
+    process.env.AUTH_CAPTCHA_MODE = '"off"';
+    expect(resolveAuthCaptchaMode()).toBe("off");
+  });
+
   it("detects aal2 from access token claim", () => {
     const token = buildJwt({ aal: "aal2" });
     expect(hasAal2AuthLevel(token)).toBe(true);
