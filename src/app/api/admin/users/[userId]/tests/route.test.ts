@@ -50,7 +50,7 @@ describe("admin user detail route", () => {
         method: "PATCH",
         body: JSON.stringify({
           email: "u2@example.com",
-          password: "Secret123!",
+          password: "SecretPass123",
           username: "user2",
           description: "updated",
           locale: "de",
@@ -61,7 +61,7 @@ describe("admin user detail route", () => {
 
     expect(updateUserByIdMock).toHaveBeenCalledWith("u2", {
       email: "u2@example.com",
-      password: "Secret123!",
+      password: "SecretPass123",
     });
     expect(updateEqMock).toHaveBeenCalledWith("id", "u2");
     expect(response.status).toBe(200);
@@ -129,6 +129,46 @@ describe("admin user detail route", () => {
       error: {
         code: "admin_user_update_forbidden",
         message: "Admin accounts cannot be edited",
+      },
+    });
+    expect(updateUserByIdMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects weak password updates", async () => {
+    requireAdminMock.mockResolvedValueOnce({
+      context: { user: { id: "admin-1" } },
+    });
+
+    const updateUserByIdMock = vi.fn();
+    createServiceRoleSupabaseClientMock.mockReturnValue({
+      auth: { admin: { updateUserById: updateUserByIdMock } },
+      from: vi.fn(() => ({
+        select: vi.fn(() => ({
+          eq: vi.fn(() => ({
+            maybeSingle: vi.fn().mockResolvedValue({
+              data: { role: "user" },
+              error: null,
+            }),
+          })),
+        })),
+      })),
+    });
+
+    const response = await PATCH(
+      new Request("http://localhost/api/admin/users/u2", {
+        method: "PATCH",
+        body: JSON.stringify({
+          password: "weakpass",
+        }),
+      }),
+      { params: Promise.resolve({ userId: "u2" }) },
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "invalid_payload",
+        message: "password must be at least 12 characters",
       },
     });
     expect(updateUserByIdMock).not.toHaveBeenCalled();

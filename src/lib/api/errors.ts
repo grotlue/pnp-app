@@ -17,6 +17,10 @@ export function toPublicErrorMessage(code: string, fallback?: string): string {
     return fallback ?? "Admin access required";
   }
 
+  if (code === "admin_mfa_required") {
+    return fallback ?? "Admin MFA is required";
+  }
+
   if (code === "not_found") {
     return fallback ?? "Not found";
   }

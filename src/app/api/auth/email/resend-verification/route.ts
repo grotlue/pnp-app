@@ -1,11 +1,17 @@
 import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import {
+  normalizeAndValidateEmail,
+  normalizeCaptchaToken,
+} from "@/lib/api/auth-validation";
 import { resolveSafeRedirectUrl } from "@/lib/api/security";
 import { hasRequiredFields } from "@/lib/api/validation";
+import { isCaptchaRequiredForAuth } from "@/server/auth/auth-hardening";
 import { enforceRateLimit } from "@/server/rate-limit/enforce-rate-limit";
 import { createServerSupabaseClient } from "@/server/supabase/server-client";
 
 type ResendVerificationBody = {
   email?: string;
+  captchaToken?: string;
 };
 
 export async function POST(request: Request) {
@@ -23,15 +29,24 @@ export async function POST(request: Request) {
   if (!hasRequiredFields(body, ["email"])) {
     return jsonError(400, "invalid_payload", "email is required");
   }
+  const email = normalizeAndValidateEmail(body.email);
+  if (!email) {
+    return jsonError(400, "invalid_payload", "valid email is required");
+  }
+  const captchaToken = normalizeCaptchaToken(body.captchaToken);
+  if (isCaptchaRequiredForAuth() && !captchaToken) {
+    return jsonError(400, "invalid_payload", "captchaToken is required");
+  }
 
   const client = createServerSupabaseClient();
   const redirectTo = resolveSafeRedirectUrl(request, "/auth/callback");
 
   const { error } = await client.auth.resend({
     type: "signup",
-    email: body.email,
+    email,
     options: {
       emailRedirectTo: redirectTo,
+      ...(captchaToken ? { captchaToken } : {}),
     },
   });
 

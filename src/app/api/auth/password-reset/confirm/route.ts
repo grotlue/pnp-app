@@ -1,4 +1,5 @@
 import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { validatePasswordStrength } from "@/lib/api/auth-validation";
 import { setSessionCookies } from "@/server/auth/session-cookie";
 import { enforceRateLimit } from "@/server/rate-limit/enforce-rate-limit";
 import { createServerSupabaseClient } from "@/server/supabase/server-client";
@@ -27,6 +28,10 @@ export async function POST(request: Request) {
       "invalid_payload",
       "accessToken, refreshToken, and newPassword are required",
     );
+  }
+  const passwordError = validatePasswordStrength(body.newPassword);
+  if (passwordError) {
+    return jsonError(400, "invalid_payload", passwordError);
   }
 
   const client = createServerSupabaseClient();

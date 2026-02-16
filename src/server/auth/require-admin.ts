@@ -1,56 +1,50 @@
-import {
-  type RequestDiagnostics,
-  finalizeDiagnosticsResponse,
-  measureDiagnostic,
-} from "@/lib/api/diagnostics";
 import { jsonError } from "@/lib/api/http";
+import { hasAal2AuthLevel, isAdminMfaRequired } from "@/server/auth/auth-hardening";
 import { requireAuth, type AuthContext } from "@/server/auth/require-auth";
 
 export async function requireAdmin(
   request: Request,
-  diagnostics?: RequestDiagnostics,
+  _diagnostics?: unknown,
 ): Promise<{ context: AuthContext } | { response: Response }> {
   try {
-    const auth = await requireAuth(request, diagnostics);
+    const auth = await requireAuth(request);
     if ("response" in auth) {
       return auth;
     }
 
-    const { data: profile, error } = await measureDiagnostic(
-      diagnostics,
-      "auth.adminRole",
-      () =>
-        auth.context.client
-          .from("profiles")
-          .select("role")
-          .eq("id", auth.context.user.id)
-          .maybeSingle(),
-    );
+    const { data: profile, error } = await auth.context.client
+      .from("profiles")
+      .select("role")
+      .eq("id", auth.context.user.id)
+      .maybeSingle();
 
     if (error) {
-      const response = jsonError(500, "admin_check_failed", error.message);
       return {
-        response: diagnostics ? finalizeDiagnosticsResponse(diagnostics, response) : response,
+        response: jsonError(500, "admin_check_failed", error.message),
       };
     }
 
     if (!profile || profile.role !== "admin") {
-      const response = jsonError(403, "admin_required", "Admin access required");
       return {
-        response: diagnostics ? finalizeDiagnosticsResponse(diagnostics, response) : response,
+        response: jsonError(403, "admin_required", "Admin access required"),
+      };
+    }
+
+    if (isAdminMfaRequired() && !hasAal2AuthLevel(auth.context.accessToken)) {
+      return {
+        response: jsonError(403, "admin_mfa_required", "Admin MFA is required"),
       };
     }
 
     return { context: auth.context };
   } catch (error) {
     console.warn("requireAdmin failed", error);
-    const response = jsonError(
-      500,
-      "admin_check_failed",
-      "Admin check failed",
-    );
     return {
-      response: diagnostics ? finalizeDiagnosticsResponse(diagnostics, response) : response,
+      response: jsonError(
+        500,
+        "admin_check_failed",
+        "Admin check failed",
+      ),
     };
   }
 }
