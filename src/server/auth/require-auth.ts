@@ -1,4 +1,9 @@
 import type { User } from "@supabase/supabase-js";
+import {
+  type RequestDiagnostics,
+  finalizeDiagnosticsResponse,
+  measureDiagnostic,
+} from "@/lib/api/diagnostics";
 import { jsonError } from "@/lib/api/http";
 import { readAccessTokenFromCookies } from "@/server/auth/session-cookie";
 import {
@@ -28,25 +33,32 @@ function extractBearerToken(request: Request): string | null {
 
 export async function requireAuth(
   request: Request,
+  diagnostics?: RequestDiagnostics,
 ): Promise<{ context: AuthContext } | { response: Response }> {
   const token = extractBearerToken(request) ?? readAccessTokenFromCookies(request);
   if (!token) {
+    const response = jsonError(
+      401,
+      "auth_required",
+      "Authorization bearer token is required.",
+    );
     return {
-      response: jsonError(
-        401,
-        "auth_required",
-        "Authorization bearer token is required.",
-      ),
+      response: diagnostics ? finalizeDiagnosticsResponse(diagnostics, response) : response,
     };
   }
 
   try {
     const authClient = createServerSupabaseClient();
-    const { data, error } = await authClient.auth.getUser(token);
+    const { data, error } = await measureDiagnostic(
+      diagnostics,
+      "auth.getUser",
+      () => authClient.auth.getUser(token),
+    );
 
     if (error || !data.user) {
+      const response = jsonError(401, "invalid_token", "Access token is invalid or expired.");
       return {
-        response: jsonError(401, "invalid_token", "Access token is invalid or expired."),
+        response: diagnostics ? finalizeDiagnosticsResponse(diagnostics, response) : response,
       };
     }
 
@@ -61,12 +73,13 @@ export async function requireAuth(
     };
   } catch (error) {
     console.warn("requireAuth failed", error);
+    const response = jsonError(
+      500,
+      "auth_check_failed",
+      "Authentication check failed",
+    );
     return {
-      response: jsonError(
-        500,
-        "auth_check_failed",
-        "Authentication check failed",
-      ),
+      response: diagnostics ? finalizeDiagnosticsResponse(diagnostics, response) : response,
     };
   }
 }

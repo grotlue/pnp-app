@@ -1,3 +1,8 @@
+import {
+  createRequestDiagnostics,
+  finalizeDiagnosticsResponse,
+  measureDiagnostic,
+} from "@/lib/api/diagnostics";
 import { requireAuth } from "@/server/auth/require-auth";
 import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
 
@@ -12,7 +17,8 @@ type CreateCharacterBody = {
 };
 
 export async function GET(request: Request) {
-  const auth = await requireAuth(request);
+  const diagnostics = createRequestDiagnostics(request, "GET /api/characters");
+  const auth = await requireAuth(request, diagnostics);
   if ("response" in auth) {
     return auth.response;
   }
@@ -39,24 +45,35 @@ export async function GET(request: Request) {
     query = query.eq("is_private", false);
   }
 
-  const { data, error } = await query.order("updated_at", { ascending: false });
+  const { data, error } = await measureDiagnostic(
+    diagnostics,
+    "db.characters.list",
+    () => query.order("updated_at", { ascending: false }),
+  );
 
   if (error) {
-    return jsonError(400, "character_list_failed", error.message);
+    return finalizeDiagnosticsResponse(
+      diagnostics,
+      jsonError(400, "character_list_failed", error.message),
+    );
   }
 
-  return jsonOk(data ?? []);
+  return finalizeDiagnosticsResponse(diagnostics, jsonOk(data ?? []));
 }
 
 export async function POST(request: Request) {
-  const auth = await requireAuth(request);
+  const diagnostics = createRequestDiagnostics(request, "POST /api/characters");
+  const auth = await requireAuth(request, diagnostics);
   if ("response" in auth) {
     return auth.response;
   }
 
   const body = await parseJsonBody<CreateCharacterBody>(request);
   if (!body?.type || !body.name) {
-    return jsonError(400, "invalid_payload", "type and name are required");
+    return finalizeDiagnosticsResponse(
+      diagnostics,
+      jsonError(400, "invalid_payload", "type and name are required"),
+    );
   }
 
   const characterId = crypto.randomUUID();
@@ -72,24 +89,34 @@ export async function POST(request: Request) {
     is_private: body.isPrivate ?? false,
   };
 
-  const { error } = await auth.context.client.from("characters").insert(insertPayload);
+  const { error } = await measureDiagnostic(
+    diagnostics,
+    "db.characters.insert",
+    () => auth.context.client.from("characters").insert(insertPayload),
+  );
 
   if (error) {
-    return jsonError(400, "character_create_failed", error.message);
+    return finalizeDiagnosticsResponse(
+      diagnostics,
+      jsonError(400, "character_create_failed", error.message),
+    );
   }
 
-  return jsonOk(
-    {
-      id: characterId,
-      owner_user_id: insertPayload.owner_user_id,
-      campaign_id: insertPayload.campaign_id,
-      type: insertPayload.type,
-      name: insertPayload.name,
-      age: insertPayload.age,
-      description: insertPayload.description,
-      avatar_path: insertPayload.avatar_path,
-      is_private: insertPayload.is_private,
-    },
-    201,
+  return finalizeDiagnosticsResponse(
+    diagnostics,
+    jsonOk(
+      {
+        id: characterId,
+        owner_user_id: insertPayload.owner_user_id,
+        campaign_id: insertPayload.campaign_id,
+        type: insertPayload.type,
+        name: insertPayload.name,
+        age: insertPayload.age,
+        description: insertPayload.description,
+        avatar_path: insertPayload.avatar_path,
+        is_private: insertPayload.is_private,
+      },
+      201,
+    ),
   );
 }

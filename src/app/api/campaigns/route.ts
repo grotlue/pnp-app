@@ -1,3 +1,8 @@
+import {
+  createRequestDiagnostics,
+  finalizeDiagnosticsResponse,
+  measureDiagnostic,
+} from "@/lib/api/diagnostics";
 import { requireAuth } from "@/server/auth/require-auth";
 import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
 
@@ -8,7 +13,8 @@ type CreateCampaignBody = {
 };
 
 export async function GET(request: Request) {
-  const auth = await requireAuth(request);
+  const diagnostics = createRequestDiagnostics(request, "GET /api/campaigns");
+  const auth = await requireAuth(request, diagnostics);
   if ("response" in auth) {
     return auth.response;
   }
@@ -33,15 +39,22 @@ export async function GET(request: Request) {
     campaignsQuery = campaignsQuery.eq("is_private", false);
   }
 
-  const { data, error } = await campaignsQuery.order("updated_at", { ascending: false });
+  const { data, error } = await measureDiagnostic(
+    diagnostics,
+    "db.campaigns.list",
+    () => campaignsQuery.order("updated_at", { ascending: false }),
+  );
 
   if (error) {
-    return jsonError(400, "campaign_list_failed", error.message);
+    return finalizeDiagnosticsResponse(
+      diagnostics,
+      jsonError(400, "campaign_list_failed", error.message),
+    );
   }
 
   const campaigns = data ?? [];
   if (campaigns.length === 0) {
-    return jsonOk([]);
+    return finalizeDiagnosticsResponse(diagnostics, jsonOk([]));
   }
 
   const campaignIds = campaigns.map((campaign) => campaign.id);
@@ -53,30 +66,45 @@ export async function GET(request: Request) {
     { data: membershipsForTargetUser, error: membershipsForTargetUserError },
   ] =
     await Promise.all([
-      client
-        .from("campaign_memberships")
-        .select("campaign_id, user_id, state")
-        .in("campaign_id", campaignIds)
-        .eq("state", "accepted"),
-      client.from("profiles").select("id, username, role").in("id", ownerIds),
+      measureDiagnostic(diagnostics, "db.campaignMemberships.listAccepted", () =>
+        client
+          .from("campaign_memberships")
+          .select("campaign_id, user_id, state")
+          .in("campaign_id", campaignIds)
+          .eq("state", "accepted"),
+      ),
+      measureDiagnostic(diagnostics, "db.profiles.listOwners", () =>
+        client.from("profiles").select("id, username, role").in("id", ownerIds),
+      ),
       roleForUserId
-        ? client
-            .from("campaign_memberships")
-            .select("campaign_id")
-            .in("campaign_id", campaignIds)
-            .eq("state", "accepted")
-            .eq("user_id", roleForUserId)
+        ? measureDiagnostic(diagnostics, "db.campaignMemberships.roleForUser", () =>
+            client
+              .from("campaign_memberships")
+              .select("campaign_id")
+              .in("campaign_id", campaignIds)
+              .eq("state", "accepted")
+              .eq("user_id", roleForUserId),
+          )
         : Promise.resolve({ data: null, error: null }),
     ]);
 
   if (membershipError) {
-    return jsonError(400, "campaign_list_failed", membershipError.message);
+    return finalizeDiagnosticsResponse(
+      diagnostics,
+      jsonError(400, "campaign_list_failed", membershipError.message),
+    );
   }
   if (ownersError) {
-    return jsonError(400, "campaign_list_failed", ownersError.message);
+    return finalizeDiagnosticsResponse(
+      diagnostics,
+      jsonError(400, "campaign_list_failed", ownersError.message),
+    );
   }
   if (membershipsForTargetUserError) {
-    return jsonError(400, "campaign_list_failed", membershipsForTargetUserError.message);
+    return finalizeDiagnosticsResponse(
+      diagnostics,
+      jsonError(400, "campaign_list_failed", membershipsForTargetUserError.message),
+    );
   }
 
   const ownerMap = new Map(
@@ -122,42 +150,62 @@ export async function GET(request: Request) {
       ? enrichedCampaigns.filter((campaign) => campaign.current_user_role !== null)
       : enrichedCampaigns;
 
-  return jsonOk(visibleCampaigns);
+  return finalizeDiagnosticsResponse(diagnostics, jsonOk(visibleCampaigns));
 }
 
 export async function POST(request: Request) {
-  const auth = await requireAuth(request);
+  const diagnostics = createRequestDiagnostics(request, "POST /api/campaigns");
+  const auth = await requireAuth(request, diagnostics);
   if ("response" in auth) {
     return auth.response;
   }
 
   const body = await parseJsonBody<CreateCampaignBody>(request);
   if (!body?.title) {
-    return jsonError(400, "invalid_payload", "title is required");
+    return finalizeDiagnosticsResponse(
+      diagnostics,
+      jsonError(400, "invalid_payload", "title is required"),
+    );
   }
 
-  const { data, error } = await auth.context.client.rpc(
-    "rpc_create_campaign_with_owner_membership",
-    {
-      p_title: body.title,
-      p_description: body.description ?? "",
-    },
+  const { data, error } = await measureDiagnostic(
+    diagnostics,
+    "db.rpc.createCampaignWithOwnerMembership",
+    () =>
+      auth.context.client.rpc(
+        "rpc_create_campaign_with_owner_membership",
+        {
+          p_title: body.title,
+          p_description: body.description ?? "",
+        },
+      ),
   );
 
   if (error) {
-    return jsonError(400, "campaign_create_failed", error.message);
+    return finalizeDiagnosticsResponse(
+      diagnostics,
+      jsonError(400, "campaign_create_failed", error.message),
+    );
   }
 
   if (body.isPrivate !== undefined && body.isPrivate) {
-    const { error: updateError } = await auth.context.client
-      .from("campaigns")
-      .update({ is_private: true })
-      .eq("id", data);
+    const { error: updateError } = await measureDiagnostic(
+      diagnostics,
+      "db.campaigns.updatePrivacy",
+      () =>
+        auth.context.client
+          .from("campaigns")
+          .update({ is_private: true })
+          .eq("id", data),
+    );
 
     if (updateError) {
-      return jsonError(400, "campaign_create_failed", updateError.message);
+      return finalizeDiagnosticsResponse(
+        diagnostics,
+        jsonError(400, "campaign_create_failed", updateError.message),
+      );
     }
   }
 
-  return jsonOk({ campaignId: data }, 201);
+  return finalizeDiagnosticsResponse(diagnostics, jsonOk({ campaignId: data }, 201));
 }
