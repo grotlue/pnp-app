@@ -1,0 +1,150 @@
+name: Bug
+description: Report a defect with reproducible flow, impact, and fix acceptance criteria.
+title: "bug: "
+labels:
+  - type:bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Bug report
+        Use this template to make debugging and planning fast and reliable.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Bug summary
+      description: Concise description of what is broken.
+      placeholder: |
+        When ..., the system ... instead of ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical (production outage, data loss, security)
+        - High (core flow blocked)
+        - Medium (major inconvenience)
+        - Low (minor issue)
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected-users
+    attributes:
+      label: Affected users and impact
+      description: Who is affected and what is the user impact?
+      placeholder: |
+        Affected users:
+        User impact:
+        Frequency:
+    validations:
+      required: true
+
+  - type: textarea
+    id: preconditions
+    attributes:
+      label: Preconditions
+      description: State required setup, account state, data state, feature flags, etc.
+      placeholder: |
+        - Logged in as ...
+        - Existing campaign ...
+        - Feature flag ... enabled
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Exact sequence to reproduce the issue.
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. Enter ...
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      placeholder: |
+        After step X, the system should ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      placeholder: |
+        After step X, the system actually ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: failing-user-flow-step
+    attributes:
+      label: User flow step where it fails
+      description: Pinpoint the exact point in the flow and any alternate/error path behavior.
+      placeholder: |
+        Fails at step ...
+        Error path observed:
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Logs, screenshots, request IDs, stack traces, or relevant traces.
+      placeholder: |
+        Logs:
+        Request IDs:
+        Screenshot links:
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser/device/app version/locale/environment.
+      placeholder: |
+        App env:
+        Browser + version:
+        Device:
+        Locale:
+    validations:
+      required: true
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Temporary workaround
+      description: Optional: any known user workaround.
+      placeholder: |
+        Users can temporarily ...
+
+  - type: textarea
+    id: acceptance-criteria-fix
+    attributes:
+      label: Acceptance criteria for fix
+      description: Define done for this bug fix. Prefer Given/When/Then format.
+      placeholder: |
+        - Given ..., when ..., then ...
+        - Given ..., when ..., then ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: regression-tests
+    attributes:
+      label: Regression test scenarios
+      description: What should be covered to prevent recurrence?
+      placeholder: |
+        Automated tests:
+        Manual regression paths:
+    validations:
+      required: true

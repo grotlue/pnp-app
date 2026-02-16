@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { Bell, LogOut, Settings, Shield, User } from "lucide-react";
 import { IconActionButton, IconActionLinkButton } from "@/components/common/icon-action-button";
 import { clearLocaleCookie, readLocaleCookie, setLocaleCookie } from "@/lib/client/locale-cookie";
@@ -11,28 +10,29 @@ import { clearSession } from "@/lib/client/session";
 import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
 import type { ClientSession } from "@/lib/client/session";
 import { logoutUser } from "@/features/users/queries/users-auth.query";
-import { getMe } from "@/features/users/queries/users-profile.query";
 import { useNotificationsQuery } from "@/features/notifications/hooks/use-notifications-query";
 import { getNotificationUnreadCount } from "@/features/notifications/logic/notification-list.logic";
+import { useMeQuery } from "@/features/users/hooks/use-me-query";
+import type { MeResponse } from "@/features/users/types";
 import { appNavigationRoutes, appRoutes } from "@/app/router";
 
 type AppHeaderProps = {
   locale: AppLocale;
   session: ClientSession;
+  me?: MeResponse | null;
+  fetchMe?: boolean;
 };
 
-export function AppHeader({ locale, session }: AppHeaderProps) {
+export function AppHeader({ locale, session, me: providedMe = null, fetchMe = true }: AppHeaderProps) {
   const t = getTranslator(locale);
   const pathname = usePathname();
   const router = useRouter();
   const currentPath = pathname ?? "";
-  const meQuery = useQuery({
-    queryKey: ["me", "header", session.accessToken],
-    queryFn: async () => getMe(session),
-  });
-  const role = meQuery.data?.profile.role;
-  const roleResolved = meQuery.isSuccess;
-  const profileLocale = meQuery.data?.profile.locale;
+  const meQuery = useMeQuery(session, { enabled: fetchMe });
+  const me = providedMe ?? meQuery.data ?? null;
+  const role = me?.profile.role;
+  const roleResolved = me !== null || (fetchMe && meQuery.isSuccess);
+  const profileLocale = me?.profile.locale;
   const notificationsQuery = useNotificationsQuery(session, { limit: 100 });
   const unreadNotifications = getNotificationUnreadCount(notificationsQuery.data ?? []);
 
@@ -116,12 +116,20 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
             </>
           ) : null}
           {roleResolved && role === "admin" ? (
-            <IconActionLinkButton
-              label={t("ui.menu.admin")}
-              icon={Shield}
-              href={appRoutes.admin}
-              variant="ghost"
-            />
+            <>
+              <IconActionLinkButton
+                label={t("ui.menu.admin")}
+                icon={Shield}
+                href={appRoutes.admin}
+                variant="ghost"
+              />
+              <IconActionLinkButton
+                label={t("ui.menu.settings")}
+                icon={Settings}
+                href={appRoutes.settings}
+                variant="ghost"
+              />
+            </>
           ) : null}
           <IconActionButton
             label={t("ui.actions.logout")}

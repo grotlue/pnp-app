@@ -39,11 +39,17 @@ export async function apiRequest<T>(
     headers.Authorization = `Bearer ${options.session.accessToken}`;
   }
 
-  const response = await fetch(path, {
-    method,
-    headers,
-    body: options?.body ? JSON.stringify(options.body) : undefined,
-  });
+  let response: Response;
+  try {
+    response = await fetch(path, {
+      method,
+      credentials: "same-origin",
+      headers,
+      body: options?.body ? JSON.stringify(options.body) : undefined,
+    });
+  } catch (error) {
+    throw error;
+  }
 
   let payload: unknown = null;
   try {

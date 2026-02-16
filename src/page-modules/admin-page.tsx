@@ -11,6 +11,7 @@ import { IconActionButton } from "@/components/common/icon-action-button";
 import { ListItemRow } from "@/components/common/list-item-row";
 import { NavTabs } from "@/components/common/nav-tabs";
 import { Modal } from "@/components/common/modal";
+import { PageLoadingState } from "@/components/common/page-loading-state";
 import {
   CampaignFormFields,
   CharacterFormFields,
@@ -32,6 +33,7 @@ import type {
 } from "@/features/admin/types";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n";
+import { hasItems } from "@/lib/logic/collections";
 import { textLinkClassName } from "@/lib/utils/link";
 
 type AdminPageViewProps = {
@@ -147,6 +149,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
   }, [ready, router, session]);
 
   const meRole = admin.meQuery.data?.profile.role;
+
   useEffect(() => {
     if (!ready || !session || admin.meQuery.isLoading) {
       return;
@@ -176,6 +179,9 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
     .map((error) => error.message);
 
   const feedback = message || queryErrors[0] || "";
+  const mfaRequiredError = queryErrors.find((error) =>
+    error.toLowerCase().includes("admin mfa is required"),
+  );
   const sectionTabs = [
     { key: "users" as const, href: "/admin/users", label: t("ui.admin.usersTitle") },
     { key: "campaigns" as const, href: "/admin/campaigns", label: t("ui.admin.campaignsTitle") },
@@ -186,14 +192,21 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
     return <main className="min-h-screen" />;
   }
 
-  if (admin.meQuery.isLoading || meRole !== "admin") {
+  if (mfaRequiredError) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
         <AppHeader locale={locale} session={session} />
-        <main className="mx-auto w-full max-w-7xl px-4 py-8">
+        <main className="mx-auto w-full max-w-4xl px-4 py-8">
           <Card>
-            <CardContent className="py-6 text-sm text-muted-foreground">
-              {t("ui.start.loading")}
+            <CardHeader>
+              <CardTitle>{t("ui.settings.mfaTitle")}</CardTitle>
+              <CardDescription>{t("ui.settings.mfaRequired")}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <FeedbackMessage message={mfaRequiredError} />
+              <Link href="/settings">
+                <Button>{t("ui.menu.settings")}</Button>
+              </Link>
             </CardContent>
           </Card>
         </main>
@@ -201,9 +214,30 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
     );
   }
 
+  if (admin.meQuery.isLoading || meRole !== "admin") {
+    return (
+      <div className="min-h-screen">
+        <AppHeader
+          locale={locale}
+          session={session}
+          me={admin.meQuery.data ?? null}
+          fetchMe={false}
+        />
+        <main className="mx-auto w-full max-w-7xl px-4 py-8">
+          <PageLoadingState label={t("ui.loading.page")} className="py-6" />
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <AppHeader locale={locale} session={session} />
+      <AppHeader
+        locale={locale}
+        session={session}
+        me={admin.meQuery.data ?? null}
+        fetchMe={false}
+      />
       <main className="mx-auto w-full max-w-7xl space-y-4 px-4 py-8">
         <Card>
           <CardHeader>
@@ -229,7 +263,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button onClick={() => setCreateUserOpen(true)}>{t("ui.admin.createUser")}</Button>
-            {users.length === 0 ? (
+            {!hasItems(users) ? (
               <EmptyState label={t("ui.feedback.empty")} />
             ) : (
               users.map((user) => (
@@ -307,7 +341,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
             >
               {t("ui.admin.createCampaign")}
             </Button>
-            {campaigns.length === 0 ? (
+            {!hasItems(campaigns) ? (
               <EmptyState label={t("ui.feedback.empty")} />
             ) : (
               campaigns.map((campaign) => (
@@ -373,7 +407,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
             >
               {t("ui.admin.createCharacter")}
             </Button>
-            {characters.length === 0 ? (
+            {!hasItems(characters) ? (
               <EmptyState label={t("ui.feedback.empty")} />
             ) : (
               characters.map((character) => (

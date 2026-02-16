@@ -27,6 +27,11 @@
       "quickLinks": "Quick Access",
       "quickLinksSubtitle": "Open your most-used sections."
     },
+    "loading": {
+      "page": "Loading page...",
+      "section": "Loading data...",
+      "auth": "Checking authentication..."
+    },
     "register": {
       "title": "Registration",
       "subtitle": "Create your account.",
@@ -61,6 +66,14 @@
     "settings": {
       "title": "Settings",
       "subtitle": "Manage private account settings.",
+      "mfaTitle": "Admin MFA",
+      "mfaSubtitle": "Set up multi-factor authentication for admin access.",
+      "mfaRequired": "Admin MFA is required. Complete setup to access admin routes.",
+      "mfaEnabled": "Admin MFA is active.",
+      "mfaNotEnabled": "Admin MFA is not configured yet.",
+      "mfaSetupStep": "Add this secret or URI in your authenticator app, then enter a current code.",
+      "mfaSetupStarted": "MFA setup started. Enter the code from your authenticator app.",
+      "mfaSetupMissing": "Start MFA setup first to get a factor.",
       "deleteTitle": "Delete account",
       "deleteConfirm": "Do you really want to delete your account?"
     },
@@ -175,6 +188,7 @@
       "username": "Username",
       "newEmail": "New email",
       "newPassword": "New password",
+      "mfaCode": "Authenticator code",
       "description": "Description",
       "characterName": "Character name",
       "characterAge": "Age",
@@ -233,19 +247,24 @@
       "reject": "Reject",
       "changeEmail": "Change email",
       "changePassword": "Change password",
+      "setupMfa": "Start MFA setup",
+      "verifyMfa": "Verify MFA code",
       "deleteAccount": "Delete account",
       "on": "on",
       "off": "off"
     },
     "feedback": {
       "requestFailed": "Request failed.",
+      "captchaRequired": "Please complete the CAPTCHA challenge.",
+      "captchaUnavailable": "CAPTCHA could not be loaded. Please reload the page and try again.",
       "empty": "No entries yet.",
       "created": "Created successfully.",
       "saved": "Saved successfully.",
       "deleted": "Deleted successfully.",
       "sent": "Sent successfully.",
       "registeredNowLogin": "Registration successful. Please log in.",
-      "passwordResetSent": "Password reset email sent."
+      "passwordResetSent": "Password reset email sent.",
+      "mfaEnabled": "MFA enabled successfully."
     }
   },
   "relationship": {

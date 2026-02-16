@@ -11,10 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AppHeader } from "@/components/common/app-header";
 import { Modal } from "@/components/common/modal";
+import { PageLoadingState } from "@/components/common/page-loading-state";
 import { ToggleTabs } from "@/components/common/toggle-tabs";
 import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
 import { VisibilityToggle } from "@/components/common/visibility-toggle";
 import { useCampaignDetailScreen } from "@/features/campaigns/hooks/use-campaign-detail-screen";
+import { canManageCampaign, isAdmin } from "@/features/users/logic/role.logic";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { textLinkClassName } from "@/lib/utils/link";
@@ -68,11 +70,7 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
       <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
         <AppHeader locale={locale} session={session} />
         <main className="mx-auto w-full max-w-7xl px-4 py-8">
-          <Card>
-            <CardContent className="py-8 text-sm text-muted-foreground">
-              {t("ui.start.loading")}
-            </CardContent>
-          </Card>
+          <PageLoadingState label={t("ui.loading.page")} />
         </main>
       </div>
     );
@@ -83,8 +81,12 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
 
   const { me, detail, characters, users } = detailQuery.data;
   const isOwner = detail.campaign.owner_user_id === me.user.id;
-  const canManage = isOwner || (me.profile.role === "admin" && !detail.campaign.is_private);
-  const isForeignAdminView = me.profile.role === "admin" && !isOwner;
+  const canManage = canManageCampaign({
+    isOwner,
+    role: me.profile.role,
+    isPrivate: detail.campaign.is_private,
+  });
+  const isForeignAdminView = isAdmin(me.profile.role) && !isOwner;
   const ownMembership = detail.memberships.find((entry) => entry.user_id === me.user.id);
   const canRequestJoin = !canManage && (!ownMembership || ownMembership.state === "rejected");
   const hasPendingJoinRequest =
@@ -121,7 +123,7 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
   }
 
   function isAdminUser(userId: string) {
-    return users.find((entry) => entry.id === userId)?.role === "admin";
+    return isAdmin(users.find((entry) => entry.id === userId)?.role);
   }
 
   return (

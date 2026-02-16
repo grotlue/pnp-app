@@ -1,4 +1,6 @@
 import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { setSessionCookies } from "@/server/auth/session-cookie";
+import { enforceRateLimit } from "@/server/rate-limit/enforce-rate-limit";
 import { createServerSupabaseClient } from "@/server/supabase/server-client";
 
 type VerifyType = "signup" | "recovery" | "email" | "email_change";
@@ -11,6 +13,16 @@ type VerifyBody = {
 const validTypes = new Set<VerifyType>(["signup", "recovery", "email", "email_change"]);
 
 export async function POST(request: Request) {
+  const rateLimited = await enforceRateLimit({
+    request,
+    route: "auth:callback:verify",
+    limit: 20,
+    windowMs: 10 * 60_000,
+  });
+  if (rateLimited) {
+    return rateLimited;
+  }
+
   const body = await parseJsonBody<VerifyBody>(request);
   if (!body?.tokenHash || !body.type || !validTypes.has(body.type)) {
     return jsonError(400, "invalid_payload", "tokenHash and valid type are required");
@@ -30,10 +42,17 @@ export async function POST(request: Request) {
     return jsonOk({ verified: true });
   }
 
-  return jsonOk({
-    verified: true,
-    accessToken: data.session.access_token,
-    refreshToken: data.session.refresh_token,
-    expiresAt: data.session.expires_at,
-  });
+  return setSessionCookies(
+    jsonOk({
+      verified: true,
+      accessToken: data.session.access_token,
+      refreshToken: data.session.refresh_token,
+      expiresAt: data.session.expires_at,
+    }),
+    {
+      accessToken: data.session.access_token,
+      refreshToken: data.session.refresh_token,
+      expiresAt: data.session.expires_at,
+    },
+  );
 }

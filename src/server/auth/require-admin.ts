@@ -1,4 +1,6 @@
 import { jsonError } from "@/lib/api/http";
+import { hasAal2AuthLevel, isAdminMfaRequired } from "@/server/auth/auth-hardening";
+import { getUserRole } from "@/server/auth/get-user-role";
 import { requireAuth, type AuthContext } from "@/server/auth/require-auth";
 
 export async function requireAdmin(
@@ -10,21 +12,22 @@ export async function requireAdmin(
       return auth;
     }
 
-    const { data: profile, error } = await auth.context.client
-      .from("profiles")
-      .select("role")
-      .eq("id", auth.context.user.id)
-      .maybeSingle();
-
-    if (error) {
+    const roleResult = await getUserRole(auth.context);
+    if (roleResult.errorMessage) {
       return {
-        response: jsonError(500, "admin_check_failed", error.message),
+        response: jsonError(500, "admin_check_failed", roleResult.errorMessage),
       };
     }
 
-    if (!profile || profile.role !== "admin") {
+    if (roleResult.role !== "admin") {
       return {
         response: jsonError(403, "admin_required", "Admin access required"),
+      };
+    }
+
+    if (isAdminMfaRequired() && !hasAal2AuthLevel(auth.context.accessToken)) {
+      return {
+        response: jsonError(403, "admin_mfa_required", "Admin MFA is required"),
       };
     }
 

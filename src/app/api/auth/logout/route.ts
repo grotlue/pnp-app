@@ -1,5 +1,6 @@
 import { requireAuth } from "@/server/auth/require-auth";
 import { jsonOk } from "@/lib/api/http";
+import { clearSessionCookies } from "@/server/auth/session-cookie";
 
 export async function POST(request: Request) {
   const auth = await requireAuth(request);
@@ -10,5 +11,5 @@ export async function POST(request: Request) {
   // We use a token-bound server client (`accessToken` option). In this mode,
   // supabase.auth.signOut() is not supported by supabase-js.
   // Client session cleanup is handled in the frontend and is the source of truth.
-  return jsonOk({ success: true });
+  return clearSessionCookies(jsonOk({ success: true }));
 }

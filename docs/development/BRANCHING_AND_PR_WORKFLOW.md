@@ -38,7 +38,12 @@ Examples:
    - `yarn lint`
    - `yarn test:run`
    - `yarn build` (for release-impacting changes)
+   - for DB/RLS changes:
+     - `supabase db lint --linked --schema public --fail-on warning`
+     - `supabase inspect db outliers --linked`
 4. Commit with conventional commit messages.
+   - In general, split work into several sensible commits (for example: structure moves, functional changes, cleanup, docs) instead of bundling unrelated edits.
+   - Each commit should be understandable and safely revertable on its own.
 5. Open a PR with scope, verification, and risk notes.
 6. Merge only after required checks and approvals pass.
 

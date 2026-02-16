@@ -103,10 +103,26 @@ In Vercel project -> Settings -> Environment Variables:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `SUPABASE_SERVICE_ROLE_KEY`
+  - `ALLOWED_ORIGINS` (comma-separated, e.g. production + preview origins)
+  - Optional auth hardening toggles:
+    - `REQUIRE_ADMIN_MFA` (default: enabled in preview/production)
+    - `AUTH_CAPTCHA_MODE` (`off` | `optional` | `required`; default: `optional` in preview/production)
+    - `NEXT_PUBLIC_AUTH_CAPTCHA_MODE` (`off` | `optional` | `required`; should match `AUTH_CAPTCHA_MODE`)
+    - `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (required when CAPTCHA mode is `optional` or `required`)
+  - Optional Speed Insights override:
+    - `ENABLE_VERCEL_SPEED_INSIGHTS=false` (default is enabled in production)
 - For `Preview`:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `SUPABASE_SERVICE_ROLE_KEY`
+  - `ALLOWED_ORIGINS` (at least preview origin)
+  - Optional auth hardening toggles:
+    - `REQUIRE_ADMIN_MFA` (default: enabled in preview/production)
+    - `AUTH_CAPTCHA_MODE` (`off` | `optional` | `required`; default: `optional` in preview/production)
+    - `NEXT_PUBLIC_AUTH_CAPTCHA_MODE` (`off` | `optional` | `required`; should match `AUTH_CAPTCHA_MODE`)
+    - `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (required when CAPTCHA mode is `optional` or `required`)
+  - Optional Speed Insights override:
+    - `ENABLE_VERCEL_SPEED_INSIGHTS=false` (default is enabled in preview)
 
 ## 6) Configure Supabase Auth URLs
 
@@ -117,6 +133,29 @@ In Supabase -> Authentication -> URL Configuration:
   - production URL
   - preview URLs (if used)
   - localhost (optional for local testing)
+
+## 6.1) Configure Supabase Auth Security Baseline
+
+In Supabase -> Authentication, configure these for both preview and production:
+
+- `Email`:
+  - Use custom SMTP (not shared default SMTP) for deliverability and branding.
+  - Customize email templates (confirm signup, reset password, change email).
+  - Enable security-oriented notification emails where available.
+- `Bot / abuse protection`:
+  - Enable CAPTCHA provider in Supabase Auth.
+  - Set `AUTH_CAPTCHA_MODE` and `NEXT_PUBLIC_AUTH_CAPTCHA_MODE` to the same value.
+  - Set `NEXT_PUBLIC_TURNSTILE_SITE_KEY` for Cloudflare Turnstile.
+- `Password security`:
+  - Keep strong password requirements enabled in Supabase.
+  - App API additionally enforces minimum complexity on register/reset/password change/admin user management.
+- `MFA`:
+  - Enable TOTP MFA in Supabase Auth.
+  - App API enforces MFA (`aal2`) for admin routes by default in preview/production.
+  - Emergency rollback only: set `REQUIRE_ADMIN_MFA=false` temporarily.
+- `Rate limits`:
+  - Review and tune Supabase Auth rate limits in dashboard.
+  - Keep app-level route rate limits enabled (already enforced in auth endpoints).
 
 ## 7) Configure Vercel Git behavior
 
@@ -139,7 +178,10 @@ Repository configuration (`vercel.json`) already restricts branch deploys:
 - `Deploy PR Preview` runs on pull request updates only when the PR has label `preview-deploy`.
 - `Deploy PR Preview` is skipped for fork PRs (no repository secrets exposure).
 - `Deploy PR Preview` runs only for PRs targeting `main` and uses GitHub `pull_request_target` so the restricted `preview` environment can be used.
-- `Deploy PR Preview` includes both preview DB deploy (`supabase db push --linked`) and Vercel preview deploy.
+- Preview DB workflows (`Deploy Preview DB` and `Deploy PR Preview`) reset the linked preview database and re-apply migrations on every run (`supabase db reset --linked --no-seed --yes`).
+- `Deploy PR Preview` includes both preview DB reset/recreate and Vercel preview deploy.
+- DB deploy workflows run `supabase db lint --linked --schema public --fail-on warning` after migrations.
+- DB deploy workflows also run `supabase inspect db outliers --linked` (non-blocking) for query visibility.
 
 Deployment order:
 
@@ -151,12 +193,16 @@ Deployment order:
 3. `CI` runs
 4. On successful `CI`:
   - `production` branch -> `Deploy Production DB` runs `supabase db push --linked`
-  - `main` branch -> `Deploy Preview DB` runs `supabase db push --linked`
+  - `main` branch -> `Deploy Preview DB` runs `supabase db reset --linked --no-seed --yes`
 5. If PR label `preview-deploy` is present, `Deploy PR Preview` creates a Vercel preview deployment and comments the URL on the PR.
 6. DB workflow then runs admin bootstrap script:
   - creates admin user when missing
   - enforces `profiles.role = 'admin'` for that user
   - keeps existing admin account idempotently
+
+For performance incident investigations, use:
+- Vercel Speed Insights (web vitals and route metrics)
+- Supabase Database tools (`Database Linter`, `Query Performance`, `inspect db outliers`)
 
 ## 9) Trigger deployment
 
