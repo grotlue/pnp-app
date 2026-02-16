@@ -211,6 +211,11 @@ export function HomePageView({
                   </Link>
                 ) : null}
               </div>
+              <div className="text-xs">
+                <Link href={appRoutes.resendVerification} className={textLinkClassName}>
+                  {t("ui.nav.resendVerification")}
+                </Link>
+              </div>
             </CardFooter>
           </Card>
         </div>

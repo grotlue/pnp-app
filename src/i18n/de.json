@@ -14,6 +14,7 @@
     "nav": {
       "register": "Registrieren",
       "passwordReset": "Passwort vergessen?",
+      "resendVerification": "Bestätigungs-E-Mail erneut senden",
       "backToLogin": "Zurück zum Login"
     },
     "start": {
@@ -39,6 +40,10 @@
     "passwordReset": {
       "title": "Passwort zurücksetzen",
       "subtitle": "Fordere eine E-Mail zum Zurücksetzen an."
+    },
+    "resendVerification": {
+      "title": "Bestätigungs-E-Mail erneut senden",
+      "subtitle": "Neue E-Mail zur Konto-Bestätigung anfordern."
     },
     "authCallback": {
       "title": "Authentifizierung",
@@ -217,6 +222,7 @@
       "login": "Anmelden",
       "register": "Registrieren",
       "sendReset": "Reset-E-Mail senden",
+      "resendVerification": "Bestätigungs-E-Mail senden",
       "logout": "Abmelden",
       "reload": "Neu laden",
       "close": "Schließen",
@@ -249,6 +255,7 @@
       "sent": "Erfolgreich gesendet.",
       "registeredNowLogin": "Registrierung erfolgreich. Bitte einloggen.",
       "passwordResetSent": "Passwort-Reset-E-Mail wurde gesendet.",
+      "verificationEmailSent": "Bestätigungs-E-Mail wurde gesendet.",
       "mfaEnabled": "MFA erfolgreich aktiviert."
     }
   },

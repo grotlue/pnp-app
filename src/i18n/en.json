@@ -14,6 +14,7 @@
     "nav": {
       "register": "Register",
       "passwordReset": "Forgot password?",
+      "resendVerification": "Resend verification email",
       "backToLogin": "Back to login"
     },
     "start": {
@@ -39,6 +40,10 @@
     "passwordReset": {
       "title": "Password Reset",
       "subtitle": "Request a password reset email."
+    },
+    "resendVerification": {
+      "title": "Resend Verification Email",
+      "subtitle": "Request a new account verification email."
     },
     "authCallback": {
       "title": "Authentication",
@@ -217,6 +222,7 @@
       "login": "Login",
       "register": "Register",
       "sendReset": "Send reset email",
+      "resendVerification": "Resend verification email",
       "logout": "Logout",
       "reload": "Reload",
       "close": "Close",
@@ -249,6 +255,7 @@
       "sent": "Sent successfully.",
       "registeredNowLogin": "Registration successful. Please log in.",
       "passwordResetSent": "Password reset email sent.",
+      "verificationEmailSent": "Verification email sent.",
       "mfaEnabled": "MFA enabled successfully."
     }
   },

@@ -16,6 +16,7 @@ import {
   loginUser,
   logoutUser,
   registerUser,
+  resendVerificationEmail,
   requestPasswordReset,
   verifyAuthToken,
 } from "../users-auth.query";
@@ -154,6 +155,38 @@ describe("users auth/profile/settings queries", () => {
     expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/password-reset/request", {
       method: "POST",
       body: { email: "x@example.com", captchaToken: "captcha-3" },
+    });
+  });
+
+  it("resendVerificationEmail posts resend payload", async () => {
+    const response = { data: { sent: true }, error: null, status: 200 };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(resendVerificationEmail({ email: "x@example.com" })).resolves.toEqual({
+      sent: true,
+    });
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/email/resend-verification", {
+      method: "POST",
+      body: { email: "x@example.com" },
+    });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Verification email resend failed",
+    );
+  });
+
+  it("resendVerificationEmail forwards captcha token when provided", async () => {
+    const response = { data: { sent: true }, error: null, status: 200 };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(
+      resendVerificationEmail({ email: "x@example.com", captchaToken: "captcha-4" }),
+    ).resolves.toEqual({
+      sent: true,
+    });
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/email/resend-verification", {
+      method: "POST",
+      body: { email: "x@example.com", captchaToken: "captcha-4" },
     });
   });
 

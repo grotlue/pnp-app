@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 export const appRoutes = {
   home: "/",
   register: "/register",
+  resendVerification: "/resend-verification",
   passwordReset: "/password-reset",
   authCallback: "/auth/callback",
   authResetPassword: "/auth/reset-password",

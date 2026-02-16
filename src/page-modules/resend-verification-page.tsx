@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import { appRoutes } from "@/app/router";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import { FormInput } from "@/components/common/form-controls";
@@ -16,29 +15,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { resendVerificationEmail } from "@/features/users/queries/users-auth.query";
+import { resolveAuthCaptchaClientConfig } from "@/lib/features/auth-captcha";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { textLinkClassName } from "@/lib/utils/link";
-import { resolveAuthCaptchaClientConfig } from "@/lib/features/auth-captcha";
-import { registerUser } from "@/features/users/queries/users-auth.query";
 
-type RegisterScreenProps = {
+type ResendVerificationScreenProps = {
   locale: AppLocale;
 };
 
-export function RegisterPageView({ locale }: RegisterScreenProps) {
+export function ResendVerificationPageView({ locale }: ResendVerificationScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
   const authCaptchaConfig = useMemo(() => resolveAuthCaptchaClientConfig(), []);
-  const router = useRouter();
-
   const [busy, setBusy] = useState(false);
+  const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
-  const [form, setForm] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
 
   async function onSubmit() {
     if (authCaptchaConfig.required && !captchaToken) {
@@ -49,12 +42,11 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
     setBusy(true);
     setMessage("");
     try {
-      await registerUser({
-        ...form,
-        locale,
+      await resendVerificationEmail({
+        email,
         ...(captchaToken ? { captchaToken } : {}),
       });
-      router.push("/?registered=1");
+      setMessage(t("ui.feedback.verificationEmailSent"));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
     } finally {
@@ -71,26 +63,15 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
       <div className="mx-auto w-full max-w-md">
         <Card>
           <CardHeader>
-            <CardTitle>{t("ui.register.title")}</CardTitle>
-            <CardDescription>{t("ui.register.subtitle")}</CardDescription>
+            <CardTitle>{t("ui.resendVerification.title")}</CardTitle>
+            <CardDescription>{t("ui.resendVerification.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <FormInput
-              placeholder={t("ui.fields.username")}
-              value={form.username}
-              onChange={(event) => setForm((prev) => ({ ...prev, username: event.target.value }))}
-            />
-            <FormInput
               type="email"
               placeholder={t("ui.fields.email")}
-              value={form.email}
-              onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
-            />
-            <FormInput
-              type="password"
-              placeholder={t("ui.fields.password")}
-              value={form.password}
-              onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
             />
             {authCaptchaConfig.enabled && authCaptchaConfig.siteKey ? (
               <TurnstileWidget
@@ -104,17 +85,17 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-2">
             <Button
-              disabled={busy || (authCaptchaConfig.required && !captchaToken)}
+              disabled={busy || !email || (authCaptchaConfig.required && !captchaToken)}
               onClick={onSubmit}
             >
-              {t("ui.actions.register")}
+              {t("ui.actions.resendVerification")}
             </Button>
             <div className="flex items-center justify-between text-xs">
               <Link className={textLinkClassName} href={appRoutes.home}>
-                {t("ui.register.alreadyRegistered")}
+                {t("ui.nav.backToLogin")}
               </Link>
-              <Link className={textLinkClassName} href={appRoutes.resendVerification}>
-                {t("ui.nav.resendVerification")}
+              <Link className={textLinkClassName} href={appRoutes.register}>
+                {t("ui.nav.register")}
               </Link>
             </div>
           </CardFooter>

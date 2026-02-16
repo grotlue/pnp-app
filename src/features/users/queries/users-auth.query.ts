@@ -45,6 +45,17 @@ export async function requestPasswordReset(input: {
   return unwrapApiResponse(response, "Password reset request failed");
 }
 
+export async function resendVerificationEmail(input: {
+  email: string;
+  captchaToken?: string;
+}): Promise<{ sent: boolean }> {
+  const response = await apiRequest<{ sent: boolean }>("/api/auth/email/resend-verification", {
+    method: "POST",
+    body: input,
+  });
+  return unwrapApiResponse(response, "Verification email resend failed");
+}
+
 export async function logoutUser(session: ClientSession): Promise<{ success: boolean }> {
   const response = await apiRequest<{ success: boolean }>("/api/auth/logout", {
     method: "POST",
