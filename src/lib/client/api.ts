@@ -11,6 +11,18 @@ export type ApiResponse<T> = {
   status: number;
 };
 
+function diagnosticsEnabled(): boolean {
+  return process.env.NEXT_PUBLIC_ENABLE_PERF_DIAGNOSTICS === "true";
+}
+
+function logApiDiagnostics(payload: Record<string, unknown>) {
+  if (!diagnosticsEnabled()) {
+    return;
+  }
+
+  console.info("api_perf_diagnostics", JSON.stringify(payload));
+}
+
 export function unwrapApiResponse<T>(
   response: ApiResponse<T>,
   fallbackMessage = "Request failed",
@@ -30,6 +42,7 @@ export async function apiRequest<T>(
   },
 ): Promise<ApiResponse<T>> {
   const method = options?.method ?? "GET";
+  const startedAt = performance.now();
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -39,11 +52,35 @@ export async function apiRequest<T>(
     headers.Authorization = `Bearer ${options.session.accessToken}`;
   }
 
-  const response = await fetch(path, {
+  let response: Response;
+  try {
+    response = await fetch(path, {
+      method,
+      credentials: "same-origin",
+      headers,
+      body: options?.body ? JSON.stringify(options.body) : undefined,
+    });
+  } catch (error) {
+    const durationMs = Number((performance.now() - startedAt).toFixed(2));
+    logApiDiagnostics({
+      method,
+      path,
+      status: "network_error",
+      durationMs,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
+
+  const durationMs = Number((performance.now() - startedAt).toFixed(2));
+  logApiDiagnostics({
     method,
-    credentials: "same-origin",
-    headers,
-    body: options?.body ? JSON.stringify(options.body) : undefined,
+    path,
+    status: response.status,
+    durationMs,
+    requestId: response.headers.get("x-request-id"),
+    serverTiming: response.headers.get("server-timing"),
+    upstreamRegion: response.headers.get("x-upstream-region"),
   });
 
   let payload: unknown = null;

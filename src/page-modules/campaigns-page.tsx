@@ -11,6 +11,7 @@ import { PaginationControls } from "@/components/common/pagination-controls";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useClientSession } from "@/lib/client/use-client-session";
+import { useClientFlowDiagnostics } from "@/lib/client/use-client-flow-diagnostics";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { DEFAULT_LIST_PAGE_SIZE, clampListPage, paginateListItems } from "@/lib/utils/list";
 import {
@@ -63,6 +64,16 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
   const { createMutation, updateMutation, deleteMutation, anyPending } = useCampaignMutations(
     session,
   );
+  const campaignsFlowReady = ready && Boolean(session);
+  const campaignsFlowLoading = campaignsFlowReady && campaignsQuery.isLoading;
+  const campaignsFlowLoaded = campaignsFlowReady && campaignsQuery.isFetched;
+
+  useClientFlowDiagnostics({
+    flow: "campaigns-screen",
+    ready: campaignsFlowReady,
+    loading: campaignsFlowLoading,
+    loaded: campaignsFlowLoaded,
+  });
 
   const queryError =
     campaignsQuery.error instanceof Error ? campaignsQuery.error.message : "";

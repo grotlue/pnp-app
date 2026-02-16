@@ -31,6 +31,7 @@ import type {
   AdminCreateUserInput,
   AdminUser,
 } from "@/features/admin/types";
+import { useClientFlowDiagnostics } from "@/lib/client/use-client-flow-diagnostics";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n";
 import { hasItems } from "@/lib/logic/collections";
@@ -149,6 +150,17 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
   }, [ready, router, session]);
 
   const meRole = admin.meQuery.data?.profile.role;
+  const adminFlowReady = ready && Boolean(session);
+  const adminFlowLoading = adminFlowReady && admin.meQuery.isLoading;
+  const adminFlowLoaded = Boolean(admin.meQuery.data) && !admin.meQuery.isLoading;
+
+  useClientFlowDiagnostics({
+    flow: "admin-dashboard",
+    ready: adminFlowReady,
+    loading: adminFlowLoading,
+    loaded: adminFlowLoaded,
+  });
+
   useEffect(() => {
     if (!ready || !session || admin.meQuery.isLoading) {
       return;

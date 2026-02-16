@@ -10,6 +10,7 @@ import { FormInput } from "@/components/common/form-controls";
 import { ListControls } from "@/components/common/list-controls";
 import { ListItemRow } from "@/components/common/list-item-row";
 import { OwnershipBadge } from "@/components/common/ownership-badge";
+import { PageLoadingState } from "@/components/common/page-loading-state";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { ToggleTabs } from "@/components/common/toggle-tabs";
 import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
@@ -45,6 +46,7 @@ import type { LoginResponse, MeResponse } from "@/features/users/types";
 import { setLocaleCookie } from "@/lib/client/locale-cookie";
 import { clearSession, setSession } from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
+import { useClientFlowDiagnostics } from "@/lib/client/use-client-flow-diagnostics";
 import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
 import { textLinkClassName } from "@/lib/utils/link";
 import { clampListPage, DEFAULT_LIST_PAGE_SIZE, paginateListItems } from "@/lib/utils/list";
@@ -113,6 +115,16 @@ export function HomePageView({
         characters,
       };
     },
+  });
+  const homeFlowReady = ready && Boolean(session);
+  const homeFlowLoading = homeFlowReady && loggedInQuery.isLoading;
+  const homeFlowLoaded = homeFlowReady && loggedInQuery.isFetched;
+
+  useClientFlowDiagnostics({
+    flow: "home-logged-in",
+    ready: homeFlowReady,
+    loading: homeFlowLoading,
+    loaded: homeFlowLoaded,
   });
 
   async function onLogin() {
@@ -196,6 +208,17 @@ export function HomePageView({
     return <main className="min-h-screen" />;
   }
 
+  if (loggedInQuery.isLoading) {
+    return (
+      <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+        <AppHeader locale={locale} session={session} />
+        <main className="mx-auto w-full max-w-7xl px-4 py-8">
+          <PageLoadingState label={t("ui.loading.page")} className="py-6" />
+        </main>
+      </div>
+    );
+  }
+
   const data = loggedInQuery.data;
   const me: MeResponse | null = data?.me ?? null;
   const currentUserId = me?.user.id;
@@ -262,7 +285,7 @@ export function HomePageView({
             <CardDescription>{t("ui.start.loggedInSubtitle")}</CardDescription>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            {me ? `${t("ui.start.welcome")}: ${me.profile.username}` : t("ui.start.loading")}
+            {me ? `${t("ui.start.welcome")}: ${me.profile.username}` : t("ui.start.loggedInSubtitle")}
           </CardContent>
         </Card>
 
