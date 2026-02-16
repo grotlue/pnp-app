@@ -65,6 +65,14 @@
     "settings": {
       "title": "Einstellungen",
       "subtitle": "Private Kontoeinstellungen verwalten.",
+      "mfaTitle": "Admin-MFA",
+      "mfaSubtitle": "Richte Multi-Faktor-Authentifizierung für Admin-Zugriff ein.",
+      "mfaRequired": "Admin-MFA ist erforderlich. Schließe das Setup ab, um Admin-Routen zu nutzen.",
+      "mfaEnabled": "Admin-MFA ist aktiv.",
+      "mfaNotEnabled": "Admin-MFA ist noch nicht eingerichtet.",
+      "mfaSetupStep": "Hinterlege dieses Secret oder die URI in deiner Authenticator-App und gib dann einen aktuellen Code ein.",
+      "mfaSetupStarted": "MFA-Setup gestartet. Gib den Code aus deiner Authenticator-App ein.",
+      "mfaSetupMissing": "Starte zuerst das MFA-Setup, um einen Faktor zu erhalten.",
       "deleteTitle": "Konto löschen",
       "deleteConfirm": "Möchtest du dein Konto wirklich löschen?"
     },
@@ -166,6 +174,7 @@
       "username": "Benutzername",
       "newEmail": "Neue E-Mail",
       "newPassword": "Neues Passwort",
+      "mfaCode": "Authenticator-Code",
       "description": "Beschreibung",
       "characterName": "Charaktername",
       "characterAge": "Alter",
@@ -223,6 +232,8 @@
       "reject": "Ablehnen",
       "changeEmail": "E-Mail ändern",
       "changePassword": "Passwort ändern",
+      "setupMfa": "MFA-Setup starten",
+      "verifyMfa": "MFA-Code prüfen",
       "deleteAccount": "Konto löschen",
       "on": "an",
       "off": "aus"
@@ -235,7 +246,8 @@
       "deleted": "Erfolgreich gelöscht.",
       "sent": "Erfolgreich gesendet.",
       "registeredNowLogin": "Registrierung erfolgreich. Bitte einloggen.",
-      "passwordResetSent": "Passwort-Reset-E-Mail wurde gesendet."
+      "passwordResetSent": "Passwort-Reset-E-Mail wurde gesendet.",
+      "mfaEnabled": "MFA erfolgreich aktiviert."
     }
   },
   "relationship": {

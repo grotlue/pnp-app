@@ -105,12 +105,20 @@ export function AppHeader({ locale, session, me: providedMe = null, fetchMe = tr
             </>
           ) : null}
           {roleResolved && role === "admin" ? (
-            <IconActionLinkButton
-              label={t("ui.menu.admin")}
-              icon={Shield}
-              href={appRoutes.admin}
-              variant="ghost"
-            />
+            <>
+              <IconActionLinkButton
+                label={t("ui.menu.admin")}
+                icon={Shield}
+                href={appRoutes.admin}
+                variant="ghost"
+              />
+              <IconActionLinkButton
+                label={t("ui.menu.settings")}
+                icon={Settings}
+                href={appRoutes.settings}
+                variant="ghost"
+              />
+            </>
           ) : null}
           <IconActionButton
             label={t("ui.actions.logout")}

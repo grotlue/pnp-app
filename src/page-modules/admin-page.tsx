@@ -179,6 +179,9 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
     .map((error) => error.message);
 
   const feedback = message || queryErrors[0] || "";
+  const mfaRequiredError = queryErrors.find((error) =>
+    error.toLowerCase().includes("admin mfa is required"),
+  );
   const sectionTabs = [
     { key: "users" as const, href: "/admin/users", label: t("ui.admin.usersTitle") },
     { key: "campaigns" as const, href: "/admin/campaigns", label: t("ui.admin.campaignsTitle") },
@@ -187,6 +190,28 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
 
   if (!ready || !session) {
     return <main className="min-h-screen" />;
+  }
+
+  if (mfaRequiredError) {
+    return (
+      <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+        <AppHeader locale={locale} session={session} />
+        <main className="mx-auto w-full max-w-4xl px-4 py-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("ui.settings.mfaTitle")}</CardTitle>
+              <CardDescription>{t("ui.settings.mfaRequired")}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <FeedbackMessage message={mfaRequiredError} />
+              <Link href="/settings">
+                <Button>{t("ui.menu.settings")}</Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
+    );
   }
 
   if (admin.meQuery.isLoading || meRole !== "admin") {
