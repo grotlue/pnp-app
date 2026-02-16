@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getMe } from "@/features/users/queries/users-profile.query";
+import { queryKeys } from "@/lib/client/query-keys";
 import type { ClientSession } from "@/lib/client/session";
 import type {
   AdminCreateCampaignInput,
@@ -11,85 +11,40 @@ import type {
   AdminUpdateCharacterInput,
   AdminUpdateUserInput,
 } from "../types";
+import { getAdminBootstrap } from "../queries/admin-bootstrap.query";
 import {
   createAdminCampaign,
   deleteAdminCampaign,
-  listAdminCampaigns,
   updateAdminCampaign,
 } from "../queries/admin-campaigns.query";
 import {
   createAdminCharacter,
   deleteAdminCharacter,
-  listAdminCharacters,
   updateAdminCharacter,
 } from "../queries/admin-characters.query";
 import {
   createAdminUser,
   deleteAdminUser,
-  listAdminUsers,
   updateAdminUser,
 } from "../queries/admin-users.query";
 
 export function useAdminDashboard(session: ClientSession | null) {
   const queryClient = useQueryClient();
   const tokenKey = session?.accessToken ?? "no-session";
-
-  const meQuery = useQuery({
-    queryKey: ["admin", "me", tokenKey],
+  const bootstrapQuery = useQuery({
+    queryKey: queryKeys.adminBootstrap(tokenKey),
     enabled: Boolean(session),
+    staleTime: 30_000,
     queryFn: async () => {
       if (!session) {
         throw new Error("Missing session");
       }
-      return getMe(session);
+      return getAdminBootstrap(session);
     },
   });
 
-  const isAdmin = meQuery.data?.profile.role === "admin";
-
-  const usersQuery = useQuery({
-    queryKey: ["admin", "users", tokenKey],
-    enabled: Boolean(session && isAdmin),
-    queryFn: async () => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
-      return listAdminUsers(session);
-    },
-  });
-
-  const campaignsQuery = useQuery({
-    queryKey: ["admin", "campaigns", tokenKey],
-    enabled: Boolean(session && isAdmin),
-    queryFn: async () => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
-      return listAdminCampaigns(session);
-    },
-  });
-
-  const charactersQuery = useQuery({
-    queryKey: ["admin", "characters", tokenKey],
-    enabled: Boolean(session && isAdmin),
-    queryFn: async () => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
-      return listAdminCharacters(session);
-    },
-  });
-
-  async function invalidateUsers() {
-    await queryClient.invalidateQueries({ queryKey: ["admin", "users", tokenKey] });
-  }
-
-  async function invalidateCampaigns() {
-    await queryClient.invalidateQueries({ queryKey: ["admin", "campaigns", tokenKey] });
-  }
-
-  async function invalidateCharacters() {
-    await queryClient.invalidateQueries({ queryKey: ["admin", "characters", tokenKey] });
+  async function invalidateBootstrap() {
+    await queryClient.invalidateQueries({ queryKey: queryKeys.adminBootstrap(tokenKey) });
   }
 
   const createUserMutation = useMutation({
@@ -99,7 +54,7 @@ export function useAdminDashboard(session: ClientSession | null) {
       }
       return createAdminUser(session, input);
     },
-    onSuccess: invalidateUsers,
+    onSuccess: invalidateBootstrap,
   });
 
   const updateUserMutation = useMutation({
@@ -109,7 +64,7 @@ export function useAdminDashboard(session: ClientSession | null) {
       }
       return updateAdminUser(session, input.userId, input.values);
     },
-    onSuccess: invalidateUsers,
+    onSuccess: invalidateBootstrap,
   });
 
   const deleteUserMutation = useMutation({
@@ -119,10 +74,7 @@ export function useAdminDashboard(session: ClientSession | null) {
       }
       return deleteAdminUser(session, userId);
     },
-    onSuccess: async () => {
-      await invalidateUsers();
-      await queryClient.invalidateQueries({ queryKey: ["admin", "me", tokenKey] });
-    },
+    onSuccess: invalidateBootstrap,
   });
 
   const createCampaignMutation = useMutation({
@@ -132,7 +84,7 @@ export function useAdminDashboard(session: ClientSession | null) {
       }
       return createAdminCampaign(session, input);
     },
-    onSuccess: invalidateCampaigns,
+    onSuccess: invalidateBootstrap,
   });
 
   const updateCampaignMutation = useMutation({
@@ -142,7 +94,7 @@ export function useAdminDashboard(session: ClientSession | null) {
       }
       return updateAdminCampaign(session, input.campaignId, input.values);
     },
-    onSuccess: invalidateCampaigns,
+    onSuccess: invalidateBootstrap,
   });
 
   const deleteCampaignMutation = useMutation({
@@ -152,7 +104,7 @@ export function useAdminDashboard(session: ClientSession | null) {
       }
       return deleteAdminCampaign(session, campaignId);
     },
-    onSuccess: invalidateCampaigns,
+    onSuccess: invalidateBootstrap,
   });
 
   const createCharacterMutation = useMutation({
@@ -162,7 +114,7 @@ export function useAdminDashboard(session: ClientSession | null) {
       }
       return createAdminCharacter(session, input);
     },
-    onSuccess: invalidateCharacters,
+    onSuccess: invalidateBootstrap,
   });
 
   const updateCharacterMutation = useMutation({
@@ -172,7 +124,7 @@ export function useAdminDashboard(session: ClientSession | null) {
       }
       return updateAdminCharacter(session, input.characterId, input.values);
     },
-    onSuccess: invalidateCharacters,
+    onSuccess: invalidateBootstrap,
   });
 
   const deleteCharacterMutation = useMutation({
@@ -182,8 +134,32 @@ export function useAdminDashboard(session: ClientSession | null) {
       }
       return deleteAdminCharacter(session, characterId);
     },
-    onSuccess: invalidateCharacters,
+    onSuccess: invalidateBootstrap,
   });
+
+  const meQuery = {
+    data: bootstrapQuery.data?.me,
+    error: bootstrapQuery.error,
+    isLoading: bootstrapQuery.isLoading,
+  };
+
+  const usersQuery = {
+    data: bootstrapQuery.data?.users,
+    error: bootstrapQuery.error,
+    isLoading: bootstrapQuery.isLoading,
+  };
+
+  const campaignsQuery = {
+    data: bootstrapQuery.data?.campaigns,
+    error: bootstrapQuery.error,
+    isLoading: bootstrapQuery.isLoading,
+  };
+
+  const charactersQuery = {
+    data: bootstrapQuery.data?.characters,
+    error: bootstrapQuery.error,
+    isLoading: bootstrapQuery.isLoading,
+  };
 
   return {
     meQuery,

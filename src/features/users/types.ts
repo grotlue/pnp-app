@@ -45,6 +45,38 @@ export type PasswordResetConfirmResponse = {
   expiresAt?: number;
 };
 
+export type AdminMfaFactor = {
+  id: string;
+  friendlyName: string | null;
+  status: "verified" | "unverified";
+  createdAt: string;
+  lastChallengedAt: string | null;
+};
+
+export type AdminMfaStatusResponse = {
+  isAdmin: boolean;
+  mfaRequired: boolean;
+  currentLevel: "aal1" | "aal2" | null;
+  nextLevel: "aal1" | "aal2" | null;
+  hasVerifiedTotp: boolean;
+  factors: AdminMfaFactor[];
+};
+
+export type AdminMfaEnrollResponse = {
+  factorId: string;
+  friendlyName: string | null;
+  qrCode: string;
+  secret: string;
+  uri: string;
+};
+
+export type AdminMfaVerifyResponse = {
+  verified: boolean;
+  accessToken: string;
+  refreshToken?: string;
+  expiresAt?: number;
+};
+
 export type PublicUserProfile = {
   id: string;
   username: string;

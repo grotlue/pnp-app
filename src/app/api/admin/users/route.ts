@@ -1,4 +1,8 @@
 import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
+import {
+  normalizeAndValidateEmail,
+  validatePasswordStrength,
+} from "@/lib/api/auth-validation";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { createServiceRoleSupabaseClient } from "@/server/supabase/service-role-client";
 
@@ -91,12 +95,20 @@ export async function POST(request: Request) {
     if (!body?.email || !body.password || !body.username) {
       return jsonError(400, "invalid_payload", "email, password, and username are required");
     }
+    const email = normalizeAndValidateEmail(body.email);
+    if (!email) {
+      return jsonError(400, "invalid_payload", "valid email is required");
+    }
+    const passwordError = validatePasswordStrength(body.password);
+    if (passwordError) {
+      return jsonError(400, "invalid_payload", passwordError);
+    }
 
     const locale = body.locale === "de" ? "de" : "en";
     const service = createServiceRoleSupabaseClient();
 
     const { data: authData, error: authError } = await service.auth.admin.createUser({
-      email: body.email,
+      email,
       password: body.password,
       email_confirm: true,
       user_metadata: {

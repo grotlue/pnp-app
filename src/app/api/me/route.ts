@@ -29,8 +29,8 @@ export async function DELETE(request: Request) {
 
   const { client, user } = auth.context;
   const { error } = await client.rpc("rpc_delete_user_phase1", {
-    p_user_id: user.id,
-  });
+      p_user_id: user.id,
+    });
 
   if (error) {
     return jsonError(400, "user_delete_failed", error.message);

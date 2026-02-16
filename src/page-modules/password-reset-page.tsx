@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import { FormInput } from "@/components/common/form-controls";
+import { TurnstileWidget } from "@/components/common/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,6 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { resolveAuthCaptchaClientConfig } from "@/lib/features/auth-captcha";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { textLinkClassName } from "@/lib/utils/link";
 import { requestPasswordReset } from "@/features/users/queries/users-auth.query";
@@ -23,19 +25,34 @@ type PasswordResetScreenProps = {
 
 export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
+  const authCaptchaConfig = useMemo(() => resolveAuthCaptchaClientConfig(), []);
   const [busy, setBusy] = useState(false);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaResetKey, setCaptchaResetKey] = useState(0);
 
   async function onSubmit() {
+    if (authCaptchaConfig.required && !captchaToken) {
+      setMessage(t("ui.feedback.captchaRequired"));
+      return;
+    }
+
     setBusy(true);
     setMessage("");
     try {
-      await requestPasswordReset({ email });
+      await requestPasswordReset({
+        email,
+        ...(captchaToken ? { captchaToken } : {}),
+      });
       setMessage(t("ui.feedback.passwordResetSent"));
     } catch (error) {
       setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
     } finally {
+      if (authCaptchaConfig.enabled) {
+        setCaptchaToken(null);
+        setCaptchaResetKey((prev) => prev + 1);
+      }
       setBusy(false);
     }
   }
@@ -55,10 +72,21 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
             />
+            {authCaptchaConfig.enabled && authCaptchaConfig.siteKey ? (
+              <TurnstileWidget
+                siteKey={authCaptchaConfig.siteKey}
+                resetKey={captchaResetKey}
+                loadErrorMessage={t("ui.feedback.captchaUnavailable")}
+                onTokenChange={setCaptchaToken}
+              />
+            ) : null}
             <FeedbackMessage message={message} />
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-2">
-            <Button disabled={busy} onClick={onSubmit}>
+            <Button
+              disabled={busy || (authCaptchaConfig.required && !captchaToken)}
+              onClick={onSubmit}
+            >
               {t("ui.actions.sendReset")}
             </Button>
             <div className="text-xs">

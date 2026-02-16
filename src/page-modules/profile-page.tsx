@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { setLocaleCookie } from "@/lib/client/locale-cookie";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { isAdmin } from "@/features/users/logic/role.logic";
 import { getMe, updateMyProfile } from "@/features/users/queries/users-profile.query";
 import type { MeResponse } from "@/features/users/types";
 
@@ -48,7 +49,7 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
     }
     try {
       const response: MeResponse = await getMe(session);
-      if (response.profile.role === "admin") {
+      if (isAdmin(response.profile.role)) {
         router.replace("/admin/users");
         return;
       }

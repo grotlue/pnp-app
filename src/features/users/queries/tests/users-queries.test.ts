@@ -19,6 +19,11 @@ import {
   requestPasswordReset,
   verifyAuthToken,
 } from "../users-auth.query";
+import {
+  enrollAdminTotp,
+  getAdminMfaStatus,
+  verifyAdminTotp,
+} from "../users-mfa.query";
 import { getMe, updateMyProfile } from "../users-profile.query";
 import { deleteMyAccount, updateMyEmail, updateMyPassword } from "../users-settings.query";
 
@@ -45,6 +50,25 @@ describe("users auth/profile/settings queries", () => {
       body: { email: "x@example.com", password: "secret" },
     });
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Login failed");
+  });
+
+  it("loginUser forwards captcha token when provided", async () => {
+    const response = { data: { accessToken: "a1" }, error: null, status: 200 };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(
+      loginUser({
+        email: "x@example.com",
+        password: "secret",
+        captchaToken: "captcha-1",
+      }),
+    ).resolves.toEqual({
+      accessToken: "a1",
+    });
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/login", {
+      method: "POST",
+      body: { email: "x@example.com", password: "secret", captchaToken: "captcha-1" },
+    });
   });
 
   it("registerUser posts registration payload", async () => {
@@ -75,6 +99,35 @@ describe("users auth/profile/settings queries", () => {
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Register failed");
   });
 
+  it("registerUser forwards captcha token when provided", async () => {
+    const response = {
+      data: { emailVerificationRequired: true },
+      error: null,
+      status: 201,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(
+      registerUser({
+        username: "user1",
+        email: "u@example.com",
+        password: "secret",
+        locale: "de",
+        captchaToken: "captcha-2",
+      }),
+    ).resolves.toEqual({ emailVerificationRequired: true });
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/register", {
+      method: "POST",
+      body: {
+        username: "user1",
+        email: "u@example.com",
+        password: "secret",
+        locale: "de",
+        captchaToken: "captcha-2",
+      },
+    });
+  });
+
   it("requestPasswordReset posts reset payload", async () => {
     const response = { data: { requested: true }, error: null, status: 200 };
     apiRequestMock.mockResolvedValueOnce(response);
@@ -87,6 +140,21 @@ describe("users auth/profile/settings queries", () => {
       body: { email: "x@example.com" },
     });
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Password reset request failed");
+  });
+
+  it("requestPasswordReset forwards captcha token when provided", async () => {
+    const response = { data: { requested: true }, error: null, status: 200 };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(
+      requestPasswordReset({ email: "x@example.com", captchaToken: "captcha-3" }),
+    ).resolves.toEqual({
+      requested: true,
+    });
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/password-reset/request", {
+      method: "POST",
+      body: { email: "x@example.com", captchaToken: "captcha-3" },
+    });
   });
 
   it("logoutUser sends authenticated logout request", async () => {
@@ -235,5 +303,54 @@ describe("users auth/profile/settings queries", () => {
       session,
     });
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to delete account");
+  });
+
+  it("getAdminMfaStatus loads MFA status for admin", async () => {
+    const response = {
+      data: { isAdmin: true, mfaRequired: true, currentLevel: "aal1", nextLevel: "aal2", hasVerifiedTotp: false, factors: [] },
+      error: null,
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(getAdminMfaStatus(session)).resolves.toEqual(response.data);
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/mfa/totp", { session });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to load MFA status");
+  });
+
+  it("enrollAdminTotp posts enrollment request", async () => {
+    const response = {
+      data: { factorId: "f1", friendlyName: "admin", qrCode: "<svg/>", secret: "ABC", uri: "otpauth://..." },
+      error: null,
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(enrollAdminTotp(session, { friendlyName: "admin" })).resolves.toEqual(response.data);
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/mfa/totp", {
+      method: "POST",
+      session,
+      body: { friendlyName: "admin" },
+    });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to start MFA setup");
+  });
+
+  it("verifyAdminTotp posts verification code", async () => {
+    const response = {
+      data: { verified: true, accessToken: "a2", refreshToken: "r2", expiresAt: 123456 },
+      error: null,
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(verifyAdminTotp(session, { factorId: "f1", code: "123456" })).resolves.toEqual(
+      response.data,
+    );
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/mfa/totp", {
+      method: "PATCH",
+      session,
+      body: { factorId: "f1", code: "123456" },
+    });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to verify MFA code");
   });
 });

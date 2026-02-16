@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import { IconActionButton } from "@/components/common/icon-action-button";
 import { ListItemRow } from "@/components/common/list-item-row";
+import { PageLoadingState } from "@/components/common/page-loading-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -26,6 +27,7 @@ import {
 import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
 import { CharacterTypeBadge } from "@/features/characters/components/character-type-badge";
 import { useCharacterDetailScreen } from "@/features/characters/hooks/use-character-detail-screen";
+import { canManageCharacter, isAdmin } from "@/features/users/logic/role.logic";
 import type { OutgoingRelationship, RelationshipDetail } from "@/features/relationships/types";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { useClientSession } from "@/lib/client/use-client-session";
@@ -104,11 +106,7 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
       <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
         <AppHeader locale={locale} session={session} />
         <main className="mx-auto w-full max-w-7xl px-4 py-8">
-          <Card>
-            <CardContent className="py-8 text-sm text-muted-foreground">
-              {t("ui.start.loading")}
-            </CardContent>
-          </Card>
+          <PageLoadingState label={t("ui.loading.page")} />
         </main>
       </div>
     );
@@ -119,8 +117,12 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
 
   const { me, character, campaigns, allCharacters, users, catalog, summary, outgoing } = detailQuery.data;
   const isOwner = me.user.id === character.owner_user_id;
-  const canManage = isOwner || (me.profile.role === "admin" && !character.is_private);
-  const isForeignAdminView = me.profile.role === "admin" && !isOwner;
+  const canManage = canManageCharacter({
+    isOwner,
+    role: me.profile.role,
+    isPrivate: character.is_private,
+  });
+  const isForeignAdminView = isAdmin(me.profile.role) && !isOwner;
   const avatarUrl = avatarQuery.data ?? null;
   const assignedCampaign = campaigns.find((entry) => entry.id === character.campaign_id) ?? null;
   const ownerUser = users.find((entry) => entry.id === character.owner_user_id) ?? null;

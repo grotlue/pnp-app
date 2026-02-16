@@ -103,6 +103,29 @@ describe("admin users route", () => {
     });
   });
 
+  it("rejects weak password on create", async () => {
+    requireAdminMock.mockResolvedValueOnce({ context: { user: { id: "admin-1" } } });
+
+    const response = await POST(
+      new Request("http://localhost/api/admin/users", {
+        method: "POST",
+        body: JSON.stringify({
+          email: "u@example.com",
+          password: "weakpass",
+          username: "user",
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "invalid_payload",
+        message: "password must be at least 12 characters",
+      },
+    });
+  });
+
   it("creates user and upserts profile", async () => {
     requireAdminMock.mockResolvedValueOnce({ context: { user: { id: "admin-1" } } });
 
@@ -127,7 +150,7 @@ describe("admin users route", () => {
         method: "POST",
         body: JSON.stringify({
           email: "u2@example.com",
-          password: "Secret123!",
+          password: "SecretPass123",
           username: "user2",
           description: "desc",
           locale: "de",
@@ -138,7 +161,7 @@ describe("admin users route", () => {
 
     expect(serviceClient.auth.admin.createUser).toHaveBeenCalledWith({
       email: "u2@example.com",
-      password: "Secret123!",
+      password: "SecretPass123",
       email_confirm: true,
       user_metadata: { username: "user2", locale: "de" },
     });
@@ -162,7 +185,7 @@ describe("admin users route", () => {
         method: "POST",
         body: JSON.stringify({
           email: "u2@example.com",
-          password: "Secret123!",
+          password: "SecretPass123",
           username: "user2",
           locale: "de",
         }),
