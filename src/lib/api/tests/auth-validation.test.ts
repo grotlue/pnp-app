@@ -3,6 +3,7 @@ import {
   normalizeAndValidateEmail,
   normalizeCaptchaToken,
   normalizeEmail,
+  normalizeTotpCode,
   validatePasswordStrength,
 } from "../auth-validation";
 
@@ -25,6 +26,14 @@ describe("auth validation helpers", () => {
 
   it("returns null for empty captcha token", () => {
     expect(normalizeCaptchaToken("   ")).toBeNull();
+  });
+
+  it("normalizes valid totp code", () => {
+    expect(normalizeTotpCode(" 123 456 ")).toBe("123456");
+  });
+
+  it("returns null for invalid totp code", () => {
+    expect(normalizeTotpCode("12ab56")).toBeNull();
   });
 
   it("accepts strong passwords", () => {

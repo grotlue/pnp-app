@@ -19,6 +19,11 @@ import {
   requestPasswordReset,
   verifyAuthToken,
 } from "../users-auth.query";
+import {
+  enrollAdminTotp,
+  getAdminMfaStatus,
+  verifyAdminTotp,
+} from "../users-mfa.query";
 import { getMe, updateMyProfile } from "../users-profile.query";
 import { deleteMyAccount, updateMyEmail, updateMyPassword } from "../users-settings.query";
 
@@ -235,5 +240,54 @@ describe("users auth/profile/settings queries", () => {
       session,
     });
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to delete account");
+  });
+
+  it("getAdminMfaStatus loads MFA status for admin", async () => {
+    const response = {
+      data: { isAdmin: true, mfaRequired: true, currentLevel: "aal1", nextLevel: "aal2", hasVerifiedTotp: false, factors: [] },
+      error: null,
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(getAdminMfaStatus(session)).resolves.toEqual(response.data);
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/mfa/totp", { session });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to load MFA status");
+  });
+
+  it("enrollAdminTotp posts enrollment request", async () => {
+    const response = {
+      data: { factorId: "f1", friendlyName: "admin", qrCode: "<svg/>", secret: "ABC", uri: "otpauth://..." },
+      error: null,
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(enrollAdminTotp(session, { friendlyName: "admin" })).resolves.toEqual(response.data);
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/mfa/totp", {
+      method: "POST",
+      session,
+      body: { friendlyName: "admin" },
+    });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to start MFA setup");
+  });
+
+  it("verifyAdminTotp posts verification code", async () => {
+    const response = {
+      data: { verified: true, accessToken: "a2", refreshToken: "r2", expiresAt: 123456 },
+      error: null,
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(verifyAdminTotp(session, { factorId: "f1", code: "123456" })).resolves.toEqual(
+      response.data,
+    );
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/mfa/totp", {
+      method: "PATCH",
+      session,
+      body: { factorId: "f1", code: "123456" },
+    });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to verify MFA code");
   });
 });

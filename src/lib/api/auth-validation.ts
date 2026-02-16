@@ -4,6 +4,7 @@ const MIN_PASSWORD_LENGTH = 12;
 const HAS_LOWERCASE = /[a-z]/;
 const HAS_UPPERCASE = /[A-Z]/;
 const HAS_DIGIT = /\d/;
+const TOTP_CODE_PATTERN = /^\d{6,8}$/;
 
 export function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
@@ -33,6 +34,19 @@ export function normalizeCaptchaToken(value: unknown): string | null {
 
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+export function normalizeTotpCode(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const normalized = value.trim().replace(/\s+/g, "");
+  if (!TOTP_CODE_PATTERN.test(normalized)) {
+    return null;
+  }
+
+  return normalized;
 }
 
 export function validatePasswordStrength(password: string): string | null {
