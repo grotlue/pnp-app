@@ -107,6 +107,8 @@ In Vercel project -> Settings -> Environment Variables:
   - Optional diagnostics flags (normally `false`):
     - `ENABLE_PERF_DIAGNOSTICS`
     - `NEXT_PUBLIC_ENABLE_PERF_DIAGNOSTICS`
+  - Optional Speed Insights override:
+    - `ENABLE_VERCEL_SPEED_INSIGHTS=false` (default is enabled in production)
 - For `Preview`:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -115,6 +117,8 @@ In Vercel project -> Settings -> Environment Variables:
   - Optional diagnostics flags (enable for targeted investigations):
     - `ENABLE_PERF_DIAGNOSTICS=true`
     - `NEXT_PUBLIC_ENABLE_PERF_DIAGNOSTICS=true`
+  - Optional Speed Insights override:
+    - `ENABLE_VERCEL_SPEED_INSIGHTS=false` (default is enabled in preview)
 
 ## 6) Configure Supabase Auth URLs
 

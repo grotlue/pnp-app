@@ -96,6 +96,7 @@ src/
   - request-level diagnostics helper in `src/lib/api/diagnostics.ts`
   - client flow diagnostics hook in `src/lib/client/use-client-flow-diagnostics.ts`
   - API client request diagnostics logging in `src/lib/client/api.ts`
+- Vercel Speed Insights is mounted in `src/app/layout.tsx` and defaults to enabled in preview/production.
 
 ## Feature Flags
 

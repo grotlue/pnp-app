@@ -25,6 +25,12 @@ Client diagnostics emit:
 - `client_perf_diagnostics` logs (screen-level readiness/loading/loaded timing)
 - `api_perf_diagnostics` logs (request duration + response headers)
 
+Vercel Speed Insights:
+
+- enabled by default in `preview` and `production`
+- disabled by default in `development`
+- optional override: `ENABLE_VERCEL_SPEED_INSIGHTS=false`
+
 ## 2) Instrumented API routes
 
 Initial diagnostics coverage focuses on the slowest flows:
