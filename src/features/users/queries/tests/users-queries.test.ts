@@ -281,6 +281,7 @@ describe("users auth/profile/settings queries", () => {
         fileName: "avatar.png",
         width: 512,
         height: 512,
+        fileSize: 123_456,
       }),
     ).resolves.toEqual(response.data);
     expect(apiRequestMock).toHaveBeenCalledWith("/api/storage/profile-images/signed-upload", {
@@ -290,6 +291,7 @@ describe("users auth/profile/settings queries", () => {
         fileName: "avatar.png",
         width: 512,
         height: 512,
+        fileSize: 123_456,
       },
     });
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(

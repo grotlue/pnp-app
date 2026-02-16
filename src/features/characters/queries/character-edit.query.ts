@@ -49,6 +49,7 @@ export async function createCharacterAvatarSignedUpload(
     fileName: string;
     width: number;
     height: number;
+    fileSize: number;
   },
 ): Promise<{ token: string; signedUrl: string; path: string }> {
   const response = await apiRequest<{ token: string; signedUrl: string; path: string }>(

@@ -83,6 +83,7 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
         fileName: file.name,
         width: dimensions.width,
         height: dimensions.height,
+        fileSize: file.size,
       });
       await uploadImageToSignedPath({
         bucket: "profile-images",
@@ -157,6 +158,7 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
               uploadingLabel={t("ui.imageUpload.uploading")}
               invalidTypeLabel={t("ui.imageUpload.invalidType")}
               invalidDimensionsLabel={t("ui.imageUpload.invalidDimensions")}
+              invalidFileSizeLabel={t("ui.imageUpload.invalidFileSize")}
               disabled={busy}
               onChange={(avatarPath) => setForm((prev) => ({ ...prev, avatarPath }))}
               onUpload={uploadProfileImage}

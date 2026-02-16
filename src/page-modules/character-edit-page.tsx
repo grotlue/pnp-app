@@ -63,6 +63,7 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
         fileName: file.name,
         width: dimensions.width,
         height: dimensions.height,
+        fileSize: file.size,
       });
       await uploadImageToSignedPath({
         bucket: "character-images",
@@ -178,6 +179,7 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
               uploadingLabel={t("ui.imageUpload.uploading")}
               invalidTypeLabel={t("ui.imageUpload.invalidType")}
               invalidDimensionsLabel={t("ui.imageUpload.invalidDimensions")}
+              invalidFileSizeLabel={t("ui.imageUpload.invalidFileSize")}
               disabled={anyPending}
               onChange={(avatarPath) => setFormEdits((prev) => ({ ...prev, avatarPath }))}
               onUpload={uploadCharacterImage}

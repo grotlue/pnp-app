@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { type ChangeEvent, useEffect, useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { MAX_IMAGE_UPLOAD_SIZE_BYTES } from "@/lib/storage/image-upload";
 import { cn } from "@/lib/utils/cn";
 
 const ACCEPTED_IMAGE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -25,6 +26,8 @@ type ImageUploadFieldProps = {
   uploadingLabel: string;
   invalidTypeLabel: string;
   invalidDimensionsLabel: string;
+  invalidFileSizeLabel: string;
+  maxFileSizeBytes?: number;
   disabled?: boolean;
   className?: string;
   onChange: (nextPath: string) => void;
@@ -67,6 +70,8 @@ export function ImageUploadField({
   uploadingLabel,
   invalidTypeLabel,
   invalidDimensionsLabel,
+  invalidFileSizeLabel,
+  maxFileSizeBytes = MAX_IMAGE_UPLOAD_SIZE_BYTES,
   disabled,
   className,
   onChange,
@@ -127,6 +132,14 @@ export function ImageUploadField({
 
     if (!ACCEPTED_IMAGE_MIME_TYPES.has(file.type)) {
       setFieldMessage(invalidTypeLabel);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    if (file.size > maxFileSizeBytes) {
+      setFieldMessage(invalidFileSizeLabel);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }

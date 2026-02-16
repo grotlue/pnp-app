@@ -169,14 +169,15 @@
       "noPermission": "Only the character owner can edit this character."
     },
     "imageUpload": {
-      "hint": "Formats: JPG, PNG, WEBP. Image must be square.",
+      "hint": "Formats: JPG, PNG, WEBP. Max 5 MB. Image must be square.",
       "empty": "No image selected",
       "upload": "Upload image",
       "replace": "Replace image",
       "remove": "Remove image",
       "uploading": "Uploading image...",
       "invalidType": "Please select a JPG, PNG, or WEBP image.",
-      "invalidDimensions": "The image must be square (same width and height)."
+      "invalidDimensions": "The image must be square (same width and height).",
+      "invalidFileSize": "Please select an image up to 5 MB."
     },
     "fields": {
       "email": "Email",

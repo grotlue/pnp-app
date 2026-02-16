@@ -158,6 +158,7 @@ describe("character queries", () => {
         fileName: "avatar.png",
         width: 400,
         height: 400,
+        fileSize: 234_567,
       }),
     ).resolves.toEqual(response.data);
     expect(apiRequestMock).toHaveBeenCalledWith("/api/storage/character-images/signed-upload", {
@@ -168,6 +169,7 @@ describe("character queries", () => {
         fileName: "avatar.png",
         width: 400,
         height: 400,
+        fileSize: 234_567,
       },
     });
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(

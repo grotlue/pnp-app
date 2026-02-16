@@ -169,14 +169,15 @@
       "noPermission": "Nur der Besitzer kann diesen Charakter bearbeiten."
     },
     "imageUpload": {
-      "hint": "Formate: JPG, PNG, WEBP. Das Bild muss quadratisch sein.",
+      "hint": "Formate: JPG, PNG, WEBP. Maximal 5 MB. Das Bild muss quadratisch sein.",
       "empty": "Kein Bild ausgewählt",
       "upload": "Bild hochladen",
       "replace": "Bild ersetzen",
       "remove": "Bild entfernen",
       "uploading": "Bild wird hochgeladen...",
       "invalidType": "Bitte ein Bild im Format JPG, PNG oder WEBP auswählen.",
-      "invalidDimensions": "Das Bild muss quadratisch sein (gleiche Breite und Höhe)."
+      "invalidDimensions": "Das Bild muss quadratisch sein (gleiche Breite und Höhe).",
+      "invalidFileSize": "Bitte ein Bild mit maximal 5 MB auswählen."
     },
     "fields": {
       "email": "E-Mail",
