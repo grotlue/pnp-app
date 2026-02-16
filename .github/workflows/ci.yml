@@ -68,14 +68,17 @@ jobs:
         with:
           version: latest
 
+      - name: Start local Supabase services
+        run: supabase start
+
       - name: Reset local Supabase DB and apply migrations
-        run: npx supabase db reset --local --no-seed --yes
+        run: supabase db reset --local --no-seed --yes
 
       - name: Check foreign key indexing
         run: ./scripts/check-unindexed-foreign-keys.sh
 
       - name: Lint local Supabase DB (public schema)
-        run: npx supabase db lint --local --schema public --fail-on warning
+        run: supabase db lint --local --schema public --fail-on warning
 
   dispatch_deploy_preview_main:
     needs:
