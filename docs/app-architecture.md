@@ -91,7 +91,7 @@ src/
 - Security headers (including CSP) are applied centrally via `src/proxy.ts`.
 - New public-schema tables must enable RLS in the same migration.
 - Admin APIs enforce role checks plus MFA `aal2` session level in preview/production by default.
-- Auth CAPTCHA support is centralized and env-driven (`AUTH_CAPTCHA_MODE`).
+- Auth CAPTCHA support is centralized and env-driven (`AUTH_CAPTCHA_MODE`, `NEXT_PUBLIC_AUTH_CAPTCHA_MODE`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`).
 - Admin MFA setup/verification flow is available in settings and backed by `GET/POST/PATCH /api/auth/mfa/totp`.
 
 ## API Patterns

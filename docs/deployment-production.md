@@ -107,6 +107,8 @@ In Vercel project -> Settings -> Environment Variables:
   - Optional auth hardening toggles:
     - `REQUIRE_ADMIN_MFA` (default: enabled in preview/production)
     - `AUTH_CAPTCHA_MODE` (`off` | `optional` | `required`; default: `optional` in preview/production)
+    - `NEXT_PUBLIC_AUTH_CAPTCHA_MODE` (`off` | `optional` | `required`; should match `AUTH_CAPTCHA_MODE`)
+    - `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (required when CAPTCHA mode is `optional` or `required`)
   - Optional Speed Insights override:
     - `ENABLE_VERCEL_SPEED_INSIGHTS=false` (default is enabled in production)
 - For `Preview`:
@@ -117,6 +119,8 @@ In Vercel project -> Settings -> Environment Variables:
   - Optional auth hardening toggles:
     - `REQUIRE_ADMIN_MFA` (default: enabled in preview/production)
     - `AUTH_CAPTCHA_MODE` (`off` | `optional` | `required`; default: `optional` in preview/production)
+    - `NEXT_PUBLIC_AUTH_CAPTCHA_MODE` (`off` | `optional` | `required`; should match `AUTH_CAPTCHA_MODE`)
+    - `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (required when CAPTCHA mode is `optional` or `required`)
   - Optional Speed Insights override:
     - `ENABLE_VERCEL_SPEED_INSIGHTS=false` (default is enabled in preview)
 
@@ -140,7 +144,8 @@ In Supabase -> Authentication, configure these for both preview and production:
   - Enable security-oriented notification emails where available.
 - `Bot / abuse protection`:
   - Enable CAPTCHA provider in Supabase Auth.
-  - Set app env `AUTH_CAPTCHA_MODE=required` after client token wiring is validated.
+  - Set `AUTH_CAPTCHA_MODE` and `NEXT_PUBLIC_AUTH_CAPTCHA_MODE` to the same value.
+  - Set `NEXT_PUBLIC_TURNSTILE_SITE_KEY` for Cloudflare Turnstile.
 - `Password security`:
   - Keep strong password requirements enabled in Supabase.
   - App API additionally enforces minimum complexity on register/reset/password change/admin user management.
