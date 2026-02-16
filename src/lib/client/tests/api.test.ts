@@ -52,6 +52,7 @@ describe("apiRequest", () => {
 
     expect(fetchMock).toHaveBeenCalledWith("/api/example", {
       method: "GET",
+      credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: undefined,
     });
@@ -74,6 +75,7 @@ describe("apiRequest", () => {
 
     expect(fetchMock).toHaveBeenCalledWith("/api/example", {
       method: "GET",
+      credentials: "same-origin",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer token-1",
@@ -95,6 +97,7 @@ describe("apiRequest", () => {
 
     expect(fetchMock).toHaveBeenCalledWith("/api/example", {
       method: "POST",
+      credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: "x" }),
     });

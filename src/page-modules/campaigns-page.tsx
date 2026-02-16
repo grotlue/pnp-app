@@ -6,6 +6,7 @@ import { AppHeader } from "@/components/common/app-header";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import { ListControls } from "@/components/common/list-controls";
 import { Modal } from "@/components/common/modal";
+import { PageLoadingState } from "@/components/common/page-loading-state";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -117,9 +118,7 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
             />
 
             {campaignsQuery.isLoading ? (
-              <div className="rounded-lg border border-border bg-background/70 p-3 text-xs text-muted-foreground">
-                {t("ui.start.loading")}
-              </div>
+              <PageLoadingState label={t("ui.loading.section")} className="py-3 text-xs" />
             ) : (
               <>
                 <CampaignsList

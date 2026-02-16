@@ -11,6 +11,7 @@ import { IconActionButton } from "@/components/common/icon-action-button";
 import { ListItemRow } from "@/components/common/list-item-row";
 import { NavTabs } from "@/components/common/nav-tabs";
 import { Modal } from "@/components/common/modal";
+import { PageLoadingState } from "@/components/common/page-loading-state";
 import {
   CampaignFormFields,
   CharacterFormFields,
@@ -32,6 +33,7 @@ import type {
 } from "@/features/admin/types";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n";
+import { hasItems } from "@/lib/logic/collections";
 import { textLinkClassName } from "@/lib/utils/link";
 
 type AdminPageViewProps = {
@@ -191,11 +193,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
       <div className="min-h-screen">
         <AppHeader locale={locale} session={session} />
         <main className="mx-auto w-full max-w-7xl px-4 py-8">
-          <Card>
-            <CardContent className="py-6 text-sm text-muted-foreground">
-              {t("ui.start.loading")}
-            </CardContent>
-          </Card>
+          <PageLoadingState label={t("ui.loading.page")} className="py-6" />
         </main>
       </div>
     );
@@ -229,7 +227,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
           </CardHeader>
           <CardContent className="space-y-3">
             <Button onClick={() => setCreateUserOpen(true)}>{t("ui.admin.createUser")}</Button>
-            {users.length === 0 ? (
+            {!hasItems(users) ? (
               <EmptyState label={t("ui.feedback.empty")} />
             ) : (
               users.map((user) => (
@@ -307,7 +305,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
             >
               {t("ui.admin.createCampaign")}
             </Button>
-            {campaigns.length === 0 ? (
+            {!hasItems(campaigns) ? (
               <EmptyState label={t("ui.feedback.empty")} />
             ) : (
               campaigns.map((campaign) => (
@@ -373,7 +371,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
             >
               {t("ui.admin.createCharacter")}
             </Button>
-            {characters.length === 0 ? (
+            {!hasItems(characters) ? (
               <EmptyState label={t("ui.feedback.empty")} />
             ) : (
               characters.map((character) => (

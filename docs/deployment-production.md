@@ -103,10 +103,12 @@ In Vercel project -> Settings -> Environment Variables:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `SUPABASE_SERVICE_ROLE_KEY`
+  - `ALLOWED_ORIGINS` (comma-separated, e.g. production + preview origins)
 - For `Preview`:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `SUPABASE_SERVICE_ROLE_KEY`
+  - `ALLOWED_ORIGINS` (at least preview origin)
 
 ## 6) Configure Supabase Auth URLs
 

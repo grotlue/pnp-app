@@ -30,6 +30,7 @@ src/
     common/                     # shared composed components
   lib/
     client/                     # client session/api helpers
+    logic/                      # shared pure helper logic (e.g. hasItems)
     features/                   # runtime feature flags
     i18n/                       # localization helpers
     supabase/                   # browser supabase setup
@@ -60,8 +61,18 @@ src/
 ## React Query
 
 - One global provider: `src/app/providers.tsx`.
+- Query keys are centralized in `src/lib/client/query-keys.ts`.
 - Interactive flows use `useQuery` / `useMutation` in feature hooks.
 - Mutations invalidate domain query keys.
+- Prefer shared hooks for common identity reads (e.g. `use-me-query`) to avoid duplicate fetches.
+
+## Loading UX
+
+- Reusable loading card lives in `src/components/common/page-loading-state.tsx`.
+- Use dedicated i18n keys for loading contexts:
+  - `ui.loading.page`
+  - `ui.loading.section`
+  - `ui.loading.auth`
 
 ## Security
 
@@ -70,6 +81,17 @@ src/
 - Supabase RLS remains the primary data access control layer.
 - Admin-only routes use explicit server-side admin checks (`requireAdmin`).
 - Service role access is limited to server-only modules (`src/server/supabase/*`).
+- Auth-sensitive endpoints use server rate limiting (`src/server/rate-limit/*`).
+- API responses are marked `no-store` via shared HTTP/security helpers.
+- Access tokens are accepted from bearer headers and secure HttpOnly cookies.
+- Security headers (including CSP) are applied centrally via `src/proxy.ts`.
+
+## API Patterns
+
+- Use bootstrap/context endpoints for high-latency screens:
+  - Admin dashboard: `GET /api/admin/bootstrap`
+- Prefer fetching exactly-needed payloads over loading multiple global lists.
+- Keep route handler validation and error response logic centralized in `src/lib/api/*`.
 
 ## Feature Flags
 

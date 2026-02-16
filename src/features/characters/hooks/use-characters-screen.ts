@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/client/query-keys";
 import type { ClientSession } from "@/lib/client/session";
 import type { CharacterCreateInput } from "../types";
 import {
@@ -11,7 +12,8 @@ import {
 
 export function useCharactersScreen(session: ClientSession | null) {
   const queryClient = useQueryClient();
-  const queryKey = ["characters", "screen", session?.accessToken ?? "no-session"] as const;
+  const token = session?.accessToken ?? "no-session";
+  const queryKey = queryKeys.charactersScreen(token);
 
   const charactersQuery = useQuery({
     queryKey,

@@ -44,6 +44,7 @@ src/
     common/                   # shared composed UI
   lib/
     client/
+    logic/
     i18n/
     supabase/
     utils/
@@ -68,12 +69,14 @@ src/
 - **Queries modules**: all external I/O (API calls, persistence adapters).
 - **Logic modules**: pure functions only (no I/O, no random, no env reads).
 - **Hooks**: orchestrate query + mutation + invalidation; keep hooks focused.
+- Repeated session/role/list checks must be extracted into reusable helpers/hooks instead of duplicating inline conditionals.
 - Features must not import from route files.
 
 ### 4.3 React Query
 
 - Single global `QueryClientProvider` in `src/app/providers.tsx`.
 - Prefer domain-scoped query keys (`["campaigns", ...]`, `["characters", ...]`).
+- Keep canonical key factories in `src/lib/client/query-keys.ts`; avoid ad-hoc key strings in page modules.
 - Mutations must invalidate relevant keys.
 - Avoid duplicate fetching patterns between server/client for the same view.
 
@@ -85,12 +88,16 @@ src/
 - Validate and sanitize route/action inputs.
 - Do not expose internal errors or secrets in user-facing messages.
 - Keep storage access signed/private unless explicitly public.
+- Apply rate limiting to auth-sensitive endpoints (login/register/password reset/auth callback).
+- Keep auth/session-sensitive API responses `no-store`.
+- Keep security headers and CSP centrally enforced.
 
 ## 6) Performance Rules
 
 - Avoid N+1 fetch patterns in UI flows.
 - Keep heavy data shaping out of render paths (memoize derived lists where needed).
 - Use React Query `staleTime`/cache intentionally; avoid unnecessary refetches.
+- Prefer bootstrap/context endpoints for complex screens to reduce request waterfalls.
 - Minimize client bundle growth:
   - keep server-only code out of client imports
   - avoid oversized dependencies
@@ -190,6 +197,7 @@ Before opening or merging a PR, ensure all points are addressed:
 - Security impact reviewed (auth, RLS, input validation, data exposure).
 - Performance impact reviewed (query count, payload size, avoid unnecessary refetching).
 - Data model / migration impact documented (if any).
+- Reusable helper/hook extraction reviewed for duplicated logic.
 - Quality gates pass:
   - `yarn typecheck`
   - `yarn lint`

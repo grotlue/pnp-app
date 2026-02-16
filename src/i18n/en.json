@@ -26,6 +26,11 @@
       "quickLinks": "Quick Access",
       "quickLinksSubtitle": "Open your most-used sections."
     },
+    "loading": {
+      "page": "Loading page...",
+      "section": "Loading data...",
+      "auth": "Checking authentication..."
+    },
     "register": {
       "title": "Registration",
       "subtitle": "Create your account.",

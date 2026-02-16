@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { clearSession } from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { isAdmin } from "@/features/users/logic/role.logic";
 import {
   deleteMyAccount,
   updateMyEmail,
@@ -46,7 +47,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
     void (async () => {
       try {
         const me = await getMe(session);
-        if (me.profile.role === "admin") {
+        if (isAdmin(me.profile.role)) {
           router.replace("/admin/users");
         }
       } catch {

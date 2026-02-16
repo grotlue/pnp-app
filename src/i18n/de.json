@@ -26,6 +26,11 @@
       "quickLinks": "Schnellzugriff",
       "quickLinksSubtitle": "Öffne direkt die wichtigsten Bereiche."
     },
+    "loading": {
+      "page": "Seite wird geladen...",
+      "section": "Daten werden geladen...",
+      "auth": "Authentifizierung wird geprüft..."
+    },
     "register": {
       "title": "Registrierung",
       "subtitle": "Erstelle dein Konto.",

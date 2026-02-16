@@ -13,6 +13,7 @@ import { IconActionButton, IconActionLinkButton } from "@/components/common/icon
 import { ListControls } from "@/components/common/list-controls";
 import { ListItemRow } from "@/components/common/list-item-row";
 import { Modal } from "@/components/common/modal";
+import { PageLoadingState } from "@/components/common/page-loading-state";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
 import { VisibilityToggle } from "@/components/common/visibility-toggle";
@@ -27,7 +28,8 @@ import {
 import type { Character } from "@/features/characters/types";
 import { useCharactersScreen } from "@/features/characters/hooks/use-characters-screen";
 import { getCampaignsQuery } from "@/features/campaigns/queries/get-campaigns.query";
-import { getMe } from "@/features/users/queries/users-profile.query";
+import { useMeQuery } from "@/features/users/hooks/use-me-query";
+import { queryKeys } from "@/lib/client/query-keys";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { textLinkClassName } from "@/lib/utils/link";
@@ -70,20 +72,10 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
     session,
   );
 
-  const meQuery = useQuery({
-    queryKey: ["me", "characters-screen", session?.accessToken ?? "no-session"],
-    enabled: Boolean(session),
-    queryFn: async () => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
-
-      return getMe(session);
-    },
-  });
+  const meQuery = useMeQuery(session);
 
   const campaignsQuery = useQuery({
-    queryKey: ["campaigns", "characters-screen", session?.accessToken ?? "no-session"],
+    queryKey: queryKeys.campaignsScreen(session?.accessToken ?? "no-session"),
     enabled: Boolean(session),
     queryFn: async () => {
       if (!session) {
@@ -134,11 +126,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
       <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
         <AppHeader locale={locale} session={session} />
         <main className="mx-auto w-full max-w-7xl px-4 py-8">
-          <Card>
-            <CardContent className="py-8 text-sm text-muted-foreground">
-              {t("ui.start.loading")}
-            </CardContent>
-          </Card>
+          <PageLoadingState label={t("ui.loading.page")} />
         </main>
       </div>
     );

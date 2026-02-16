@@ -41,6 +41,7 @@ export async function apiRequest<T>(
 
   const response = await fetch(path, {
     method,
+    credentials: "same-origin",
     headers,
     body: options?.body ? JSON.stringify(options.body) : undefined,
   });
