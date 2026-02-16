@@ -173,7 +173,8 @@ Repository configuration (`vercel.json`) already restricts branch deploys:
 - `Deploy PR Preview` runs on pull request updates only when the PR has label `preview-deploy`.
 - `Deploy PR Preview` is skipped for fork PRs (no repository secrets exposure).
 - `Deploy PR Preview` runs only for PRs targeting `main` and uses GitHub `pull_request_target` so the restricted `preview` environment can be used.
-- `Deploy PR Preview` includes both preview DB deploy (`supabase db push --linked`) and Vercel preview deploy.
+- Preview DB workflows (`Deploy Preview DB` and `Deploy PR Preview`) reset the linked preview database and re-apply migrations on every run (`supabase db reset --linked --no-seed --yes`).
+- `Deploy PR Preview` includes both preview DB reset/recreate and Vercel preview deploy.
 - DB deploy workflows run `supabase db lint --linked --schema public --fail-on warning` after migrations.
 - DB deploy workflows also run `supabase inspect db outliers --linked` (non-blocking) for query visibility.
 
@@ -187,7 +188,7 @@ Deployment order:
 3. `CI` runs
 4. On successful `CI`:
   - `production` branch -> `Deploy Production DB` runs `supabase db push --linked`
-  - `main` branch -> `Deploy Preview DB` runs `supabase db push --linked`
+  - `main` branch -> `Deploy Preview DB` runs `supabase db reset --linked --no-seed --yes`
 5. If PR label `preview-deploy` is present, `Deploy PR Preview` creates a Vercel preview deployment and comments the URL on the PR.
 6. DB workflow then runs admin bootstrap script:
   - creates admin user when missing

@@ -84,10 +84,10 @@ jobs:
         with:
           version: latest
 
-      - name: Push Supabase migrations (preview)
+      - name: Reset Supabase DB (preview) and apply migrations
         run: |
           supabase link --project-ref "$SUPABASE_PROJECT_REF"
-          supabase db push --linked
+          supabase db reset --linked --no-seed --yes
 
       - name: Lint Supabase DB (PR preview, public schema)
         run: |
