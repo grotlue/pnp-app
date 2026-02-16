@@ -10,8 +10,7 @@ import { clearSession } from "@/lib/client/session";
 import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
 import type { ClientSession } from "@/lib/client/session";
 import { logoutUser } from "@/features/users/queries/users-auth.query";
-import { useNotificationsQuery } from "@/features/notifications/hooks/use-notifications-query";
-import { getNotificationUnreadCount } from "@/features/notifications/logic/notification-list.logic";
+import { useNotificationsUnreadCount } from "@/features/notifications/hooks/use-notifications-unread-count";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
 import type { MeResponse } from "@/features/users/types";
 import { appNavigationRoutes, appRoutes } from "@/app/router";
@@ -33,8 +32,8 @@ export function AppHeader({ locale, session, me: providedMe = null, fetchMe = tr
   const role = me?.profile.role;
   const roleResolved = me !== null || (fetchMe && meQuery.isSuccess);
   const profileLocale = me?.profile.locale;
-  const notificationsQuery = useNotificationsQuery(session, { limit: 100 });
-  const unreadNotifications = getNotificationUnreadCount(notificationsQuery.data ?? []);
+  const notificationsUnreadCountQuery = useNotificationsUnreadCount(session);
+  const unreadNotifications = notificationsUnreadCountQuery.data?.unreadCount ?? 0;
 
   useEffect(() => {
     if (!profileLocale) {

@@ -25,6 +25,5 @@ export function useNotificationsQuery(
       }
       return getNotificationsQuery(session, { limit });
     },
-    refetchInterval: 15_000,
   });
 }

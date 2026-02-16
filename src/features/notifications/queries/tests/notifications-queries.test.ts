@@ -11,6 +11,7 @@ vi.mock("@/lib/client/api", () => ({
 }));
 
 import { getNotificationsQuery } from "../get-notifications.query";
+import { getNotificationsUnreadCountQuery } from "../get-notifications-unread-count.query";
 import { markNotificationReadMutation } from "../mark-notification-read.mutation";
 import { markAllNotificationsReadMutation } from "../mark-all-notifications-read.mutation";
 import { decideNotificationMembershipMutation } from "../decide-notification-membership.mutation";
@@ -38,6 +39,22 @@ describe("notifications queries", () => {
 
     await expect(getNotificationsQuery(session, { limit: 10 })).resolves.toEqual(response.data);
     expect(apiRequestMock).toHaveBeenCalledWith("/api/notifications?limit=10", { session });
+  });
+
+  it("loads unread notification count", async () => {
+    const response = { data: { unreadCount: 3 }, error: null, status: 200 };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(getNotificationsUnreadCountQuery(session)).resolves.toEqual({
+      unreadCount: 3,
+    });
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/notifications/unread-count", {
+      session,
+    });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to load unread notification count",
+    );
   });
 
   it("marks a single notification as read", async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/common/app-header";
 import { EmptyState } from "@/components/common/empty-state";
@@ -51,7 +51,6 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
   const router = useRouter();
   const { session, ready } = useClientSession();
-  const autoReadTriggered = useRef(false);
 
   const { notificationsQuery, markReadMutation, markAllReadMutation, decideMembershipMutation, anyPending } =
     useNotificationsScreen(session);
@@ -68,31 +67,6 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
 
   const notifications = notificationsQuery.data ?? [];
   const unreadCount = getNotificationUnreadCount(notifications);
-
-  useEffect(() => {
-    if (!session || notificationsQuery.isLoading || notifications.length === 0 || unreadCount === 0) {
-      if (unreadCount === 0) {
-        autoReadTriggered.current = false;
-      }
-      return;
-    }
-    if (autoReadTriggered.current || markAllReadMutation.isPending) {
-      return;
-    }
-
-    autoReadTriggered.current = true;
-    void markAllReadMutation.mutateAsync().catch(() => {
-      setMessage(t("ui.feedback.requestFailed"));
-      autoReadTriggered.current = false;
-    });
-  }, [
-    markAllReadMutation,
-    notifications.length,
-    notificationsQuery.isLoading,
-    session,
-    t,
-    unreadCount,
-  ]);
 
   async function markAsRead(notification: NotificationEntry) {
     if (notification.is_read) {
@@ -184,7 +158,7 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
 
             {notificationsQuery.isLoading ? (
               <div className="rounded-lg border border-border bg-background/70 p-3 text-xs text-muted-foreground">
-                {t("ui.start.loading")}
+                {t("ui.loading.section")}
               </div>
             ) : notifications.length === 0 ? (
               <EmptyState label={t("ui.feedback.empty")} />
