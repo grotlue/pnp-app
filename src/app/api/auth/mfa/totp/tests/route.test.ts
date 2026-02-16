@@ -31,7 +31,8 @@ describe("auth mfa totp route", () => {
       context: {
         accessToken: "token",
         user: { id: "u1" },
-        client: { auth: { mfa: {} } },
+        client: { from: vi.fn() },
+        authClient: { auth: { mfa: {} } },
       },
     });
     getUserRoleMock.mockResolvedValueOnce({ role: "user" });
@@ -64,7 +65,8 @@ describe("auth mfa totp route", () => {
       context: {
         accessToken: "token",
         user: { id: "u1" },
-        client: { auth: { mfa: { enroll: enrollMock } } },
+        client: { from: vi.fn() },
+        authClient: { auth: { mfa: { enroll: enrollMock } } },
       },
     });
     getUserRoleMock.mockResolvedValueOnce({ role: "admin" });
@@ -103,7 +105,8 @@ describe("auth mfa totp route", () => {
       context: {
         accessToken: "token",
         user: { id: "u1" },
-        client: { auth: { mfa: { enroll: enrollMock } } },
+        client: { from: vi.fn() },
+        authClient: { auth: { mfa: { enroll: enrollMock } } },
       },
     });
     getUserRoleMock.mockResolvedValueOnce({ role: "admin" });
@@ -129,7 +132,8 @@ describe("auth mfa totp route", () => {
       context: {
         accessToken: "token",
         user: { id: "u1" },
-        client: { auth: { mfa: {} } },
+        client: { from: vi.fn() },
+        authClient: { auth: { mfa: {} } },
       },
     });
     getUserRoleMock.mockResolvedValueOnce({ role: "admin" });
@@ -163,7 +167,8 @@ describe("auth mfa totp route", () => {
       context: {
         accessToken: "token",
         user: { id: "u1" },
-        client: { auth: { mfa: { challenge: challengeMock, verify: verifyMock } } },
+        client: { from: vi.fn() },
+        authClient: { auth: { mfa: { challenge: challengeMock, verify: verifyMock } } },
       },
     });
     getUserRoleMock.mockResolvedValueOnce({ role: "admin" });

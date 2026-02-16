@@ -87,8 +87,8 @@ export async function GET(request: Request) {
   }
 
   const [aalResult, factorsResult] = await Promise.all([
-    auth.context.client.auth.mfa.getAuthenticatorAssuranceLevel(auth.context.accessToken),
-    auth.context.client.auth.mfa.listFactors(),
+    auth.context.authClient.auth.mfa.getAuthenticatorAssuranceLevel(auth.context.accessToken),
+    auth.context.authClient.auth.mfa.listFactors(),
   ]);
 
   if (aalResult.error) {
@@ -147,7 +147,7 @@ export async function POST(request: Request) {
   const body = await parseJsonBody<EnrollTotpBody>(request);
   const friendlyName = normalizeFriendlyName(body?.friendlyName);
 
-  const { data, error } = await auth.context.client.auth.mfa.enroll({
+  const { data, error } = await auth.context.authClient.auth.mfa.enroll({
     factorType: "totp",
     issuer: "pnp-app",
     friendlyName,
@@ -205,14 +205,14 @@ export async function PATCH(request: Request) {
     return jsonError(400, "invalid_payload", "valid code is required");
   }
 
-  const { data: challengeData, error: challengeError } = await auth.context.client.auth.mfa.challenge({
+  const { data: challengeData, error: challengeError } = await auth.context.authClient.auth.mfa.challenge({
     factorId: body.factorId,
   });
   if (challengeError || !challengeData) {
     return jsonError(400, "mfa_verify_failed", challengeError?.message ?? "MFA challenge failed");
   }
 
-  const { data, error } = await auth.context.client.auth.mfa.verify({
+  const { data, error } = await auth.context.authClient.auth.mfa.verify({
     factorId: body.factorId,
     challengeId: challengeData.id,
     code: normalizedCode,
