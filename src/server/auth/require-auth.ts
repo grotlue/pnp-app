@@ -3,6 +3,7 @@ import { jsonError } from "@/lib/api/http";
 import { readAccessTokenFromCookies } from "@/server/auth/session-cookie";
 import {
   createServerSupabaseClient,
+  createServerSupabaseUserAuthClient,
   createServerSupabaseUserClient,
 } from "@/server/supabase/server-client";
 
@@ -10,6 +11,7 @@ export type AuthContext = {
   accessToken: string;
   user: User;
   client: ReturnType<typeof createServerSupabaseUserClient>;
+  authClient: ReturnType<typeof createServerSupabaseUserAuthClient>;
 };
 
 function extractBearerToken(request: Request): string | null {
@@ -51,12 +53,14 @@ export async function requireAuth(
     }
 
     const client = createServerSupabaseUserClient(token);
+    const authClientForUser = createServerSupabaseUserAuthClient(token);
 
     return {
       context: {
         accessToken: token,
         user: data.user,
         client,
+        authClient: authClientForUser,
       },
     };
   } catch (error) {

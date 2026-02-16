@@ -12,7 +12,7 @@ import { ListItemRow } from "@/components/common/list-item-row";
 import { OwnershipBadge } from "@/components/common/ownership-badge";
 import { PageLoadingState } from "@/components/common/page-loading-state";
 import { PaginationControls } from "@/components/common/pagination-controls";
-import { TurnstileWidget } from "@/components/common/turnstile-widget";
+import { TurnstileWidget, type TurnstileErrorReason } from "@/components/common/turnstile-widget";
 import { ToggleTabs } from "@/components/common/toggle-tabs";
 import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
 import { Button } from "@/components/ui/button";
@@ -70,6 +70,21 @@ function isAuthSessionError(error: unknown): boolean {
   );
 }
 
+function getCaptchaFailureMessage(
+  t: ReturnType<typeof getTranslator>,
+  reason: TurnstileErrorReason | null,
+): string {
+  if (!reason) {
+    return t("ui.feedback.captchaRequired");
+  }
+
+  if (reason === "widget_error" || reason === "render_failed") {
+    return t("ui.feedback.captchaInitializationFailed");
+  }
+
+  return t("ui.feedback.captchaUnavailable");
+}
+
 export function HomePageView({
   locale,
   registrationEnabled,
@@ -87,6 +102,7 @@ export function HomePageView({
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
+  const [captchaErrorReason, setCaptchaErrorReason] = useState<TurnstileErrorReason | null>(null);
 
   const [characterTab, setCharacterTab] = useState<"player" | "npc">("player");
   const [characterOwnershipFilter, setCharacterOwnershipFilter] =
@@ -122,8 +138,13 @@ export function HomePageView({
   });
 
   async function onLogin() {
+    if (authCaptchaConfig.required && !authCaptchaConfig.enabled) {
+      setMessage(t("ui.feedback.captchaMisconfigured"));
+      return;
+    }
+
     if (authCaptchaConfig.required && !captchaToken) {
-      setMessage(t("ui.feedback.captchaRequired"));
+      setMessage(getCaptchaFailureMessage(t, captchaErrorReason));
       return;
     }
 
@@ -148,6 +169,7 @@ export function HomePageView({
     } finally {
       if (authCaptchaConfig.enabled) {
         setCaptchaToken(null);
+        setCaptchaErrorReason(null);
         setCaptchaResetKey((prev) => prev + 1);
       }
       setBusy(false);
@@ -189,14 +211,20 @@ export function HomePageView({
                   siteKey={authCaptchaConfig.siteKey}
                   resetKey={captchaResetKey}
                   loadErrorMessage={t("ui.feedback.captchaUnavailable")}
-                  onTokenChange={setCaptchaToken}
+                  onTokenChange={(token) => {
+                    if (token) {
+                      setCaptchaErrorReason(null);
+                    }
+                    setCaptchaToken(token);
+                  }}
+                  onErrorReason={setCaptchaErrorReason}
                 />
               ) : null}
               <FeedbackMessage message={message} />
             </CardContent>
             <CardFooter className="flex-col items-stretch gap-2">
               <Button
-                disabled={busy || (authCaptchaConfig.required && !captchaToken)}
+                disabled={busy}
                 onClick={onLogin}
               >
                 {t("ui.actions.login")}

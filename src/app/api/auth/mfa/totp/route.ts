@@ -29,6 +29,49 @@ function normalizeFriendlyName(value: unknown): string | undefined {
   return trimmed.slice(0, 64);
 }
 
+function isCompleteTotpEnrollment(data: unknown): data is {
+  id: string;
+  friendly_name?: string;
+  totp: { qr_code: string; secret: string; uri: string };
+} {
+  if (!data || typeof data !== "object") {
+    return false;
+  }
+
+  const candidate = data as {
+    id?: unknown;
+    totp?: { qr_code?: unknown; secret?: unknown; uri?: unknown } | null;
+  };
+
+  return (
+    typeof candidate.id === "string" &&
+    !!candidate.totp &&
+    typeof candidate.totp.qr_code === "string" &&
+    typeof candidate.totp.secret === "string" &&
+    typeof candidate.totp.uri === "string"
+  );
+}
+
+function isCompleteMfaVerification(data: unknown): data is {
+  access_token: string;
+  refresh_token?: string;
+} {
+  if (!data || typeof data !== "object") {
+    return false;
+  }
+
+  const candidate = data as { access_token?: unknown; refresh_token?: unknown };
+  if (typeof candidate.access_token !== "string") {
+    return false;
+  }
+
+  if (candidate.refresh_token !== undefined && typeof candidate.refresh_token !== "string") {
+    return false;
+  }
+
+  return true;
+}
+
 export async function GET(request: Request) {
   const auth = await requireAuth(request);
   if ("response" in auth) {
@@ -44,8 +87,8 @@ export async function GET(request: Request) {
   }
 
   const [aalResult, factorsResult] = await Promise.all([
-    auth.context.client.auth.mfa.getAuthenticatorAssuranceLevel(auth.context.accessToken),
-    auth.context.client.auth.mfa.listFactors(),
+    auth.context.authClient.auth.mfa.getAuthenticatorAssuranceLevel(auth.context.accessToken),
+    auth.context.authClient.auth.mfa.listFactors(),
   ]);
 
   if (aalResult.error) {
@@ -104,7 +147,7 @@ export async function POST(request: Request) {
   const body = await parseJsonBody<EnrollTotpBody>(request);
   const friendlyName = normalizeFriendlyName(body?.friendlyName);
 
-  const { data, error } = await auth.context.client.auth.mfa.enroll({
+  const { data, error } = await auth.context.authClient.auth.mfa.enroll({
     factorType: "totp",
     issuer: "pnp-app",
     friendlyName,
@@ -112,6 +155,10 @@ export async function POST(request: Request) {
 
   if (error) {
     return jsonError(400, "mfa_enroll_failed", error.message);
+  }
+
+  if (!isCompleteTotpEnrollment(data)) {
+    return jsonError(400, "mfa_enroll_failed", "MFA enrollment response was incomplete");
   }
 
   return jsonOk({
@@ -158,14 +205,14 @@ export async function PATCH(request: Request) {
     return jsonError(400, "invalid_payload", "valid code is required");
   }
 
-  const { data: challengeData, error: challengeError } = await auth.context.client.auth.mfa.challenge({
+  const { data: challengeData, error: challengeError } = await auth.context.authClient.auth.mfa.challenge({
     factorId: body.factorId,
   });
   if (challengeError || !challengeData) {
     return jsonError(400, "mfa_verify_failed", challengeError?.message ?? "MFA challenge failed");
   }
 
-  const { data, error } = await auth.context.client.auth.mfa.verify({
+  const { data, error } = await auth.context.authClient.auth.mfa.verify({
     factorId: body.factorId,
     challengeId: challengeData.id,
     code: normalizedCode,
@@ -173,6 +220,10 @@ export async function PATCH(request: Request) {
 
   if (error) {
     return jsonError(400, "mfa_verify_failed", error.message);
+  }
+
+  if (!isCompleteMfaVerification(data)) {
+    return jsonError(400, "mfa_verify_failed", "MFA verification response was incomplete");
   }
 
   return setSessionCookies(
