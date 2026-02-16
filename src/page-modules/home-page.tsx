@@ -46,7 +46,6 @@ import type { LoginResponse, MeResponse } from "@/features/users/types";
 import { setLocaleCookie } from "@/lib/client/locale-cookie";
 import { clearSession, setSession } from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
-import { useClientFlowDiagnostics } from "@/lib/client/use-client-flow-diagnostics";
 import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
 import { textLinkClassName } from "@/lib/utils/link";
 import { clampListPage, DEFAULT_LIST_PAGE_SIZE, paginateListItems } from "@/lib/utils/list";
@@ -115,16 +114,6 @@ export function HomePageView({
         characters,
       };
     },
-  });
-  const homeFlowReady = ready && Boolean(session);
-  const homeFlowLoading = homeFlowReady && loggedInQuery.isLoading;
-  const homeFlowLoaded = homeFlowReady && loggedInQuery.isFetched;
-
-  useClientFlowDiagnostics({
-    flow: "home-logged-in",
-    ready: homeFlowReady,
-    loading: homeFlowLoading,
-    loaded: homeFlowLoaded,
   });
 
   async function onLogin() {

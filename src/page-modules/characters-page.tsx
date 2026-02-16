@@ -31,7 +31,6 @@ import { getCampaignsQuery } from "@/features/campaigns/queries/get-campaigns.qu
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
 import { queryKeys } from "@/lib/client/query-keys";
 import { useClientSession } from "@/lib/client/use-client-session";
-import { useClientFlowDiagnostics } from "@/lib/client/use-client-flow-diagnostics";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { textLinkClassName } from "@/lib/utils/link";
 import { clampListPage, DEFAULT_LIST_PAGE_SIZE, paginateListItems } from "@/lib/utils/list";
@@ -85,22 +84,6 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
 
       return getCampaignsQuery(session, { scope: "member" });
     },
-  });
-  const charactersFlowReady = ready && Boolean(session);
-  const charactersFlowLoading =
-    charactersFlowReady &&
-    (meQuery.isLoading || charactersQuery.isLoading || campaignsQuery.isLoading);
-  const charactersFlowLoaded =
-    charactersFlowReady &&
-    meQuery.isFetched &&
-    charactersQuery.isFetched &&
-    campaignsQuery.isFetched;
-
-  useClientFlowDiagnostics({
-    flow: "characters-screen",
-    ready: charactersFlowReady,
-    loading: charactersFlowLoading,
-    loaded: charactersFlowLoaded,
   });
 
   const characters = charactersQuery.data ?? [];
