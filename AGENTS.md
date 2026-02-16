@@ -91,6 +91,8 @@ src/
 - Apply rate limiting to auth-sensitive endpoints (login/register/password reset/auth callback).
 - Keep auth/session-sensitive API responses `no-store`.
 - Keep security headers and CSP centrally enforced.
+- Every new table in `public` (or any API-exposed schema) must have RLS enabled in the same migration.
+- New internal-only operational tables should not be left broadly accessible; grant only minimal required roles.
 
 ## 6) Performance Rules
 
@@ -98,6 +100,8 @@ src/
 - Keep heavy data shaping out of render paths (memoize derived lists where needed).
 - Use React Query `staleTime`/cache intentionally; avoid unnecessary refetches.
 - Prefer bootstrap/context endpoints for complex screens to reduce request waterfalls.
+- In RLS policies, prefer `(select auth.uid())` / `(select auth.<fn>())` patterns to avoid per-row auth re-evaluation.
+- Avoid multiple permissive policies for the same table+role+action when one merged policy can express the rule.
 - Minimize client bundle growth:
   - keep server-only code out of client imports
   - avoid oversized dependencies
@@ -129,6 +133,8 @@ Minimum expectations:
 - new logic: unit tests where feasible
 - regression-prone flows: integration-style tests where practical
 - no unresolved lint/type errors
+- database changes: pass Supabase DB lint checks for `public` schema without warnings in preview before production deploy
+- database changes: review slow-query outliers (`supabase inspect db outliers`) and address user-facing bottlenecks before merge
 
 ## 9) Migration and Refactor Safety
 

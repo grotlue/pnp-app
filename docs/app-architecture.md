@@ -85,6 +85,7 @@ src/
 - API responses are marked `no-store` via shared HTTP/security helpers.
 - Access tokens are accepted from bearer headers and secure HttpOnly cookies.
 - Security headers (including CSP) are applied centrally via `src/proxy.ts`.
+- New public-schema tables must enable RLS in the same migration.
 
 ## API Patterns
 

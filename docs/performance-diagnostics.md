@@ -75,3 +75,14 @@ Heuristic:
 - If `auth.getUser` dominates: reduce redundant auth checks per screen/flow.
 - If DB segments dominate: index/query optimization and reduce payload volume.
 - If client loading dominates: remove chained gates, reuse cached me/session data, avoid duplicated startup queries.
+
+## 6) Supabase slow-query triage
+
+Some outliers can be platform/meta queries (for example extension/type/function introspection) and are not always user-flow bottlenecks.
+
+Use this order:
+
+1. Prioritize application-table queries and RPC calls first.
+2. Correlate slow-query timestamps with API request IDs / user flows.
+3. Treat dashboard/meta introspection queries separately from product-path latency.
+4. Keep `supabase inspect db outliers --linked` as routine visibility, but optimize based on user-facing impact first.

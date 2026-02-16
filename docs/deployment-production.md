@@ -152,6 +152,8 @@ Repository configuration (`vercel.json`) already restricts branch deploys:
 - `Deploy PR Preview` is skipped for fork PRs (no repository secrets exposure).
 - `Deploy PR Preview` runs only for PRs targeting `main` and uses GitHub `pull_request_target` so the restricted `preview` environment can be used.
 - `Deploy PR Preview` includes both preview DB deploy (`supabase db push --linked`) and Vercel preview deploy.
+- DB deploy workflows run `supabase db lint --linked --schema public --fail-on warning` after migrations.
+- DB deploy workflows also run `supabase inspect db outliers --linked` (non-blocking) for query visibility.
 
 Deployment order:
 
