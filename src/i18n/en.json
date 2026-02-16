@@ -240,6 +240,8 @@
     },
     "feedback": {
       "requestFailed": "Request failed.",
+      "captchaRequired": "Please complete the CAPTCHA challenge.",
+      "captchaUnavailable": "CAPTCHA could not be loaded. Please reload the page and try again.",
       "empty": "No entries yet.",
       "created": "Created successfully.",
       "saved": "Saved successfully.",

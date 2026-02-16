@@ -52,6 +52,25 @@ describe("users auth/profile/settings queries", () => {
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Login failed");
   });
 
+  it("loginUser forwards captcha token when provided", async () => {
+    const response = { data: { accessToken: "a1" }, error: null, status: 200 };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(
+      loginUser({
+        email: "x@example.com",
+        password: "secret",
+        captchaToken: "captcha-1",
+      }),
+    ).resolves.toEqual({
+      accessToken: "a1",
+    });
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/login", {
+      method: "POST",
+      body: { email: "x@example.com", password: "secret", captchaToken: "captcha-1" },
+    });
+  });
+
   it("registerUser posts registration payload", async () => {
     const response = {
       data: { emailVerificationRequired: true },
@@ -80,6 +99,35 @@ describe("users auth/profile/settings queries", () => {
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Register failed");
   });
 
+  it("registerUser forwards captcha token when provided", async () => {
+    const response = {
+      data: { emailVerificationRequired: true },
+      error: null,
+      status: 201,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(
+      registerUser({
+        username: "user1",
+        email: "u@example.com",
+        password: "secret",
+        locale: "de",
+        captchaToken: "captcha-2",
+      }),
+    ).resolves.toEqual({ emailVerificationRequired: true });
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/register", {
+      method: "POST",
+      body: {
+        username: "user1",
+        email: "u@example.com",
+        password: "secret",
+        locale: "de",
+        captchaToken: "captcha-2",
+      },
+    });
+  });
+
   it("requestPasswordReset posts reset payload", async () => {
     const response = { data: { requested: true }, error: null, status: 200 };
     apiRequestMock.mockResolvedValueOnce(response);
@@ -92,6 +140,21 @@ describe("users auth/profile/settings queries", () => {
       body: { email: "x@example.com" },
     });
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Password reset request failed");
+  });
+
+  it("requestPasswordReset forwards captcha token when provided", async () => {
+    const response = { data: { requested: true }, error: null, status: 200 };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(
+      requestPasswordReset({ email: "x@example.com", captchaToken: "captcha-3" }),
+    ).resolves.toEqual({
+      requested: true,
+    });
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/password-reset/request", {
+      method: "POST",
+      body: { email: "x@example.com", captchaToken: "captcha-3" },
+    });
   });
 
   it("logoutUser sends authenticated logout request", async () => {

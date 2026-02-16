@@ -240,6 +240,8 @@
     },
     "feedback": {
       "requestFailed": "Anfrage fehlgeschlagen.",
+      "captchaRequired": "Bitte löse die CAPTCHA-Prüfung.",
+      "captchaUnavailable": "CAPTCHA konnte nicht geladen werden. Bitte Seite neu laden und erneut versuchen.",
       "empty": "Noch keine Einträge.",
       "created": "Erfolgreich erstellt.",
       "saved": "Erfolgreich gespeichert.",

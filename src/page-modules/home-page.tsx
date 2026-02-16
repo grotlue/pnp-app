@@ -12,6 +12,7 @@ import { ListItemRow } from "@/components/common/list-item-row";
 import { OwnershipBadge } from "@/components/common/ownership-badge";
 import { PageLoadingState } from "@/components/common/page-loading-state";
 import { PaginationControls } from "@/components/common/pagination-controls";
+import { TurnstileWidget } from "@/components/common/turnstile-widget";
 import { ToggleTabs } from "@/components/common/toggle-tabs";
 import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ import type { LoginResponse, MeResponse } from "@/features/users/types";
 import { setLocaleCookie } from "@/lib/client/locale-cookie";
 import { clearSession, setSession } from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
+import { resolveAuthCaptchaClientConfig } from "@/lib/features/auth-captcha";
 import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
 import { textLinkClassName } from "@/lib/utils/link";
 import { clampListPage, DEFAULT_LIST_PAGE_SIZE, paginateListItems } from "@/lib/utils/list";
@@ -74,6 +76,7 @@ export function HomePageView({
   registeredNotice = false,
 }: HomeScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
+  const authCaptchaConfig = useMemo(() => resolveAuthCaptchaClientConfig(), []);
   const { session, ready } = useClientSession();
   const router = useRouter();
 
@@ -82,6 +85,8 @@ export function HomePageView({
     registeredNotice ? t("ui.feedback.registeredNowLogin") : "",
   );
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaResetKey, setCaptchaResetKey] = useState(0);
 
   const [characterTab, setCharacterTab] = useState<"player" | "npc">("player");
   const [characterOwnershipFilter, setCharacterOwnershipFilter] =
@@ -117,10 +122,18 @@ export function HomePageView({
   });
 
   async function onLogin() {
+    if (authCaptchaConfig.required && !captchaToken) {
+      setMessage(t("ui.feedback.captchaRequired"));
+      return;
+    }
+
     setBusy(true);
     setMessage("");
     try {
-      const response: LoginResponse = await loginUser(loginForm);
+      const response: LoginResponse = await loginUser({
+        ...loginForm,
+        ...(captchaToken ? { captchaToken } : {}),
+      });
       setSession({
         accessToken: response.accessToken,
         refreshToken: response.refreshToken,
@@ -133,6 +146,10 @@ export function HomePageView({
     } catch (error) {
       setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
     } finally {
+      if (authCaptchaConfig.enabled) {
+        setCaptchaToken(null);
+        setCaptchaResetKey((prev) => prev + 1);
+      }
       setBusy(false);
     }
   }
@@ -167,10 +184,21 @@ export function HomePageView({
                   setLoginForm((prev) => ({ ...prev, password: event.target.value }))
                 }
               />
+              {authCaptchaConfig.enabled && authCaptchaConfig.siteKey ? (
+                <TurnstileWidget
+                  siteKey={authCaptchaConfig.siteKey}
+                  resetKey={captchaResetKey}
+                  loadErrorMessage={t("ui.feedback.captchaUnavailable")}
+                  onTokenChange={setCaptchaToken}
+                />
+              ) : null}
               <FeedbackMessage message={message} />
             </CardContent>
             <CardFooter className="flex-col items-stretch gap-2">
-              <Button disabled={busy} onClick={onLogin}>
+              <Button
+                disabled={busy || (authCaptchaConfig.required && !captchaToken)}
+                onClick={onLogin}
+              >
                 {t("ui.actions.login")}
               </Button>
               <div className="flex items-center justify-between text-xs">

@@ -11,6 +11,7 @@ import type {
 export async function loginUser(input: {
   email: string;
   password: string;
+  captchaToken?: string;
 }): Promise<LoginResponse> {
   const response = await apiRequest<LoginResponse>("/api/auth/login", {
     method: "POST",
@@ -24,6 +25,7 @@ export async function registerUser(input: {
   email: string;
   password: string;
   locale: "en" | "de";
+  captchaToken?: string;
 }): Promise<RegisterResponse> {
   const response = await apiRequest<RegisterResponse>("/api/auth/register", {
     method: "POST",
@@ -32,7 +34,10 @@ export async function registerUser(input: {
   return unwrapApiResponse(response, "Register failed");
 }
 
-export async function requestPasswordReset(input: { email: string }): Promise<{ requested: boolean }> {
+export async function requestPasswordReset(input: {
+  email: string;
+  captchaToken?: string;
+}): Promise<{ requested: boolean }> {
   const response = await apiRequest<{ requested: boolean }>("/api/auth/password-reset/request", {
     method: "POST",
     body: input,

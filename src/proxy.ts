@@ -4,11 +4,12 @@ import { NextResponse } from "next/server";
 function buildCsp() {
   return [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://vercel.live",
+    "script-src 'self' 'unsafe-inline' https://vercel.live https://challenges.cloudflare.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://vercel.live",
+    "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://vercel.live https://challenges.cloudflare.com",
+    "frame-src 'self' https://challenges.cloudflare.com",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
