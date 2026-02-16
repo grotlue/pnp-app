@@ -99,6 +99,13 @@ src/
 - Do not expose internal errors or secrets in user-facing messages.
 - Keep storage access signed/private unless explicitly public.
 - Apply rate limiting to auth-sensitive endpoints (login/register/password reset/auth callback).
+- Centralize auth input hardening (email normalization/validation, password policy validation, captcha token handling) in reusable helpers.
+- Enforce admin MFA step-up (`aal2`) server-side for admin APIs in preview/production unless explicitly disabled for emergency rollback.
+- Use Supabase Auth security baseline in deployed environments:
+  - custom SMTP + maintained auth email templates
+  - CAPTCHA provider configured when `AUTH_CAPTCHA_MODE=required`
+  - MFA factors enabled for admin users
+  - Supabase dashboard auth rate limits reviewed periodically
 - Keep auth/session-sensitive API responses `no-store`.
 - Keep security headers and CSP centrally enforced.
 - Every new table in `public` (or any API-exposed schema) must have RLS enabled in the same migration.
@@ -112,6 +119,7 @@ src/
 - Prefer bootstrap/context endpoints for complex screens to reduce request waterfalls.
 - In RLS policies, prefer `(select auth.uid())` / `(select auth.<fn>())` patterns to avoid per-row auth re-evaluation.
 - Avoid multiple permissive policies for the same table+role+action when one merged policy can express the rule.
+- Prefer built-in observability first (Vercel Speed Insights + Supabase query/linter tooling); avoid adding custom performance logging/instrumentation unless strictly necessary for an active incident.
 - Minimize client bundle growth:
   - keep server-only code out of client imports
   - avoid oversized dependencies

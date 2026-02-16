@@ -104,9 +104,9 @@ In Vercel project -> Settings -> Environment Variables:
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `SUPABASE_SERVICE_ROLE_KEY`
   - `ALLOWED_ORIGINS` (comma-separated, e.g. production + preview origins)
-  - Optional diagnostics flags (normally `false`):
-    - `ENABLE_PERF_DIAGNOSTICS`
-    - `NEXT_PUBLIC_ENABLE_PERF_DIAGNOSTICS`
+  - Optional auth hardening toggles:
+    - `REQUIRE_ADMIN_MFA` (default: enabled in preview/production)
+    - `AUTH_CAPTCHA_MODE` (`off` | `optional` | `required`; default: `optional` in preview/production)
   - Optional Speed Insights override:
     - `ENABLE_VERCEL_SPEED_INSIGHTS=false` (default is enabled in production)
 - For `Preview`:
@@ -114,9 +114,9 @@ In Vercel project -> Settings -> Environment Variables:
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `SUPABASE_SERVICE_ROLE_KEY`
   - `ALLOWED_ORIGINS` (at least preview origin)
-  - Optional diagnostics flags (enable for targeted investigations):
-    - `ENABLE_PERF_DIAGNOSTICS=true`
-    - `NEXT_PUBLIC_ENABLE_PERF_DIAGNOSTICS=true`
+  - Optional auth hardening toggles:
+    - `REQUIRE_ADMIN_MFA` (default: enabled in preview/production)
+    - `AUTH_CAPTCHA_MODE` (`off` | `optional` | `required`; default: `optional` in preview/production)
   - Optional Speed Insights override:
     - `ENABLE_VERCEL_SPEED_INSIGHTS=false` (default is enabled in preview)
 
@@ -129,6 +129,28 @@ In Supabase -> Authentication -> URL Configuration:
   - production URL
   - preview URLs (if used)
   - localhost (optional for local testing)
+
+## 6.1) Configure Supabase Auth Security Baseline
+
+In Supabase -> Authentication, configure these for both preview and production:
+
+- `Email`:
+  - Use custom SMTP (not shared default SMTP) for deliverability and branding.
+  - Customize email templates (confirm signup, reset password, change email).
+  - Enable security-oriented notification emails where available.
+- `Bot / abuse protection`:
+  - Enable CAPTCHA provider in Supabase Auth.
+  - Set app env `AUTH_CAPTCHA_MODE=required` after client token wiring is validated.
+- `Password security`:
+  - Keep strong password requirements enabled in Supabase.
+  - App API additionally enforces minimum complexity on register/reset/password change/admin user management.
+- `MFA`:
+  - Enable TOTP MFA in Supabase Auth.
+  - App API enforces MFA (`aal2`) for admin routes by default in preview/production.
+  - Emergency rollback only: set `REQUIRE_ADMIN_MFA=false` temporarily.
+- `Rate limits`:
+  - Review and tune Supabase Auth rate limits in dashboard.
+  - Keep app-level route rate limits enabled (already enforced in auth endpoints).
 
 ## 7) Configure Vercel Git behavior
 
@@ -172,7 +194,9 @@ Deployment order:
   - enforces `profiles.role = 'admin'` for that user
   - keeps existing admin account idempotently
 
-For performance incident investigations, see `docs/performance-diagnostics.md`.
+For performance incident investigations, use:
+- Vercel Speed Insights (web vitals and route metrics)
+- Supabase Database tools (`Database Linter`, `Query Performance`, `inspect db outliers`)
 
 ## 9) Trigger deployment
 

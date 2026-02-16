@@ -82,10 +82,16 @@ src/
 - Admin-only routes use explicit server-side admin checks (`requireAdmin`).
 - Service role access is limited to server-only modules (`src/server/supabase/*`).
 - Auth-sensitive endpoints use server rate limiting (`src/server/rate-limit/*`).
+- Auth input hardening is centralized (`src/lib/api/auth-validation.ts`):
+  - email normalization/validation
+  - password complexity checks
+  - captcha token normalization
 - API responses are marked `no-store` via shared HTTP/security helpers.
 - Access tokens are accepted from bearer headers and secure HttpOnly cookies.
 - Security headers (including CSP) are applied centrally via `src/proxy.ts`.
 - New public-schema tables must enable RLS in the same migration.
+- Admin APIs enforce role checks plus MFA `aal2` session level in preview/production by default.
+- Auth CAPTCHA support is centralized and env-driven (`AUTH_CAPTCHA_MODE`).
 
 ## API Patterns
 
@@ -93,11 +99,8 @@ src/
   - Admin dashboard: `GET /api/admin/bootstrap`
 - Prefer fetching exactly-needed payloads over loading multiple global lists.
 - Keep route handler validation and error response logic centralized in `src/lib/api/*`.
-- Performance diagnostics for preview investigations:
-  - request-level diagnostics helper in `src/lib/api/diagnostics.ts`
-  - client flow diagnostics hook in `src/lib/client/use-client-flow-diagnostics.ts`
-  - API client request diagnostics logging in `src/lib/client/api.ts`
 - Vercel Speed Insights is mounted in `src/app/layout.tsx` and defaults to enabled in preview/production.
+- Supabase built-in observability should be used for DB-side performance analysis (linter, outliers, query stats).
 
 ## Runtime Boundary
 
