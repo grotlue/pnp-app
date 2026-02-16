@@ -56,8 +56,31 @@ jobs:
       - name: Build
         run: yarn build
 
+  db_schema_guardrails:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Reset local Supabase DB and apply migrations
+        run: npx supabase db reset --local --no-seed --yes
+
+      - name: Check foreign key indexing
+        run: ./scripts/check-unindexed-foreign-keys.sh
+
+      - name: Lint local Supabase DB (public schema)
+        run: npx supabase db lint --local --schema public --fail-on warning
+
   dispatch_deploy_preview_main:
-    needs: quality
+    needs:
+      - quality
+      - db_schema_guardrails
     if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
     runs-on: ubuntu-latest
     steps:
@@ -73,7 +96,9 @@ jobs:
             --data '{"ref":"main","inputs":{"checkout_ref":"${{ github.sha }}"}}'
 
   dispatch_deploy_production:
-    needs: quality
+    needs:
+      - quality
+      - db_schema_guardrails
     if: ${{ github.event_name == 'push' && github.ref_name == 'production' }}
     runs-on: ubuntu-latest
     steps:
@@ -89,7 +114,9 @@ jobs:
             --data '{"ref":"production","inputs":{"checkout_ref":"${{ github.sha }}"}}'
 
   dispatch_deploy_pr_preview:
-    needs: quality
+    needs:
+      - quality
+      - db_schema_guardrails
     if: >-
       ${{
         github.event_name == 'pull_request' &&

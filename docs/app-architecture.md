@@ -112,6 +112,13 @@ src/
   - narrowly scoped tasks that benefit from explicit Supabase-side execution
 - Keep one source of truth for authz/RLS semantics regardless of runtime.
 
+## Database Guardrails
+
+- Every new foreign key in `public` must ship with a covering index in the same migration.
+- CI enforces this via `db_schema_guardrails` (`supabase db reset --local` + `scripts/check-unindexed-foreign-keys.sh`).
+- Keep `supabase db lint --schema public --fail-on warning` clean for warning/error-level checks.
+- Treat `unused_index` findings as review input over representative traffic before dropping indexes.
+
 ## Feature Flags
 
 - Runtime feature flags are centralized in `src/lib/features/feature-flags.ts`.
