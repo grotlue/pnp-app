@@ -188,7 +188,7 @@ When working as an automated coding agent:
   - `chore(scope): ...`
 - Commit messages must describe intent, not just file moves.
 - Keep commits atomic and reversible.
-- For broad refactors, avoid one large monolithic commit; create a small sequence of logically grouped commits with clear intent per step.
+- In general, do not bundle unrelated edits into one commit; always split work into sensible, logically grouped commits with clear intent per step.
 - No `WIP` commits on review-ready branches.
 
 ## 13) Pull Request Checklist

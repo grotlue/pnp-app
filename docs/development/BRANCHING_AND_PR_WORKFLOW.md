@@ -39,7 +39,7 @@ Examples:
    - `yarn test:run`
    - `yarn build` (for release-impacting changes)
 4. Commit with conventional commit messages.
-   - For large refactors, split work into several sensible commits (for example: structure moves, functional changes, cleanup, docs) instead of one large commit.
+   - In general, split work into several sensible commits (for example: structure moves, functional changes, cleanup, docs) instead of bundling unrelated edits.
    - Each commit should be understandable and safely revertable on its own.
 5. Open a PR with scope, verification, and risk notes.
 6. Merge only after required checks and approvals pass.
