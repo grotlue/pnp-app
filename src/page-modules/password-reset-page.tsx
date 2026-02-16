@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import { FormInput } from "@/components/common/form-controls";
-import { TurnstileWidget } from "@/components/common/turnstile-widget";
+import { TurnstileWidget, type TurnstileErrorReason } from "@/components/common/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -23,6 +23,21 @@ type PasswordResetScreenProps = {
   locale: AppLocale;
 };
 
+function getCaptchaFailureMessage(
+  t: ReturnType<typeof getTranslator>,
+  reason: TurnstileErrorReason | null,
+): string {
+  if (!reason) {
+    return t("ui.feedback.captchaRequired");
+  }
+
+  if (reason === "widget_error" || reason === "render_failed") {
+    return t("ui.feedback.captchaInitializationFailed");
+  }
+
+  return t("ui.feedback.captchaUnavailable");
+}
+
 export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
   const authCaptchaConfig = useMemo(() => resolveAuthCaptchaClientConfig(), []);
@@ -31,10 +46,16 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
   const [message, setMessage] = useState("");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
+  const [captchaErrorReason, setCaptchaErrorReason] = useState<TurnstileErrorReason | null>(null);
 
   async function onSubmit() {
+    if (authCaptchaConfig.required && !authCaptchaConfig.enabled) {
+      setMessage(t("ui.feedback.captchaMisconfigured"));
+      return;
+    }
+
     if (authCaptchaConfig.required && !captchaToken) {
-      setMessage(t("ui.feedback.captchaRequired"));
+      setMessage(getCaptchaFailureMessage(t, captchaErrorReason));
       return;
     }
 
@@ -51,6 +72,7 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
     } finally {
       if (authCaptchaConfig.enabled) {
         setCaptchaToken(null);
+        setCaptchaErrorReason(null);
         setCaptchaResetKey((prev) => prev + 1);
       }
       setBusy(false);
@@ -77,7 +99,13 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
                 siteKey={authCaptchaConfig.siteKey}
                 resetKey={captchaResetKey}
                 loadErrorMessage={t("ui.feedback.captchaUnavailable")}
-                onTokenChange={setCaptchaToken}
+                onTokenChange={(token) => {
+                  if (token) {
+                    setCaptchaErrorReason(null);
+                  }
+                  setCaptchaToken(token);
+                }}
+                onErrorReason={setCaptchaErrorReason}
               />
             ) : null}
             <FeedbackMessage message={message} />
