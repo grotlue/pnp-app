@@ -19,7 +19,6 @@ jobs:
     permissions:
       actions: read
       contents: read
-      issues: write
       statuses: write
     environment: production
     steps:
@@ -82,101 +81,6 @@ jobs:
         run: |
           supabase link --project-ref "$SUPABASE_PROJECT_REF"
           supabase inspect db outliers --linked
-
-      - name: Inspect Supabase DB index stats (production advisory)
-        id: index_stats
-        continue-on-error: true
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
-        run: |
-          supabase link --project-ref "$SUPABASE_PROJECT_REF"
-          supabase inspect db index-stats --linked > /tmp/index-stats.txt
-
-          awk -F'|' '
-            /^[[:space:]]*public\.idx_/ {
-              name=$1
-              unused=$6
-              gsub(/^[[:space:]]+|[[:space:]]+$/, "", name)
-              gsub(/^[[:space:]]+|[[:space:]]+$/, "", unused)
-              if (unused == "true") print name
-            }
-          ' /tmp/index-stats.txt > /tmp/unused-indexes.txt
-
-          if [ -s /tmp/unused-indexes.txt ]; then
-            echo "has_unused=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has_unused=false" >> "$GITHUB_OUTPUT"
-          fi
-
-          echo "unused_indexes<<EOF" >> "$GITHUB_OUTPUT"
-          cat /tmp/unused-indexes.txt >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
-
-      - name: Create or update issue for unused indexes (production advisory)
-        if: ${{ steps.index_stats.outputs.has_unused == 'true' }}
-        continue-on-error: true
-        uses: actions/github-script@v7
-        env:
-          UNUSED_INDEXES: ${{ steps.index_stats.outputs.unused_indexes }}
-        with:
-          script: |
-            const marker = "<!-- db-unused-indexes-production -->";
-            const title = "chore(db): review production unused indexes";
-            const indexes = (process.env.UNUSED_INDEXES ?? "")
-              .split("\n")
-              .map((entry) => entry.trim())
-              .filter(Boolean);
-
-            if (indexes.length === 0) {
-              core.info("No advisory unused indexes detected.");
-              return;
-            }
-
-            const body = `${marker}
-            Supabase advisory detected potentially unused custom indexes in production.
-
-            Detected at: ${new Date().toISOString()}
-            Workflow run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}
-
-            Indexes:
-            ${indexes.map((name) => `- \`${name}\``).join("\n")}
-
-            Notes:
-            - This is advisory and does not fail deployment.
-            - Validate over representative traffic windows before dropping indexes.`;
-
-            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: "open",
-              per_page: 100,
-            });
-
-            const existing = openIssues.find(
-              (issue) => !issue.pull_request && issue.body?.includes(marker),
-            );
-
-            if (existing) {
-              await github.rest.issues.update({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: existing.number,
-                title,
-                body,
-              });
-              core.info(`Updated issue #${existing.number}`);
-              return;
-            }
-
-            const created = await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title,
-              body,
-            });
-            core.info(`Created issue #${created.data.number}`);
 
       - name: Set commit status (deploy DB final)
         if: ${{ always() }}

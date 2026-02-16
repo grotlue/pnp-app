@@ -118,7 +118,6 @@ src/
 - CI enforces this via `db_schema_guardrails` (`supabase db reset --local` + `scripts/check-unindexed-foreign-keys.sh`).
 - Keep `supabase db lint --schema public --fail-on warning` clean for warning/error-level checks.
 - Treat `unused_index` findings as review input over representative traffic before dropping indexes.
-- Production deploy runs a non-blocking `supabase inspect db index-stats` advisory check and auto-creates/updates an issue when custom indexes appear unused.
 
 ## Feature Flags
 
