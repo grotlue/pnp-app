@@ -136,6 +136,7 @@ Minimum expectations:
 - Prefer move-first, then refactor, then cleanup.
 - Keep imports stable where possible.
 - Remove dead compatibility layers once safe.
+- Large refactors must be split into multiple sensible commits by step (for example: move, behavior change, cleanup, docs) so each commit is easy to review and revert.
 
 ## 10) Documentation Policy
 
@@ -187,6 +188,7 @@ When working as an automated coding agent:
   - `chore(scope): ...`
 - Commit messages must describe intent, not just file moves.
 - Keep commits atomic and reversible.
+- For broad refactors, avoid one large monolithic commit; create a small sequence of logically grouped commits with clear intent per step.
 - No `WIP` commits on review-ready branches.
 
 ## 13) Pull Request Checklist
