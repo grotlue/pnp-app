@@ -92,6 +92,10 @@ src/
   - Admin dashboard: `GET /api/admin/bootstrap`
 - Prefer fetching exactly-needed payloads over loading multiple global lists.
 - Keep route handler validation and error response logic centralized in `src/lib/api/*`.
+- Performance diagnostics for preview investigations:
+  - request-level diagnostics helper in `src/lib/api/diagnostics.ts`
+  - client flow diagnostics hook in `src/lib/client/use-client-flow-diagnostics.ts`
+  - API client request diagnostics logging in `src/lib/client/api.ts`
 
 ## Feature Flags
 

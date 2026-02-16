@@ -104,11 +104,17 @@ In Vercel project -> Settings -> Environment Variables:
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `SUPABASE_SERVICE_ROLE_KEY`
   - `ALLOWED_ORIGINS` (comma-separated, e.g. production + preview origins)
+  - Optional diagnostics flags (normally `false`):
+    - `ENABLE_PERF_DIAGNOSTICS`
+    - `NEXT_PUBLIC_ENABLE_PERF_DIAGNOSTICS`
 - For `Preview`:
   - `NEXT_PUBLIC_SUPABASE_URL`
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
   - `SUPABASE_SERVICE_ROLE_KEY`
   - `ALLOWED_ORIGINS` (at least preview origin)
+  - Optional diagnostics flags (enable for targeted investigations):
+    - `ENABLE_PERF_DIAGNOSTICS=true`
+    - `NEXT_PUBLIC_ENABLE_PERF_DIAGNOSTICS=true`
 
 ## 6) Configure Supabase Auth URLs
 
@@ -159,6 +165,8 @@ Deployment order:
   - creates admin user when missing
   - enforces `profiles.role = 'admin'` for that user
   - keeps existing admin account idempotently
+
+For performance incident investigations, see `docs/performance-diagnostics.md`.
 
 ## 9) Trigger deployment
 

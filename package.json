@@ -17,6 +17,7 @@
     "supabase:push": "supabase db push --linked",
     "supabase:types": "supabase gen types typescript --linked --schema public > src/types/database.ts",
     "supabase:env:local": "./scripts/update-local-supabase-env.sh",
+    "perf:collect": "./scripts/collect-perf-diagnostics.sh",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
