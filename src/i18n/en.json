@@ -7,6 +7,7 @@
     "menu": {
       "characters": "Characters",
       "campaigns": "Campaigns",
+      "notifications": "Notifications",
       "profile": "Profile",
       "settings": "Settings",
       "admin": "Admin"
@@ -108,6 +109,19 @@
       "joinConfirm": "Send join request to campaign owner?",
       "joinPending": "Your join request is pending.",
       "pendingRequests": "Pending join requests"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "All updates for your account.",
+      "unread": "Unread",
+      "markRead": "Mark as read",
+      "markAllRead": "Mark all as read",
+      "events": {
+        "campaignInvite": "Campaign invite",
+        "campaignJoinRequest": "Campaign join request",
+        "relationshipCreated": "Relationship created",
+        "relationshipUpdated": "Relationship updated"
+      }
     },
     "admin": {
       "title": "Admin Dashboard",
@@ -236,6 +250,7 @@
       "create": "Create",
       "save": "Save",
       "edit": "Edit",
+      "view": "View",
       "delete": "Delete",
       "confirmDelete": "Confirm delete",
       "confirm": "Confirm",

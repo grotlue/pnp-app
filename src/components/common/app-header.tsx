@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Settings, Shield, User } from "lucide-react";
+import { Bell, LogOut, Settings, Shield, User } from "lucide-react";
 import { IconActionButton, IconActionLinkButton } from "@/components/common/icon-action-button";
 import { clearLocaleCookie, readLocaleCookie, setLocaleCookie } from "@/lib/client/locale-cookie";
 import { clearSession } from "@/lib/client/session";
 import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
 import type { ClientSession } from "@/lib/client/session";
 import { logoutUser } from "@/features/users/queries/users-auth.query";
+import { useNotificationsUnreadCount } from "@/features/notifications/hooks/use-notifications-unread-count";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
 import type { MeResponse } from "@/features/users/types";
 import { appNavigationRoutes, appRoutes } from "@/app/router";
@@ -31,6 +32,8 @@ export function AppHeader({ locale, session, me: providedMe = null, fetchMe = tr
   const role = me?.profile.role;
   const roleResolved = me !== null || (fetchMe && meQuery.isSuccess);
   const profileLocale = me?.profile.locale;
+  const notificationsUnreadCountQuery = useNotificationsUnreadCount(session);
+  const unreadNotifications = notificationsUnreadCountQuery.data?.unreadCount ?? 0;
 
   useEffect(() => {
     if (!profileLocale) {
@@ -88,6 +91,13 @@ export function AppHeader({ locale, session, me: providedMe = null, fetchMe = tr
           })}
         </nav>
         <div className="ml-auto flex items-center gap-1">
+          <IconActionLinkButton
+            label={t("ui.menu.notifications")}
+            icon={Bell}
+            href={appRoutes.notifications}
+            variant="ghost"
+            badgeCount={unreadNotifications}
+          />
           {roleResolved && role !== "admin" ? (
             <>
               <IconActionLinkButton

@@ -7,6 +7,7 @@
     "menu": {
       "characters": "Charaktere",
       "campaigns": "Kampagnen",
+      "notifications": "Benachrichtigungen",
       "profile": "Profil",
       "settings": "Einstellungen",
       "admin": "Admin"
@@ -108,6 +109,19 @@
       "joinConfirm": "Beitrittsanfrage an Kampagnenbesitzer senden?",
       "joinPending": "Deine Beitrittsanfrage ist noch offen.",
       "pendingRequests": "Offene Beitrittsanfragen"
+    },
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "subtitle": "Alle Updates zu deinem Account.",
+      "unread": "Ungelesen",
+      "markRead": "Als gelesen markieren",
+      "markAllRead": "Alle als gelesen markieren",
+      "events": {
+        "campaignInvite": "Kampagnen-Einladung",
+        "campaignJoinRequest": "Kampagnen-Beitrittsanfrage",
+        "relationshipCreated": "Beziehung erstellt",
+        "relationshipUpdated": "Beziehung aktualisiert"
+      }
     },
     "admin": {
       "title": "Admin-Dashboard",
@@ -236,6 +250,7 @@
       "create": "Erstellen",
       "save": "Speichern",
       "edit": "Bearbeiten",
+      "view": "Anschauen",
       "delete": "Löschen",
       "confirmDelete": "Löschen bestätigen",
       "confirm": "Bestätigen",

@@ -8,6 +8,7 @@ export const appRoutes = {
   authResetPassword: "/auth/reset-password",
   characters: "/characters",
   campaigns: "/campaigns",
+  notifications: "/notifications",
   profile: "/profile",
   settings: "/settings",
   admin: "/admin",
