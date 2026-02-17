@@ -61,7 +61,7 @@ jobs:
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: |
           supabase link --project-ref "$SUPABASE_PROJECT_REF"
-          supabase db push --linked
+          supabase db push --linked --include-all
 
       - name: Lint Supabase DB (production, public schema)
         env:

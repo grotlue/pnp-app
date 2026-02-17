@@ -10,6 +10,7 @@ export async function GET(request: Request) {
   const { count, error } = await auth.context.client
     .from("notifications")
     .select("id", { head: true, count: "exact" })
+    .eq("recipient_user_id", auth.context.user.id)
     .eq("is_read", false);
 
   if (error) {

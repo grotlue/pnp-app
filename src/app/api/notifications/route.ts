@@ -18,6 +18,7 @@ export async function GET(request: Request) {
     .select(
       "id, recipient_user_id, event_type, source_character_id, target_character_id, payload, is_read, created_at, read_at",
     )
+    .eq("recipient_user_id", auth.context.user.id)
     .limit(limit)
     .order("created_at", { ascending: false });
 
