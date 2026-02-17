@@ -1,5 +1,8 @@
 import { jsonError } from "@/lib/api/http";
-import { hasAal2AuthLevel, isAdminMfaRequired } from "@/server/auth/auth-hardening";
+import {
+  hasAal2AuthLevel,
+  isAdminMfaRequired,
+} from "@/server/auth/auth-hardening";
 import { getUserRole } from "@/server/auth/get-user-role";
 import { requireAuth, type AuthContext } from "@/server/auth/require-auth";
 
@@ -35,11 +38,7 @@ export async function requireAdmin(
   } catch (error) {
     console.warn("requireAdmin failed", error);
     return {
-      response: jsonError(
-        500,
-        "admin_check_failed",
-        "Admin check failed",
-      ),
+      response: jsonError(500, "admin_check_failed", "Admin check failed"),
     };
   }
 }

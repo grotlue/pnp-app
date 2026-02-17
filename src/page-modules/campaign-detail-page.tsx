@@ -5,10 +5,20 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/common/empty-state";
 import { FeedbackMessage } from "@/components/common/feedback-message";
-import { FormInput, FormSelect, FormTextarea } from "@/components/common/form-controls";
+import {
+  FormInput,
+  FormSelect,
+  FormTextarea,
+} from "@/components/common/form-controls";
 import { SectionBox } from "@/components/common/section-box";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { AppHeader } from "@/components/common/app-header";
 import { Modal } from "@/components/common/modal";
 import { PageLoadingState } from "@/components/common/page-loading-state";
@@ -26,7 +36,10 @@ type CampaignDetailScreenProps = {
   campaignId: string;
 };
 
-export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScreenProps) {
+export function CampaignDetailPageView({
+  locale,
+  campaignId,
+}: CampaignDetailScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
   const router = useRouter();
   const { session, ready } = useClientSession();
@@ -48,7 +61,11 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
   const [inviteOpen, setInviteOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
   const [joinOpen, setJoinOpen] = useState(false);
-  const [editForm, setEditForm] = useState({ title: "", description: "", isPrivate: false });
+  const [editForm, setEditForm] = useState({
+    title: "",
+    description: "",
+    isPrivate: false,
+  });
   const [inviteUserId, setInviteUserId] = useState("");
   const [assignCharacterId, setAssignCharacterId] = useState("");
 
@@ -76,7 +93,8 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
     );
   }
 
-  const queryError = detailQuery.error instanceof Error ? detailQuery.error.message : "";
+  const queryError =
+    detailQuery.error instanceof Error ? detailQuery.error.message : "";
   const feedback = message || queryError;
 
   const { me, detail, characters, users } = detailQuery.data;
@@ -87,15 +105,28 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
     isPrivate: detail.campaign.is_private,
   });
   const isForeignAdminView = isAdmin(me.profile.role) && !isOwner;
-  const ownMembership = detail.memberships.find((entry) => entry.user_id === me.user.id);
-  const canRequestJoin = !canManage && (!ownMembership || ownMembership.state === "rejected");
+  const ownMembership = detail.memberships.find(
+    (entry) => entry.user_id === me.user.id,
+  );
+  const canRequestJoin =
+    !canManage && (!ownMembership || ownMembership.state === "rejected");
   const hasPendingJoinRequest =
-    !canManage && ownMembership?.source === "request" && ownMembership.state === "pending";
+    !canManage &&
+    ownMembership?.source === "request" &&
+    ownMembership.state === "pending";
 
-  const acceptedPlayers = detail.memberships.filter((entry) => entry.state === "accepted");
-  const campaignCharacters = characters.filter((entry) => entry.campaign_id === campaignId);
-  const playerCharacters = campaignCharacters.filter((entry) => entry.type === "player");
-  const npcCharacters = campaignCharacters.filter((entry) => entry.type === "npc");
+  const acceptedPlayers = detail.memberships.filter(
+    (entry) => entry.state === "accepted",
+  );
+  const campaignCharacters = characters.filter(
+    (entry) => entry.campaign_id === campaignId,
+  );
+  const playerCharacters = campaignCharacters.filter(
+    (entry) => entry.type === "player",
+  );
+  const npcCharacters = campaignCharacters.filter(
+    (entry) => entry.type === "npc",
+  );
 
   const assignableCharacters = characters.filter((entry) => {
     if (entry.campaign_id !== null) {
@@ -110,9 +141,13 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
     return true;
   });
 
-  const membershipUserIds = new Set(detail.memberships.map((entry) => entry.user_id));
+  const membershipUserIds = new Set(
+    detail.memberships.map((entry) => entry.user_id),
+  );
   const inviteCandidates = users.filter(
-    (entry) => entry.id !== detail.campaign.owner_user_id && !membershipUserIds.has(entry.id),
+    (entry) =>
+      entry.id !== detail.campaign.owner_user_id &&
+      !membershipUserIds.has(entry.id),
   );
   const pendingRequests = detail.memberships.filter(
     (entry) => entry.source === "request" && entry.state === "pending",
@@ -141,7 +176,7 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
             </CardTitle>
             <CardDescription>{t("ui.campaignDetail.subtitle")}</CardDescription>
             {isForeignAdminView ? (
-              <div className="inline-flex w-fit rounded-md border border-destructive/40 bg-destructive/10 px-2 py-1 text-xs font-medium text-destructive">
+              <div className="border-destructive/40 bg-destructive/10 text-destructive inline-flex w-fit rounded-md border px-2 py-1 text-xs font-medium">
                 {t("ui.admin.foreignItemLabel")}
               </div>
             ) : null}
@@ -163,7 +198,10 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                   >
                     {t("ui.actions.edit")}
                   </Button>
-                  <Button variant="destructive" onClick={() => setDeleteOpen(true)}>
+                  <Button
+                    variant="destructive"
+                    onClick={() => setDeleteOpen(true)}
+                  >
                     {t("ui.actions.delete")}
                   </Button>
                   <Button variant="outline" onClick={() => setInviteOpen(true)}>
@@ -185,16 +223,23 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
 
             <FeedbackMessage message={feedback} />
             <FeedbackMessage
-              message={hasPendingJoinRequest ? t("ui.campaignDetail.joinPending") : ""}
+              message={
+                hasPendingJoinRequest ? t("ui.campaignDetail.joinPending") : ""
+              }
             />
 
-            <SectionBox title={t("ui.fields.campaignDescription")} className="text-sm">
-              <div className="mt-1 text-muted-foreground">{detail.campaign.description || "-"}</div>
+            <SectionBox
+              title={t("ui.fields.campaignDescription")}
+              className="text-sm"
+            >
+              <div className="text-muted-foreground mt-1">
+                {detail.campaign.description || "-"}
+              </div>
             </SectionBox>
 
             <SectionBox title={t("ui.campaignDetail.players")}>
               <div className="space-y-1 text-xs">
-                {acceptedPlayers.map((entry) => (
+                {acceptedPlayers.map((entry) =>
                   isAdminUser(entry.user_id) ? (
                     <div key={entry.id}>{usernameFor(entry.user_id)}</div>
                   ) : (
@@ -205,12 +250,12 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                     >
                       {usernameFor(entry.user_id)}
                     </Link>
-                  )
-                ))}
+                  ),
+                )}
                 {acceptedPlayers.length === 0 ? (
                   <EmptyState
                     label={t("ui.feedback.empty")}
-                    className="border-0 bg-transparent p-0 text-muted-foreground"
+                    className="text-muted-foreground border-0 bg-transparent p-0"
                   />
                 ) : null}
               </div>
@@ -222,7 +267,7 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                   {pendingRequests.map((entry) => (
                     <div
                       key={entry.id}
-                      className="flex flex-wrap items-center gap-2 rounded border border-border px-2 py-2 text-xs"
+                      className="border-border flex flex-wrap items-center gap-2 rounded border px-2 py-2 text-xs"
                     >
                       {isAdminUser(entry.user_id) ? (
                         <span>{usernameFor(entry.user_id)}</span>
@@ -248,7 +293,9 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                             setMessage(t("ui.feedback.saved"));
                           } catch (error) {
                             setMessage(
-                              error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                              error instanceof Error
+                                ? error.message
+                                : t("ui.feedback.requestFailed"),
                             );
                           }
                         }}
@@ -269,7 +316,9 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                             setMessage(t("ui.feedback.saved"));
                           } catch (error) {
                             setMessage(
-                              error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                              error instanceof Error
+                                ? error.message
+                                : t("ui.feedback.requestFailed"),
                             );
                           }
                         }}
@@ -288,21 +337,34 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                   value={tab}
                   onChange={setTab}
                   options={[
-                    { value: "player", label: t("ui.campaignDetail.playerCharacters") },
+                    {
+                      value: "player",
+                      label: t("ui.campaignDetail.playerCharacters"),
+                    },
                     { value: "npc", label: t("ui.campaignDetail.npcs") },
                   ]}
                 />
               </div>
               <div className="space-y-1 text-xs">
-                {(tab === "player" ? playerCharacters : npcCharacters).map((entry) => (
-                  <Link key={entry.id} href={`/characters/${entry.id}`} className={`flex items-center gap-1 ${textLinkClassName}`}>
-                    <TitleWithPrivacy title={entry.name} isPrivate={entry.is_private} />
-                  </Link>
-                ))}
-                {(tab === "player" ? playerCharacters : npcCharacters).length === 0 ? (
+                {(tab === "player" ? playerCharacters : npcCharacters).map(
+                  (entry) => (
+                    <Link
+                      key={entry.id}
+                      href={`/characters/${entry.id}`}
+                      className={`flex items-center gap-1 ${textLinkClassName}`}
+                    >
+                      <TitleWithPrivacy
+                        title={entry.name}
+                        isPrivate={entry.is_private}
+                      />
+                    </Link>
+                  ),
+                )}
+                {(tab === "player" ? playerCharacters : npcCharacters)
+                  .length === 0 ? (
                   <EmptyState
                     label={t("ui.feedback.empty")}
-                    className="border-0 bg-transparent p-0 text-muted-foreground"
+                    className="text-muted-foreground border-0 bg-transparent p-0"
                   />
                 ) : null}
               </div>
@@ -329,7 +391,11 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                   setEditOpen(false);
                   setMessage(t("ui.feedback.saved"));
                 } catch (error) {
-                  setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+                  setMessage(
+                    error instanceof Error
+                      ? error.message
+                      : t("ui.feedback.requestFailed"),
+                  );
                 }
               }}
             >
@@ -342,14 +408,19 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
           <FormInput
             value={editForm.title}
             placeholder={t("ui.fields.campaignTitle")}
-            onChange={(event) => setEditForm((prev) => ({ ...prev, title: event.target.value }))}
+            onChange={(event) =>
+              setEditForm((prev) => ({ ...prev, title: event.target.value }))
+            }
           />
           <FormTextarea
             className="min-h-24"
             value={editForm.description}
             placeholder={t("ui.fields.campaignDescription")}
             onChange={(event) =>
-              setEditForm((prev) => ({ ...prev, description: event.target.value }))
+              setEditForm((prev) => ({
+                ...prev,
+                description: event.target.value,
+              }))
             }
           />
           <VisibilityToggle
@@ -383,7 +454,11 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                   setDeleteOpen(false);
                   router.push("/campaigns");
                 } catch (error) {
-                  setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+                  setMessage(
+                    error instanceof Error
+                      ? error.message
+                      : t("ui.feedback.requestFailed"),
+                  );
                 }
               }}
             >
@@ -414,7 +489,11 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                   setInviteUserId("");
                   setMessage(t("ui.feedback.sent"));
                 } catch (error) {
-                  setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+                  setMessage(
+                    error instanceof Error
+                      ? error.message
+                      : t("ui.feedback.requestFailed"),
+                  );
                 }
               }}
             >
@@ -455,7 +534,11 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                   setAssignCharacterId("");
                   setMessage(t("ui.feedback.saved"));
                 } catch (error) {
-                  setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+                  setMessage(
+                    error instanceof Error
+                      ? error.message
+                      : t("ui.feedback.requestFailed"),
+                  );
                 }
               }}
             >
@@ -495,7 +578,11 @@ export function CampaignDetailPageView({ locale, campaignId }: CampaignDetailScr
                   setJoinOpen(false);
                   setMessage(t("ui.feedback.sent"));
                 } catch (error) {
-                  setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+                  setMessage(
+                    error instanceof Error
+                      ? error.message
+                      : t("ui.feedback.requestFailed"),
+                  );
                 }
               }}
             >

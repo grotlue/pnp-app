@@ -11,7 +11,12 @@ export function FeedbackMessage({ message, className }: FeedbackMessageProps) {
   }
 
   return (
-    <div className={cn("rounded-md border border-border bg-background p-2 text-xs", className)}>
+    <div
+      className={cn(
+        "border-border bg-background rounded-md border p-2 text-xs",
+        className,
+      )}
+    >
       {message}
     </div>
   );

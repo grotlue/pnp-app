@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import { FormInput } from "@/components/common/form-controls";
-import { TurnstileWidget, type TurnstileErrorReason } from "@/components/common/turnstile-widget";
+import {
+  TurnstileWidget,
+  type TurnstileErrorReason,
+} from "@/components/common/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -46,7 +49,8 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
   const [message, setMessage] = useState("");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
-  const [captchaErrorReason, setCaptchaErrorReason] = useState<TurnstileErrorReason | null>(null);
+  const [captchaErrorReason, setCaptchaErrorReason] =
+    useState<TurnstileErrorReason | null>(null);
 
   async function onSubmit() {
     if (authCaptchaConfig.required && !authCaptchaConfig.enabled) {
@@ -68,7 +72,9 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
       });
       setMessage(t("ui.feedback.passwordResetSent"));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
     } finally {
       if (authCaptchaConfig.enabled) {
         setCaptchaToken(null);
@@ -111,10 +117,7 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
             <FeedbackMessage message={message} />
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-2">
-            <Button
-              disabled={busy}
-              onClick={onSubmit}
-            >
+            <Button disabled={busy} onClick={onSubmit}>
               {t("ui.actions.sendReset")}
             </Button>
             <div className="text-xs">

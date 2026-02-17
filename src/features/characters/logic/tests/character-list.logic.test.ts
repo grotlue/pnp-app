@@ -47,7 +47,11 @@ describe("character-list.logic", () => {
   });
 
   it("filters ownership for current user", () => {
-    const filtered = filterCharactersByOwnership([...characters], "mine", "u-1");
+    const filtered = filterCharactersByOwnership(
+      [...characters],
+      "mine",
+      "u-1",
+    );
     expect(filtered.map((entry) => entry.id)).toEqual(["c-1"]);
   });
 });

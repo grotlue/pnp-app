@@ -59,11 +59,16 @@ export async function apiRequest<T>(
   }
 
   if (!response.ok) {
-    const err = payload as { error?: { code?: string; message?: string } } | null;
+    const err = payload as {
+      error?: { code?: string; message?: string };
+    } | null;
     const errorCode = err?.error?.code ?? "request_failed";
     const errorMessage = err?.error?.message ?? "Request failed";
 
-    if (response.status === 401 && (errorCode === "invalid_token" || errorCode === "auth_required")) {
+    if (
+      response.status === 401 &&
+      (errorCode === "invalid_token" || errorCode === "auth_required")
+    ) {
       clearSession();
     }
 

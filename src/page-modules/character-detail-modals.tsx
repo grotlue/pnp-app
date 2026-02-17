@@ -1,9 +1,16 @@
 import type { Dispatch, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/common/modal";
-import { FormInput, FormSelect, FormTextarea } from "@/components/common/form-controls";
+import {
+  FormInput,
+  FormSelect,
+  FormTextarea,
+} from "@/components/common/form-controls";
 import type { Campaign } from "@/features/campaigns/types";
-import type { RelationshipCatalog, RelationshipDetail } from "@/features/relationships/types";
+import type {
+  RelationshipCatalog,
+  RelationshipDetail,
+} from "@/features/relationships/types";
 
 type Translator = (key: string) => string;
 
@@ -88,10 +95,15 @@ function RelationshipFormFields<TForm extends RelationshipBaseFormValues>({
         <FormSelect
           value={form.targetCharacterId}
           onChange={(event) =>
-            onFormChange((prev) => ({ ...prev, targetCharacterId: event.target.value }))
+            onFormChange((prev) => ({
+              ...prev,
+              targetCharacterId: event.target.value,
+            }))
           }
         >
-          <option value="">{t("ui.characterDetail.selectRelationshipTarget")}</option>
+          <option value="">
+            {t("ui.characterDetail.selectRelationshipTarget")}
+          </option>
           {targetOptions.map((entry) => (
             <option key={entry.id} value={entry.id}>
               {entry.name}
@@ -103,14 +115,19 @@ function RelationshipFormFields<TForm extends RelationshipBaseFormValues>({
           value={form.targetSnapshotName}
           placeholder={t("ui.characterDetail.externalName")}
           onChange={(event) =>
-            onFormChange((prev) => ({ ...prev, targetSnapshotName: event.target.value }))
+            onFormChange((prev) => ({
+              ...prev,
+              targetSnapshotName: event.target.value,
+            }))
           }
         />
       )}
 
       <FormSelect
         value={categoryValue}
-        onChange={(event) => onFormChange((prev) => ({ ...prev, categoryId: event.target.value }))}
+        onChange={(event) =>
+          onFormChange((prev) => ({ ...prev, categoryId: event.target.value }))
+        }
       >
         <option value="">{t("ui.characterDetail.category")}</option>
         {catalog.categories.map((entry) => (
@@ -154,7 +171,9 @@ function RelationshipFormFields<TForm extends RelationshipBaseFormValues>({
         className="min-h-20"
         value={form.description}
         placeholder={t("ui.fields.description")}
-        onChange={(event) => onFormChange((prev) => ({ ...prev, description: event.target.value }))}
+        onChange={(event) =>
+          onFormChange((prev) => ({ ...prev, description: event.target.value }))
+        }
       />
     </div>
   );
@@ -191,7 +210,10 @@ export function AssignCampaignModal({
           <Button variant="outline" onClick={onClose}>
             {t("ui.actions.close")}
           </Button>
-          <Button disabled={anyPending || !selectedCampaignId} onClick={onAssign}>
+          <Button
+            disabled={anyPending || !selectedCampaignId}
+            onClick={onAssign}
+          >
             {t("ui.actions.assign")}
           </Button>
         </>
@@ -237,7 +259,11 @@ export function UnassignCampaignModal({
           <Button variant="outline" onClick={onClose}>
             {t("ui.actions.close")}
           </Button>
-          <Button variant="destructive" disabled={anyPending} onClick={onConfirm}>
+          <Button
+            variant="destructive"
+            disabled={anyPending}
+            onClick={onConfirm}
+          >
             {t("ui.actions.confirm")}
           </Button>
         </>
@@ -245,7 +271,9 @@ export function UnassignCampaignModal({
     >
       <div className="space-y-2 text-sm">
         <div>{t("ui.characterDetail.unassignConfirm")}</div>
-        <div className="text-xs text-muted-foreground">{t("ui.characterDetail.unassignInfo")}</div>
+        <div className="text-muted-foreground text-xs">
+          {t("ui.characterDetail.unassignInfo")}
+        </div>
       </div>
     </Modal>
   );
@@ -315,7 +343,10 @@ export function AddRelationshipModal({
           placeholder={t("ui.characterDetail.firstTimelineEntry")}
           value={form.firstTimelineEntry}
           onChange={(event) =>
-            onFormChange((prev) => ({ ...prev, firstTimelineEntry: event.target.value }))
+            onFormChange((prev) => ({
+              ...prev,
+              firstTimelineEntry: event.target.value,
+            }))
           }
         />
       </div>
@@ -410,13 +441,19 @@ export function DeleteRelationshipModal({
           <Button variant="outline" onClick={onClose}>
             {t("ui.actions.close")}
           </Button>
-          <Button variant="destructive" disabled={anyPending || !hasRelation} onClick={onDelete}>
+          <Button
+            variant="destructive"
+            disabled={anyPending || !hasRelation}
+            onClick={onDelete}
+          >
             {t("ui.actions.confirmDelete")}
           </Button>
         </>
       }
     >
-      <div className="text-sm">{t("ui.characterDetail.deleteRelationshipConfirm")}</div>
+      <div className="text-sm">
+        {t("ui.characterDetail.deleteRelationshipConfirm")}
+      </div>
     </Modal>
   );
 }
@@ -447,21 +484,27 @@ export function RelationshipDetailModal({
     >
       {detail ? (
         <div className="space-y-3 text-sm">
-          <div className="rounded border border-border p-2">
-            <div className="font-medium">{t("ui.characterDetail.howThisSeesOther")}</div>
-            <pre className="mt-1 overflow-auto whitespace-pre-wrap text-xs">
+          <div className="border-border rounded border p-2">
+            <div className="font-medium">
+              {t("ui.characterDetail.howThisSeesOther")}
+            </div>
+            <pre className="mt-1 overflow-auto text-xs whitespace-pre-wrap">
               {JSON.stringify(detail.outgoing, null, 2)}
             </pre>
           </div>
-          <div className="rounded border border-border p-2">
-            <div className="font-medium">{t("ui.characterDetail.howOtherSeesThis")}</div>
-            <pre className="mt-1 overflow-auto whitespace-pre-wrap text-xs">
+          <div className="border-border rounded border p-2">
+            <div className="font-medium">
+              {t("ui.characterDetail.howOtherSeesThis")}
+            </div>
+            <pre className="mt-1 overflow-auto text-xs whitespace-pre-wrap">
               {JSON.stringify(detail.incoming, null, 2)}
             </pre>
           </div>
-          <div className="rounded border border-border p-2">
-            <div className="font-medium">{t("ui.characterDetail.timeline")}</div>
-            <pre className="mt-1 overflow-auto whitespace-pre-wrap text-xs">
+          <div className="border-border rounded border p-2">
+            <div className="font-medium">
+              {t("ui.characterDetail.timeline")}
+            </div>
+            <pre className="mt-1 overflow-auto text-xs whitespace-pre-wrap">
               {JSON.stringify(detail.timeline, null, 2)}
             </pre>
           </div>

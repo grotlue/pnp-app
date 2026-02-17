@@ -1,6 +1,9 @@
 import type { Campaign } from "../types";
 
-export function isCampaignOwner(campaign: Campaign, userId?: string | null): boolean {
+export function isCampaignOwner(
+  campaign: Campaign,
+  userId?: string | null,
+): boolean {
   if (!userId) {
     return false;
   }

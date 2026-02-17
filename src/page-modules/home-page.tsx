@@ -12,7 +12,10 @@ import { ListItemRow } from "@/components/common/list-item-row";
 import { OwnershipBadge } from "@/components/common/ownership-badge";
 import { PageLoadingState } from "@/components/common/page-loading-state";
 import { PaginationControls } from "@/components/common/pagination-controls";
-import { TurnstileWidget, type TurnstileErrorReason } from "@/components/common/turnstile-widget";
+import {
+  TurnstileWidget,
+  type TurnstileErrorReason,
+} from "@/components/common/turnstile-widget";
 import { ToggleTabs } from "@/components/common/toggle-tabs";
 import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
 import { Button } from "@/components/ui/button";
@@ -50,7 +53,11 @@ import { useClientSession } from "@/lib/client/use-client-session";
 import { resolveAuthCaptchaClientConfig } from "@/lib/features/auth-captcha";
 import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
 import { textLinkClassName } from "@/lib/utils/link";
-import { clampListPage, DEFAULT_LIST_PAGE_SIZE, paginateListItems } from "@/lib/utils/list";
+import {
+  clampListPage,
+  DEFAULT_LIST_PAGE_SIZE,
+  paginateListItems,
+} from "@/lib/utils/list";
 
 type HomeScreenProps = {
   locale: AppLocale;
@@ -102,17 +109,20 @@ export function HomePageView({
   const [loginForm, setLoginForm] = useState({ email: "", password: "" });
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
-  const [captchaErrorReason, setCaptchaErrorReason] = useState<TurnstileErrorReason | null>(null);
+  const [captchaErrorReason, setCaptchaErrorReason] =
+    useState<TurnstileErrorReason | null>(null);
 
   const [characterTab, setCharacterTab] = useState<"player" | "npc">("player");
   const [characterOwnershipFilter, setCharacterOwnershipFilter] =
     useState<CharacterOwnershipFilter>("all");
   const [characterSearchQuery, setCharacterSearchQuery] = useState("");
-  const [characterSortBy, setCharacterSortBy] = useState<CharacterListSort>("updated_desc");
+  const [characterSortBy, setCharacterSortBy] =
+    useState<CharacterListSort>("updated_desc");
   const [characterPage, setCharacterPage] = useState(1);
 
   const [campaignSearchQuery, setCampaignSearchQuery] = useState("");
-  const [campaignSortBy, setCampaignSortBy] = useState<CampaignListSort>("updated_desc");
+  const [campaignSortBy, setCampaignSortBy] =
+    useState<CampaignListSort>("updated_desc");
   const [campaignPage, setCampaignPage] = useState(1);
 
   const loggedInQuery = useQuery({
@@ -165,7 +175,9 @@ export function HomePageView({
       }
       router.replace("/");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
     } finally {
       if (authCaptchaConfig.enabled) {
         setCaptchaToken(null);
@@ -187,7 +199,9 @@ export function HomePageView({
           <Card>
             <CardHeader>
               <CardTitle>{t("ui.start.loggedOutTitle")}</CardTitle>
-              <CardDescription>{t("ui.start.loggedOutSubtitle")}</CardDescription>
+              <CardDescription>
+                {t("ui.start.loggedOutSubtitle")}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <FormInput
@@ -195,7 +209,10 @@ export function HomePageView({
                 placeholder={t("ui.fields.email")}
                 value={loginForm.email}
                 onChange={(event) =>
-                  setLoginForm((prev) => ({ ...prev, email: event.target.value }))
+                  setLoginForm((prev) => ({
+                    ...prev,
+                    email: event.target.value,
+                  }))
                 }
               />
               <FormInput
@@ -203,7 +220,10 @@ export function HomePageView({
                 placeholder={t("ui.fields.password")}
                 value={loginForm.password}
                 onChange={(event) =>
-                  setLoginForm((prev) => ({ ...prev, password: event.target.value }))
+                  setLoginForm((prev) => ({
+                    ...prev,
+                    password: event.target.value,
+                  }))
                 }
               />
               {authCaptchaConfig.enabled && authCaptchaConfig.siteKey ? (
@@ -223,14 +243,14 @@ export function HomePageView({
               <FeedbackMessage message={message} />
             </CardContent>
             <CardFooter className="flex-col items-stretch gap-2">
-              <Button
-                disabled={busy}
-                onClick={onLogin}
-              >
+              <Button disabled={busy} onClick={onLogin}>
                 {t("ui.actions.login")}
               </Button>
               <div className="flex items-center justify-between text-xs">
-                <Link href={appRoutes.passwordReset} className={textLinkClassName}>
+                <Link
+                  href={appRoutes.passwordReset}
+                  className={textLinkClassName}
+                >
                   {t("ui.nav.passwordReset")}
                 </Link>
                 {registrationEnabled ? (
@@ -269,7 +289,9 @@ export function HomePageView({
   const currentUserId = me?.user.id;
   const publicCampaigns = data?.campaigns ?? [];
   const publicCharacters = data?.characters ?? [];
-  const campaignById = new Map(publicCampaigns.map((campaign) => [campaign.id, campaign]));
+  const campaignById = new Map(
+    publicCampaigns.map((campaign) => [campaign.id, campaign]),
+  );
 
   const visibleCharactersByType = publicCharacters.filter(
     (character) => character.type === characterTab,
@@ -329,8 +351,10 @@ export function HomePageView({
             <CardTitle>{t("ui.start.loggedInTitle")}</CardTitle>
             <CardDescription>{t("ui.start.loggedInSubtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {me ? `${t("ui.start.welcome")}: ${me.profile.username}` : t("ui.start.loggedInSubtitle")}
+          <CardContent className="text-muted-foreground text-sm">
+            {me
+              ? `${t("ui.start.welcome")}: ${me.profile.username}`
+              : t("ui.start.loggedInSubtitle")}
           </CardContent>
         </Card>
 
@@ -344,7 +368,10 @@ export function HomePageView({
                 value={characterTab}
                 onChange={setCharacterTab}
                 options={[
-                  { value: "player", label: t("ui.labels.characterType.player") },
+                  {
+                    value: "player",
+                    label: t("ui.labels.characterType.player"),
+                  },
                   { value: "npc", label: t("ui.labels.characterType.npc") },
                 ]}
               />
@@ -353,7 +380,9 @@ export function HomePageView({
                 onSearchChange={setCharacterSearchQuery}
                 searchPlaceholder={t("ui.list.searchCharacters")}
                 sortValue={characterSortBy}
-                onSortChange={(value) => setCharacterSortBy(value as CharacterListSort)}
+                onSortChange={(value) =>
+                  setCharacterSortBy(value as CharacterListSort)
+                }
                 sortLabel={t("ui.list.sortBy")}
                 sortOptions={characterSortOptions}
                 filterLabel={t("ui.list.filterBy")}
@@ -369,20 +398,23 @@ export function HomePageView({
               />
 
               <div className="space-y-2">
-                <div className="grid gap-2 px-1 text-[11px] font-medium text-muted-foreground md:grid-cols-[1fr_170px]">
+                <div className="text-muted-foreground grid gap-2 px-1 text-[11px] font-medium md:grid-cols-[1fr_170px]">
                   <div>{t("ui.characters.title")}</div>
                   <div>{t("ui.fields.campaign")}</div>
                 </div>
                 {pagedCharacters.map((character) => {
                   const campaign = character.campaign_id
-                    ? campaignById.get(character.campaign_id) ?? null
+                    ? (campaignById.get(character.campaign_id) ?? null)
                     : null;
 
                   return (
                     <ListItemRow key={character.id}>
                       <div className="grid gap-2 md:grid-cols-[1fr_170px]">
                         <div className="space-y-1">
-                          <Link href={`/characters/${character.id}`} className={textLinkClassName}>
+                          <Link
+                            href={`/characters/${character.id}`}
+                            className={textLinkClassName}
+                          >
                             <TitleWithPrivacy
                               title={character.name}
                               isPrivate={character.is_private}
@@ -395,9 +427,12 @@ export function HomePageView({
                             ) : null}
                           </div>
                         </div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-muted-foreground text-xs">
                           {campaign ? (
-                            <Link href={`/campaigns/${campaign.id}`} className={textLinkClassName}>
+                            <Link
+                              href={`/campaigns/${campaign.id}`}
+                              className={textLinkClassName}
+                            >
                               {campaign.title}
                             </Link>
                           ) : (
@@ -411,7 +446,7 @@ export function HomePageView({
                 {searchedAndSortedCharacters.length === 0 ? (
                   <EmptyState
                     label={t("ui.feedback.empty")}
-                    className="border-0 bg-transparent p-0 text-muted-foreground"
+                    className="text-muted-foreground border-0 bg-transparent p-0"
                   />
                 ) : null}
               </div>
@@ -438,13 +473,15 @@ export function HomePageView({
                 onSearchChange={setCampaignSearchQuery}
                 searchPlaceholder={t("ui.list.searchCampaigns")}
                 sortValue={campaignSortBy}
-                onSortChange={(value) => setCampaignSortBy(value as CampaignListSort)}
+                onSortChange={(value) =>
+                  setCampaignSortBy(value as CampaignListSort)
+                }
                 sortLabel={t("ui.list.sortBy")}
                 sortOptions={campaignSortOptions}
               />
 
               <div className="space-y-2">
-                <div className="grid gap-2 px-1 text-[11px] font-medium text-muted-foreground md:grid-cols-[1fr_150px_80px]">
+                <div className="text-muted-foreground grid gap-2 px-1 text-[11px] font-medium md:grid-cols-[1fr_150px_80px]">
                   <div>{t("ui.campaigns.title")}</div>
                   <div>{t("ui.admin.ownerLabel")}</div>
                   <div>{t("ui.fields.players")}</div>
@@ -453,7 +490,10 @@ export function HomePageView({
                   <ListItemRow key={campaign.id}>
                     <div className="grid gap-2 md:grid-cols-[1fr_150px_80px]">
                       <div className="space-y-1">
-                        <Link href={`/campaigns/${campaign.id}`} className={textLinkClassName}>
+                        <Link
+                          href={`/campaigns/${campaign.id}`}
+                          className={textLinkClassName}
+                        >
                           <TitleWithPrivacy
                             title={campaign.title}
                             isPrivate={campaign.is_private}
@@ -462,13 +502,18 @@ export function HomePageView({
                         </Link>
                         <div className="flex flex-wrap items-center gap-2">
                           {campaign.current_user_role ? (
-                            <CampaignRoleBadge role={campaign.current_user_role} t={t} />
+                            <CampaignRoleBadge
+                              role={campaign.current_user_role}
+                              t={t}
+                            />
                           ) : null}
                         </div>
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-muted-foreground text-xs">
                         {campaign.owner_role === "admin" ? (
-                          <span>{campaign.owner_username ?? campaign.owner_user_id}</span>
+                          <span>
+                            {campaign.owner_username ?? campaign.owner_user_id}
+                          </span>
                         ) : (
                           <Link
                             href={`/users/${campaign.owner_user_id}`}
@@ -478,14 +523,16 @@ export function HomePageView({
                           </Link>
                         )}
                       </div>
-                      <div className="text-xs text-muted-foreground">{campaign.player_count ?? 0}</div>
+                      <div className="text-muted-foreground text-xs">
+                        {campaign.player_count ?? 0}
+                      </div>
                     </div>
                   </ListItemRow>
                 ))}
                 {searchedAndSortedCampaigns.length === 0 ? (
                   <EmptyState
                     label={t("ui.feedback.empty")}
-                    className="border-0 bg-transparent p-0 text-muted-foreground"
+                    className="text-muted-foreground border-0 bg-transparent p-0"
                   />
                 ) : null}
               </div>

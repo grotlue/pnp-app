@@ -65,7 +65,10 @@ function isCompleteMfaVerification(data: unknown): data is {
     return false;
   }
 
-  if (candidate.refresh_token !== undefined && typeof candidate.refresh_token !== "string") {
+  if (
+    candidate.refresh_token !== undefined &&
+    typeof candidate.refresh_token !== "string"
+  ) {
     return false;
   }
 
@@ -87,7 +90,9 @@ export async function GET(request: Request) {
   }
 
   const [aalResult, factorsResult] = await Promise.all([
-    auth.context.authClient.auth.mfa.getAuthenticatorAssuranceLevel(auth.context.accessToken),
+    auth.context.authClient.auth.mfa.getAuthenticatorAssuranceLevel(
+      auth.context.accessToken,
+    ),
     auth.context.authClient.auth.mfa.listFactors(),
   ]);
 
@@ -158,7 +163,11 @@ export async function POST(request: Request) {
   }
 
   if (!isCompleteTotpEnrollment(data)) {
-    return jsonError(400, "mfa_enroll_failed", "MFA enrollment response was incomplete");
+    return jsonError(
+      400,
+      "mfa_enroll_failed",
+      "MFA enrollment response was incomplete",
+    );
   }
 
   return jsonOk({
@@ -205,11 +214,16 @@ export async function PATCH(request: Request) {
     return jsonError(400, "invalid_payload", "valid code is required");
   }
 
-  const { data: challengeData, error: challengeError } = await auth.context.authClient.auth.mfa.challenge({
-    factorId: body.factorId,
-  });
+  const { data: challengeData, error: challengeError } =
+    await auth.context.authClient.auth.mfa.challenge({
+      factorId: body.factorId,
+    });
   if (challengeError || !challengeData) {
-    return jsonError(400, "mfa_verify_failed", challengeError?.message ?? "MFA challenge failed");
+    return jsonError(
+      400,
+      "mfa_verify_failed",
+      challengeError?.message ?? "MFA challenge failed",
+    );
   }
 
   const { data, error } = await auth.context.authClient.auth.mfa.verify({
@@ -223,7 +237,11 @@ export async function PATCH(request: Request) {
   }
 
   if (!isCompleteMfaVerification(data)) {
-    return jsonError(400, "mfa_verify_failed", "MFA verification response was incomplete");
+    return jsonError(
+      400,
+      "mfa_verify_failed",
+      "MFA verification response was incomplete",
+    );
   }
 
   return setSessionCookies(

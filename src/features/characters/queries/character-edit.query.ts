@@ -23,11 +23,14 @@ export async function updateCharacter(
   characterId: string,
   input: CharacterUpdateInput,
 ): Promise<Character> {
-  const response = await apiRequest<Character>(`/api/characters/${characterId}`, {
-    method: "PATCH",
-    session,
-    body: input,
-  });
+  const response = await apiRequest<Character>(
+    `/api/characters/${characterId}`,
+    {
+      method: "PATCH",
+      session,
+      body: input,
+    },
+  );
   return unwrapApiResponse(response, "Failed to update character");
 }
 
@@ -35,10 +38,13 @@ export async function deleteCharacterFromEdit(
   session: ClientSession,
   characterId: string,
 ): Promise<{ deleted: boolean }> {
-  const response = await apiRequest<{ deleted: boolean }>(`/api/characters/${characterId}`, {
-    method: "DELETE",
-    session,
-  });
+  const response = await apiRequest<{ deleted: boolean }>(
+    `/api/characters/${characterId}`,
+    {
+      method: "DELETE",
+      session,
+    },
+  );
   return unwrapApiResponse(response, "Failed to delete character");
 }
 
@@ -52,16 +58,20 @@ export async function createCharacterAvatarSignedUpload(
     fileSize: number;
   },
 ): Promise<{ token: string; signedUrl: string; path: string }> {
-  const response = await apiRequest<{ token: string; signedUrl: string; path: string }>(
-    "/api/storage/character-images/signed-upload",
-    {
-      method: "POST",
-      session,
-      body: {
-        characterId,
-        ...input,
-      },
+  const response = await apiRequest<{
+    token: string;
+    signedUrl: string;
+    path: string;
+  }>("/api/storage/character-images/signed-upload", {
+    method: "POST",
+    session,
+    body: {
+      characterId,
+      ...input,
     },
+  });
+  return unwrapApiResponse(
+    response,
+    "Failed to prepare character image upload",
   );
-  return unwrapApiResponse(response, "Failed to prepare character image upload");
 }

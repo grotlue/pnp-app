@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { MAX_IMAGE_UPLOAD_SIZE_BYTES } from "@/lib/storage/image-upload";
 import { cn } from "@/lib/utils/cn";
 
-const ACCEPTED_IMAGE_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const ACCEPTED_IMAGE_MIME_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
 const ACCEPTED_IMAGE_EXTENSIONS = ".jpg,.jpeg,.png,.webp";
 
 type ImageDimensions = {
@@ -31,7 +35,10 @@ type ImageUploadFieldProps = {
   disabled?: boolean;
   className?: string;
   onChange: (nextPath: string) => void;
-  onUpload: (file: File, dimensions: ImageDimensions) => Promise<{ path: string }>;
+  onUpload: (
+    file: File,
+    dimensions: ImageDimensions,
+  ) => Promise<{ path: string }>;
   onResolvePreviewUrl: (path: string) => Promise<string>;
 };
 
@@ -116,7 +123,9 @@ export function ImageUploadField({
         if (cancelled) {
           return;
         }
-        setFieldMessage(error instanceof Error ? error.message : "Request failed");
+        setFieldMessage(
+          error instanceof Error ? error.message : "Request failed",
+        );
       });
 
     return () => {
@@ -162,7 +171,9 @@ export function ImageUploadField({
       setResolvedPath(uploadResponse.path);
       setFieldMessage("");
     } catch (error) {
-      setFieldMessage(error instanceof Error ? error.message : "Request failed");
+      setFieldMessage(
+        error instanceof Error ? error.message : "Request failed",
+      );
     } finally {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -183,11 +194,11 @@ export function ImageUploadField({
 
   return (
     <div className={cn("space-y-2", className)}>
-      <label htmlFor={inputId} className="text-xs text-muted-foreground">
+      <label htmlFor={inputId} className="text-muted-foreground text-xs">
         {label}
       </label>
       <div className="grid gap-3 md:grid-cols-[200px_1fr]">
-        <div className="overflow-hidden rounded-lg border border-border bg-muted/30">
+        <div className="border-border bg-muted/30 overflow-hidden rounded-lg border">
           {previewUrl ? (
             <Image
               src={previewUrl}
@@ -198,7 +209,7 @@ export function ImageUploadField({
               unoptimized
             />
           ) : (
-            <div className="flex h-[200px] items-center justify-center px-3 text-center text-xs text-muted-foreground">
+            <div className="text-muted-foreground flex h-[200px] items-center justify-center px-3 text-center text-xs">
               {emptyLabel}
             </div>
           )}
@@ -213,9 +224,9 @@ export function ImageUploadField({
             disabled={disabled || isUploading}
             onChange={handleFileChange}
           />
-          <div className="text-xs text-muted-foreground">{hint}</div>
+          <div className="text-muted-foreground text-xs">{hint}</div>
           {value ? (
-            <div className="rounded-md border border-border bg-background px-2 py-1 text-xs font-mono break-all">
+            <div className="border-border bg-background rounded-md border px-2 py-1 font-mono text-xs break-all">
               {value}
             </div>
           ) : null}
@@ -238,10 +249,12 @@ export function ImageUploadField({
             </Button>
           </div>
           {isUploading ? (
-            <div className="text-xs text-muted-foreground">{uploadingLabel}</div>
+            <div className="text-muted-foreground text-xs">
+              {uploadingLabel}
+            </div>
           ) : null}
           {fieldMessage ? (
-            <div className="rounded-md border border-border bg-background p-2 text-xs">
+            <div className="border-border bg-background rounded-md border p-2 text-xs">
               {fieldMessage}
             </div>
           ) : null}

@@ -8,7 +8,13 @@ import { FeedbackMessage } from "@/components/common/feedback-message";
 import { ListItemRow } from "@/components/common/list-item-row";
 import { StatusBadge } from "@/components/common/status-badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useNotificationsScreen } from "@/features/notifications/hooks/use-notifications-screen";
 import {
   getNotificationDisplayTitle,
@@ -52,8 +58,13 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
   const router = useRouter();
   const { session, ready } = useClientSession();
 
-  const { notificationsQuery, markReadMutation, markAllReadMutation, decideMembershipMutation, anyPending } =
-    useNotificationsScreen(session);
+  const {
+    notificationsQuery,
+    markReadMutation,
+    markAllReadMutation,
+    decideMembershipMutation,
+    anyPending,
+  } = useNotificationsScreen(session);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -86,7 +97,9 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
       await markAsRead(notification);
       router.push(path);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
     }
   }
 
@@ -110,7 +123,9 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
       await markAsRead(notification);
       setMessage(t("ui.feedback.saved"));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
     }
   }
 
@@ -118,7 +133,10 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
     return <main className="min-h-screen" />;
   }
 
-  const queryError = notificationsQuery.error instanceof Error ? notificationsQuery.error.message : "";
+  const queryError =
+    notificationsQuery.error instanceof Error
+      ? notificationsQuery.error.message
+      : "";
   const feedback = message || queryError;
 
   return (
@@ -131,8 +149,11 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
             <CardDescription>{t("ui.notifications.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <StatusBadge label={t("ui.notifications.unread", "Unread")} tone="violet" />
+            <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
+              <StatusBadge
+                label={t("ui.notifications.unread", "Unread")}
+                tone="violet"
+              />
               <span>{unreadCount}</span>
               <Button
                 variant="outline"
@@ -145,7 +166,9 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
                     setMessage(t("ui.feedback.saved"));
                   } catch (error) {
                     setMessage(
-                      error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                      error instanceof Error
+                        ? error.message
+                        : t("ui.feedback.requestFailed"),
                     );
                   }
                 }}
@@ -157,7 +180,7 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
             <FeedbackMessage message={feedback} />
 
             {notificationsQuery.isLoading ? (
-              <div className="rounded-lg border border-border bg-background/70 p-3 text-xs text-muted-foreground">
+              <div className="border-border bg-background/70 text-muted-foreground rounded-lg border p-3 text-xs">
                 {t("ui.loading.section")}
               </div>
             ) : notifications.length === 0 ? (
@@ -183,7 +206,9 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
                               size="sm"
                               variant="outline"
                               disabled={anyPending}
-                              onClick={() => void onDecide(notification, "accepted")}
+                              onClick={() =>
+                                void onDecide(notification, "accepted")
+                              }
                             >
                               {t("ui.actions.accept")}
                             </Button>
@@ -193,7 +218,9 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
                               size="sm"
                               variant="destructive"
                               disabled={anyPending}
-                              onClick={() => void onDecide(notification, "rejected")}
+                              onClick={() =>
+                                void onDecide(notification, "rejected")
+                              }
                             >
                               {t("ui.actions.reject")}
                             </Button>
@@ -237,13 +264,22 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
                       <div className="space-y-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <div className="text-sm font-medium">{title}</div>
-                          <StatusBadge label={eventLabel} tone={notificationTone(notification)} />
+                          <StatusBadge
+                            label={eventLabel}
+                            tone={notificationTone(notification)}
+                          />
                           {!notification.is_read ? (
-                            <StatusBadge label={t("ui.notifications.unread")} tone="violet" />
+                            <StatusBadge
+                              label={t("ui.notifications.unread")}
+                              tone="violet"
+                            />
                           ) : null}
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {formatNotificationTimestamp(notification.created_at, locale)}
+                        <div className="text-muted-foreground text-xs">
+                          {formatNotificationTimestamp(
+                            notification.created_at,
+                            locale,
+                          )}
                         </div>
                       </div>
                     </ListItemRow>

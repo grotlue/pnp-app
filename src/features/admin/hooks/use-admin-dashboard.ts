@@ -44,7 +44,9 @@ export function useAdminDashboard(session: ClientSession | null) {
   });
 
   async function invalidateBootstrap() {
-    await queryClient.invalidateQueries({ queryKey: queryKeys.adminBootstrap(tokenKey) });
+    await queryClient.invalidateQueries({
+      queryKey: queryKeys.adminBootstrap(tokenKey),
+    });
   }
 
   const createUserMutation = useMutation({
@@ -58,7 +60,10 @@ export function useAdminDashboard(session: ClientSession | null) {
   });
 
   const updateUserMutation = useMutation({
-    mutationFn: async (input: { userId: string; values: AdminUpdateUserInput }) => {
+    mutationFn: async (input: {
+      userId: string;
+      values: AdminUpdateUserInput;
+    }) => {
       if (!session) {
         throw new Error("Missing session");
       }
@@ -88,7 +93,10 @@ export function useAdminDashboard(session: ClientSession | null) {
   });
 
   const updateCampaignMutation = useMutation({
-    mutationFn: async (input: { campaignId: string; values: AdminUpdateCampaignInput }) => {
+    mutationFn: async (input: {
+      campaignId: string;
+      values: AdminUpdateCampaignInput;
+    }) => {
       if (!session) {
         throw new Error("Missing session");
       }
@@ -118,7 +126,10 @@ export function useAdminDashboard(session: ClientSession | null) {
   });
 
   const updateCharacterMutation = useMutation({
-    mutationFn: async (input: { characterId: string; values: AdminUpdateCharacterInput }) => {
+    mutationFn: async (input: {
+      characterId: string;
+      values: AdminUpdateCharacterInput;
+    }) => {
       if (!session) {
         throw new Error("Missing session");
       }

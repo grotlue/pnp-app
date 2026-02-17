@@ -5,7 +5,9 @@ type UserProfilePageProps = {
   params: Promise<{ userId: string }>;
 };
 
-export default async function UserProfilePage({ params }: UserProfilePageProps) {
+export default async function UserProfilePage({
+  params,
+}: UserProfilePageProps) {
   const locale = await getRequestLocale();
   const { userId } = await params;
 

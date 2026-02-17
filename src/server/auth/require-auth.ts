@@ -31,7 +31,8 @@ function extractBearerToken(request: Request): string | null {
 export async function requireAuth(
   request: Request,
 ): Promise<{ context: AuthContext } | { response: Response }> {
-  const token = extractBearerToken(request) ?? readAccessTokenFromCookies(request);
+  const token =
+    extractBearerToken(request) ?? readAccessTokenFromCookies(request);
   if (!token) {
     return {
       response: jsonError(
@@ -48,7 +49,11 @@ export async function requireAuth(
 
     if (error || !data.user) {
       return {
-        response: jsonError(401, "invalid_token", "Access token is invalid or expired."),
+        response: jsonError(
+          401,
+          "invalid_token",
+          "Access token is invalid or expired.",
+        ),
       };
     }
 

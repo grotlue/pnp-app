@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { requireAdminMock, createServiceRoleSupabaseClientMock } = vi.hoisted(() => ({
-  requireAdminMock: vi.fn(),
-  createServiceRoleSupabaseClientMock: vi.fn(),
-}));
+const { requireAdminMock, createServiceRoleSupabaseClientMock } = vi.hoisted(
+  () => ({
+    requireAdminMock: vi.fn(),
+    createServiceRoleSupabaseClientMock: vi.fn(),
+  }),
+);
 
 vi.mock("@/server/auth/require-admin", () => ({
   requireAdmin: requireAdminMock,
@@ -72,7 +74,9 @@ describe("admin user detail route", () => {
       context: { user: { id: "admin-1" } },
     });
     createServiceRoleSupabaseClientMock.mockImplementationOnce(() => {
-      throw new Error("Missing environment variable: SUPABASE_SERVICE_ROLE_KEY");
+      throw new Error(
+        "Missing environment variable: SUPABASE_SERVICE_ROLE_KEY",
+      );
     });
 
     const response = await PATCH(
@@ -196,9 +200,12 @@ describe("admin user detail route", () => {
       })),
     });
 
-    const response = await DELETE(new Request("http://localhost/api/admin/users/admin-2"), {
-      params: Promise.resolve({ userId: "admin-2" }),
-    });
+    const response = await DELETE(
+      new Request("http://localhost/api/admin/users/admin-2"),
+      {
+        params: Promise.resolve({ userId: "admin-2" }),
+      },
+    );
 
     expect(response.status).toBe(403);
     await expect(response.json()).resolves.toEqual({

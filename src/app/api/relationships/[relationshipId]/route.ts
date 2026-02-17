@@ -44,16 +44,15 @@ export async function PATCH(request: Request, { params }: Params) {
   const body = await parseJsonBody<UpdateRelationshipBody>(request);
 
   if (!body || body.categoryId === undefined) {
-    return jsonError(
-      400,
-      "invalid_payload",
-      "categoryId is required",
-    );
+    return jsonError(400, "invalid_payload", "categoryId is required");
   }
 
   const hasTargetCharacter = Boolean(body.targetCharacterId);
   const hasSnapshot = Boolean(body.targetSnapshotName?.trim());
-  if ((hasTargetCharacter && hasSnapshot) || (!hasTargetCharacter && !hasSnapshot)) {
+  if (
+    (hasTargetCharacter && hasSnapshot) ||
+    (!hasTargetCharacter && !hasSnapshot)
+  ) {
     return jsonError(
       400,
       "invalid_payload",

@@ -12,7 +12,13 @@ import { IconActionButton } from "@/components/common/icon-action-button";
 import { ListItemRow } from "@/components/common/list-item-row";
 import { PageLoadingState } from "@/components/common/page-loading-state";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   AddRelationshipModal,
   AssignCampaignModal,
@@ -28,7 +34,10 @@ import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
 import { CharacterTypeBadge } from "@/features/characters/components/character-type-badge";
 import { useCharacterDetailScreen } from "@/features/characters/hooks/use-character-detail-screen";
 import { canManageCharacter, isAdmin } from "@/features/users/logic/role.logic";
-import type { OutgoingRelationship, RelationshipDetail } from "@/features/relationships/types";
+import type {
+  OutgoingRelationship,
+  RelationshipDetail,
+} from "@/features/relationships/types";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { textLinkClassName } from "@/lib/utils/link";
@@ -38,7 +47,10 @@ type CharacterDetailScreenProps = {
   characterId: string;
 };
 
-export function CharacterDetailPageView({ locale, characterId }: CharacterDetailScreenProps) {
+export function CharacterDetailPageView({
+  locale,
+  characterId,
+}: CharacterDetailScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
   const router = useRouter();
   const { session, ready } = useClientSession();
@@ -75,7 +87,9 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
   });
 
   const [editMode, setEditMode] = useState<RelationshipTargetMode>("existing");
-  const [editRelation, setEditRelation] = useState<OutgoingRelationship | null>(null);
+  const [editRelation, setEditRelation] = useState<OutgoingRelationship | null>(
+    null,
+  );
   const [editForm, setEditForm] = useState<RelationshipEditFormValues>({
     targetCharacterId: "",
     targetSnapshotName: "",
@@ -85,8 +99,11 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
     description: "",
   });
 
-  const [deleteRelation, setDeleteRelation] = useState<OutgoingRelationship | null>(null);
-  const [detailContent, setDetailContent] = useState<RelationshipDetail | null>(null);
+  const [deleteRelation, setDeleteRelation] =
+    useState<OutgoingRelationship | null>(null);
+  const [detailContent, setDetailContent] = useState<RelationshipDetail | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!ready) {
@@ -112,10 +129,20 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
     );
   }
 
-  const queryError = detailQuery.error instanceof Error ? detailQuery.error.message : "";
+  const queryError =
+    detailQuery.error instanceof Error ? detailQuery.error.message : "";
   const feedback = message || queryError;
 
-  const { me, character, campaigns, allCharacters, users, catalog, summary, outgoing } = detailQuery.data;
+  const {
+    me,
+    character,
+    campaigns,
+    allCharacters,
+    users,
+    catalog,
+    summary,
+    outgoing,
+  } = detailQuery.data;
   const isOwner = me.user.id === character.owner_user_id;
   const canManage = canManageCharacter({
     isOwner,
@@ -124,14 +151,22 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
   });
   const isForeignAdminView = isAdmin(me.profile.role) && !isOwner;
   const avatarUrl = avatarQuery.data ?? null;
-  const assignedCampaign = campaigns.find((entry) => entry.id === character.campaign_id) ?? null;
-  const ownerUser = users.find((entry) => entry.id === character.owner_user_id) ?? null;
-  const defaultCategoryId = catalog.categories[0] ? String(catalog.categories[0].id) : "";
-  const defaultLabelPresetId = catalog.labels[0] ? String(catalog.labels[0].id) : "";
+  const assignedCampaign =
+    campaigns.find((entry) => entry.id === character.campaign_id) ?? null;
+  const ownerUser =
+    users.find((entry) => entry.id === character.owner_user_id) ?? null;
+  const defaultCategoryId = catalog.categories[0]
+    ? String(catalog.categories[0].id)
+    : "";
+  const defaultLabelPresetId = catalog.labels[0]
+    ? String(catalog.labels[0].id)
+    : "";
 
   const campaignCharacters = character.campaign_id
     ? allCharacters.filter(
-        (entry) => entry.campaign_id === character.campaign_id && entry.id !== character.id,
+        (entry) =>
+          entry.campaign_id === character.campaign_id &&
+          entry.id !== character.id,
       )
     : [];
 
@@ -146,7 +181,9 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
 
   const mergedRelations = summary.map((entry) => {
     const outgoingRelation =
-      outgoing.find((relation) => relation.target_character_id === entry.other_character_id) ??
+      outgoing.find(
+        (relation) => relation.target_character_id === entry.other_character_id,
+      ) ??
       (entry.other_character_id === null
         ? outgoing.find(
             (relation) =>
@@ -164,13 +201,17 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
 
   function openEditRelationship(relation: OutgoingRelationship) {
     setEditRelation(relation);
-    const mode: RelationshipTargetMode = relation.target_character_id ? "existing" : "external";
+    const mode: RelationshipTargetMode = relation.target_character_id
+      ? "existing"
+      : "external";
     setEditMode(mode);
     setEditForm({
       targetCharacterId: relation.target_character_id ?? "",
       targetSnapshotName: relation.target_snapshot_name ?? "",
       categoryId: String(relation.category_id),
-      labelPresetId: relation.label_preset_id ? String(relation.label_preset_id) : "",
+      labelPresetId: relation.label_preset_id
+        ? String(relation.label_preset_id)
+        : "",
       labelCustom: relation.label_custom ?? "",
       description: relation.description,
     });
@@ -201,16 +242,18 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
                 iconClassName="size-4"
               />
             </CardTitle>
-            <CardDescription>{t("ui.characterDetail.subtitle")}</CardDescription>
+            <CardDescription>
+              {t("ui.characterDetail.subtitle")}
+            </CardDescription>
             {isForeignAdminView ? (
-              <div className="inline-flex w-fit rounded-md border border-destructive/40 bg-destructive/10 px-2 py-1 text-xs font-medium text-destructive">
+              <div className="border-destructive/40 bg-destructive/10 text-destructive inline-flex w-fit rounded-md border px-2 py-1 text-xs font-medium">
                 {t("ui.admin.foreignItemLabel")}
               </div>
             ) : null}
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-[200px_1fr]">
-              <div className="overflow-hidden rounded-lg border border-border bg-muted/30">
+              <div className="border-border bg-muted/30 overflow-hidden rounded-lg border">
                 {avatarUrl ? (
                   <Image
                     src={avatarUrl}
@@ -220,17 +263,19 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
                     className="h-[200px] w-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-[200px] items-center justify-center text-xs text-muted-foreground">
+                  <div className="text-muted-foreground flex h-[200px] items-center justify-center text-xs">
                     {t("ui.characterDetail.noImage")}
                   </div>
                 )}
               </div>
               <div className="space-y-2 text-sm">
                 <div>
-                  <strong>{t("ui.fields.characterName")}</strong>: {character.name}
+                  <strong>{t("ui.fields.characterName")}</strong>:{" "}
+                  {character.name}
                 </div>
                 <div>
-                  <strong>{t("ui.fields.characterAge")}</strong>: {character.age ?? "-"}
+                  <strong>{t("ui.fields.characterAge")}</strong>:{" "}
+                  {character.age ?? "-"}
                 </div>
                 <div>
                   <strong>{t("ui.fields.type")}</strong>:{" "}
@@ -241,7 +286,10 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
                   {ownerUser?.role === "admin" ? (
                     <span>{ownerUser.username ?? character.owner_user_id}</span>
                   ) : (
-                    <Link href={`/users/${character.owner_user_id}`} className={textLinkClassName}>
+                    <Link
+                      href={`/users/${character.owner_user_id}`}
+                      className={textLinkClassName}
+                    >
                       {ownerUser?.username ?? character.owner_user_id}
                     </Link>
                   )}
@@ -249,7 +297,10 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
                 <div>
                   <strong>{t("ui.characterDetail.assignedCampaign")}</strong>:{" "}
                   {assignedCampaign ? (
-                    <Link href={`/campaigns/${assignedCampaign.id}`} className={textLinkClassName}>
+                    <Link
+                      href={`/campaigns/${assignedCampaign.id}`}
+                      className={textLinkClassName}
+                    >
                       {assignedCampaign.title}
                     </Link>
                   ) : (
@@ -257,7 +308,8 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
                   )}
                 </div>
                 <div>
-                  <strong>{t("ui.fields.description")}</strong>: {character.description || "-"}
+                  <strong>{t("ui.fields.description")}</strong>:{" "}
+                  {character.description || "-"}
                 </div>
               </div>
             </div>
@@ -275,11 +327,16 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
               ) : null}
               {canManage ? (
                 <Button asChild variant="outline">
-                  <Link href={`/characters/${character.id}/edit`}>{t("ui.actions.edit")}</Link>
+                  <Link href={`/characters/${character.id}/edit`}>
+                    {t("ui.actions.edit")}
+                  </Link>
                 </Button>
               ) : null}
               {canManage && character.campaign_id ? (
-                <Button variant="outline" onClick={() => setAddRelationshipOpen(true)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setAddRelationshipOpen(true)}
+                >
                   {t("ui.characterDetail.addRelationship")}
                 </Button>
               ) : null}
@@ -288,7 +345,9 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
             <FeedbackMessage message={feedback} />
 
             <div className="space-y-2">
-              <div className="text-sm font-medium">{t("ui.characterDetail.relationships")}</div>
+              <div className="text-sm font-medium">
+                {t("ui.characterDetail.relationships")}
+              </div>
               {mergedRelations.map((entry, index) => (
                 <ListItemRow
                   key={`${entry.other_character_id ?? `external-${index}`}`}
@@ -326,28 +385,38 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
                     onClick={async () => {
                       setMessage("");
                       try {
-                        const detail = await relationshipDetailMutation.mutateAsync({
-                          otherCharacterId: entry.other_character_id,
-                          outgoingRelationshipId: entry.outgoingRelation?.id,
-                        });
+                        const detail =
+                          await relationshipDetailMutation.mutateAsync({
+                            otherCharacterId: entry.other_character_id,
+                            outgoingRelationshipId: entry.outgoingRelation?.id,
+                          });
                         setDetailContent(detail);
                         setRelationshipDetailOpen(true);
                       } catch (error) {
                         setMessage(
-                          error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                          error instanceof Error
+                            ? error.message
+                            : t("ui.feedback.requestFailed"),
                         );
                       }
                     }}
                   >
-                    <div className="font-medium">{entry.other_character_name}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {entry.other_character_deleted ? t("ui.characterDetail.externalOneWay") : ""}
+                    <div className="font-medium">
+                      {entry.other_character_name}
+                    </div>
+                    <div className="text-muted-foreground text-xs">
+                      {entry.other_character_deleted
+                        ? t("ui.characterDetail.externalOneWay")
+                        : ""}
                     </div>
                   </button>
                 </ListItemRow>
               ))}
               {mergedRelations.length === 0 ? (
-                <EmptyState label={t("ui.feedback.empty")} className="bg-background p-3" />
+                <EmptyState
+                  label={t("ui.feedback.empty")}
+                  className="bg-background p-3"
+                />
               ) : null}
             </div>
           </CardContent>
@@ -370,7 +439,11 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
             setSelectedCampaignId("");
             setMessage(t("ui.feedback.saved"));
           } catch (error) {
-            setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+            setMessage(
+              error instanceof Error
+                ? error.message
+                : t("ui.feedback.requestFailed"),
+            );
           }
         }}
       />
@@ -387,7 +460,11 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
             setUnassignOpen(false);
             setMessage(t("ui.feedback.saved"));
           } catch (error) {
-            setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+            setMessage(
+              error instanceof Error
+                ? error.message
+                : t("ui.feedback.requestFailed"),
+            );
           }
         }}
       />
@@ -410,8 +487,10 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
           try {
             await createRelationshipMutation.mutateAsync({
               sourceCharacterId: character.id,
-              targetCharacterId: addMode === "existing" ? addForm.targetCharacterId : null,
-              targetSnapshotName: addMode === "external" ? addForm.targetSnapshotName : null,
+              targetCharacterId:
+                addMode === "existing" ? addForm.targetCharacterId : null,
+              targetSnapshotName:
+                addMode === "external" ? addForm.targetSnapshotName : null,
               categoryId: Number(addForm.categoryId || defaultCategoryId),
               labelPresetId: addForm.labelCustom
                 ? null
@@ -433,7 +512,11 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
             });
             setMessage(t("ui.feedback.created"));
           } catch (error) {
-            setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+            setMessage(
+              error instanceof Error
+                ? error.message
+                : t("ui.feedback.requestFailed"),
+            );
           }
         }}
       />
@@ -461,10 +544,14 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
           try {
             await updateRelationshipMutation.mutateAsync({
               relationshipId: editRelation.id,
-              targetCharacterId: editMode === "existing" ? editForm.targetCharacterId : null,
-              targetSnapshotName: editMode === "external" ? editForm.targetSnapshotName : null,
+              targetCharacterId:
+                editMode === "existing" ? editForm.targetCharacterId : null,
+              targetSnapshotName:
+                editMode === "external" ? editForm.targetSnapshotName : null,
               categoryId: Number(editForm.categoryId),
-              labelPresetId: editForm.labelCustom ? null : Number(editForm.labelPresetId),
+              labelPresetId: editForm.labelCustom
+                ? null
+                : Number(editForm.labelPresetId),
               labelCustom: editForm.labelCustom || null,
               description: editForm.description,
             });
@@ -472,7 +559,11 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
             setEditRelation(null);
             setMessage(t("ui.feedback.saved"));
           } catch (error) {
-            setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+            setMessage(
+              error instanceof Error
+                ? error.message
+                : t("ui.feedback.requestFailed"),
+            );
           }
         }}
       />
@@ -497,7 +588,11 @@ export function CharacterDetailPageView({ locale, characterId }: CharacterDetail
             setDeleteRelation(null);
             setMessage(t("ui.feedback.deleted"));
           } catch (error) {
-            setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+            setMessage(
+              error instanceof Error
+                ? error.message
+                : t("ui.feedback.requestFailed"),
+            );
           }
         }}
       />

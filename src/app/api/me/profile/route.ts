@@ -37,7 +37,9 @@ export async function PATCH(request: Request) {
     .from("profiles")
     .update(patch)
     .eq("id", auth.context.user.id)
-    .select("id, username, description, avatar_path, role, locale, created_at, updated_at")
+    .select(
+      "id, username, description, avatar_path, role, locale, created_at, updated_at",
+    )
     .single();
 
   if (error) {

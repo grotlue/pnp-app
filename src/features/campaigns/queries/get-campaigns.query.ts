@@ -18,7 +18,10 @@ export async function getCampaignsQuery(
   if (options?.scope) {
     searchParams.set("scope", options.scope);
   }
-  const path = searchParams.size > 0 ? `/api/campaigns?${searchParams.toString()}` : "/api/campaigns";
+  const path =
+    searchParams.size > 0
+      ? `/api/campaigns?${searchParams.toString()}`
+      : "/api/campaigns";
 
   const response = await apiRequest<Campaign[]>(path, { session });
   if (response.error || !response.data) {

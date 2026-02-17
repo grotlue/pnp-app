@@ -1,12 +1,6 @@
 import { cn } from "@/lib/utils/cn";
 
-type StatusBadgeTone =
-  | "slate"
-  | "blue"
-  | "green"
-  | "amber"
-  | "violet"
-  | "teal";
+type StatusBadgeTone = "slate" | "blue" | "green" | "amber" | "violet" | "teal";
 
 type StatusBadgeProps = {
   label: string;
@@ -23,11 +17,15 @@ const toneClassMap: Record<StatusBadgeTone, string> = {
   teal: "border-teal-300/70 bg-teal-100 text-teal-700",
 };
 
-export function StatusBadge({ label, tone = "slate", className }: StatusBadgeProps) {
+export function StatusBadge({
+  label,
+  tone = "slate",
+  className,
+}: StatusBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase",
         toneClassMap[tone],
         className,
       )}

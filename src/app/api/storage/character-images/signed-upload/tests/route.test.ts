@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { enforceRateLimitMock, getUserRoleMock, requireAuthMock } = vi.hoisted(() => ({
-  requireAuthMock: vi.fn(),
-  enforceRateLimitMock: vi.fn(),
-  getUserRoleMock: vi.fn(),
-}));
+const { enforceRateLimitMock, getUserRoleMock, requireAuthMock } = vi.hoisted(
+  () => ({
+    requireAuthMock: vi.fn(),
+    enforceRateLimitMock: vi.fn(),
+    getUserRoleMock: vi.fn(),
+  }),
+);
 
 vi.mock("@/server/auth/require-auth", () => ({
   requireAuth: requireAuthMock,
@@ -67,16 +69,19 @@ describe("character image signed upload route", () => {
     getUserRoleMock.mockResolvedValueOnce({ role: "user" });
 
     const response = await POST(
-      new Request("http://localhost/api/storage/character-images/signed-upload", {
-        method: "POST",
-        body: JSON.stringify({
-          characterId: "character-1",
-          fileName: "Avatar.PNG",
-          width: 256,
-          height: 256,
-          fileSize: 1024,
-        }),
-      }),
+      new Request(
+        "http://localhost/api/storage/character-images/signed-upload",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            characterId: "character-1",
+            fileName: "Avatar.PNG",
+            width: 256,
+            height: 256,
+            fileSize: 1024,
+          }),
+        },
+      ),
     );
 
     expect(response.status).toBe(200);

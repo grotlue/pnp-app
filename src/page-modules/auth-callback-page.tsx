@@ -4,12 +4,24 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/common/feedback-message";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { setSession } from "@/lib/client/session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { textLinkClassName } from "@/lib/utils/link";
-import { exchangeAuthCode, verifyAuthToken } from "@/features/users/queries/users-auth.query";
-import { getAuthParamsFromUrl, getSessionTokensFromUrl } from "./auth-session-from-url";
+import {
+  exchangeAuthCode,
+  verifyAuthToken,
+} from "@/features/users/queries/users-auth.query";
+import {
+  getAuthParamsFromUrl,
+  getSessionTokensFromUrl,
+} from "./auth-session-from-url";
 
 type AuthCallbackPageViewProps = {
   locale: AppLocale;
@@ -76,7 +88,11 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : t("ui.feedback.requestFailed"),
+          );
         }
       }
     }
@@ -100,7 +116,9 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
             {errorMessage ? (
               <FeedbackMessage message={errorMessage} />
             ) : (
-              <div className="text-muted-foreground">{t("ui.authCallback.processing")}</div>
+              <div className="text-muted-foreground">
+                {t("ui.authCallback.processing")}
+              </div>
             )}
             {errorMessage ? (
               <Link href="/" className={`text-xs ${textLinkClassName}`}>

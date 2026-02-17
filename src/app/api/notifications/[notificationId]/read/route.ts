@@ -12,9 +12,12 @@ export async function POST(request: Request, { params }: Params) {
   }
 
   const { notificationId } = await params;
-  const { error } = await auth.context.client.rpc("rpc_mark_notification_read", {
-    p_notification_id: notificationId,
-  });
+  const { error } = await auth.context.client.rpc(
+    "rpc_mark_notification_read",
+    {
+      p_notification_id: notificationId,
+    },
+  );
 
   if (error) {
     return jsonError(400, "notification_mark_read_failed", error.message);

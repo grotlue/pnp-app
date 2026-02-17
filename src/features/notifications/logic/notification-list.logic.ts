@@ -1,6 +1,12 @@
-import type { NotificationEntry, NotificationPayload } from "@/features/notifications/types";
+import type {
+  NotificationEntry,
+  NotificationPayload,
+} from "@/features/notifications/types";
 
-function payloadString(payload: NotificationPayload | null, key: keyof NotificationPayload) {
+function payloadString(
+  payload: NotificationPayload | null,
+  key: keyof NotificationPayload,
+) {
   const value = payload?.[key];
   return typeof value === "string" && value.length > 0 ? value : null;
 }
@@ -9,7 +15,9 @@ export function getNotificationUnreadCount(notifications: NotificationEntry[]) {
   return notifications.filter((entry) => !entry.is_read).length;
 }
 
-export function getNotificationMembershipTarget(notification: NotificationEntry) {
+export function getNotificationMembershipTarget(
+  notification: NotificationEntry,
+) {
   const campaignId = payloadString(notification.payload, "campaign_id");
   const membershipId = payloadString(notification.payload, "membership_id");
   if (!campaignId || !membershipId) {
@@ -37,8 +45,14 @@ export function getNotificationDisplayTitle(
   t: (key: string, fallback?: string) => string,
 ) {
   const campaignTitle = payloadString(notification.payload, "campaign_title");
-  const sourceName = payloadString(notification.payload, "source_character_name");
-  const targetName = payloadString(notification.payload, "target_character_name");
+  const sourceName = payloadString(
+    notification.payload,
+    "source_character_name",
+  );
+  const targetName = payloadString(
+    notification.payload,
+    "target_character_name",
+  );
 
   if (notification.event_type === "campaign_invite") {
     return campaignTitle

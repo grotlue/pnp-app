@@ -43,9 +43,11 @@ describe("unwrapApiResponse", () => {
 
 describe("apiRequest", () => {
   it("sends GET with default headers and returns wrapped data", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ data: { id: "1" } }), { status: 200 }),
-    );
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        new Response(JSON.stringify({ data: { id: "1" } }), { status: 200 }),
+      );
     vi.stubGlobal("fetch", fetchMock);
 
     const response = await apiRequest<{ id: string }>("/api/example");
@@ -64,9 +66,11 @@ describe("apiRequest", () => {
   });
 
   it("adds authorization header when session token is provided", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ data: { ok: true } }), { status: 200 }),
-    );
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        new Response(JSON.stringify({ data: { ok: true } }), { status: 200 }),
+      );
     vi.stubGlobal("fetch", fetchMock);
 
     await apiRequest<{ ok: boolean }>("/api/example", {
@@ -86,7 +90,9 @@ describe("apiRequest", () => {
 
   it("serializes request body for mutations", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ data: { created: true } }), { status: 201 }),
+      new Response(JSON.stringify({ data: { created: true } }), {
+        status: 201,
+      }),
     );
     vi.stubGlobal("fetch", fetchMock);
 
@@ -124,7 +130,9 @@ describe("apiRequest", () => {
   });
 
   it("uses fallback error payload when response body is not json", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(new Response("not-json", { status: 500 }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response("not-json", { status: 500 }));
     vi.stubGlobal("fetch", fetchMock);
 
     const response = await apiRequest("/api/example");
@@ -142,7 +150,10 @@ describe("apiRequest", () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(
         JSON.stringify({
-          error: { code: "invalid_token", message: "Access token is invalid or expired." },
+          error: {
+            code: "invalid_token",
+            message: "Access token is invalid or expired.",
+          },
         }),
         { status: 401 },
       ),
@@ -155,7 +166,10 @@ describe("apiRequest", () => {
 
     expect(response).toEqual({
       data: null,
-      error: { code: "invalid_token", message: "Access token is invalid or expired." },
+      error: {
+        code: "invalid_token",
+        message: "Access token is invalid or expired.",
+      },
       status: 401,
     });
     expect(getSession()).toBeNull();

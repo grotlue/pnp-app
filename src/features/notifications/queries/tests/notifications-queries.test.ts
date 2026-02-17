@@ -20,7 +20,9 @@ const session = { accessToken: "access-token" };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  unwrapApiResponseMock.mockImplementation((response: { data: unknown }) => response.data);
+  unwrapApiResponseMock.mockImplementation(
+    (response: { data: unknown }) => response.data,
+  );
 });
 
 describe("notifications queries", () => {
@@ -28,17 +30,29 @@ describe("notifications queries", () => {
     const response = { data: [{ id: "n1" }], error: null, status: 200 };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(getNotificationsQuery(session)).resolves.toEqual(response.data);
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/notifications?limit=100", { session });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to load notifications");
+    await expect(getNotificationsQuery(session)).resolves.toEqual(
+      response.data,
+    );
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/notifications?limit=100",
+      { session },
+    );
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to load notifications",
+    );
   });
 
   it("loads notifications with explicit limit", async () => {
     const response = { data: [{ id: "n1" }], error: null, status: 200 };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(getNotificationsQuery(session, { limit: 10 })).resolves.toEqual(response.data);
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/notifications?limit=10", { session });
+    await expect(
+      getNotificationsQuery(session, { limit: 10 }),
+    ).resolves.toEqual(response.data);
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/notifications?limit=10", {
+      session,
+    });
   });
 
   it("loads unread notification count", async () => {
@@ -48,9 +62,12 @@ describe("notifications queries", () => {
     await expect(getNotificationsUnreadCountQuery(session)).resolves.toEqual({
       unreadCount: 3,
     });
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/notifications/unread-count", {
-      session,
-    });
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/notifications/unread-count",
+      {
+        session,
+      },
+    );
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(
       response,
       "Failed to load unread notification count",
@@ -61,7 +78,9 @@ describe("notifications queries", () => {
     const response = { data: { read: true }, error: null, status: 200 };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(markNotificationReadMutation(session, "n1")).resolves.toEqual({ read: true });
+    await expect(markNotificationReadMutation(session, "n1")).resolves.toEqual({
+      read: true,
+    });
     expect(apiRequestMock).toHaveBeenCalledWith("/api/notifications/n1/read", {
       method: "POST",
       session,
@@ -73,10 +92,16 @@ describe("notifications queries", () => {
   });
 
   it("marks all notifications as read", async () => {
-    const response = { data: { readAll: true, updated: 4 }, error: null, status: 200 };
+    const response = {
+      data: { readAll: true, updated: 4 },
+      error: null,
+      status: 200,
+    };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(markAllNotificationsReadMutation(session)).resolves.toEqual(response.data);
+    await expect(markAllNotificationsReadMutation(session)).resolves.toEqual(
+      response.data,
+    );
     expect(apiRequestMock).toHaveBeenCalledWith("/api/notifications/read-all", {
       method: "POST",
       session,
@@ -99,11 +124,17 @@ describe("notifications queries", () => {
       }),
     ).resolves.toEqual({ decided: true });
 
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/campaigns/c1/memberships/m1/decision", {
-      method: "POST",
-      session,
-      body: { state: "accepted" },
-    });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to decide membership");
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/campaigns/c1/memberships/m1/decision",
+      {
+        method: "POST",
+        session,
+        body: { state: "accepted" },
+      },
+    );
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to decide membership",
+    );
   });
 });

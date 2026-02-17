@@ -27,7 +27,7 @@ export function PaginationControls({
   const safePage = Math.min(Math.max(page, 1), totalPages);
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border bg-background/70 px-3 py-2 text-xs text-muted-foreground">
+    <div className="border-border bg-background/70 text-muted-foreground flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2 text-xs">
       <div>
         {pageLabel}: {safePage} / {totalPages}
       </div>

@@ -12,7 +12,9 @@ describe("i18n", () => {
   });
 
   it("detects de from Accept-Language", () => {
-    expect(detectLocaleFromAcceptLanguage("de-DE,de;q=0.9,en;q=0.8")).toBe("de");
+    expect(detectLocaleFromAcceptLanguage("de-DE,de;q=0.9,en;q=0.8")).toBe(
+      "de",
+    );
     expect(detectLocaleFromAcceptLanguage("en-US,en;q=0.9")).toBe("en");
   });
 

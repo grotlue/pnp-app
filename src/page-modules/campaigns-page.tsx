@@ -9,10 +9,20 @@ import { Modal } from "@/components/common/modal";
 import { PageLoadingState } from "@/components/common/page-loading-state";
 import { PaginationControls } from "@/components/common/pagination-controls";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
-import { DEFAULT_LIST_PAGE_SIZE, clampListPage, paginateListItems } from "@/lib/utils/list";
+import {
+  DEFAULT_LIST_PAGE_SIZE,
+  clampListPage,
+  paginateListItems,
+} from "@/lib/utils/list";
 import {
   type CampaignListSort,
   searchCampaigns,
@@ -47,8 +57,10 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<CampaignListSort>("updated_desc");
   const [page, setPage] = useState(1);
-  const [createForm, setCreateForm] = useState<CampaignFormValues>(defaultFormValues);
-  const [editForm, setEditForm] = useState<CampaignFormValues>(defaultFormValues);
+  const [createForm, setCreateForm] =
+    useState<CampaignFormValues>(defaultFormValues);
+  const [editForm, setEditForm] =
+    useState<CampaignFormValues>(defaultFormValues);
 
   useEffect(() => {
     if (!ready) {
@@ -60,9 +72,8 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
   }, [ready, router, session]);
 
   const campaignsQuery = useCampaignsQuery(session);
-  const { createMutation, updateMutation, deleteMutation, anyPending } = useCampaignMutations(
-    session,
-  );
+  const { createMutation, updateMutation, deleteMutation, anyPending } =
+    useCampaignMutations(session);
 
   const queryError =
     campaignsQuery.error instanceof Error ? campaignsQuery.error.message : "";
@@ -74,7 +85,11 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
     searchCampaigns(visibleCampaigns, searchQuery),
     sortBy,
   );
-  const safePage = clampListPage(page, sortedAndFilteredCampaigns.length, DEFAULT_LIST_PAGE_SIZE);
+  const safePage = clampListPage(
+    page,
+    sortedAndFilteredCampaigns.length,
+    DEFAULT_LIST_PAGE_SIZE,
+  );
   const pagedCampaigns = paginateListItems(
     sortedAndFilteredCampaigns,
     safePage,
@@ -102,7 +117,9 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
-              <Button onClick={() => setCreateOpen(true)}>{t("ui.campaigns.create")}</Button>
+              <Button onClick={() => setCreateOpen(true)}>
+                {t("ui.campaigns.create")}
+              </Button>
             </div>
 
             <FeedbackMessage message={feedback} />
@@ -118,7 +135,10 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
             />
 
             {campaignsQuery.isLoading ? (
-              <PageLoadingState label={t("ui.loading.section")} className="py-3 text-xs" />
+              <PageLoadingState
+                label={t("ui.loading.section")}
+                className="py-3 text-xs"
+              />
             ) : (
               <>
                 <CampaignsList
@@ -179,7 +199,9 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
                   setMessage(t("ui.feedback.created"));
                 } catch (error) {
                   setMessage(
-                    error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                    error instanceof Error
+                      ? error.message
+                      : t("ui.feedback.requestFailed"),
                   );
                 }
               }}
@@ -226,7 +248,9 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
                   setMessage(t("ui.feedback.saved"));
                 } catch (error) {
                   setMessage(
-                    error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                    error instanceof Error
+                      ? error.message
+                      : t("ui.feedback.requestFailed"),
                   );
                 }
               }}
@@ -271,7 +295,9 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
                   setMessage(t("ui.feedback.deleted"));
                 } catch (error) {
                   setMessage(
-                    error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                    error instanceof Error
+                      ? error.message
+                      : t("ui.feedback.requestFailed"),
                   );
                 }
               }}

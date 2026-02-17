@@ -6,8 +6,12 @@ import type {
   AdminUpdateCharacterInput,
 } from "../types";
 
-export async function listAdminCharacters(session: ClientSession): Promise<AdminCharacter[]> {
-  const response = await apiRequest<AdminCharacter[]>("/api/admin/characters", { session });
+export async function listAdminCharacters(
+  session: ClientSession,
+): Promise<AdminCharacter[]> {
+  const response = await apiRequest<AdminCharacter[]>("/api/admin/characters", {
+    session,
+  });
   return unwrapApiResponse(response, "Failed to load characters");
 }
 
@@ -28,11 +32,14 @@ export async function updateAdminCharacter(
   characterId: string,
   input: AdminUpdateCharacterInput,
 ): Promise<AdminCharacter> {
-  const response = await apiRequest<AdminCharacter>(`/api/admin/characters/${characterId}`, {
-    method: "PATCH",
-    session,
-    body: input,
-  });
+  const response = await apiRequest<AdminCharacter>(
+    `/api/admin/characters/${characterId}`,
+    {
+      method: "PATCH",
+      session,
+      body: input,
+    },
+  );
   return unwrapApiResponse(response, "Failed to update character");
 }
 
@@ -40,9 +47,12 @@ export async function deleteAdminCharacter(
   session: ClientSession,
   characterId: string,
 ): Promise<{ deleted: true }> {
-  const response = await apiRequest<{ deleted: true }>(`/api/admin/characters/${characterId}`, {
-    method: "DELETE",
-    session,
-  });
+  const response = await apiRequest<{ deleted: true }>(
+    `/api/admin/characters/${characterId}`,
+    {
+      method: "DELETE",
+      session,
+    },
+  );
   return unwrapApiResponse(response, "Failed to delete character");
 }

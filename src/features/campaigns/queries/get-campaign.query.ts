@@ -6,8 +6,11 @@ export async function getCampaignDetail(
   session: ClientSession,
   campaignId: string,
 ): Promise<CampaignDetail> {
-  const response = await apiRequest<CampaignDetail>(`/api/campaigns/${campaignId}`, {
-    session,
-  });
+  const response = await apiRequest<CampaignDetail>(
+    `/api/campaigns/${campaignId}`,
+    {
+      session,
+    },
+  );
   return unwrapApiResponse(response, "Failed to load campaign");
 }

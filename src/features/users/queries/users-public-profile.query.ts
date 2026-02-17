@@ -6,6 +6,8 @@ export async function getPublicUserProfile(
   session: ClientSession,
   userId: string,
 ): Promise<PublicUserProfile> {
-  const response = await apiRequest<PublicUserProfile>(`/api/users/${userId}`, { session });
+  const response = await apiRequest<PublicUserProfile>(`/api/users/${userId}`, {
+    session,
+  });
   return unwrapApiResponse(response, "Failed to load user profile");
 }

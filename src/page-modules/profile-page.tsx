@@ -4,10 +4,20 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/common/app-header";
 import { FeedbackMessage } from "@/components/common/feedback-message";
-import { FormInput, FormSelect, FormTextarea } from "@/components/common/form-controls";
+import {
+  FormInput,
+  FormSelect,
+  FormTextarea,
+} from "@/components/common/form-controls";
 import { ImageUploadField } from "@/components/common/image-upload-field";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { uploadImageToSignedPath } from "@/lib/client/storage-upload";
 import { setLocaleCookie } from "@/lib/client/locale-cookie";
 import { useClientSession } from "@/lib/client/use-client-session";
@@ -68,7 +78,9 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
         avatarPath: response.profile.avatar_path ?? "",
       });
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
       return;
     }
   }
@@ -126,7 +138,9 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
       router.refresh();
       setMessage(t("ui.feedback.saved"));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
     } finally {
       setBusy(false);
     }
@@ -160,7 +174,9 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
               invalidDimensionsLabel={t("ui.imageUpload.invalidDimensions")}
               invalidFileSizeLabel={t("ui.imageUpload.invalidFileSize")}
               disabled={busy}
-              onChange={(avatarPath) => setForm((prev) => ({ ...prev, avatarPath }))}
+              onChange={(avatarPath) =>
+                setForm((prev) => ({ ...prev, avatarPath }))
+              }
               onUpload={uploadProfileImage}
               onResolvePreviewUrl={resolveProfileImagePreview}
             />
@@ -188,7 +204,10 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
               value={form.description}
               placeholder={t("ui.fields.description")}
               onChange={(event) =>
-                setForm((prev) => ({ ...prev, description: event.target.value }))
+                setForm((prev) => ({
+                  ...prev,
+                  description: event.target.value,
+                }))
               }
             />
             <div className="flex gap-2">

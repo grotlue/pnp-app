@@ -14,7 +14,10 @@ export async function getCharacters(
   if (options?.scope) {
     searchParams.set("scope", options.scope);
   }
-  const path = searchParams.size > 0 ? `/api/characters?${searchParams.toString()}` : "/api/characters";
+  const path =
+    searchParams.size > 0
+      ? `/api/characters?${searchParams.toString()}`
+      : "/api/characters";
 
   const response = await apiRequest<Character[]>(path, { session });
   return unwrapApiResponse(response, "Failed to load characters");
@@ -36,9 +39,12 @@ export async function deleteCharacter(
   session: ClientSession,
   characterId: string,
 ): Promise<{ deleted: boolean }> {
-  const response = await apiRequest<{ deleted: boolean }>(`/api/characters/${characterId}`, {
-    method: "DELETE",
-    session,
-  });
+  const response = await apiRequest<{ deleted: boolean }>(
+    `/api/characters/${characterId}`,
+    {
+      method: "DELETE",
+      session,
+    },
+  );
   return unwrapApiResponse(response, "Failed to delete character");
 }

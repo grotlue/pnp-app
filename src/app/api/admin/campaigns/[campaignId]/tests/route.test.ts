@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { requireAdminMock, createServiceRoleSupabaseClientMock } = vi.hoisted(() => ({
-  requireAdminMock: vi.fn(),
-  createServiceRoleSupabaseClientMock: vi.fn(),
-}));
+const { requireAdminMock, createServiceRoleSupabaseClientMock } = vi.hoisted(
+  () => ({
+    requireAdminMock: vi.fn(),
+    createServiceRoleSupabaseClientMock: vi.fn(),
+  }),
+);
 
 vi.mock("@/server/auth/require-admin", () => ({
   requireAdmin: requireAdminMock,
@@ -21,9 +23,16 @@ beforeEach(() => {
 
 describe("admin campaign detail route", () => {
   it("updates campaign", async () => {
-    requireAdminMock.mockResolvedValueOnce({ context: { user: { id: "admin-1" } } });
+    requireAdminMock.mockResolvedValueOnce({
+      context: { user: { id: "admin-1" } },
+    });
     const singleMock = vi.fn().mockResolvedValue({
-      data: { id: "c1", owner_user_id: "u2", title: "Updated", description: "" },
+      data: {
+        id: "c1",
+        owner_user_id: "u2",
+        title: "Updated",
+        description: "",
+      },
       error: null,
     });
     createServiceRoleSupabaseClientMock.mockReturnValue({
@@ -49,7 +58,9 @@ describe("admin campaign detail route", () => {
   });
 
   it("deletes campaign", async () => {
-    requireAdminMock.mockResolvedValueOnce({ context: { user: { id: "admin-1" } } });
+    requireAdminMock.mockResolvedValueOnce({
+      context: { user: { id: "admin-1" } },
+    });
     const eqMock = vi.fn().mockResolvedValue({ error: null });
     createServiceRoleSupabaseClientMock.mockReturnValue({
       from: vi.fn(() => ({
@@ -59,9 +70,12 @@ describe("admin campaign detail route", () => {
       })),
     });
 
-    const response = await DELETE(new Request("http://localhost/api/admin/campaigns/c1"), {
-      params: Promise.resolve({ campaignId: "c1" }),
-    });
+    const response = await DELETE(
+      new Request("http://localhost/api/admin/campaigns/c1"),
+      {
+        params: Promise.resolve({ campaignId: "c1" }),
+      },
+    );
     expect(eqMock).toHaveBeenCalledWith("id", "c1");
     expect(response.status).toBe(200);
   });

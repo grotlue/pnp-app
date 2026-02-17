@@ -22,10 +22,13 @@ export async function POST(request: Request, { params }: Params) {
     return jsonError(400, "invalid_payload", "userId is required");
   }
 
-  const { data, error } = await auth.context.client.rpc("rpc_invite_user_to_campaign", {
-    p_campaign_id: campaignId,
-    p_user_id: body.userId,
-  });
+  const { data, error } = await auth.context.client.rpc(
+    "rpc_invite_user_to_campaign",
+    {
+      p_campaign_id: campaignId,
+      p_user_id: body.userId,
+    },
+  );
 
   if (error) {
     return jsonError(400, "campaign_invite_failed", error.message);

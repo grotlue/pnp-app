@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { requireAdminMock, createServiceRoleSupabaseClientMock } = vi.hoisted(() => ({
-  requireAdminMock: vi.fn(),
-  createServiceRoleSupabaseClientMock: vi.fn(),
-}));
+const { requireAdminMock, createServiceRoleSupabaseClientMock } = vi.hoisted(
+  () => ({
+    requireAdminMock: vi.fn(),
+    createServiceRoleSupabaseClientMock: vi.fn(),
+  }),
+);
 
 vi.mock("@/server/auth/require-admin", () => ({
   requireAdmin: requireAdminMock,
@@ -21,7 +23,10 @@ beforeEach(() => {
 
 describe("admin users route", () => {
   it("returns early when requireAdmin denies access", async () => {
-    const deniedResponse = Response.json({ error: { code: "admin_required" } }, { status: 403 });
+    const deniedResponse = Response.json(
+      { error: { code: "admin_required" } },
+      { status: 403 },
+    );
     requireAdminMock.mockResolvedValueOnce({ response: deniedResponse });
 
     const response = await GET(new Request("http://localhost/api/admin/users"));
@@ -29,7 +34,9 @@ describe("admin users route", () => {
   });
 
   it("lists users with merged profile + auth email", async () => {
-    requireAdminMock.mockResolvedValueOnce({ context: { user: { id: "admin-1" } } });
+    requireAdminMock.mockResolvedValueOnce({
+      context: { user: { id: "admin-1" } },
+    });
 
     const serviceClient = {
       from: vi.fn(() => ({
@@ -85,7 +92,9 @@ describe("admin users route", () => {
   });
 
   it("rejects invalid create payload", async () => {
-    requireAdminMock.mockResolvedValueOnce({ context: { user: { id: "admin-1" } } });
+    requireAdminMock.mockResolvedValueOnce({
+      context: { user: { id: "admin-1" } },
+    });
 
     const response = await POST(
       new Request("http://localhost/api/admin/users", {
@@ -104,7 +113,9 @@ describe("admin users route", () => {
   });
 
   it("rejects weak password on create", async () => {
-    requireAdminMock.mockResolvedValueOnce({ context: { user: { id: "admin-1" } } });
+    requireAdminMock.mockResolvedValueOnce({
+      context: { user: { id: "admin-1" } },
+    });
 
     const response = await POST(
       new Request("http://localhost/api/admin/users", {
@@ -127,7 +138,9 @@ describe("admin users route", () => {
   });
 
   it("creates user and upserts profile", async () => {
-    requireAdminMock.mockResolvedValueOnce({ context: { user: { id: "admin-1" } } });
+    requireAdminMock.mockResolvedValueOnce({
+      context: { user: { id: "admin-1" } },
+    });
 
     const upsertMock = vi.fn().mockResolvedValue({ error: null });
     const serviceClient = {
@@ -175,9 +188,13 @@ describe("admin users route", () => {
   });
 
   it("returns structured 500 when user creation throws unexpectedly", async () => {
-    requireAdminMock.mockResolvedValueOnce({ context: { user: { id: "admin-1" } } });
+    requireAdminMock.mockResolvedValueOnce({
+      context: { user: { id: "admin-1" } },
+    });
     createServiceRoleSupabaseClientMock.mockImplementationOnce(() => {
-      throw new Error("Missing environment variable: SUPABASE_SERVICE_ROLE_KEY");
+      throw new Error(
+        "Missing environment variable: SUPABASE_SERVICE_ROLE_KEY",
+      );
     });
 
     const response = await POST(

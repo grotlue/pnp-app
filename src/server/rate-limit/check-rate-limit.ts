@@ -22,7 +22,11 @@ export async function checkRateLimit(input: {
     });
 
     if (error || !data || typeof data !== "object") {
-      return { allowed: true, remaining: Number.POSITIVE_INFINITY, retryAfterSeconds: 0 };
+      return {
+        allowed: true,
+        remaining: Number.POSITIVE_INFINITY,
+        retryAfterSeconds: 0,
+      };
     }
 
     const parsed = data as {
@@ -37,6 +41,10 @@ export async function checkRateLimit(input: {
       retryAfterSeconds: parsed.retry_after_seconds ?? 0,
     };
   } catch {
-    return { allowed: true, remaining: Number.POSITIVE_INFINITY, retryAfterSeconds: 0 };
+    return {
+      allowed: true,
+      remaining: Number.POSITIVE_INFINITY,
+      retryAfterSeconds: 0,
+    };
   }
 }

@@ -1,5 +1,6 @@
 import { requireAuth } from "@/server/auth/require-auth";
 import { jsonError, jsonOk } from "@/lib/api/http";
+import { countUnreadNotificationsRpcQuery } from "@/features/notifications/queries/count-unread-notifications-rpc.query";
 
 export async function GET(request: Request) {
   const auth = await requireAuth(request);
@@ -7,15 +8,13 @@ export async function GET(request: Request) {
     return auth.response;
   }
 
-  const { count, error } = await auth.context.client
-    .from("notifications")
-    .select("id", { head: true, count: "exact" })
-    .eq("recipient_user_id", auth.context.user.id)
-    .eq("is_read", false);
-
-  if (error) {
-    return jsonError(400, "notifications_unread_count_failed", error.message);
+  try {
+    const unreadCount = await countUnreadNotificationsRpcQuery(
+      auth.context.client,
+    );
+    return jsonOk({ unreadCount });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return jsonError(400, "notifications_unread_count_failed", message);
   }
-
-  return jsonOk({ unreadCount: count ?? 0 });
 }

@@ -22,13 +22,20 @@ export async function POST(request: Request, { params }: Params) {
   const body = await parseJsonBody<DecisionBody>(request);
 
   if (!body?.state || !["accepted", "rejected"].includes(body.state)) {
-    return jsonError(400, "invalid_payload", "state must be accepted or rejected");
+    return jsonError(
+      400,
+      "invalid_payload",
+      "state must be accepted or rejected",
+    );
   }
 
-  const { error } = await auth.context.client.rpc("rpc_decide_campaign_membership", {
-    p_membership_id: membershipId,
-    p_state: body.state,
-  });
+  const { error } = await auth.context.client.rpc(
+    "rpc_decide_campaign_membership",
+    {
+      p_membership_id: membershipId,
+      p_state: body.state,
+    },
+  );
 
   if (error) {
     return jsonError(400, "campaign_membership_decision_failed", error.message);

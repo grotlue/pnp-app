@@ -27,7 +27,13 @@ export async function enforceRateLimit(input: {
   }
 
   const response = jsonError(429, "rate_limited", "Too many requests");
-  response.headers.set("Retry-After", String(Math.max(1, result.retryAfterSeconds)));
-  response.headers.set("X-RateLimit-Remaining", String(Math.max(0, result.remaining)));
+  response.headers.set(
+    "Retry-After",
+    String(Math.max(1, result.retryAfterSeconds)),
+  );
+  response.headers.set(
+    "X-RateLimit-Remaining",
+    String(Math.max(0, result.remaining)),
+  );
   return response;
 }

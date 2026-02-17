@@ -1,5 +1,8 @@
 import { requireAuth } from "@/server/auth/require-auth";
 import { jsonError, jsonOk } from "@/lib/api/http";
+import { listNotificationsRpcQuery } from "@/features/notifications/queries/list-notifications-rpc.query";
+import { mapNotificationRpcRow } from "@/features/notifications/logic/map-notification-rpc-row.logic";
+import { parseListLimitParam } from "@/server/api/validation/list-query";
 
 export async function GET(request: Request) {
   const auth = await requireAuth(request);
@@ -8,23 +11,15 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
-  const limitParam = Number(url.searchParams.get("limit") ?? "100");
-  const limit = Number.isFinite(limitParam)
-    ? Math.min(Math.max(limitParam, 1), 500)
-    : 100;
+  const limit = parseListLimitParam(url.searchParams.get("limit"), 100, 1, 500);
 
-  const { data, error } = await auth.context.client
-    .from("notifications")
-    .select(
-      "id, recipient_user_id, event_type, source_character_id, target_character_id, payload, is_read, created_at, read_at",
-    )
-    .eq("recipient_user_id", auth.context.user.id)
-    .limit(limit)
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    return jsonError(400, "notifications_list_failed", error.message);
+  try {
+    const rows = await listNotificationsRpcQuery(auth.context.client, {
+      limit,
+    });
+    return jsonOk(rows.map(mapNotificationRpcRow));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return jsonError(400, "notifications_list_failed", message);
   }
-
-  return jsonOk(data ?? []);
 }

@@ -9,7 +9,11 @@ function baseCookieParts(): string[] {
   return ["Path=/", "HttpOnly", "SameSite=Lax", "Secure"];
 }
 
-function serializeCookie(name: string, value: string, options?: CookieOptions): string {
+function serializeCookie(
+  name: string,
+  value: string,
+  options?: CookieOptions,
+): string {
   const parts = [`${name}=${encodeURIComponent(value)}`, ...baseCookieParts()];
   if (options?.maxAgeSeconds !== undefined) {
     parts.push(`Max-Age=${Math.max(0, Math.trunc(options.maxAgeSeconds))}`);
@@ -17,19 +21,26 @@ function serializeCookie(name: string, value: string, options?: CookieOptions): 
   return parts.join("; ");
 }
 
-export function setSessionCookies(response: Response, input: {
-  accessToken: string;
-  refreshToken?: string;
-  expiresAt?: number;
-}) {
+export function setSessionCookies(
+  response: Response,
+  input: {
+    accessToken: string;
+    refreshToken?: string;
+    expiresAt?: number;
+  },
+) {
   const headers = new Headers(response.headers);
 
   const nowSeconds = Math.floor(Date.now() / 1000);
-  const accessMaxAge = input.expiresAt ? Math.max(0, input.expiresAt - nowSeconds) : undefined;
+  const accessMaxAge = input.expiresAt
+    ? Math.max(0, input.expiresAt - nowSeconds)
+    : undefined;
 
   headers.append(
     "Set-Cookie",
-    serializeCookie(ACCESS_COOKIE_NAME, input.accessToken, { maxAgeSeconds: accessMaxAge }),
+    serializeCookie(ACCESS_COOKIE_NAME, input.accessToken, {
+      maxAgeSeconds: accessMaxAge,
+    }),
   );
 
   if (input.refreshToken) {
@@ -50,8 +61,14 @@ export function setSessionCookies(response: Response, input: {
 
 export function clearSessionCookies(response: Response) {
   const headers = new Headers(response.headers);
-  headers.append("Set-Cookie", serializeCookie(ACCESS_COOKIE_NAME, "", { maxAgeSeconds: 0 }));
-  headers.append("Set-Cookie", serializeCookie(REFRESH_COOKIE_NAME, "", { maxAgeSeconds: 0 }));
+  headers.append(
+    "Set-Cookie",
+    serializeCookie(ACCESS_COOKIE_NAME, "", { maxAgeSeconds: 0 }),
+  );
+  headers.append(
+    "Set-Cookie",
+    serializeCookie(REFRESH_COOKIE_NAME, "", { maxAgeSeconds: 0 }),
+  );
 
   return new Response(response.body, {
     status: response.status,
@@ -67,7 +84,9 @@ export function readAccessTokenFromCookies(request: Request): string | null {
   }
 
   const parts = cookieHeader.split(";").map((entry) => entry.trim());
-  const match = parts.find((entry) => entry.startsWith(`${ACCESS_COOKIE_NAME}=`));
+  const match = parts.find((entry) =>
+    entry.startsWith(`${ACCESS_COOKIE_NAME}=`),
+  );
   if (!match) {
     return null;
   }

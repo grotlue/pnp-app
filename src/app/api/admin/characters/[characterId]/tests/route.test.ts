@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { requireAdminMock, createServiceRoleSupabaseClientMock } = vi.hoisted(() => ({
-  requireAdminMock: vi.fn(),
-  createServiceRoleSupabaseClientMock: vi.fn(),
-}));
+const { requireAdminMock, createServiceRoleSupabaseClientMock } = vi.hoisted(
+  () => ({
+    requireAdminMock: vi.fn(),
+    createServiceRoleSupabaseClientMock: vi.fn(),
+  }),
+);
 
 vi.mock("@/server/auth/require-admin", () => ({
   requireAdmin: requireAdminMock,
@@ -21,7 +23,9 @@ beforeEach(() => {
 
 describe("admin character detail route", () => {
   it("updates character", async () => {
-    requireAdminMock.mockResolvedValueOnce({ context: { user: { id: "admin-1" } } });
+    requireAdminMock.mockResolvedValueOnce({
+      context: { user: { id: "admin-1" } },
+    });
     const singleMock = vi.fn().mockResolvedValue({
       data: { id: "ch1", owner_user_id: "u2", type: "npc", name: "Updated" },
       error: null,
@@ -49,7 +53,9 @@ describe("admin character detail route", () => {
   });
 
   it("deletes character", async () => {
-    requireAdminMock.mockResolvedValueOnce({ context: { user: { id: "admin-1" } } });
+    requireAdminMock.mockResolvedValueOnce({
+      context: { user: { id: "admin-1" } },
+    });
     const eqMock = vi.fn().mockResolvedValue({ error: null });
     createServiceRoleSupabaseClientMock.mockReturnValue({
       from: vi.fn(() => ({
@@ -59,9 +65,12 @@ describe("admin character detail route", () => {
       })),
     });
 
-    const response = await DELETE(new Request("http://localhost/api/admin/characters/ch1"), {
-      params: Promise.resolve({ characterId: "ch1" }),
-    });
+    const response = await DELETE(
+      new Request("http://localhost/api/admin/characters/ch1"),
+      {
+        params: Promise.resolve({ characterId: "ch1" }),
+      },
+    );
     expect(eqMock).toHaveBeenCalledWith("id", "ch1");
     expect(response.status).toBe(200);
   });

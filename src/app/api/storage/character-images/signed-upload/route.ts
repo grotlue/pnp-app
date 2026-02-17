@@ -71,7 +71,11 @@ export async function POST(request: Request) {
     isPrivate: character.is_private,
   });
   if (!canManage) {
-    return jsonError(403, "forbidden", "Cannot upload image for this character");
+    return jsonError(
+      403,
+      "forbidden",
+      "Cannot upload image for this character",
+    );
   }
 
   const path = `${auth.context.user.id}/${body.characterId}/${randomUUID()}-${sanitizeFileName(body.fileName)}`;
@@ -80,7 +84,11 @@ export async function POST(request: Request) {
     .createSignedUploadUrl(path);
 
   if (error) {
-    return jsonError(400, "character_image_signed_upload_failed", error.message);
+    return jsonError(
+      400,
+      "character_image_signed_upload_failed",
+      error.message,
+    );
   }
 
   return jsonOk({ ...data, path });

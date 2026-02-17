@@ -36,7 +36,11 @@ export async function GET(request: Request, { params }: Params) {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return jsonError(400, "character_outgoing_relationships_failed", error.message);
+    return jsonError(
+      400,
+      "character_outgoing_relationships_failed",
+      error.message,
+    );
   }
 
   const rows = (data ?? []) as RelationshipRow[];
@@ -52,7 +56,11 @@ export async function GET(request: Request, { params }: Params) {
       .in("id", targetIds);
 
     if (targetsError) {
-      return jsonError(400, "character_targets_fetch_failed", targetsError.message);
+      return jsonError(
+        400,
+        "character_targets_fetch_failed",
+        targetsError.message,
+      );
     }
 
     for (const target of targets ?? []) {
@@ -64,7 +72,9 @@ export async function GET(request: Request, { params }: Params) {
     rows.map((row) => ({
       ...row,
       target_name:
-        (row.target_character_id ? nameById.get(row.target_character_id) : null) ??
+        (row.target_character_id
+          ? nameById.get(row.target_character_id)
+          : null) ??
         row.target_snapshot_name ??
         null,
       is_external_target: row.target_character_id === null,

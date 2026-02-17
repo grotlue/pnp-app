@@ -2,7 +2,10 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ClientSession } from "@/lib/client/session";
-import { notificationsQueryKey, useNotificationsQuery } from "./use-notifications-query";
+import {
+  notificationsQueryKey,
+  useNotificationsQuery,
+} from "./use-notifications-query";
 import { markNotificationReadMutation } from "@/features/notifications/queries/mark-notification-read.mutation";
 import { markAllNotificationsReadMutation } from "@/features/notifications/queries/mark-all-notifications-read.mutation";
 import { decideNotificationMembershipMutation } from "@/features/notifications/queries/decide-notification-membership.mutation";

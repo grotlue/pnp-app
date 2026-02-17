@@ -16,7 +16,9 @@ export async function uploadImageToSignedPath({
   file,
 }: SignedImageUploadInput): Promise<void> {
   const supabase = getBrowserSupabaseClient();
-  const { error } = await supabase.storage.from(bucket).uploadToSignedUrl(path, token, file);
+  const { error } = await supabase.storage
+    .from(bucket)
+    .uploadToSignedUrl(path, token, file);
 
   if (error) {
     throw new Error(error.message);

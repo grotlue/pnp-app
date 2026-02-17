@@ -13,17 +13,21 @@ export async function getCampaignDetailContext(
   characters: Character[];
   users: UserEntry[];
 }> {
-  const [meResponse, detailResponse, charactersResponse, usersResponse] = await Promise.all([
-    apiRequest<MeResponse>("/api/me", { session }),
-    apiRequest<CampaignDetail>(`/api/campaigns/${campaignId}`, { session }),
-    apiRequest<Character[]>("/api/characters", { session }),
-    apiRequest<UserEntry[]>("/api/users", { session }),
-  ]);
+  const [meResponse, detailResponse, charactersResponse, usersResponse] =
+    await Promise.all([
+      apiRequest<MeResponse>("/api/me", { session }),
+      apiRequest<CampaignDetail>(`/api/campaigns/${campaignId}`, { session }),
+      apiRequest<Character[]>("/api/characters", { session }),
+      apiRequest<UserEntry[]>("/api/users", { session }),
+    ]);
 
   return {
     me: unwrapApiResponse(meResponse, "Failed to load user"),
     detail: unwrapApiResponse(detailResponse, "Failed to load campaign"),
-    characters: unwrapApiResponse(charactersResponse, "Failed to load characters"),
+    characters: unwrapApiResponse(
+      charactersResponse,
+      "Failed to load characters",
+    ),
     users: unwrapApiResponse(usersResponse, "Failed to load users"),
   };
 }
@@ -63,10 +67,13 @@ export async function deleteCampaignDetail(
   session: ClientSession,
   campaignId: string,
 ): Promise<{ deleted: boolean }> {
-  const response = await apiRequest<{ deleted: boolean }>(`/api/campaigns/${campaignId}`, {
-    method: "DELETE",
-    session,
-  });
+  const response = await apiRequest<{ deleted: boolean }>(
+    `/api/campaigns/${campaignId}`,
+    {
+      method: "DELETE",
+      session,
+    },
+  );
   return unwrapApiResponse(response, "Failed to delete campaign");
 }
 

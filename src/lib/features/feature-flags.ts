@@ -19,7 +19,9 @@ const featureRules: Record<FeatureFlag, FeatureRule> = {
   },
 };
 
-const knownFeatureFlags = new Set<FeatureFlag>(Object.keys(featureRules) as FeatureFlag[]);
+const knownFeatureFlags = new Set<FeatureFlag>(
+  Object.keys(featureRules) as FeatureFlag[],
+);
 const knownProviders = new Set<FeatureFlagProvider>(["rules", "vercel"]);
 const isTestEnvironment = process.env.NODE_ENV === "test";
 const flagOptions = [
@@ -27,12 +29,18 @@ const flagOptions = [
   { label: "Enabled", value: true },
 ];
 
-function normalizeRuntimeEnvironment(value?: string | null): RuntimeEnvironment | null {
+function normalizeRuntimeEnvironment(
+  value?: string | null,
+): RuntimeEnvironment | null {
   if (!value) {
     return null;
   }
 
-  if (value === "development" || value === "preview" || value === "production") {
+  if (
+    value === "development" ||
+    value === "preview" ||
+    value === "production"
+  ) {
     return value;
   }
 
@@ -44,7 +52,9 @@ function normalizeProvider(value?: string | null): FeatureFlagProvider | null {
     return null;
   }
 
-  return knownProviders.has(value as FeatureFlagProvider) ? (value as FeatureFlagProvider) : null;
+  return knownProviders.has(value as FeatureFlagProvider)
+    ? (value as FeatureFlagProvider)
+    : null;
 }
 
 function parseFeatureOverrideList(raw?: string): Set<FeatureFlag> {
@@ -55,7 +65,9 @@ function parseFeatureOverrideList(raw?: string): Set<FeatureFlag> {
   const values = raw
     .split(",")
     .map((value) => value.trim())
-    .filter((value): value is FeatureFlag => knownFeatureFlags.has(value as FeatureFlag));
+    .filter((value): value is FeatureFlag =>
+      knownFeatureFlags.has(value as FeatureFlag),
+    );
 
   return new Set(values);
 }
@@ -68,12 +80,16 @@ function getFeatureDefaultValue(
 }
 
 function getFeatureOverride(feature: FeatureFlag): boolean | null {
-  const forceDisabled = parseFeatureOverrideList(process.env.FEATURE_FLAGS_DISABLE);
+  const forceDisabled = parseFeatureOverrideList(
+    process.env.FEATURE_FLAGS_DISABLE,
+  );
   if (forceDisabled.has(feature)) {
     return false;
   }
 
-  const forceEnabled = parseFeatureOverrideList(process.env.FEATURE_FLAGS_ENABLE);
+  const forceEnabled = parseFeatureOverrideList(
+    process.env.FEATURE_FLAGS_ENABLE,
+  );
   if (forceEnabled.has(feature)) {
     return true;
   }
@@ -81,11 +97,15 @@ function getFeatureOverride(feature: FeatureFlag): boolean | null {
   return null;
 }
 
-async function evaluateWithRulesProvider(feature: FeatureFlag): Promise<boolean> {
+async function evaluateWithRulesProvider(
+  feature: FeatureFlag,
+): Promise<boolean> {
   return rulesFeatureFlags[feature]();
 }
 
-async function evaluateWithVercelAdapter(feature: FeatureFlag): Promise<boolean> {
+async function evaluateWithVercelAdapter(
+  feature: FeatureFlag,
+): Promise<boolean> {
   return getVercelFeatureFlags()[feature]();
 }
 
@@ -134,7 +154,9 @@ export function resolveRuntimeEnvironment(): RuntimeEnvironment {
 }
 
 export function resolveFeatureFlagProvider(): FeatureFlagProvider {
-  const explicitProvider = normalizeProvider(process.env.FEATURE_FLAGS_PROVIDER);
+  const explicitProvider = normalizeProvider(
+    process.env.FEATURE_FLAGS_PROVIDER,
+  );
   if (explicitProvider) {
     return explicitProvider;
   }
@@ -167,7 +189,10 @@ export async function getFeatureFlagsProviderData(): Promise<ProviderData> {
     const vercelProviderData = await getVercelProviderData(activeFlags);
     return mergeProviderData([baseProviderData, vercelProviderData]);
   } catch (error) {
-    console.warn("feature flags: failed to load Vercel provider metadata", error);
+    console.warn(
+      "feature flags: failed to load Vercel provider metadata",
+      error,
+    );
     return baseProviderData;
   }
 }

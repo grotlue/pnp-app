@@ -17,7 +17,11 @@ export function useNotificationsQuery(
   const limit = options?.limit ?? 100;
 
   return useQuery({
-    queryKey: [...notificationsQueryKey, session?.accessToken ?? "no-session", limit],
+    queryKey: [
+      ...notificationsQueryKey,
+      session?.accessToken ?? "no-session",
+      limit,
+    ],
     enabled: Boolean(session),
     queryFn: async () => {
       if (!session) {

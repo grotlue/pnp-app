@@ -1,0 +1,10 @@
+.next
+out
+build
+coverage
+node_modules
+.playwright-browsers
+playwright-report
+test-results
+.yarn
+.github/ISSUE_TEMPLATE

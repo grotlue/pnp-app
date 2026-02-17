@@ -1,14 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { isFeatureEnabledMock, createServerSupabaseClientMock } = vi.hoisted(() => ({
-  isFeatureEnabledMock: vi.fn(),
-  createServerSupabaseClientMock: vi.fn(),
-}));
+const { isFeatureEnabledMock, createServerSupabaseClientMock } = vi.hoisted(
+  () => ({
+    isFeatureEnabledMock: vi.fn(),
+    createServerSupabaseClientMock: vi.fn(),
+  }),
+);
 
 vi.mock("@/lib/features/feature-flags", async () => {
-  const actual = await vi.importActual<typeof import("@/lib/features/feature-flags")>(
-    "@/lib/features/feature-flags",
-  );
+  const actual = await vi.importActual<
+    typeof import("@/lib/features/feature-flags")
+  >("@/lib/features/feature-flags");
 
   return {
     ...actual,
@@ -33,7 +35,10 @@ describe("POST /api/auth/register", () => {
 
     const request = new Request("http://localhost/api/auth/register", {
       method: "POST",
-      body: JSON.stringify({ email: "x@example.com", password: "SecretPass123" }),
+      body: JSON.stringify({
+        email: "x@example.com",
+        password: "SecretPass123",
+      }),
     });
     const response = await POST(request);
 

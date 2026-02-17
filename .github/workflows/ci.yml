@@ -29,6 +29,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Notify Vercel (quality)
         uses: vercel/repository-dispatch/actions/status@v1
@@ -50,11 +52,54 @@ jobs:
       - name: Lint
         run: yarn lint
 
+      - name: Format (Prettier)
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.base_ref }}" --depth=1
+            changed_files="$(git diff --name-only --diff-filter=ACMRTUXB "origin/${{ github.base_ref }}"...HEAD)"
+          else
+            changed_files="$(git diff --name-only --diff-filter=ACMRTUXB HEAD~1 HEAD || true)"
+          fi
+
+          set --
+          while IFS= read -r file; do
+            if [ -n "$file" ]; then
+              set -- "$@" "$file"
+            fi
+          done <<EOF
+          $changed_files
+          EOF
+
+          if [ "$#" -eq 0 ]; then
+            echo "No changed files to check."
+            exit 0
+          fi
+
+          yarn prettier:check "$@"
+
       - name: Test
         run: yarn test:run
 
       - name: Build
         run: yarn build
+
+      - name: Install Playwright browsers
+        run: yarn test:e2e:install
+
+      - name: E2E smoke tests
+        env:
+          PLAYWRIGHT_WEB_SERVER_CMD: yarn start --port 3000
+        run: yarn test:e2e
+
+      - name: Upload Playwright artifacts on failure
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
 
   db_schema_guardrails:
     runs-on: ubuntu-latest

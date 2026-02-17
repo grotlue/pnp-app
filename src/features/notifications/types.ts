@@ -28,3 +28,5 @@ export type NotificationEntry = {
   created_at: string;
   read_at: string | null;
 };
+
+export type NotificationRpcRow = NotificationEntry;

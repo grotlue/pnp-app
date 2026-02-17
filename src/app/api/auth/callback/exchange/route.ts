@@ -27,7 +27,11 @@ export async function POST(request: Request) {
   const { data, error } = await client.auth.exchangeCodeForSession(body.code);
 
   if (error || !data.session) {
-    return jsonError(400, "auth_code_exchange_failed", error?.message ?? "auth code exchange failed");
+    return jsonError(
+      400,
+      "auth_code_exchange_failed",
+      error?.message ?? "auth code exchange failed",
+    );
   }
 
   return setSessionCookies(

@@ -8,8 +8,15 @@ import { Pencil, Trash2 } from "lucide-react";
 import { AppHeader } from "@/components/common/app-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { FeedbackMessage } from "@/components/common/feedback-message";
-import { FormInput, FormSelect, FormTextarea } from "@/components/common/form-controls";
-import { IconActionButton, IconActionLinkButton } from "@/components/common/icon-action-button";
+import {
+  FormInput,
+  FormSelect,
+  FormTextarea,
+} from "@/components/common/form-controls";
+import {
+  IconActionButton,
+  IconActionLinkButton,
+} from "@/components/common/icon-action-button";
 import { ListControls } from "@/components/common/list-controls";
 import { ListItemRow } from "@/components/common/list-item-row";
 import { Modal } from "@/components/common/modal";
@@ -18,7 +25,13 @@ import { PaginationControls } from "@/components/common/pagination-controls";
 import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
 import { VisibilityToggle } from "@/components/common/visibility-toggle";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { CharacterTypeBadge } from "@/features/characters/components/character-type-badge";
 import {
   type CharacterListSort,
@@ -33,7 +46,11 @@ import { queryKeys } from "@/lib/client/query-keys";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { textLinkClassName } from "@/lib/utils/link";
-import { clampListPage, DEFAULT_LIST_PAGE_SIZE, paginateListItems } from "@/lib/utils/list";
+import {
+  clampListPage,
+  DEFAULT_LIST_PAGE_SIZE,
+  paginateListItems,
+} from "@/lib/utils/list";
 
 type CharactersScreenProps = {
   locale: AppLocale;
@@ -68,9 +85,8 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
     }
   }, [ready, router, session]);
 
-  const { charactersQuery, createMutation, deleteMutation, anyPending } = useCharactersScreen(
-    session,
-  );
+  const { charactersQuery, createMutation, deleteMutation, anyPending } =
+    useCharactersScreen(session);
 
   const meQuery = useMeQuery(session);
 
@@ -92,7 +108,11 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
     searchCharacters(visibleCharacters, searchQuery),
     sortBy,
   );
-  const safePage = clampListPage(page, sortedAndFilteredCharacters.length, DEFAULT_LIST_PAGE_SIZE);
+  const safePage = clampListPage(
+    page,
+    sortedAndFilteredCharacters.length,
+    DEFAULT_LIST_PAGE_SIZE,
+  );
   const pagedCharacters = paginateListItems(
     sortedAndFilteredCharacters,
     safePage,
@@ -100,7 +120,10 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
   );
 
   const campaignsById = useMemo(
-    () => new Map((campaignsQuery.data ?? []).map((campaign) => [campaign.id, campaign])),
+    () =>
+      new Map(
+        (campaignsQuery.data ?? []).map((campaign) => [campaign.id, campaign]),
+      ),
     [campaignsQuery.data],
   );
 
@@ -109,7 +132,8 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
     meQuery.error,
     campaignsQuery.error,
   ].find((entry) => entry instanceof Error);
-  const feedback = message || (queryError instanceof Error ? queryError.message : "");
+  const feedback =
+    message || (queryError instanceof Error ? queryError.message : "");
 
   const sortOptions = [
     { value: "updated_desc", label: t("ui.list.sortUpdated") },
@@ -143,7 +167,9 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-2">
-              <Button onClick={() => setCreateOpen(true)}>{t("ui.characters.create")}</Button>
+              <Button onClick={() => setCreateOpen(true)}>
+                {t("ui.characters.create")}
+              </Button>
             </div>
 
             <FeedbackMessage message={feedback} />
@@ -161,7 +187,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
             <div className="space-y-2">
               {pagedCharacters.map((character) => {
                 const campaign = character.campaign_id
-                  ? campaignsById.get(character.campaign_id) ?? null
+                  ? (campaignsById.get(character.campaign_id) ?? null)
                   : null;
 
                 return (
@@ -184,7 +210,10 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
                     }
                   >
                     <div className="space-y-1">
-                      <Link className={textLinkClassName} href={`/characters/${character.id}`}>
+                      <Link
+                        className={textLinkClassName}
+                        href={`/characters/${character.id}`}
+                      >
                         <TitleWithPrivacy
                           title={character.name}
                           isPrivate={character.is_private}
@@ -256,7 +285,9 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
                     setMessage(t("ui.feedback.created"));
                   } catch (error) {
                     setMessage(
-                      error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                      error instanceof Error
+                        ? error.message
+                        : t("ui.feedback.requestFailed"),
                     );
                     return;
                   }
@@ -275,7 +306,9 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
               setCreateForm((prev) => ({ ...prev, type: event.target.value }))
             }
           >
-            <option value="player">{t("ui.labels.characterType.player")}</option>
+            <option value="player">
+              {t("ui.labels.characterType.player")}
+            </option>
             <option value="npc">{t("ui.labels.characterType.npc")}</option>
           </FormSelect>
           <FormInput
@@ -297,7 +330,10 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
             placeholder={t("ui.fields.description")}
             value={createForm.description}
             onChange={(event) =>
-              setCreateForm((prev) => ({ ...prev, description: event.target.value }))
+              setCreateForm((prev) => ({
+                ...prev,
+                description: event.target.value,
+              }))
             }
           />
           <VisibilityToggle
@@ -336,7 +372,9 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
                     setMessage(t("ui.feedback.deleted"));
                   } catch (error) {
                     setMessage(
-                      error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                      error instanceof Error
+                        ? error.message
+                        : t("ui.feedback.requestFailed"),
                     );
                   }
                 })()

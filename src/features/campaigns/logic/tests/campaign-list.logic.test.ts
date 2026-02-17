@@ -25,7 +25,10 @@ const campaigns = [
 describe("campaign-list.logic", () => {
   it("sorts by title", () => {
     const sorted = sortCampaigns([...campaigns], "name_asc");
-    expect(sorted.map((entry) => entry.title)).toEqual(["Amber Road", "Zenith Keep"]);
+    expect(sorted.map((entry) => entry.title)).toEqual([
+      "Amber Road",
+      "Zenith Keep",
+    ]);
   });
 
   it("sorts by updated descending", () => {

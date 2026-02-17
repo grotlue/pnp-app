@@ -59,11 +59,17 @@ export function IconActionLinkButton({
   const badgeLabel = badgeCount > 99 ? "99+" : String(badgeCount);
 
   return (
-    <Button asChild variant={variant} size={size} title={label} className="relative">
+    <Button
+      asChild
+      variant={variant}
+      size={size}
+      title={label}
+      className="relative"
+    >
       <Link href={href} aria-label={label}>
         <Icon />
         {showBadge ? (
-          <span className="absolute -right-2 -top-2 inline-flex min-w-5 items-center justify-center rounded-full border border-background bg-destructive px-1.5 text-[10px] font-semibold leading-none text-white">
+          <span className="border-background bg-destructive absolute -top-2 -right-2 inline-flex min-w-5 items-center justify-center rounded-full border px-1.5 text-[10px] leading-none font-semibold text-white">
             {badgeLabel}
           </span>
         ) : null}

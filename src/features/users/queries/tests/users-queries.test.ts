@@ -30,7 +30,11 @@ import {
   getProfileAvatarSignedUrl,
   updateMyProfile,
 } from "../users-profile.query";
-import { deleteMyAccount, updateMyEmail, updateMyPassword } from "../users-settings.query";
+import {
+  deleteMyAccount,
+  updateMyEmail,
+  updateMyPassword,
+} from "../users-settings.query";
 
 const session = {
   accessToken: "access-token",
@@ -39,7 +43,9 @@ const session = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  unwrapApiResponseMock.mockImplementation((response: { data: unknown }) => response.data);
+  unwrapApiResponseMock.mockImplementation(
+    (response: { data: unknown }) => response.data,
+  );
 });
 
 describe("users auth/profile/settings queries", () => {
@@ -47,14 +53,19 @@ describe("users auth/profile/settings queries", () => {
     const response = { data: { accessToken: "a1" }, error: null, status: 200 };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(loginUser({ email: "x@example.com", password: "secret" })).resolves.toEqual({
+    await expect(
+      loginUser({ email: "x@example.com", password: "secret" }),
+    ).resolves.toEqual({
       accessToken: "a1",
     });
     expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/login", {
       method: "POST",
       body: { email: "x@example.com", password: "secret" },
     });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Login failed");
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Login failed",
+    );
   });
 
   it("loginUser forwards captcha token when provided", async () => {
@@ -72,7 +83,11 @@ describe("users auth/profile/settings queries", () => {
     });
     expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/login", {
       method: "POST",
-      body: { email: "x@example.com", password: "secret", captchaToken: "captcha-1" },
+      body: {
+        email: "x@example.com",
+        password: "secret",
+        captchaToken: "captcha-1",
+      },
     });
   });
 
@@ -101,7 +116,10 @@ describe("users auth/profile/settings queries", () => {
         locale: "de",
       },
     });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Register failed");
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Register failed",
+    );
   });
 
   it("registerUser forwards captcha token when provided", async () => {
@@ -137,14 +155,22 @@ describe("users auth/profile/settings queries", () => {
     const response = { data: { requested: true }, error: null, status: 200 };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(requestPasswordReset({ email: "x@example.com" })).resolves.toEqual({
+    await expect(
+      requestPasswordReset({ email: "x@example.com" }),
+    ).resolves.toEqual({
       requested: true,
     });
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/password-reset/request", {
-      method: "POST",
-      body: { email: "x@example.com" },
-    });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Password reset request failed");
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/auth/password-reset/request",
+      {
+        method: "POST",
+        body: { email: "x@example.com" },
+      },
+    );
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Password reset request failed",
+    );
   });
 
   it("requestPasswordReset forwards captcha token when provided", async () => {
@@ -152,14 +178,20 @@ describe("users auth/profile/settings queries", () => {
     apiRequestMock.mockResolvedValueOnce(response);
 
     await expect(
-      requestPasswordReset({ email: "x@example.com", captchaToken: "captcha-3" }),
+      requestPasswordReset({
+        email: "x@example.com",
+        captchaToken: "captcha-3",
+      }),
     ).resolves.toEqual({
       requested: true,
     });
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/password-reset/request", {
-      method: "POST",
-      body: { email: "x@example.com", captchaToken: "captcha-3" },
-    });
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/auth/password-reset/request",
+      {
+        method: "POST",
+        body: { email: "x@example.com", captchaToken: "captcha-3" },
+      },
+    );
   });
 
   it("logoutUser sends authenticated logout request", async () => {
@@ -171,7 +203,10 @@ describe("users auth/profile/settings queries", () => {
       method: "POST",
       session,
     });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Logout failed");
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Logout failed",
+    );
   });
 
   it("exchangeAuthCode posts callback code", async () => {
@@ -190,21 +225,29 @@ describe("users auth/profile/settings queries", () => {
       method: "POST",
       body: { code: "code-1" },
     });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Auth code exchange failed");
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Auth code exchange failed",
+    );
   });
 
   it("verifyAuthToken posts token hash and type", async () => {
     const response = { data: { verified: true }, error: null, status: 200 };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(verifyAuthToken({ tokenHash: "th", type: "signup" })).resolves.toEqual({
+    await expect(
+      verifyAuthToken({ tokenHash: "th", type: "signup" }),
+    ).resolves.toEqual({
       verified: true,
     });
     expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/callback/verify", {
       method: "POST",
       body: { tokenHash: "th", type: "signup" },
     });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Token verification failed");
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Token verification failed",
+    );
   });
 
   it("confirmPasswordReset posts reset confirmation payload", async () => {
@@ -218,15 +261,21 @@ describe("users auth/profile/settings queries", () => {
         newPassword: "new-secret",
       }),
     ).resolves.toEqual({ updated: true });
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/password-reset/confirm", {
-      method: "POST",
-      body: {
-        accessToken: "a1",
-        refreshToken: "r1",
-        newPassword: "new-secret",
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/auth/password-reset/confirm",
+      {
+        method: "POST",
+        body: {
+          accessToken: "a1",
+          refreshToken: "r1",
+          newPassword: "new-secret",
+        },
       },
-    });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Password reset confirm failed");
+    );
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Password reset confirm failed",
+    );
   });
 
   it("getMe loads profile via /api/me", async () => {
@@ -242,11 +291,18 @@ describe("users auth/profile/settings queries", () => {
 
     await expect(getMe(session)).resolves.toEqual(response.data);
     expect(apiRequestMock).toHaveBeenCalledWith("/api/me", { session });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to load profile");
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to load profile",
+    );
   });
 
   it("updateMyProfile sends patch payload", async () => {
-    const response = { data: { username: "updated" }, error: null, status: 200 };
+    const response = {
+      data: { username: "updated" },
+      error: null,
+      status: 200,
+    };
     apiRequestMock.mockResolvedValueOnce(response);
 
     await expect(
@@ -265,12 +321,19 @@ describe("users auth/profile/settings queries", () => {
         locale: "de",
       },
     });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to save profile");
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to save profile",
+    );
   });
 
   it("createProfileAvatarSignedUpload posts upload metadata", async () => {
     const response = {
-      data: { token: "upload-token", signedUrl: "https://signed-upload", path: "u1/avatar.png" },
+      data: {
+        token: "upload-token",
+        signedUrl: "https://signed-upload",
+        path: "u1/avatar.png",
+      },
       error: null,
       status: 200,
     };
@@ -284,16 +347,19 @@ describe("users auth/profile/settings queries", () => {
         fileSize: 123_456,
       }),
     ).resolves.toEqual(response.data);
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/storage/profile-images/signed-upload", {
-      method: "POST",
-      session,
-      body: {
-        fileName: "avatar.png",
-        width: 512,
-        height: 512,
-        fileSize: 123_456,
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/storage/profile-images/signed-upload",
+      {
+        method: "POST",
+        session,
+        body: {
+          fileName: "avatar.png",
+          width: 512,
+          height: 512,
+          fileSize: 123_456,
+        },
       },
-    });
+    );
     expect(unwrapApiResponseMock).toHaveBeenCalledWith(
       response,
       "Failed to prepare profile image upload",
@@ -308,23 +374,33 @@ describe("users auth/profile/settings queries", () => {
     };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(getProfileAvatarSignedUrl(session, "u1/avatar.png")).resolves.toEqual(response.data);
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/storage/profile-images/signed-url", {
-      method: "POST",
-      session,
-      body: {
-        path: "u1/avatar.png",
-        expiresIn: 600,
+    await expect(
+      getProfileAvatarSignedUrl(session, "u1/avatar.png"),
+    ).resolves.toEqual(response.data);
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/storage/profile-images/signed-url",
+      {
+        method: "POST",
+        session,
+        body: {
+          path: "u1/avatar.png",
+          expiresIn: 600,
+        },
       },
-    });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to load profile image");
+    );
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to load profile image",
+    );
   });
 
   it("updateMyEmail sends patch payload", async () => {
     const response = { data: { user: { id: "u1" } }, error: null, status: 200 };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(updateMyEmail(session, { newEmail: "new@example.com" })).resolves.toEqual({
+    await expect(
+      updateMyEmail(session, { newEmail: "new@example.com" }),
+    ).resolves.toEqual({
       user: { id: "u1" },
     });
     expect(apiRequestMock).toHaveBeenCalledWith("/api/me/settings/email", {
@@ -332,14 +408,19 @@ describe("users auth/profile/settings queries", () => {
       session,
       body: { newEmail: "new@example.com" },
     });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to update email");
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to update email",
+    );
   });
 
   it("updateMyPassword sends patch payload", async () => {
     const response = { data: { user: { id: "u1" } }, error: null, status: 200 };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(updateMyPassword(session, { newPassword: "new-secret" })).resolves.toEqual({
+    await expect(
+      updateMyPassword(session, { newPassword: "new-secret" }),
+    ).resolves.toEqual({
       user: { id: "u1" },
     });
     expect(apiRequestMock).toHaveBeenCalledWith("/api/me/settings/password", {
@@ -347,7 +428,10 @@ describe("users auth/profile/settings queries", () => {
       session,
       body: { newPassword: "new-secret" },
     });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to update password");
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to update password",
+    );
   });
 
   it("deleteMyAccount sends delete request", async () => {
@@ -359,55 +443,89 @@ describe("users auth/profile/settings queries", () => {
       method: "DELETE",
       session,
     });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to delete account");
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to delete account",
+    );
   });
 
   it("getAdminMfaStatus loads MFA status for admin", async () => {
     const response = {
-      data: { isAdmin: true, mfaRequired: true, currentLevel: "aal1", nextLevel: "aal2", hasVerifiedTotp: false, factors: [] },
+      data: {
+        isAdmin: true,
+        mfaRequired: true,
+        currentLevel: "aal1",
+        nextLevel: "aal2",
+        hasVerifiedTotp: false,
+        factors: [],
+      },
       error: null,
       status: 200,
     };
     apiRequestMock.mockResolvedValueOnce(response);
 
     await expect(getAdminMfaStatus(session)).resolves.toEqual(response.data);
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/mfa/totp", { session });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to load MFA status");
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/mfa/totp", {
+      session,
+    });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to load MFA status",
+    );
   });
 
   it("enrollAdminTotp posts enrollment request", async () => {
     const response = {
-      data: { factorId: "f1", friendlyName: "admin", qrCode: "<svg/>", secret: "ABC", uri: "otpauth://..." },
+      data: {
+        factorId: "f1",
+        friendlyName: "admin",
+        qrCode: "<svg/>",
+        secret: "ABC",
+        uri: "otpauth://...",
+      },
       error: null,
       status: 200,
     };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(enrollAdminTotp(session, { friendlyName: "admin" })).resolves.toEqual(response.data);
+    await expect(
+      enrollAdminTotp(session, { friendlyName: "admin" }),
+    ).resolves.toEqual(response.data);
     expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/mfa/totp", {
       method: "POST",
       session,
       body: { friendlyName: "admin" },
     });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to start MFA setup");
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to start MFA setup",
+    );
   });
 
   it("verifyAdminTotp posts verification code", async () => {
     const response = {
-      data: { verified: true, accessToken: "a2", refreshToken: "r2", expiresAt: 123456 },
+      data: {
+        verified: true,
+        accessToken: "a2",
+        refreshToken: "r2",
+        expiresAt: 123456,
+      },
       error: null,
       status: 200,
     };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(verifyAdminTotp(session, { factorId: "f1", code: "123456" })).resolves.toEqual(
-      response.data,
-    );
+    await expect(
+      verifyAdminTotp(session, { factorId: "f1", code: "123456" }),
+    ).resolves.toEqual(response.data);
     expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/mfa/totp", {
       method: "PATCH",
       session,
       body: { factorId: "f1", code: "123456" },
     });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to verify MFA code");
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to verify MFA code",
+    );
   });
 });

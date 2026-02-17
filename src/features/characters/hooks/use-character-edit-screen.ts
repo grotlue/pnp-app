@@ -9,9 +9,17 @@ import {
   updateCharacter,
 } from "../queries/character-edit.query";
 
-export function useCharacterEditScreen(session: ClientSession | null, characterId: string) {
+export function useCharacterEditScreen(
+  session: ClientSession | null,
+  characterId: string,
+) {
   const editQuery = useQuery({
-    queryKey: ["characters", "edit", characterId, session?.accessToken ?? "no-session"],
+    queryKey: [
+      "characters",
+      "edit",
+      characterId,
+      session?.accessToken ?? "no-session",
+    ],
     enabled: Boolean(session),
     queryFn: async () => {
       if (!session) {

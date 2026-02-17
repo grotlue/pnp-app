@@ -94,7 +94,10 @@ export async function DELETE(request: Request, { params }: Params) {
       return admin.context.client;
     }
   })();
-  const { error } = await client.from("characters").delete().eq("id", characterId);
+  const { error } = await client
+    .from("characters")
+    .delete()
+    .eq("id", characterId);
 
   if (error) {
     return jsonError(400, "admin_character_delete_failed", error.message);

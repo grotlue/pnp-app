@@ -4,8 +4,15 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, LogOut, Settings, Shield, User } from "lucide-react";
-import { IconActionButton, IconActionLinkButton } from "@/components/common/icon-action-button";
-import { clearLocaleCookie, readLocaleCookie, setLocaleCookie } from "@/lib/client/locale-cookie";
+import {
+  IconActionButton,
+  IconActionLinkButton,
+} from "@/components/common/icon-action-button";
+import {
+  clearLocaleCookie,
+  readLocaleCookie,
+  setLocaleCookie,
+} from "@/lib/client/locale-cookie";
 import { clearSession } from "@/lib/client/session";
 import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
 import type { ClientSession } from "@/lib/client/session";
@@ -22,7 +29,12 @@ type AppHeaderProps = {
   fetchMe?: boolean;
 };
 
-export function AppHeader({ locale, session, me: providedMe = null, fetchMe = true }: AppHeaderProps) {
+export function AppHeader({
+  locale,
+  session,
+  me: providedMe = null,
+  fetchMe = true,
+}: AppHeaderProps) {
   const t = getTranslator(locale);
   const pathname = usePathname();
   const router = useRouter();
@@ -33,7 +45,8 @@ export function AppHeader({ locale, session, me: providedMe = null, fetchMe = tr
   const roleResolved = me !== null || (fetchMe && meQuery.isSuccess);
   const profileLocale = me?.profile.locale;
   const notificationsUnreadCountQuery = useNotificationsUnreadCount(session);
-  const unreadNotifications = notificationsUnreadCountQuery.data?.unreadCount ?? 0;
+  const unreadNotifications =
+    notificationsUnreadCountQuery.data?.unreadCount ?? 0;
 
   useEffect(() => {
     if (!profileLocale) {
@@ -68,7 +81,7 @@ export function AppHeader({ locale, session, me: providedMe = null, fetchMe = tr
   }
 
   return (
-    <header className="border-b border-border bg-background/80 backdrop-blur-sm">
+    <header className="border-border bg-background/80 border-b backdrop-blur-sm">
       <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-2 px-4 py-3">
         <Link href={appRoutes.home} className="mr-2 font-semibold">
           pnp-app
@@ -76,13 +89,16 @@ export function AppHeader({ locale, session, me: providedMe = null, fetchMe = tr
         <nav className="flex flex-wrap items-center gap-2">
           {appNavigationRoutes.map((item) => {
             const active =
-              currentPath === item.href || currentPath.startsWith(`${item.href}/`);
+              currentPath === item.href ||
+              currentPath.startsWith(`${item.href}/`);
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 className={`rounded-md px-3 py-1.5 text-sm ${
-                  active ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                  active
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-foreground"
                 }`}
               >
                 {t(item.key)}

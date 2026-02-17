@@ -2,7 +2,11 @@ import { resolveRuntimeEnvironment } from "@/lib/features/feature-flags";
 
 export type AuthCaptchaMode = "off" | "optional" | "required";
 
-const KNOWN_CAPTCHA_MODES = new Set<AuthCaptchaMode>(["off", "optional", "required"]);
+const KNOWN_CAPTCHA_MODES = new Set<AuthCaptchaMode>([
+  "off",
+  "optional",
+  "required",
+]);
 
 function normalizeEnvValue(value?: string): string | null {
   if (!value) {
@@ -38,7 +42,9 @@ function parseBooleanEnv(value?: string): boolean | null {
   return null;
 }
 
-function decodeAccessTokenPayload(accessToken: string): Record<string, unknown> | null {
+function decodeAccessTokenPayload(
+  accessToken: string,
+): Record<string, unknown> | null {
   const parts = accessToken.split(".");
   if (parts.length < 2) {
     return null;
@@ -47,7 +53,9 @@ function decodeAccessTokenPayload(accessToken: string): Record<string, unknown> 
   try {
     const decoded = Buffer.from(parts[1], "base64url").toString("utf8");
     const payload = JSON.parse(decoded);
-    return payload && typeof payload === "object" ? (payload as Record<string, unknown>) : null;
+    return payload && typeof payload === "object"
+      ? (payload as Record<string, unknown>)
+      : null;
   } catch {
     return null;
   }

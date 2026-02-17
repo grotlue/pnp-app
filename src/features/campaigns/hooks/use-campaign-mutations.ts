@@ -26,7 +26,10 @@ export function useCampaignMutations(session: ClientSession | null) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (input: { campaignId: string; values: CampaignFormValues }) => {
+    mutationFn: async (input: {
+      campaignId: string;
+      values: CampaignFormValues;
+    }) => {
       if (!session) {
         throw new Error("Missing session");
       }
@@ -50,6 +53,8 @@ export function useCampaignMutations(session: ClientSession | null) {
     updateMutation,
     deleteMutation,
     anyPending:
-      createMutation.isPending || updateMutation.isPending || deleteMutation.isPending,
+      createMutation.isPending ||
+      updateMutation.isPending ||
+      deleteMutation.isPending,
   };
 }

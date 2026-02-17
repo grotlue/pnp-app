@@ -34,12 +34,15 @@ export default async function RootLayout({
 }>) {
   const locale = await getRequestLocale();
   const enableToolbar =
-    process.env.NODE_ENV === "development" || process.env.NEXT_PUBLIC_ENABLE_VERCEL_TOOLBAR === "true";
+    process.env.NODE_ENV === "development" ||
+    process.env.NEXT_PUBLIC_ENABLE_VERCEL_TOOLBAR === "true";
   const enableSpeedInsights = resolveSpeedInsightsEnabled();
 
   return (
     <html lang={locale}>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         {children}
         {enableToolbar ? <VercelToolbar /> : null}
         {enableSpeedInsights ? <SpeedInsights /> : null}

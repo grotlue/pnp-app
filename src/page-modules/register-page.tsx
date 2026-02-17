@@ -5,7 +5,10 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import { FormInput } from "@/components/common/form-controls";
-import { TurnstileWidget, type TurnstileErrorReason } from "@/components/common/turnstile-widget";
+import {
+  TurnstileWidget,
+  type TurnstileErrorReason,
+} from "@/components/common/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -48,7 +51,8 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
   const [message, setMessage] = useState("");
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaResetKey, setCaptchaResetKey] = useState(0);
-  const [captchaErrorReason, setCaptchaErrorReason] = useState<TurnstileErrorReason | null>(null);
+  const [captchaErrorReason, setCaptchaErrorReason] =
+    useState<TurnstileErrorReason | null>(null);
   const [form, setForm] = useState({
     username: "",
     email: "",
@@ -76,7 +80,9 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
       });
       router.push("/?registered=1");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
     } finally {
       if (authCaptchaConfig.enabled) {
         setCaptchaToken(null);
@@ -99,19 +105,25 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
             <FormInput
               placeholder={t("ui.fields.username")}
               value={form.username}
-              onChange={(event) => setForm((prev) => ({ ...prev, username: event.target.value }))}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, username: event.target.value }))
+              }
             />
             <FormInput
               type="email"
               placeholder={t("ui.fields.email")}
               value={form.email}
-              onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, email: event.target.value }))
+              }
             />
             <FormInput
               type="password"
               placeholder={t("ui.fields.password")}
               value={form.password}
-              onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, password: event.target.value }))
+              }
             />
             {authCaptchaConfig.enabled && authCaptchaConfig.siteKey ? (
               <TurnstileWidget
@@ -130,10 +142,7 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
             <FeedbackMessage message={message} />
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-2">
-            <Button
-              disabled={busy}
-              onClick={onSubmit}
-            >
+            <Button disabled={busy} onClick={onSubmit}>
               {t("ui.actions.register")}
             </Button>
             <div className="text-xs">

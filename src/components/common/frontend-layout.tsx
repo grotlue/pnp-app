@@ -5,5 +5,7 @@ type FrontendLayoutProps = {
 };
 
 export function FrontendLayout({ children }: FrontendLayoutProps) {
-  return <div className="min-h-screen bg-background text-foreground">{children}</div>;
+  return (
+    <div className="bg-background text-foreground min-h-screen">{children}</div>
+  );
 }

@@ -12,9 +12,17 @@ import {
   updateCampaignDetail,
 } from "../queries/campaign-detail.query";
 
-export function useCampaignDetailScreen(session: ClientSession | null, campaignId: string) {
+export function useCampaignDetailScreen(
+  session: ClientSession | null,
+  campaignId: string,
+) {
   const queryClient = useQueryClient();
-  const queryKey = ["campaigns", "detail", campaignId, session?.accessToken ?? "no-session"] as const;
+  const queryKey = [
+    "campaigns",
+    "detail",
+    campaignId,
+    session?.accessToken ?? "no-session",
+  ] as const;
 
   const detailQuery = useQuery({
     queryKey,
@@ -32,17 +40,29 @@ export function useCampaignDetailScreen(session: ClientSession | null, campaignI
   }
 
   const decideMutation = useMutation({
-    mutationFn: async (input: { membershipId: string; state: "accepted" | "rejected" }) => {
+    mutationFn: async (input: {
+      membershipId: string;
+      state: "accepted" | "rejected";
+    }) => {
       if (!session) {
         throw new Error("Missing session");
       }
-      return decideCampaignMembership(session, campaignId, input.membershipId, input.state);
+      return decideCampaignMembership(
+        session,
+        campaignId,
+        input.membershipId,
+        input.state,
+      );
     },
     onSuccess: invalidate,
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (input: { title: string; description: string; isPrivate?: boolean }) => {
+    mutationFn: async (input: {
+      title: string;
+      description: string;
+      isPrivate?: boolean;
+    }) => {
       if (!session) {
         throw new Error("Missing session");
       }

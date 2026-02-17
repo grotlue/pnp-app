@@ -52,7 +52,9 @@ export async function PATCH(request: Request, { params }: Params) {
     .from("campaigns")
     .update(patch)
     .eq("id", campaignId)
-    .select("id, owner_user_id, title, description, is_private, created_at, updated_at")
+    .select(
+      "id, owner_user_id, title, description, is_private, created_at, updated_at",
+    )
     .single();
 
   if (error) {
@@ -76,7 +78,10 @@ export async function DELETE(request: Request, { params }: Params) {
       return admin.context.client;
     }
   })();
-  const { error } = await client.from("campaigns").delete().eq("id", campaignId);
+  const { error } = await client
+    .from("campaigns")
+    .delete()
+    .eq("id", campaignId);
 
   if (error) {
     return jsonError(400, "admin_campaign_delete_failed", error.message);

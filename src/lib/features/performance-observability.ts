@@ -1,11 +1,17 @@
 type RuntimeEnvironment = "development" | "preview" | "production";
 
-function normalizeRuntimeEnvironment(value?: string | null): RuntimeEnvironment | null {
+function normalizeRuntimeEnvironment(
+  value?: string | null,
+): RuntimeEnvironment | null {
   if (!value) {
     return null;
   }
 
-  if (value === "development" || value === "preview" || value === "production") {
+  if (
+    value === "development" ||
+    value === "preview" ||
+    value === "production"
+  ) {
     return value;
   }
 

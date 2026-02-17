@@ -17,9 +17,13 @@ describe("Home page", () => {
     });
     render(<AppProviders>{ui}</AppProviders>);
 
-    expect(await screen.findByRole("button", { name: "Login" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("button", { name: "Login" }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Register" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Forgot password?" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Forgot password?" }),
+    ).toBeInTheDocument();
   });
 
   it("hides register link when self-registration is disabled", async () => {
@@ -30,8 +34,12 @@ describe("Home page", () => {
       });
       render(<AppProviders>{ui}</AppProviders>);
 
-      expect(await screen.findByRole("button", { name: "Login" })).toBeInTheDocument();
-      expect(screen.queryByRole("link", { name: "Register" })).not.toBeInTheDocument();
+      expect(
+        await screen.findByRole("button", { name: "Login" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Register" }),
+      ).not.toBeInTheDocument();
     } finally {
       delete process.env.APP_ENV;
     }

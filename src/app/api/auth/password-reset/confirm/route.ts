@@ -35,10 +35,11 @@ export async function POST(request: Request) {
   }
 
   const client = createServerSupabaseClient();
-  const { data: sessionData, error: sessionError } = await client.auth.setSession({
-    access_token: body.accessToken,
-    refresh_token: body.refreshToken,
-  });
+  const { data: sessionData, error: sessionError } =
+    await client.auth.setSession({
+      access_token: body.accessToken,
+      refresh_token: body.refreshToken,
+    });
 
   if (sessionError || !sessionData.session) {
     return jsonError(
