@@ -71,11 +71,21 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
     isAdminUser &&
     adminMfaQuery.data?.mfaRequired === true &&
     adminMfaQuery.data.currentLevel !== "aal2";
+  const hasVerifiedTotp = adminMfaQuery.data?.hasVerifiedTotp === true;
   const fallbackUnverifiedFactor = adminMfaQuery.data?.factors.find(
     (factor) => factor.status === "unverified",
   );
+  const fallbackVerifiedFactor = adminMfaQuery.data?.factors.find(
+    (factor) => factor.status === "verified",
+  );
   const mfaFactorId =
-    mfaEnrollment?.factorId ?? fallbackUnverifiedFactor?.id ?? null;
+    mfaEnrollment?.factorId ??
+    (adminNeedsMfaStepUp
+      ? fallbackVerifiedFactor?.id
+      : fallbackUnverifiedFactor?.id) ??
+    fallbackUnverifiedFactor?.id ??
+    fallbackVerifiedFactor?.id ??
+    null;
 
   useEffect(() => {
     if (!ready) {
@@ -194,8 +204,10 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
                 {adminMfaQuery.isLoading
                   ? t("ui.loading.section")
                   : adminNeedsMfaStepUp
-                    ? t("ui.settings.mfaRequired")
-                    : adminMfaQuery.data?.hasVerifiedTotp
+                    ? hasVerifiedTotp
+                      ? t("ui.settings.mfaStepUpRequired")
+                      : t("ui.settings.mfaRequired")
+                    : hasVerifiedTotp
                       ? t("ui.settings.mfaEnabled")
                       : t("ui.settings.mfaNotEnabled")}
               </div>
