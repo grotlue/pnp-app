@@ -69,6 +69,7 @@
       "mfaTitle": "Admin MFA",
       "mfaSubtitle": "Set up multi-factor authentication for admin access.",
       "mfaRequired": "Admin MFA is required. Complete setup to access admin routes.",
+      "mfaStepUpRequired": "Admin MFA is configured. Enter a current code to access admin routes in this session.",
       "mfaEnabled": "Admin MFA is active.",
       "mfaNotEnabled": "Admin MFA is not configured yet.",
       "mfaSetupStep": "Add this secret or URI in your authenticator app, then enter a current code.",
