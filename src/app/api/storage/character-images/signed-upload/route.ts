@@ -75,7 +75,7 @@ export async function POST(request: Request) {
   }
 
   const path = `${auth.context.user.id}/${body.characterId}/${randomUUID()}-${sanitizeFileName(body.fileName)}`;
-  const { data, error } = await auth.context.client.storage
+  const { data, error } = await auth.context.authClient.storage
     .from("character-images")
     .createSignedUploadUrl(path);
 
