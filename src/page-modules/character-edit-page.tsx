@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/common/app-header";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import { FormInput, FormSelect, FormTextarea } from "@/components/common/form-controls";
+import { ImageUploadField } from "@/components/common/image-upload-field";
 import { Modal } from "@/components/common/modal";
 import { VisibilityToggle } from "@/components/common/visibility-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { createCharacterAvatarSignedUpload } from "@/features/characters/queries/character-edit.query";
+import { getCharacterAvatarSignedUrl } from "@/features/characters/queries/character-detail.query";
+import { uploadImageToSignedPath } from "@/lib/client/storage-upload";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { useCharacterEditScreen } from "@/features/characters/hooks/use-character-edit-screen";
@@ -47,6 +51,42 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
   const { editQuery, updateMutation, deleteMutation, anyPending } = useCharacterEditScreen(
     session,
     characterId,
+  );
+
+  const uploadCharacterImage = useCallback(
+    async (file: File, dimensions: { width: number; height: number }) => {
+      if (!session) {
+        throw new Error("Missing session");
+      }
+
+      const signedUpload = await createCharacterAvatarSignedUpload(session, characterId, {
+        fileName: file.name,
+        width: dimensions.width,
+        height: dimensions.height,
+        fileSize: file.size,
+      });
+      await uploadImageToSignedPath({
+        bucket: "character-images",
+        path: signedUpload.path,
+        token: signedUpload.token,
+        file,
+      });
+
+      return { path: signedUpload.path };
+    },
+    [characterId, session],
+  );
+
+  const resolveCharacterImagePreview = useCallback(
+    async (path: string) => {
+      if (!session) {
+        throw new Error("Missing session");
+      }
+
+      const response = await getCharacterAvatarSignedUrl(session, path);
+      return response.signedUrl;
+    },
+    [session],
   );
 
   if (!ready || !session || !editQuery.data) {
@@ -127,12 +167,23 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
               <option value="player">{t("ui.labels.characterType.player")}</option>
               <option value="npc">{t("ui.labels.characterType.npc")}</option>
             </FormSelect>
-            <FormInput
+            <ImageUploadField
               value={form.avatarPath}
-              placeholder={t("ui.characterEdit.avatarPath")}
-              onChange={(event) =>
-                setFormEdits((prev) => ({ ...prev, avatarPath: event.target.value }))
-              }
+              label={t("ui.fields.characterImage")}
+              previewAlt={form.name || t("ui.fields.characterImage")}
+              hint={t("ui.imageUpload.hint")}
+              emptyLabel={t("ui.imageUpload.empty")}
+              uploadLabel={t("ui.imageUpload.upload")}
+              replaceLabel={t("ui.imageUpload.replace")}
+              removeLabel={t("ui.imageUpload.remove")}
+              uploadingLabel={t("ui.imageUpload.uploading")}
+              invalidTypeLabel={t("ui.imageUpload.invalidType")}
+              invalidDimensionsLabel={t("ui.imageUpload.invalidDimensions")}
+              invalidFileSizeLabel={t("ui.imageUpload.invalidFileSize")}
+              disabled={anyPending}
+              onChange={(avatarPath) => setFormEdits((prev) => ({ ...prev, avatarPath }))}
+              onUpload={uploadCharacterImage}
+              onResolvePreviewUrl={resolveCharacterImagePreview}
             />
             <FormTextarea
               className="min-h-24"
