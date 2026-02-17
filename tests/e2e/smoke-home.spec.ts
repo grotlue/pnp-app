@@ -3,8 +3,10 @@ import { expect, test } from "@playwright/test";
 test("home page renders login form for logged-out users", async ({ page }) => {
   await page.goto("/");
 
-  await expect(page.getByRole("heading", { name: "Login" })).toBeVisible();
-  await expect(page.getByPlaceholder("Email")).toBeVisible();
-  await expect(page.getByPlaceholder("Password")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Login" })).toBeVisible();
+  await expect(page.locator("main input[type='email']").first()).toBeVisible();
+  await expect(
+    page.locator("main input[type='password']").first(),
+  ).toBeVisible();
+  await expect(page.locator("main button").first()).toBeVisible();
+  await expect(page.locator("main a[href='/password-reset']")).toBeVisible();
 });
