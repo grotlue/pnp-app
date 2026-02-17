@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     return jsonError(400, "invalid_payload", "path is required");
   }
 
-  const { data, error } = await auth.context.client.storage
+  const { data, error } = await auth.context.authClient.storage
     .from("character-images")
     .createSignedUrl(body.path, body.expiresIn ?? 60 * 10);
 
