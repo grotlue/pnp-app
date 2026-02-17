@@ -101,7 +101,9 @@ describe("requireAdmin", () => {
   it("returns 403 when admin MFA is required but session is aal1", async () => {
     process.env.REQUIRE_ADMIN_MFA = "true";
     const accessToken = [
-      Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url"),
+      Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString(
+        "base64url",
+      ),
       Buffer.from(JSON.stringify({ aal: "aal1" })).toString("base64url"),
       "signature",
     ].join(".");

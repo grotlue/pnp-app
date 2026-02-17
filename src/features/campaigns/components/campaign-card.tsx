@@ -35,7 +35,11 @@ export function CampaignCard({
       actions={
         canManage ? (
           <>
-            <IconActionButton label={editLabel} icon={Pencil} onClick={onEdit} />
+            <IconActionButton
+              label={editLabel}
+              icon={Pencil}
+              onClick={onEdit}
+            />
             <IconActionButton
               label={deleteLabel}
               icon={Trash2}
@@ -52,8 +56,14 @@ export function CampaignCard({
           isPrivate={campaign.is_private}
           className="font-medium"
         />
-        <div className="text-xs text-muted-foreground">{campaign.description || "-"}</div>
-        <StatusBadge label={isOwner ? ownerLabel : roleLabel} tone={isOwner ? "green" : "violet"} className="mt-1" />
+        <div className="text-muted-foreground text-xs">
+          {campaign.description || "-"}
+        </div>
+        <StatusBadge
+          label={isOwner ? ownerLabel : roleLabel}
+          tone={isOwner ? "green" : "violet"}
+          className="mt-1"
+        />
       </Link>
     </ListItemRow>
   );

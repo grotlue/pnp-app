@@ -30,7 +30,9 @@ function normalizeAdminLocale(rawLocale) {
     return normalized;
   }
 
-  console.warn(`Unsupported ADMIN_BOOTSTRAP_LOCALE "${rawLocale}". Falling back to "en".`);
+  console.warn(
+    `Unsupported ADMIN_BOOTSTRAP_LOCALE "${rawLocale}". Falling back to "en".`,
+  );
   return "en";
 }
 
@@ -39,7 +41,10 @@ async function listAllUsers(client) {
   let page = 1;
 
   while (true) {
-    const { data, error } = await client.auth.admin.listUsers({ page, perPage: 1000 });
+    const { data, error } = await client.auth.admin.listUsers({
+      page,
+      perPage: 1000,
+    });
     if (error) {
       throw new Error(`Failed to list users: ${error.message}`);
     }
@@ -59,7 +64,9 @@ async function listAllUsers(client) {
 async function main() {
   const explicitSupabaseUrl = optionalEnv("NEXT_PUBLIC_SUPABASE_URL");
   const projectRef = optionalEnv("SUPABASE_PROJECT_REF");
-  const supabaseUrl = explicitSupabaseUrl ?? (projectRef ? `https://${projectRef}.supabase.co` : null);
+  const supabaseUrl =
+    explicitSupabaseUrl ??
+    (projectRef ? `https://${projectRef}.supabase.co` : null);
 
   if (!supabaseUrl) {
     throw new Error(
@@ -71,8 +78,11 @@ async function main() {
   const adminEmail = requireEnv("ADMIN_BOOTSTRAP_EMAIL").toLowerCase();
   const adminPassword = requireEnv("ADMIN_BOOTSTRAP_PASSWORD");
   const adminUsername = optionalEnv("ADMIN_BOOTSTRAP_USERNAME") ?? "admin";
-  const adminDescription = optionalEnv("ADMIN_BOOTSTRAP_DESCRIPTION") ?? "System admin account";
-  const adminLocale = normalizeAdminLocale(optionalEnv("ADMIN_BOOTSTRAP_LOCALE"));
+  const adminDescription =
+    optionalEnv("ADMIN_BOOTSTRAP_DESCRIPTION") ?? "System admin account";
+  const adminLocale = normalizeAdminLocale(
+    optionalEnv("ADMIN_BOOTSTRAP_LOCALE"),
+  );
 
   const supabase = createClient(supabaseUrl, serviceRoleKey, {
     auth: {
@@ -83,7 +93,9 @@ async function main() {
   });
 
   const users = await listAllUsers(supabase);
-  let adminUser = users.find((user) => user.email?.toLowerCase() === adminEmail);
+  let adminUser = users.find(
+    (user) => user.email?.toLowerCase() === adminEmail,
+  );
 
   if (!adminUser) {
     const { data, error } = await supabase.auth.admin.createUser({
@@ -96,7 +108,9 @@ async function main() {
     });
 
     if (error || !data.user) {
-      throw new Error(`Failed to create admin user: ${error?.message ?? "unknown error"}`);
+      throw new Error(
+        `Failed to create admin user: ${error?.message ?? "unknown error"}`,
+      );
     }
 
     adminUser = data.user;
@@ -105,14 +119,17 @@ async function main() {
     console.log(`Admin email already exists: ${adminEmail}`);
   }
 
-  const { data: existingAdminProfile, error: adminProfileError } = await supabase
-    .from("profiles")
-    .select("id, username")
-    .eq("role", "admin")
-    .maybeSingle();
+  const { data: existingAdminProfile, error: adminProfileError } =
+    await supabase
+      .from("profiles")
+      .select("id, username")
+      .eq("role", "admin")
+      .maybeSingle();
 
   if (adminProfileError) {
-    throw new Error(`Failed to query existing admin profile: ${adminProfileError.message}`);
+    throw new Error(
+      `Failed to query existing admin profile: ${adminProfileError.message}`,
+    );
   }
 
   if (existingAdminProfile && existingAdminProfile.id !== adminUser.id) {

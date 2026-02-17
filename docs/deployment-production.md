@@ -187,20 +187,26 @@ Deployment order:
 
 1. Push to branch
 2. Vercel deploys:
-  - `production` branch -> production deployment
-  - `main` branch -> preview deployment
-  - all other branches -> skipped by Vercel unless PR is labeled `preview-deploy`
+
+- `production` branch -> production deployment
+- `main` branch -> preview deployment
+- all other branches -> skipped by Vercel unless PR is labeled `preview-deploy`
+
 3. `CI` runs
 4. On successful `CI`:
-  - `production` branch -> `Deploy Production DB` runs `supabase db push --linked`
-  - `main` branch -> `Deploy Preview DB` runs `supabase db reset --linked --no-seed --yes`
+
+- `production` branch -> `Deploy Production DB` runs `supabase db push --linked`
+- `main` branch -> `Deploy Preview DB` runs `supabase db reset --linked --no-seed --yes`
+
 5. If PR label `preview-deploy` is present, `Deploy PR Preview` creates a Vercel preview deployment and comments the URL on the PR.
 6. DB workflow then runs admin bootstrap script:
-  - creates admin user when missing
-  - enforces `profiles.role = 'admin'` for that user
-  - keeps existing admin account idempotently
+
+- creates admin user when missing
+- enforces `profiles.role = 'admin'` for that user
+- keeps existing admin account idempotently
 
 For performance incident investigations, use:
+
 - Vercel Speed Insights (web vitals and route metrics)
 - Supabase Database tools (`Database Linter`, `Query Performance`, `inspect db outliers`)
 

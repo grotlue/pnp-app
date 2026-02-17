@@ -72,7 +72,9 @@ export async function POST(request: Request) {
     is_private: body.isPrivate ?? false,
   };
 
-  const { error } = await auth.context.client.from("characters").insert(insertPayload);
+  const { error } = await auth.context.client
+    .from("characters")
+    .insert(insertPayload);
 
   if (error) {
     return jsonError(400, "character_create_failed", error.message);

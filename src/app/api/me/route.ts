@@ -10,7 +10,9 @@ export async function GET(request: Request) {
   const { client, user } = auth.context;
   const { data: profile, error } = await client
     .from("profiles")
-    .select("id, username, description, avatar_path, role, locale, created_at, updated_at")
+    .select(
+      "id, username, description, avatar_path, role, locale, created_at, updated_at",
+    )
     .eq("id", user.id)
     .single();
 
@@ -29,8 +31,8 @@ export async function DELETE(request: Request) {
 
   const { client, user } = auth.context;
   const { error } = await client.rpc("rpc_delete_user_phase1", {
-      p_user_id: user.id,
-    });
+    p_user_id: user.id,
+  });
 
   if (error) {
     return jsonError(400, "user_delete_failed", error.message);

@@ -22,10 +22,13 @@ export async function POST(request: Request, { params }: Params) {
     return jsonError(400, "invalid_payload", "campaignId is required");
   }
 
-  const { error } = await auth.context.client.rpc("rpc_assign_character_to_campaign", {
-    p_character_id: characterId,
-    p_campaign_id: body.campaignId,
-  });
+  const { error } = await auth.context.client.rpc(
+    "rpc_assign_character_to_campaign",
+    {
+      p_character_id: characterId,
+      p_campaign_id: body.campaignId,
+    },
+  );
 
   if (error) {
     return jsonError(400, "character_assign_campaign_failed", error.message);

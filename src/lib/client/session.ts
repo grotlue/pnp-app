@@ -35,7 +35,8 @@ function getExpiryFromAccessToken(accessToken: string): number | null {
 }
 
 function isSessionExpired(session: ClientSession): boolean {
-  const expiresAt = session.expiresAt ?? getExpiryFromAccessToken(session.accessToken);
+  const expiresAt =
+    session.expiresAt ?? getExpiryFromAccessToken(session.accessToken);
   if (!expiresAt) {
     return false;
   }

@@ -38,14 +38,19 @@ export async function requestPasswordReset(input: {
   email: string;
   captchaToken?: string;
 }): Promise<{ requested: boolean }> {
-  const response = await apiRequest<{ requested: boolean }>("/api/auth/password-reset/request", {
-    method: "POST",
-    body: input,
-  });
+  const response = await apiRequest<{ requested: boolean }>(
+    "/api/auth/password-reset/request",
+    {
+      method: "POST",
+      body: input,
+    },
+  );
   return unwrapApiResponse(response, "Password reset request failed");
 }
 
-export async function logoutUser(session: ClientSession): Promise<{ success: boolean }> {
+export async function logoutUser(
+  session: ClientSession,
+): Promise<{ success: boolean }> {
   const response = await apiRequest<{ success: boolean }>("/api/auth/logout", {
     method: "POST",
     session,
@@ -56,10 +61,13 @@ export async function logoutUser(session: ClientSession): Promise<{ success: boo
 export async function exchangeAuthCode(input: {
   code: string;
 }): Promise<AuthCodeExchangeResponse> {
-  const response = await apiRequest<AuthCodeExchangeResponse>("/api/auth/callback/exchange", {
-    method: "POST",
-    body: input,
-  });
+  const response = await apiRequest<AuthCodeExchangeResponse>(
+    "/api/auth/callback/exchange",
+    {
+      method: "POST",
+      body: input,
+    },
+  );
   return unwrapApiResponse(response, "Auth code exchange failed");
 }
 
@@ -67,10 +75,13 @@ export async function verifyAuthToken(input: {
   tokenHash: string;
   type: "signup" | "recovery" | "email" | "email_change";
 }): Promise<AuthVerifyResponse> {
-  const response = await apiRequest<AuthVerifyResponse>("/api/auth/callback/verify", {
-    method: "POST",
-    body: input,
-  });
+  const response = await apiRequest<AuthVerifyResponse>(
+    "/api/auth/callback/verify",
+    {
+      method: "POST",
+      body: input,
+    },
+  );
   return unwrapApiResponse(response, "Token verification failed");
 }
 

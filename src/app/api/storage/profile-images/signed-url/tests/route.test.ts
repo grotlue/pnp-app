@@ -55,7 +55,10 @@ describe("profile image signed url route", () => {
 
     expect(response.status).toBe(200);
     expect(authClientStorageFromMock).toHaveBeenCalledWith("profile-images");
-    expect(createSignedUrlWithAuthClientMock).toHaveBeenCalledWith("user-1/avatar.png", 600);
+    expect(createSignedUrlWithAuthClientMock).toHaveBeenCalledWith(
+      "user-1/avatar.png",
+      600,
+    );
     expect(createSignedUrlWithDataClientMock).not.toHaveBeenCalled();
     expect(dataClientStorageFromMock).not.toHaveBeenCalled();
   });

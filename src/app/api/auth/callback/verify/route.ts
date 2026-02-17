@@ -10,7 +10,12 @@ type VerifyBody = {
   type?: VerifyType;
 };
 
-const validTypes = new Set<VerifyType>(["signup", "recovery", "email", "email_change"]);
+const validTypes = new Set<VerifyType>([
+  "signup",
+  "recovery",
+  "email",
+  "email_change",
+]);
 
 export async function POST(request: Request) {
   const rateLimited = await enforceRateLimit({
@@ -25,7 +30,11 @@ export async function POST(request: Request) {
 
   const body = await parseJsonBody<VerifyBody>(request);
   if (!body?.tokenHash || !body.type || !validTypes.has(body.type)) {
-    return jsonError(400, "invalid_payload", "tokenHash and valid type are required");
+    return jsonError(
+      400,
+      "invalid_payload",
+      "tokenHash and valid type are required",
+    );
   }
 
   const client = createServerSupabaseClient();

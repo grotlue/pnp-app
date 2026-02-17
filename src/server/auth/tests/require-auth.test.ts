@@ -90,8 +90,12 @@ describe("requireAuth", () => {
     });
     const result = await requireAuth(request);
 
-    expect(createServerSupabaseUserClientMock).toHaveBeenCalledWith("token-cookie");
-    expect(createServerSupabaseUserAuthClientMock).toHaveBeenCalledWith("token-cookie");
+    expect(createServerSupabaseUserClientMock).toHaveBeenCalledWith(
+      "token-cookie",
+    );
+    expect(createServerSupabaseUserAuthClientMock).toHaveBeenCalledWith(
+      "token-cookie",
+    );
     expect("context" in result).toBe(true);
     if ("context" in result) {
       expect(result.context.authClient).toBe(authUserClient);
@@ -127,7 +131,9 @@ describe("requireAuth", () => {
       expect(result.context.authClient).toBe(authUserClient);
     }
     expect(createServerSupabaseUserClientMock).toHaveBeenCalledWith("token-2");
-    expect(createServerSupabaseUserAuthClientMock).toHaveBeenCalledWith("token-2");
+    expect(createServerSupabaseUserAuthClientMock).toHaveBeenCalledWith(
+      "token-2",
+    );
   });
 
   it("returns 500 when auth backend throws unexpectedly", async () => {

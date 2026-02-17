@@ -20,15 +20,22 @@ export async function GET(request: Request, { params }: Params) {
   const { campaignId } = await params;
   const { client } = auth.context;
 
-  const [{ data: campaign, error: campaignError }, { data: memberships, error: membershipError }] = await Promise.all([
+  const [
+    { data: campaign, error: campaignError },
+    { data: memberships, error: membershipError },
+  ] = await Promise.all([
     client
       .from("campaigns")
-      .select("id, owner_user_id, title, description, is_private, created_at, updated_at")
+      .select(
+        "id, owner_user_id, title, description, is_private, created_at, updated_at",
+      )
       .eq("id", campaignId)
       .single(),
     client
       .from("campaign_memberships")
-      .select("id, user_id, state, source, created_at, updated_at, responded_at")
+      .select(
+        "id, user_id, state, source, created_at, updated_at, responded_at",
+      )
       .eq("campaign_id", campaignId),
   ]);
 
@@ -37,7 +44,11 @@ export async function GET(request: Request, { params }: Params) {
   }
 
   if (membershipError) {
-    return jsonError(400, "campaign_memberships_fetch_failed", membershipError.message);
+    return jsonError(
+      400,
+      "campaign_memberships_fetch_failed",
+      membershipError.message,
+    );
   }
 
   return jsonOk({ campaign, memberships: memberships ?? [] });
@@ -70,7 +81,9 @@ export async function PATCH(request: Request, { params }: Params) {
     .from("campaigns")
     .update(patch)
     .eq("id", campaignId)
-    .select("id, owner_user_id, title, description, is_private, created_at, updated_at")
+    .select(
+      "id, owner_user_id, title, description, is_private, created_at, updated_at",
+    )
     .single();
 
   if (error) {

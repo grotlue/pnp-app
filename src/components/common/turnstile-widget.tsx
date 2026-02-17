@@ -55,7 +55,9 @@ function mapTurnstileErrorReason(error: unknown): TurnstileErrorReason {
   return "script_failed";
 }
 
-function waitForExistingTurnstileScript(script: HTMLScriptElement): Promise<void> {
+function waitForExistingTurnstileScript(
+  script: HTMLScriptElement,
+): Promise<void> {
   return new Promise((resolve, reject) => {
     if (window.turnstile) {
       resolve();
@@ -113,15 +115,20 @@ function ensureTurnstileScript(): Promise<void> {
   }
 
   const promise = new Promise<void>((resolve, reject) => {
-    const existingScript = document.getElementById("cloudflare-turnstile-script");
+    const existingScript = document.getElementById(
+      "cloudflare-turnstile-script",
+    );
     if (existingScript) {
-      void waitForExistingTurnstileScript(existingScript as HTMLScriptElement).then(resolve).catch(reject);
+      void waitForExistingTurnstileScript(existingScript as HTMLScriptElement)
+        .then(resolve)
+        .catch(reject);
       return;
     }
 
     const script = document.createElement("script");
     script.id = "cloudflare-turnstile-script";
-    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.src =
+      "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
     script.async = true;
     script.defer = true;
     script.onload = () => {
@@ -215,7 +222,12 @@ export function TurnstileWidget({
 
   if (loadError) {
     return loadErrorMessage ? (
-      <div className={cn("rounded-md border border-border bg-background p-2 text-xs", className)}>
+      <div
+        className={cn(
+          "border-border bg-background rounded-md border p-2 text-xs",
+          className,
+        )}
+      >
         {loadErrorMessage}
       </div>
     ) : null;

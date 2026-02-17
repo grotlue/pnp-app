@@ -8,9 +8,18 @@ import { FeedbackMessage } from "@/components/common/feedback-message";
 import { FormInput } from "@/components/common/form-controls";
 import { Modal } from "@/components/common/modal";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { queryKeys } from "@/lib/client/query-keys";
-import { clearSession, setSession as persistSession } from "@/lib/client/session";
+import {
+  clearSession,
+  setSession as persistSession,
+} from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
@@ -42,7 +51,8 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
   const [newPassword, setNewPassword] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [mfaCode, setMfaCode] = useState("");
-  const [mfaEnrollment, setMfaEnrollment] = useState<AdminMfaEnrollResponse | null>(null);
+  const [mfaEnrollment, setMfaEnrollment] =
+    useState<AdminMfaEnrollResponse | null>(null);
   const meQuery = useMeQuery(session);
   const isAdminUser = meQuery.data?.profile.role === "admin";
   const adminMfaQuery = useQuery({
@@ -70,7 +80,9 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
   );
   const mfaFactorId =
     mfaEnrollment?.factorId ??
-    (adminNeedsMfaStepUp ? fallbackVerifiedFactor?.id : fallbackUnverifiedFactor?.id) ??
+    (adminNeedsMfaStepUp
+      ? fallbackVerifiedFactor?.id
+      : fallbackUnverifiedFactor?.id) ??
     fallbackUnverifiedFactor?.id ??
     fallbackVerifiedFactor?.id ??
     null;
@@ -131,7 +143,9 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
                     setMessage(t("ui.feedback.saved"));
                   } catch (error) {
                     setMessage(
-                      error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                      error instanceof Error
+                        ? error.message
+                        : t("ui.feedback.requestFailed"),
                     );
                   }
                 })
@@ -156,7 +170,9 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
                     setMessage(t("ui.feedback.saved"));
                   } catch (error) {
                     setMessage(
-                      error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                      error instanceof Error
+                        ? error.message
+                        : t("ui.feedback.requestFailed"),
                     );
                   }
                 })
@@ -165,7 +181,11 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
               {t("ui.actions.changePassword")}
             </Button>
 
-            <Button variant="destructive" disabled={busy} onClick={() => setDeleteOpen(true)}>
+            <Button
+              variant="destructive"
+              disabled={busy}
+              onClick={() => setDeleteOpen(true)}
+            >
               {t("ui.actions.deleteAccount")}
             </Button>
 
@@ -193,10 +213,14 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
               </div>
 
               {mfaEnrollment ? (
-                <div className="space-y-2 rounded-md border border-border bg-muted/40 p-3">
-                  <div className="text-xs text-muted-foreground">{t("ui.settings.mfaSetupStep")}</div>
-                  <div className="text-xs font-mono break-all">{mfaEnrollment.secret}</div>
-                  <div className="text-[11px] font-mono break-all text-muted-foreground">
+                <div className="border-border bg-muted/40 space-y-2 rounded-md border p-3">
+                  <div className="text-muted-foreground text-xs">
+                    {t("ui.settings.mfaSetupStep")}
+                  </div>
+                  <div className="font-mono text-xs break-all">
+                    {mfaEnrollment.secret}
+                  </div>
+                  <div className="text-muted-foreground font-mono text-[11px] break-all">
                     {mfaEnrollment.uri}
                   </div>
                 </div>
@@ -222,7 +246,9 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
                         setMessage(t("ui.settings.mfaSetupStarted"));
                       } catch (error) {
                         setMessage(
-                          error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                          error instanceof Error
+                            ? error.message
+                            : t("ui.feedback.requestFailed"),
                         );
                       }
                     })
@@ -246,7 +272,8 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
                         });
                         persistSession({
                           accessToken: verified.accessToken,
-                          refreshToken: verified.refreshToken ?? session.refreshToken,
+                          refreshToken:
+                            verified.refreshToken ?? session.refreshToken,
                           expiresAt: verified.expiresAt,
                         });
                         setMfaEnrollment(null);
@@ -257,7 +284,9 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
                         setMessage(t("ui.feedback.mfaEnabled"));
                       } catch (error) {
                         setMessage(
-                          error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                          error instanceof Error
+                            ? error.message
+                            : t("ui.feedback.requestFailed"),
                         );
                       }
                     })
@@ -275,7 +304,11 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
               </div>
 
               <FeedbackMessage
-                message={adminMfaQuery.error instanceof Error ? adminMfaQuery.error.message : ""}
+                message={
+                  adminMfaQuery.error instanceof Error
+                    ? adminMfaQuery.error.message
+                    : ""
+                }
               />
             </CardContent>
           </Card>
@@ -303,7 +336,9 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
                     router.replace("/");
                   } catch (error) {
                     setMessage(
-                      error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                      error instanceof Error
+                        ? error.message
+                        : t("ui.feedback.requestFailed"),
                     );
                   }
                 })

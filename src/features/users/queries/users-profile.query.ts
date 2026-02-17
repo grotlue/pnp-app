@@ -33,14 +33,15 @@ export async function createProfileAvatarSignedUpload(
     fileSize: number;
   },
 ): Promise<{ token: string; signedUrl: string; path: string }> {
-  const response = await apiRequest<{ token: string; signedUrl: string; path: string }>(
-    "/api/storage/profile-images/signed-upload",
-    {
-      method: "POST",
-      session,
-      body: input,
-    },
-  );
+  const response = await apiRequest<{
+    token: string;
+    signedUrl: string;
+    path: string;
+  }>("/api/storage/profile-images/signed-upload", {
+    method: "POST",
+    session,
+    body: input,
+  });
   return unwrapApiResponse(response, "Failed to prepare profile image upload");
 }
 
@@ -48,13 +49,16 @@ export async function getProfileAvatarSignedUrl(
   session: ClientSession,
   path: string,
 ): Promise<{ signedUrl: string }> {
-  const response = await apiRequest<{ signedUrl: string }>("/api/storage/profile-images/signed-url", {
-    method: "POST",
-    session,
-    body: {
-      path,
-      expiresIn: 600,
+  const response = await apiRequest<{ signedUrl: string }>(
+    "/api/storage/profile-images/signed-url",
+    {
+      method: "POST",
+      session,
+      body: {
+        path,
+        expiresIn: 600,
+      },
     },
-  });
+  );
   return unwrapApiResponse(response, "Failed to load profile image");
 }

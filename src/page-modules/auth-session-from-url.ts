@@ -18,7 +18,9 @@ function parseExpiresAt(raw: string | null): number | undefined {
   return Number.isFinite(value) ? value : undefined;
 }
 
-export function getSessionTokensFromUrl(windowLocation: Location): SessionTokens | null {
+export function getSessionTokensFromUrl(
+  windowLocation: Location,
+): SessionTokens | null {
   const hashRaw = windowLocation.hash.startsWith("#")
     ? windowLocation.hash.slice(1)
     : windowLocation.hash;
@@ -45,7 +47,10 @@ export function getAuthParamsFromUrl(windowLocation: Location): AuthUrlParams {
     code: search.get("code") ?? undefined,
     tokenHash: search.get("token_hash") ?? undefined,
     type:
-      type === "signup" || type === "recovery" || type === "email" || type === "email_change"
+      type === "signup" ||
+      type === "recovery" ||
+      type === "email" ||
+      type === "email_change"
         ? type
         : undefined,
   };

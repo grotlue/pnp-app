@@ -13,9 +13,12 @@ export async function POST(request: Request, { params }: Params) {
 
   const { characterId } = await params;
 
-  const { error } = await auth.context.client.rpc("rpc_unassign_character_from_campaign", {
-    p_character_id: characterId,
-  });
+  const { error } = await auth.context.client.rpc(
+    "rpc_unassign_character_from_campaign",
+    {
+      p_character_id: characterId,
+    },
+  );
 
   if (error) {
     return jsonError(400, "character_unassign_campaign_failed", error.message);

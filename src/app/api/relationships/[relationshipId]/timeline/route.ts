@@ -19,7 +19,9 @@ export async function GET(request: Request, { params }: Params) {
   const { relationshipId } = await params;
   const { data, error } = await auth.context.client
     .from("relationship_timeline_entries")
-    .select("id, relationship_id, owner_user_id, occurred_at, content, created_at")
+    .select(
+      "id, relationship_id, owner_user_id, occurred_at, content, created_at",
+    )
     .eq("relationship_id", relationshipId)
     .order("occurred_at", { ascending: false });
 

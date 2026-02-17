@@ -1,4 +1,9 @@
-import { FormInput, FormLabel, FormSelect, FormTextarea } from "@/components/common/form-controls";
+import {
+  FormInput,
+  FormLabel,
+  FormSelect,
+  FormTextarea,
+} from "@/components/common/form-controls";
 import { VisibilityToggle } from "@/components/common/visibility-toggle";
 
 type Translator = (key: string) => string;
@@ -47,7 +52,12 @@ type UserFormFieldsProps = {
   onChange: (next: AdminUserFormValues) => void;
 };
 
-export function UserFormFields({ t, values, passwordPlaceholder, onChange }: UserFormFieldsProps) {
+export function UserFormFields({
+  t,
+  values,
+  passwordPlaceholder,
+  onChange,
+}: UserFormFieldsProps) {
   return (
     <div className="grid gap-2">
       <FormInput
@@ -58,22 +68,30 @@ export function UserFormFields({ t, values, passwordPlaceholder, onChange }: Use
       <FormInput
         placeholder={passwordPlaceholder}
         value={values.password}
-        onChange={(event) => onChange({ ...values, password: event.target.value })}
+        onChange={(event) =>
+          onChange({ ...values, password: event.target.value })
+        }
       />
       <FormInput
         placeholder={t("ui.fields.username")}
         value={values.username}
-        onChange={(event) => onChange({ ...values, username: event.target.value })}
+        onChange={(event) =>
+          onChange({ ...values, username: event.target.value })
+        }
       />
       <FormTextarea
         className="min-h-20"
         placeholder={t("ui.fields.description")}
         value={values.description}
-        onChange={(event) => onChange({ ...values, description: event.target.value })}
+        onChange={(event) =>
+          onChange({ ...values, description: event.target.value })
+        }
       />
       <FormSelect
         value={values.locale}
-        onChange={(event) => onChange({ ...values, locale: event.target.value as "en" | "de" })}
+        onChange={(event) =>
+          onChange({ ...values, locale: event.target.value as "en" | "de" })
+        }
       >
         <option value="en">en</option>
         <option value="de">de</option>
@@ -89,13 +107,20 @@ type CampaignFormFieldsProps = {
   onChange: (next: AdminCampaignFormValues) => void;
 };
 
-export function CampaignFormFields({ t, values, users, onChange }: CampaignFormFieldsProps) {
+export function CampaignFormFields({
+  t,
+  values,
+  users,
+  onChange,
+}: CampaignFormFieldsProps) {
   return (
     <div className="grid gap-2">
       <FormLabel>{t("ui.admin.ownerLabel")}</FormLabel>
       <FormSelect
         value={values.ownerUserId}
-        onChange={(event) => onChange({ ...values, ownerUserId: event.target.value })}
+        onChange={(event) =>
+          onChange({ ...values, ownerUserId: event.target.value })
+        }
       >
         {users.map((user) => (
           <option key={user.id} value={user.id}>
@@ -112,7 +137,9 @@ export function CampaignFormFields({ t, values, users, onChange }: CampaignFormF
         className="min-h-20"
         placeholder={t("ui.fields.campaignDescription")}
         value={values.description}
-        onChange={(event) => onChange({ ...values, description: event.target.value })}
+        onChange={(event) =>
+          onChange({ ...values, description: event.target.value })
+        }
       />
       <VisibilityToggle
         isPrivate={values.isPrivate}
@@ -145,7 +172,9 @@ export function CharacterFormFields({
       <FormLabel>{t("ui.admin.ownerLabel")}</FormLabel>
       <FormSelect
         value={values.ownerUserId}
-        onChange={(event) => onChange({ ...values, ownerUserId: event.target.value })}
+        onChange={(event) =>
+          onChange({ ...values, ownerUserId: event.target.value })
+        }
       >
         {users.map((user) => (
           <option key={user.id} value={user.id}>
@@ -157,7 +186,9 @@ export function CharacterFormFields({
       <FormLabel>{t("ui.admin.campaignLabel")}</FormLabel>
       <FormSelect
         value={values.campaignIdText}
-        onChange={(event) => onChange({ ...values, campaignIdText: event.target.value })}
+        onChange={(event) =>
+          onChange({ ...values, campaignIdText: event.target.value })
+        }
       >
         <option value="">{t("ui.admin.noCampaign")}</option>
         {campaigns.map((campaign) => (
@@ -169,7 +200,9 @@ export function CharacterFormFields({
 
       <FormSelect
         value={values.type}
-        onChange={(event) => onChange({ ...values, type: event.target.value as "player" | "npc" })}
+        onChange={(event) =>
+          onChange({ ...values, type: event.target.value as "player" | "npc" })
+        }
       >
         <option value="player">{t("ui.labels.characterType.player")}</option>
         <option value="npc">{t("ui.labels.characterType.npc")}</option>
@@ -183,18 +216,24 @@ export function CharacterFormFields({
       <FormInput
         placeholder={t("ui.fields.characterAge")}
         value={values.ageText}
-        onChange={(event) => onChange({ ...values, ageText: event.target.value })}
+        onChange={(event) =>
+          onChange({ ...values, ageText: event.target.value })
+        }
       />
       <FormInput
         placeholder={t("ui.characterEdit.avatarPath")}
         value={values.avatarPathText}
-        onChange={(event) => onChange({ ...values, avatarPathText: event.target.value })}
+        onChange={(event) =>
+          onChange({ ...values, avatarPathText: event.target.value })
+        }
       />
       <FormTextarea
         className="min-h-20"
         placeholder={t("ui.fields.description")}
         value={values.description}
-        onChange={(event) => onChange({ ...values, description: event.target.value })}
+        onChange={(event) =>
+          onChange({ ...values, description: event.target.value })
+        }
       />
       <VisibilityToggle
         isPrivate={values.isPrivate}

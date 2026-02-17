@@ -12,23 +12,35 @@ function toTimestamp(value?: string | null): number {
   return Number.isFinite(timestamp) ? timestamp : 0;
 }
 
-export function sortCharacters(items: Character[], sort: CharacterListSort): Character[] {
+export function sortCharacters(
+  items: Character[],
+  sort: CharacterListSort,
+): Character[] {
   const copy = [...items];
   copy.sort((left, right) => {
     if (sort === "name_asc") {
-      return left.name.localeCompare(right.name, undefined, { sensitivity: "base" });
+      return left.name.localeCompare(right.name, undefined, {
+        sensitivity: "base",
+      });
     }
 
     const leftTimestamp =
-      sort === "updated_desc" ? toTimestamp(left.updated_at) : toTimestamp(left.created_at);
+      sort === "updated_desc"
+        ? toTimestamp(left.updated_at)
+        : toTimestamp(left.created_at);
     const rightTimestamp =
-      sort === "updated_desc" ? toTimestamp(right.updated_at) : toTimestamp(right.created_at);
+      sort === "updated_desc"
+        ? toTimestamp(right.updated_at)
+        : toTimestamp(right.created_at);
     return rightTimestamp - leftTimestamp;
   });
   return copy;
 }
 
-export function searchCharacters(items: Character[], query: string): Character[] {
+export function searchCharacters(
+  items: Character[],
+  query: string,
+): Character[] {
   const normalizedQuery = normalizeListQuery(query);
   if (!normalizedQuery) {
     return items;
@@ -52,7 +64,9 @@ export function filterCharactersByOwnership(
   }
 
   if (filter === "mine") {
-    return items.filter((character) => character.owner_user_id === currentUserId);
+    return items.filter(
+      (character) => character.owner_user_id === currentUserId,
+    );
   }
 
   return items.filter((character) => character.owner_user_id !== currentUserId);

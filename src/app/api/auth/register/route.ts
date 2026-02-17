@@ -54,7 +54,8 @@ export async function POST(request: Request) {
   }
 
   const signupLocale =
-    body.locale ?? detectLocaleFromAcceptLanguage(request.headers.get("accept-language"));
+    body.locale ??
+    detectLocaleFromAcceptLanguage(request.headers.get("accept-language"));
 
   const client = createServerSupabaseClient();
   const redirectTo = resolveSafeRedirectUrl(request, "/auth/callback");

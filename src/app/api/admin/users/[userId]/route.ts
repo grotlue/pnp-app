@@ -20,7 +20,10 @@ type UpdateAdminUserBody = {
   locale?: "en" | "de";
 };
 
-async function getProfileRole(service: ReturnType<typeof createServiceRoleSupabaseClient>, userId: string) {
+async function getProfileRole(
+  service: ReturnType<typeof createServiceRoleSupabaseClient>,
+  userId: string,
+) {
   const { data, error } = await service
     .from("profiles")
     .select("role")
@@ -50,7 +53,10 @@ export async function PATCH(request: Request, { params }: Params) {
   try {
     service = createServiceRoleSupabaseClient();
   } catch (error) {
-    console.warn("admin user update failed: missing service role client", error);
+    console.warn(
+      "admin user update failed: missing service role client",
+      error,
+    );
     return jsonError(500, "admin_user_update_failed", "Failed to update user");
   }
 
@@ -60,7 +66,11 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 
   if (targetRole.role === "admin") {
-    return jsonError(403, "admin_user_update_forbidden", "Admin accounts cannot be edited");
+    return jsonError(
+      403,
+      "admin_user_update_forbidden",
+      "Admin accounts cannot be edited",
+    );
   }
 
   if (body.email !== undefined) {
@@ -79,10 +89,13 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 
   if (body.email || body.password) {
-    const { error: authError } = await service.auth.admin.updateUserById(userId, {
-      email: body.email,
-      password: body.password,
-    });
+    const { error: authError } = await service.auth.admin.updateUserById(
+      userId,
+      {
+        email: body.email,
+        password: body.password,
+      },
+    );
 
     if (authError) {
       return jsonError(400, "admin_user_update_failed", authError.message);
@@ -135,7 +148,11 @@ export async function DELETE(request: Request, { params }: Params) {
   }
 
   if (targetRole.role === "admin" || userId === admin.context.user.id) {
-    return jsonError(403, "admin_delete_failed", "Admin accounts cannot be deleted");
+    return jsonError(
+      403,
+      "admin_delete_failed",
+      "Admin accounts cannot be deleted",
+    );
   }
 
   const { error } = await admin.context.client.rpc("rpc_admin_delete_user", {

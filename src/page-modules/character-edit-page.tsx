@@ -4,12 +4,22 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/common/app-header";
 import { FeedbackMessage } from "@/components/common/feedback-message";
-import { FormInput, FormSelect, FormTextarea } from "@/components/common/form-controls";
+import {
+  FormInput,
+  FormSelect,
+  FormTextarea,
+} from "@/components/common/form-controls";
 import { ImageUploadField } from "@/components/common/image-upload-field";
 import { Modal } from "@/components/common/modal";
 import { VisibilityToggle } from "@/components/common/visibility-toggle";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { createCharacterAvatarSignedUpload } from "@/features/characters/queries/character-edit.query";
 import { getCharacterAvatarSignedUrl } from "@/features/characters/queries/character-detail.query";
 import { uploadImageToSignedPath } from "@/lib/client/storage-upload";
@@ -23,7 +33,10 @@ type CharacterEditScreenProps = {
   characterId: string;
 };
 
-export function CharacterEditPageView({ locale, characterId }: CharacterEditScreenProps) {
+export function CharacterEditPageView({
+  locale,
+  characterId,
+}: CharacterEditScreenProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
   const router = useRouter();
   const { session, ready } = useClientSession();
@@ -48,10 +61,8 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
     }
   }, [ready, router, session]);
 
-  const { editQuery, updateMutation, deleteMutation, anyPending } = useCharacterEditScreen(
-    session,
-    characterId,
-  );
+  const { editQuery, updateMutation, deleteMutation, anyPending } =
+    useCharacterEditScreen(session, characterId);
 
   const uploadCharacterImage = useCallback(
     async (file: File, dimensions: { width: number; height: number }) => {
@@ -59,12 +70,16 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
         throw new Error("Missing session");
       }
 
-      const signedUpload = await createCharacterAvatarSignedUpload(session, characterId, {
-        fileName: file.name,
-        width: dimensions.width,
-        height: dimensions.height,
-        fileSize: file.size,
-      });
+      const signedUpload = await createCharacterAvatarSignedUpload(
+        session,
+        characterId,
+        {
+          fileName: file.name,
+          width: dimensions.width,
+          height: dimensions.height,
+          fileSize: file.size,
+        },
+      );
       await uploadImageToSignedPath({
         bucket: "character-images",
         path: signedUpload.path,
@@ -98,9 +113,9 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
     name: formEdits.name ?? character.name,
     age: formEdits.age ?? (character.age ? String(character.age) : ""),
     type: formEdits.type ?? character.type,
-    avatarPath: formEdits.avatarPath ?? (character.avatar_path ?? ""),
+    avatarPath: formEdits.avatarPath ?? character.avatar_path ?? "",
     description: formEdits.description ?? character.description,
-    isPrivate: formEdits.isPrivate ?? (character.is_private ?? false),
+    isPrivate: formEdits.isPrivate ?? character.is_private ?? false,
   };
 
   const isOwner = editQuery.data.me.user.id === character.owner_user_id;
@@ -109,7 +124,8 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
     role: editQuery.data.me.profile.role,
     isPrivate: character.is_private,
   });
-  const isForeignAdminView = isAdmin(editQuery.data.me.profile.role) && !isOwner;
+  const isForeignAdminView =
+    isAdmin(editQuery.data.me.profile.role) && !isOwner;
   if (!canManage) {
     return (
       <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
@@ -118,7 +134,9 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
           <Card>
             <CardHeader>
               <CardTitle>{t("ui.feedback.requestFailed")}</CardTitle>
-              <CardDescription>{t("ui.characterEdit.noPermission")}</CardDescription>
+              <CardDescription>
+                {t("ui.characterEdit.noPermission")}
+              </CardDescription>
             </CardHeader>
           </Card>
         </main>
@@ -135,7 +153,7 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
             <CardTitle>{t("ui.characterEdit.title")}</CardTitle>
             <CardDescription>{t("ui.characterEdit.subtitle")}</CardDescription>
             {isForeignAdminView ? (
-              <div className="inline-flex w-fit rounded-md border border-destructive/40 bg-destructive/10 px-2 py-1 text-xs font-medium text-destructive">
+              <div className="border-destructive/40 bg-destructive/10 text-destructive inline-flex w-fit rounded-md border px-2 py-1 text-xs font-medium">
                 {t("ui.admin.foreignItemLabel")}
               </div>
             ) : null}
@@ -164,7 +182,9 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
                 }))
               }
             >
-              <option value="player">{t("ui.labels.characterType.player")}</option>
+              <option value="player">
+                {t("ui.labels.characterType.player")}
+              </option>
               <option value="npc">{t("ui.labels.characterType.npc")}</option>
             </FormSelect>
             <ImageUploadField
@@ -181,7 +201,9 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
               invalidDimensionsLabel={t("ui.imageUpload.invalidDimensions")}
               invalidFileSizeLabel={t("ui.imageUpload.invalidFileSize")}
               disabled={anyPending}
-              onChange={(avatarPath) => setFormEdits((prev) => ({ ...prev, avatarPath }))}
+              onChange={(avatarPath) =>
+                setFormEdits((prev) => ({ ...prev, avatarPath }))
+              }
               onUpload={uploadCharacterImage}
               onResolvePreviewUrl={resolveCharacterImagePreview}
             />
@@ -190,7 +212,10 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
               value={form.description}
               placeholder={t("ui.fields.description")}
               onChange={(event) =>
-                setFormEdits((prev) => ({ ...prev, description: event.target.value }))
+                setFormEdits((prev) => ({
+                  ...prev,
+                  description: event.target.value,
+                }))
               }
             />
             <VisibilityToggle
@@ -199,7 +224,10 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
               onLabel={t("ui.actions.on")}
               offLabel={t("ui.actions.off")}
               onToggle={() =>
-                setFormEdits((prev) => ({ ...prev, isPrivate: !form.isPrivate }))
+                setFormEdits((prev) => ({
+                  ...prev,
+                  isPrivate: !form.isPrivate,
+                }))
               }
             />
 
@@ -221,7 +249,9 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
                       router.push(`/characters/${character.id}`);
                     } catch (error) {
                       setMessage(
-                        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                        error instanceof Error
+                          ? error.message
+                          : t("ui.feedback.requestFailed"),
                       );
                     }
                   })()
@@ -230,7 +260,10 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
                 {t("ui.actions.save")}
               </Button>
 
-              <Button variant="outline" onClick={() => router.push(`/characters/${character.id}`)}>
+              <Button
+                variant="outline"
+                onClick={() => router.push(`/characters/${character.id}`)}
+              >
                 {t("ui.actions.close")}
               </Button>
 
@@ -264,7 +297,9 @@ export function CharacterEditPageView({ locale, characterId }: CharacterEditScre
                     router.push("/characters");
                   } catch (error) {
                     setMessage(
-                      error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+                      error instanceof Error
+                        ? error.message
+                        : t("ui.feedback.requestFailed"),
                     );
                   }
                 })()

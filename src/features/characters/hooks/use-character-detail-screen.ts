@@ -16,7 +16,10 @@ import {
   updateRelationship,
 } from "../queries/character-detail.query";
 
-export function useCharacterDetailScreen(session: ClientSession | null, characterId: string) {
+export function useCharacterDetailScreen(
+  session: ClientSession | null,
+  characterId: string,
+) {
   const queryClient = useQueryClient();
   const detailQueryKey = [
     "characters",
@@ -168,7 +171,11 @@ export function useCharacterDetailScreen(session: ClientSession | null, characte
       }
 
       if (input.otherCharacterId) {
-        return getCharacterRelationDetail(session, characterId, input.otherCharacterId);
+        return getCharacterRelationDetail(
+          session,
+          characterId,
+          input.otherCharacterId,
+        );
       }
 
       if (!input.outgoingRelationshipId) {

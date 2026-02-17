@@ -34,7 +34,7 @@ export function ListControls({
   filterOptions = [],
 }: ListControlsProps) {
   return (
-    <div className="space-y-3 rounded-lg border border-border bg-background/70 p-3">
+    <div className="border-border bg-background/70 space-y-3 rounded-lg border p-3">
       <div className="grid gap-2 md:grid-cols-[1fr_220px]">
         <FormInput
           value={searchValue}
@@ -43,7 +43,7 @@ export function ListControls({
           aria-label={searchPlaceholder}
         />
         <div className="grid gap-1">
-          <label className="text-xs text-muted-foreground">{sortLabel}</label>
+          <label className="text-muted-foreground text-xs">{sortLabel}</label>
           <FormSelect
             value={sortValue}
             onChange={(event) => onSortChange(event.target.value)}
@@ -58,9 +58,12 @@ export function ListControls({
         </div>
       </div>
 
-      {filterOptions.length > 0 && filterLabel && filterValue && onFilterChange ? (
+      {filterOptions.length > 0 &&
+      filterLabel &&
+      filterValue &&
+      onFilterChange ? (
         <div className="space-y-1">
-          <div className="text-xs text-muted-foreground">{filterLabel}</div>
+          <div className="text-muted-foreground text-xs">{filterLabel}</div>
           <div className="flex flex-wrap gap-2">
             {filterOptions.map((option) => (
               <Button

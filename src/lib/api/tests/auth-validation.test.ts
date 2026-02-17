@@ -13,7 +13,9 @@ describe("auth validation helpers", () => {
   });
 
   it("returns normalized email when valid", () => {
-    expect(normalizeAndValidateEmail("  User@Example.com ")).toBe("user@example.com");
+    expect(normalizeAndValidateEmail("  User@Example.com ")).toBe(
+      "user@example.com",
+    );
   });
 
   it("returns null for invalid email", () => {
@@ -41,7 +43,9 @@ describe("auth validation helpers", () => {
   });
 
   it("rejects short passwords", () => {
-    expect(validatePasswordStrength("Short1A")).toBe("password must be at least 12 characters");
+    expect(validatePasswordStrength("Short1A")).toBe(
+      "password must be at least 12 characters",
+    );
   });
 
   it("rejects passwords without lowercase letters", () => {
@@ -57,6 +61,8 @@ describe("auth validation helpers", () => {
   });
 
   it("rejects passwords without digits", () => {
-    expect(validatePasswordStrength("NoDigitsHereAA")).toBe("password must include a number");
+    expect(validatePasswordStrength("NoDigitsHereAA")).toBe(
+      "password must include a number",
+    );
   });
 });

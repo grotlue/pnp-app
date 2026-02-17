@@ -8,7 +8,11 @@ type AuthCaptchaClientConfig = {
   enabled: boolean;
 };
 
-const KNOWN_CAPTCHA_MODES = new Set<AuthCaptchaMode>(["off", "optional", "required"]);
+const KNOWN_CAPTCHA_MODES = new Set<AuthCaptchaMode>([
+  "off",
+  "optional",
+  "required",
+]);
 
 function normalizeEnvValue(value?: string | null): string | null {
   if (!value) {
@@ -29,7 +33,9 @@ function normalizeEnvValue(value?: string | null): string | null {
   return unquoted ? unquoted.toLowerCase() : null;
 }
 
-function normalizeRuntimeEnvironment(value?: string | null): RuntimeEnvironment | null {
+function normalizeRuntimeEnvironment(
+  value?: string | null,
+): RuntimeEnvironment | null {
   const normalized = normalizeEnvValue(value);
   if (!normalized) {
     return null;
@@ -74,7 +80,9 @@ export function resolveAuthCaptchaRuntimeEnvironment(): RuntimeEnvironment {
 }
 
 export function resolveClientAuthCaptchaMode(): AuthCaptchaMode {
-  const explicitMode = normalizeCaptchaMode(process.env.NEXT_PUBLIC_AUTH_CAPTCHA_MODE);
+  const explicitMode = normalizeCaptchaMode(
+    process.env.NEXT_PUBLIC_AUTH_CAPTCHA_MODE,
+  );
   if (explicitMode) {
     return explicitMode;
   }

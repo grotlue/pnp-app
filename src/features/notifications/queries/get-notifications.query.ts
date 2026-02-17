@@ -14,8 +14,11 @@ export async function getNotificationsQuery(
   const params = new URLSearchParams();
   params.set("limit", String(limit));
 
-  const response = await apiRequest<NotificationEntry[]>(`/api/notifications?${params.toString()}`, {
-    session,
-  });
+  const response = await apiRequest<NotificationEntry[]>(
+    `/api/notifications?${params.toString()}`,
+    {
+      session,
+    },
+  );
   return unwrapApiResponse(response, "Failed to load notifications");
 }

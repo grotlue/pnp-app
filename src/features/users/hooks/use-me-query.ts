@@ -9,7 +9,10 @@ type UseMeQueryOptions = {
   enabled?: boolean;
 };
 
-export function useMeQuery(session: ClientSession | null, options?: UseMeQueryOptions) {
+export function useMeQuery(
+  session: ClientSession | null,
+  options?: UseMeQueryOptions,
+) {
   const token = session?.accessToken ?? "no-session";
   const enabled = options?.enabled ?? true;
 

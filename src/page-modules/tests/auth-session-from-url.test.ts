@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { getAuthParamsFromUrl, getSessionTokensFromUrl } from "../auth-session-from-url";
+import {
+  getAuthParamsFromUrl,
+  getSessionTokensFromUrl,
+} from "../auth-session-from-url";
 
 function toLocation(url: string): Location {
   return new URL(url) as unknown as Location;

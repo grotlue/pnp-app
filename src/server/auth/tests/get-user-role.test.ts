@@ -10,7 +10,10 @@ vi.mock("@/server/supabase/service-role-client", () => ({
 
 import { getUserRole } from "../get-user-role";
 
-function createRoleClient(result: { data: { role: string } | null; error: { message: string } | null }) {
+function createRoleClient(result: {
+  data: { role: string } | null;
+  error: { message: string } | null;
+}) {
   return {
     from: vi.fn(() => ({
       select: vi.fn(() => ({
@@ -65,10 +68,12 @@ describe("getUserRole", () => {
   it("returns original error when fallback cannot be used", async () => {
     const userClient = createRoleClient({
       data: null,
-      error: { message: "relation \"profiles\" does not exist" },
+      error: { message: 'relation "profiles" does not exist' },
     });
     createServiceRoleSupabaseClientMock.mockImplementationOnce(() => {
-      throw new Error("Missing environment variable: SUPABASE_SERVICE_ROLE_KEY");
+      throw new Error(
+        "Missing environment variable: SUPABASE_SERVICE_ROLE_KEY",
+      );
     });
 
     const result = await getUserRole({
@@ -78,7 +83,7 @@ describe("getUserRole", () => {
 
     expect(result).toEqual({
       role: null,
-      errorMessage: "relation \"profiles\" does not exist",
+      errorMessage: 'relation "profiles" does not exist',
     });
     expect(createServiceRoleSupabaseClientMock).toHaveBeenCalledTimes(1);
   });

@@ -24,7 +24,9 @@ export async function GET(request: Request) {
   })();
   const { data, error } = await client
     .from("campaigns")
-    .select("id, owner_user_id, title, description, is_private, created_at, updated_at")
+    .select(
+      "id, owner_user_id, title, description, is_private, created_at, updated_at",
+    )
     .order("created_at", { ascending: false })
     .limit(500);
 
@@ -43,7 +45,11 @@ export async function POST(request: Request) {
 
   const body = await parseJsonBody<CreateCampaignBody>(request);
   if (!body?.ownerUserId || !body.title) {
-    return jsonError(400, "invalid_payload", "ownerUserId and title are required");
+    return jsonError(
+      400,
+      "invalid_payload",
+      "ownerUserId and title are required",
+    );
   }
 
   const client = (() => {
@@ -61,7 +67,9 @@ export async function POST(request: Request) {
       description: body.description ?? "",
       is_private: body.isPrivate ?? false,
     })
-    .select("id, owner_user_id, title, description, is_private, created_at, updated_at")
+    .select(
+      "id, owner_user_id, title, description, is_private, created_at, updated_at",
+    )
     .single();
 
   if (error) {

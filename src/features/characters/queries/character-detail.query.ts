@@ -40,21 +40,39 @@ export async function getCharacterDetailContext(
     apiRequest<Character[]>("/api/characters?limit=500", { session }),
     apiRequest<UserListEntry[]>("/api/users?limit=1000", { session }),
     apiRequest<RelationshipCatalog>("/api/relationships/catalogs", { session }),
-    apiRequest<RelationshipSummary[]>(`/api/characters/${characterId}/relations-summary`, { session }),
-    apiRequest<OutgoingRelationship[]>(`/api/characters/${characterId}/outgoing-relationships`, {
-      session,
-    }),
+    apiRequest<RelationshipSummary[]>(
+      `/api/characters/${characterId}/relations-summary`,
+      { session },
+    ),
+    apiRequest<OutgoingRelationship[]>(
+      `/api/characters/${characterId}/outgoing-relationships`,
+      {
+        session,
+      },
+    ),
   ]);
 
   return {
     me: unwrapApiResponse(meResponse, "Failed to load user"),
     character: unwrapApiResponse(characterResponse, "Failed to load character"),
     campaigns: unwrapApiResponse(campaignsResponse, "Failed to load campaigns"),
-    allCharacters: unwrapApiResponse(allCharactersResponse, "Failed to load characters"),
+    allCharacters: unwrapApiResponse(
+      allCharactersResponse,
+      "Failed to load characters",
+    ),
     users: unwrapApiResponse(usersResponse, "Failed to load users"),
-    catalog: unwrapApiResponse(catalogResponse, "Failed to load relationship catalogs"),
-    summary: unwrapApiResponse(summaryResponse, "Failed to load relationship summary"),
-    outgoing: unwrapApiResponse(outgoingResponse, "Failed to load outgoing relationships"),
+    catalog: unwrapApiResponse(
+      catalogResponse,
+      "Failed to load relationship catalogs",
+    ),
+    summary: unwrapApiResponse(
+      summaryResponse,
+      "Failed to load relationship summary",
+    ),
+    outgoing: unwrapApiResponse(
+      outgoingResponse,
+      "Failed to load outgoing relationships",
+    ),
   };
 }
 
@@ -96,13 +114,24 @@ export async function getRelationshipDetailForExternalTarget(
   timeline: RelationshipTimelineEntry[];
 }> {
   const [relationshipResponse, timelineResponse] = await Promise.all([
-    apiRequest<OutgoingRelationship>(`/api/relationships/${relationshipId}`, { session }),
-    apiRequest<RelationshipTimelineEntry[]>(`/api/relationships/${relationshipId}/timeline`, { session }),
+    apiRequest<OutgoingRelationship>(`/api/relationships/${relationshipId}`, {
+      session,
+    }),
+    apiRequest<RelationshipTimelineEntry[]>(
+      `/api/relationships/${relationshipId}/timeline`,
+      { session },
+    ),
   ]);
 
   return {
-    outgoing: unwrapApiResponse(relationshipResponse, "Failed to load relationship"),
-    timeline: unwrapApiResponse(timelineResponse, "Failed to load relationship timeline"),
+    outgoing: unwrapApiResponse(
+      relationshipResponse,
+      "Failed to load relationship",
+    ),
+    timeline: unwrapApiResponse(
+      timelineResponse,
+      "Failed to load relationship timeline",
+    ),
   };
 }
 
@@ -148,11 +177,14 @@ export async function createRelationship(
     description: string;
   },
 ): Promise<{ relationshipId: string }> {
-  const response = await apiRequest<{ relationshipId: string }>("/api/relationships", {
-    method: "POST",
-    session,
-    body: input,
-  });
+  const response = await apiRequest<{ relationshipId: string }>(
+    "/api/relationships",
+    {
+      method: "POST",
+      session,
+      body: input,
+    },
+  );
   return unwrapApiResponse(response, "Failed to create relationship");
 }
 
@@ -184,11 +216,14 @@ export async function updateRelationship(
     description: string;
   },
 ): Promise<{ updated: boolean }> {
-  const response = await apiRequest<{ updated: boolean }>(`/api/relationships/${relationshipId}`, {
-    method: "PATCH",
-    session,
-    body: input,
-  });
+  const response = await apiRequest<{ updated: boolean }>(
+    `/api/relationships/${relationshipId}`,
+    {
+      method: "PATCH",
+      session,
+      body: input,
+    },
+  );
   return unwrapApiResponse(response, "Failed to update relationship");
 }
 
@@ -196,9 +231,12 @@ export async function deleteRelationship(
   session: ClientSession,
   relationshipId: string,
 ): Promise<{ deleted: boolean }> {
-  const response = await apiRequest<{ deleted: boolean }>(`/api/relationships/${relationshipId}`, {
-    method: "DELETE",
-    session,
-  });
+  const response = await apiRequest<{ deleted: boolean }>(
+    `/api/relationships/${relationshipId}`,
+    {
+      method: "DELETE",
+      session,
+    },
+  );
   return unwrapApiResponse(response, "Failed to delete relationship");
 }

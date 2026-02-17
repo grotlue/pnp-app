@@ -6,7 +6,14 @@ import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import { FormInput } from "@/components/common/form-controls";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { setSession } from "@/lib/client/session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { textLinkClassName } from "@/lib/utils/link";
@@ -25,11 +32,15 @@ type AuthResetPasswordPageViewProps = {
   locale: AppLocale;
 };
 
-export function AuthResetPasswordPageView({ locale }: AuthResetPasswordPageViewProps) {
+export function AuthResetPasswordPageView({
+  locale,
+}: AuthResetPasswordPageViewProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
   const router = useRouter();
 
-  const [sessionTokens, setSessionTokens] = useState<SessionTokens | null>(null);
+  const [sessionTokens, setSessionTokens] = useState<SessionTokens | null>(
+    null,
+  );
   const [resolving, setResolving] = useState(true);
   const [busy, setBusy] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -101,7 +112,11 @@ export function AuthResetPasswordPageView({ locale }: AuthResetPasswordPageViewP
         }
       } catch (error) {
         if (!cancelled) {
-          setResolveError(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+          setResolveError(
+            error instanceof Error
+              ? error.message
+              : t("ui.feedback.requestFailed"),
+          );
           setResolving(false);
         }
       }
@@ -137,7 +152,9 @@ export function AuthResetPasswordPageView({ locale }: AuthResetPasswordPageViewP
       setMessage(t("ui.authReset.updated"));
       router.replace("/");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("ui.feedback.requestFailed"));
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
     } finally {
       setBusy(false);
     }
@@ -153,7 +170,9 @@ export function AuthResetPasswordPageView({ locale }: AuthResetPasswordPageViewP
           </CardHeader>
           <CardContent className="space-y-3">
             {resolving ? (
-              <div className="text-sm text-muted-foreground">{t("ui.authReset.processing")}</div>
+              <div className="text-muted-foreground text-sm">
+                {t("ui.authReset.processing")}
+              </div>
             ) : sessionTokens ? (
               <FormInput
                 type="password"
@@ -162,14 +181,19 @@ export function AuthResetPasswordPageView({ locale }: AuthResetPasswordPageViewP
                 onChange={(event) => setNewPassword(event.target.value)}
               />
             ) : (
-              <FeedbackMessage message={resolveError || t("ui.authReset.invalidLink")} />
+              <FeedbackMessage
+                message={resolveError || t("ui.authReset.invalidLink")}
+              />
             )}
 
             <FeedbackMessage message={message} />
           </CardContent>
           <CardFooter className="flex-col items-stretch gap-2">
             {sessionTokens ? (
-              <Button disabled={busy || !newPassword} onClick={() => void onSubmit()}>
+              <Button
+                disabled={busy || !newPassword}
+                onClick={() => void onSubmit()}
+              >
                 {t("ui.authReset.submit")}
               </Button>
             ) : (

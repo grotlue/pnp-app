@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { requireAuthMock, getUserRoleMock, enforceRateLimitMock } = vi.hoisted(() => ({
-  requireAuthMock: vi.fn(),
-  getUserRoleMock: vi.fn(),
-  enforceRateLimitMock: vi.fn(),
-}));
+const { requireAuthMock, getUserRoleMock, enforceRateLimitMock } = vi.hoisted(
+  () => ({
+    requireAuthMock: vi.fn(),
+    getUserRoleMock: vi.fn(),
+    enforceRateLimitMock: vi.fn(),
+  }),
+);
 
 vi.mock("@/server/auth/require-auth", () => ({
   requireAuth: requireAuthMock,
@@ -37,7 +39,9 @@ describe("auth mfa totp route", () => {
     });
     getUserRoleMock.mockResolvedValueOnce({ role: "user" });
 
-    const response = await GET(new Request("http://localhost/api/auth/mfa/totp"));
+    const response = await GET(
+      new Request("http://localhost/api/auth/mfa/totp"),
+    );
 
     expect(response.status).toBe(403);
     await expect(response.json()).resolves.toEqual({
@@ -168,7 +172,9 @@ describe("auth mfa totp route", () => {
         accessToken: "token",
         user: { id: "u1" },
         client: { from: vi.fn() },
-        authClient: { auth: { mfa: { challenge: challengeMock, verify: verifyMock } } },
+        authClient: {
+          auth: { mfa: { challenge: challengeMock, verify: verifyMock } },
+        },
       },
     });
     getUserRoleMock.mockResolvedValueOnce({ role: "admin" });

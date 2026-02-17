@@ -29,12 +29,16 @@ const session = { accessToken: "access-token" };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  unwrapApiResponseMock.mockImplementation((response: { data: unknown }) => response.data);
+  unwrapApiResponseMock.mockImplementation(
+    (response: { data: unknown }) => response.data,
+  );
 });
 
 describe("campaign queries", () => {
   it("getCampaignsQuery returns campaigns on success", async () => {
-    const data = [{ id: "c1", owner_user_id: "u1", title: "A", description: "" }];
+    const data = [
+      { id: "c1", owner_user_id: "u1", title: "A", description: "" },
+    ];
     apiRequestMock.mockResolvedValueOnce({ data, error: null, status: 200 });
 
     await expect(getCampaignsQuery(session)).resolves.toEqual(data);
@@ -42,20 +46,31 @@ describe("campaign queries", () => {
   });
 
   it("getCampaignsQuery supports roleForUserId option", async () => {
-    const data = [{ id: "c2", owner_user_id: "u2", title: "B", description: "" }];
+    const data = [
+      { id: "c2", owner_user_id: "u2", title: "B", description: "" },
+    ];
     apiRequestMock.mockResolvedValueOnce({ data, error: null, status: 200 });
 
-    await expect(getCampaignsQuery(session, { roleForUserId: "target-user" })).resolves.toEqual(data);
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/campaigns?roleForUserId=target-user", {
-      session,
-    });
+    await expect(
+      getCampaignsQuery(session, { roleForUserId: "target-user" }),
+    ).resolves.toEqual(data);
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/campaigns?roleForUserId=target-user",
+      {
+        session,
+      },
+    );
   });
 
   it("getCampaignsQuery supports scope option", async () => {
-    const data = [{ id: "c3", owner_user_id: "u3", title: "C", description: "" }];
+    const data = [
+      { id: "c3", owner_user_id: "u3", title: "C", description: "" },
+    ];
     apiRequestMock.mockResolvedValueOnce({ data, error: null, status: 200 });
 
-    await expect(getCampaignsQuery(session, { scope: "member" })).resolves.toEqual(data);
+    await expect(
+      getCampaignsQuery(session, { scope: "member" }),
+    ).resolves.toEqual(data);
     expect(apiRequestMock).toHaveBeenCalledWith("/api/campaigns?scope=member", {
       session,
     });
@@ -89,7 +104,12 @@ describe("campaign queries", () => {
   });
 
   it("updateCampaignMutation patches campaign", async () => {
-    const data = { id: "c1", owner_user_id: "u1", title: "Updated", description: "D" };
+    const data = {
+      id: "c1",
+      owner_user_id: "u1",
+      title: "Updated",
+      description: "D",
+    };
     apiRequestMock.mockResolvedValueOnce({ data, error: null, status: 200 });
 
     await expect(
@@ -126,21 +146,39 @@ describe("campaign queries", () => {
 
   it("getCampaignDetailContext aggregates dependent resources", async () => {
     apiRequestMock
-      .mockResolvedValueOnce({ data: { user: { id: "u1" } }, error: null, status: 200 })
+      .mockResolvedValueOnce({
+        data: { user: { id: "u1" } },
+        error: null,
+        status: 200,
+      })
       .mockResolvedValueOnce({
         data: { campaign: { id: "c1" }, memberships: [] },
         error: null,
         status: 200,
       })
-      .mockResolvedValueOnce({ data: [{ id: "char1" }], error: null, status: 200 })
-      .mockResolvedValueOnce({ data: [{ id: "user2", username: "x" }], error: null, status: 200 });
+      .mockResolvedValueOnce({
+        data: [{ id: "char1" }],
+        error: null,
+        status: 200,
+      })
+      .mockResolvedValueOnce({
+        data: [{ id: "user2", username: "x" }],
+        error: null,
+        status: 200,
+      });
 
     const result = await getCampaignDetailContext(session, "c1");
 
     expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/me", { session });
-    expect(apiRequestMock).toHaveBeenNthCalledWith(2, "/api/campaigns/c1", { session });
-    expect(apiRequestMock).toHaveBeenNthCalledWith(3, "/api/characters", { session });
-    expect(apiRequestMock).toHaveBeenNthCalledWith(4, "/api/users", { session });
+    expect(apiRequestMock).toHaveBeenNthCalledWith(2, "/api/campaigns/c1", {
+      session,
+    });
+    expect(apiRequestMock).toHaveBeenNthCalledWith(3, "/api/characters", {
+      session,
+    });
+    expect(apiRequestMock).toHaveBeenNthCalledWith(4, "/api/users", {
+      session,
+    });
 
     expect(result).toEqual({
       me: { user: { id: "u1" } },
@@ -154,15 +192,23 @@ describe("campaign queries", () => {
     const response = { data: { decided: true }, error: null, status: 200 };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(decideCampaignMembership(session, "c1", "m1", "accepted")).resolves.toEqual({
+    await expect(
+      decideCampaignMembership(session, "c1", "m1", "accepted"),
+    ).resolves.toEqual({
       decided: true,
     });
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/campaigns/c1/memberships/m1/decision", {
-      method: "POST",
-      session,
-      body: { state: "accepted" },
-    });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to decide membership");
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/campaigns/c1/memberships/m1/decision",
+      {
+        method: "POST",
+        session,
+        body: { state: "accepted" },
+      },
+    );
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to decide membership",
+    );
   });
 
   it("updateCampaignDetail patches campaign detail", async () => {
@@ -173,27 +219,35 @@ describe("campaign queries", () => {
     };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(updateCampaignDetail(session, "c1", { title: "T", description: "D" })).resolves.toEqual(
-      response.data,
-    );
+    await expect(
+      updateCampaignDetail(session, "c1", { title: "T", description: "D" }),
+    ).resolves.toEqual(response.data);
     expect(apiRequestMock).toHaveBeenCalledWith("/api/campaigns/c1", {
       method: "PATCH",
       session,
       body: { title: "T", description: "D" },
     });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to update campaign");
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to update campaign",
+    );
   });
 
   it("deleteCampaignDetail deletes campaign", async () => {
     const response = { data: { deleted: true }, error: null, status: 200 };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(deleteCampaignDetail(session, "c1")).resolves.toEqual({ deleted: true });
+    await expect(deleteCampaignDetail(session, "c1")).resolves.toEqual({
+      deleted: true,
+    });
     expect(apiRequestMock).toHaveBeenCalledWith("/api/campaigns/c1", {
       method: "DELETE",
       session,
     });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to delete campaign");
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to delete campaign",
+    );
   });
 
   it("inviteUserToCampaign posts invite payload", async () => {
@@ -203,38 +257,60 @@ describe("campaign queries", () => {
     await expect(inviteUserToCampaign(session, "c1", "u2")).resolves.toEqual({
       membershipId: "m1",
     });
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/campaigns/c1/invitations", {
-      method: "POST",
-      session,
-      body: { userId: "u2" },
-    });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to invite user");
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/campaigns/c1/invitations",
+      {
+        method: "POST",
+        session,
+        body: { userId: "u2" },
+      },
+    );
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to invite user",
+    );
   });
 
   it("assignCharacterToCampaign posts assignment payload", async () => {
     const response = { data: { assigned: true }, error: null, status: 200 };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(assignCharacterToCampaign(session, "char1", "c1")).resolves.toEqual({
+    await expect(
+      assignCharacterToCampaign(session, "char1", "c1"),
+    ).resolves.toEqual({
       assigned: true,
     });
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/characters/char1/assign-campaign", {
-      method: "POST",
-      session,
-      body: { campaignId: "c1" },
-    });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to assign character");
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/characters/char1/assign-campaign",
+      {
+        method: "POST",
+        session,
+        body: { campaignId: "c1" },
+      },
+    );
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to assign character",
+    );
   });
 
   it("requestJoinCampaign posts join request", async () => {
     const response = { data: { membershipId: "m2" }, error: null, status: 201 };
     apiRequestMock.mockResolvedValueOnce(response);
 
-    await expect(requestJoinCampaign(session, "c1")).resolves.toEqual({ membershipId: "m2" });
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/campaigns/c1/join-requests", {
-      method: "POST",
-      session,
+    await expect(requestJoinCampaign(session, "c1")).resolves.toEqual({
+      membershipId: "m2",
     });
-    expect(unwrapApiResponseMock).toHaveBeenCalledWith(response, "Failed to request campaign join");
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/campaigns/c1/join-requests",
+      {
+        method: "POST",
+        session,
+      },
+    );
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Failed to request campaign join",
+    );
   });
 });

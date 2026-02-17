@@ -10,7 +10,9 @@ import type { NotificationEntry } from "@/features/notifications/types";
 
 const t = (key: string) => key;
 
-function makeNotification(input?: Partial<NotificationEntry>): NotificationEntry {
+function makeNotification(
+  input?: Partial<NotificationEntry>,
+): NotificationEntry {
   return {
     id: "n1",
     recipient_user_id: "u1",

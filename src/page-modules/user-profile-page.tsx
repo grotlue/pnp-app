@@ -12,16 +12,18 @@ import { PaginationControls } from "@/components/common/pagination-controls";
 import { SectionBox } from "@/components/common/section-box";
 import { ToggleTabs } from "@/components/common/toggle-tabs";
 import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { AppHeader } from "@/components/common/app-header";
 import { CampaignRoleBadge } from "@/features/campaigns/components/campaign-role-badge";
-import {
-  sortCampaigns,
-} from "@/features/campaigns/logic/campaign-list.logic";
+import { sortCampaigns } from "@/features/campaigns/logic/campaign-list.logic";
 import { getCampaignsQuery } from "@/features/campaigns/queries/get-campaigns.query";
-import {
-  sortCharacters,
-} from "@/features/characters/logic/character-list.logic";
+import { sortCharacters } from "@/features/characters/logic/character-list.logic";
 import { getCharacters } from "@/features/characters/queries/characters-screen.query";
 import type { Campaign } from "@/features/campaigns/types";
 import { getPublicUserProfile } from "@/features/users/queries/users-public-profile.query";
@@ -29,7 +31,11 @@ import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { hasItems } from "@/lib/logic/collections";
 import { textLinkClassName } from "@/lib/utils/link";
-import { clampListPage, DEFAULT_LIST_PAGE_SIZE, paginateListItems } from "@/lib/utils/list";
+import {
+  clampListPage,
+  DEFAULT_LIST_PAGE_SIZE,
+  paginateListItems,
+} from "@/lib/utils/list";
 
 type UserProfilePageViewProps = {
   locale: AppLocale;
@@ -41,7 +47,10 @@ type ProfileCampaignEntry = {
   role: "owner" | "player";
 };
 
-export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps) {
+export function UserProfilePageView({
+  locale,
+  userId,
+}: UserProfilePageViewProps) {
   const t = useMemo(() => getTranslator(locale), [locale]);
   const router = useRouter();
   const { session, ready } = useClientSession();
@@ -59,7 +68,12 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
   }, [ready, router, session]);
 
   const profileQuery = useQuery({
-    queryKey: ["users", "public-profile", userId, session?.accessToken ?? "no-session"],
+    queryKey: [
+      "users",
+      "public-profile",
+      userId,
+      session?.accessToken ?? "no-session",
+    ],
     enabled: Boolean(session),
     queryFn: async () => {
       if (!session) {
@@ -72,7 +86,11 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
         getCharacters(session),
       ]);
       const profileCampaigns: ProfileCampaignEntry[] = campaigns
-        .filter((campaign) => campaign.role_for_user === "owner" || campaign.role_for_user === "player")
+        .filter(
+          (campaign) =>
+            campaign.role_for_user === "owner" ||
+            campaign.role_for_user === "player",
+        )
         .map((campaign) => ({
           campaign,
           role: campaign.role_for_user === "owner" ? "owner" : "player",
@@ -81,7 +99,9 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
       return {
         profile,
         campaigns: profileCampaigns,
-        characters: characters.filter((character) => character.owner_user_id === userId),
+        characters: characters.filter(
+          (character) => character.owner_user_id === userId,
+        ),
       };
     },
   });
@@ -102,14 +122,15 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
   }
 
   const profile = profileQuery.data;
-  const errorMessage = profileQuery.error instanceof Error ? profileQuery.error.message : "";
+  const errorMessage =
+    profileQuery.error instanceof Error ? profileQuery.error.message : "";
   if (!profile) {
     return (
       <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
         <AppHeader locale={locale} session={session} />
         <main className="mx-auto w-full max-w-4xl px-4 py-8">
           <Card>
-            <CardContent className="py-8 text-sm text-muted-foreground">
+            <CardContent className="text-muted-foreground py-8 text-sm">
               {errorMessage || t("ui.feedback.requestFailed")}
             </CardContent>
           </Card>
@@ -121,7 +142,10 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
   const visibleCharactersByType = profile.characters.filter(
     (character) => character.type === characterTab,
   );
-  const searchedAndSortedCharacters = sortCharacters(visibleCharactersByType, "updated_desc");
+  const searchedAndSortedCharacters = sortCharacters(
+    visibleCharactersByType,
+    "updated_desc",
+  );
   const safeCharacterPage = clampListPage(
     characterPage,
     searchedAndSortedCharacters.length,
@@ -133,8 +157,13 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
     DEFAULT_LIST_PAGE_SIZE,
   );
 
-  const sortedCampaignEntries = sortCampaigns(profile.campaigns.map((entry) => entry.campaign), "updated_desc");
-  const roleByCampaignId = new Map(profile.campaigns.map((entry) => [entry.campaign.id, entry.role]));
+  const sortedCampaignEntries = sortCampaigns(
+    profile.campaigns.map((entry) => entry.campaign),
+    "updated_desc",
+  );
+  const roleByCampaignId = new Map(
+    profile.campaigns.map((entry) => [entry.campaign.id, entry.role]),
+  );
   const safeCampaignPage = clampListPage(
     campaignPage,
     sortedCampaignEntries.length,
@@ -158,19 +187,27 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
           <CardContent className="space-y-4 text-sm">
             <FeedbackMessage message={errorMessage} />
             <div>
-              <strong>{t("ui.fields.username")}</strong>: {profile.profile.username}
+              <strong>{t("ui.fields.username")}</strong>:{" "}
+              {profile.profile.username}
             </div>
             <div>
-              <strong>{t("ui.fields.description")}</strong>: {profile.profile.description || "-"}
+              <strong>{t("ui.fields.description")}</strong>:{" "}
+              {profile.profile.description || "-"}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <SectionBox title={t("ui.characters.title")} className="space-y-2">
+              <SectionBox
+                title={t("ui.characters.title")}
+                className="space-y-2"
+              >
                 <ToggleTabs
                   value={characterTab}
                   onChange={setCharacterTab}
                   options={[
-                    { value: "player", label: t("ui.labels.characterType.player") },
+                    {
+                      value: "player",
+                      label: t("ui.labels.characterType.player"),
+                    },
                     { value: "npc", label: t("ui.labels.characterType.npc") },
                   ]}
                 />
@@ -179,8 +216,14 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
                   {pagedCharacters.map((character) => (
                     <ListItemRow key={character.id}>
                       <div className="space-y-1">
-                        <Link href={`/characters/${character.id}`} className={textLinkClassName}>
-                          <TitleWithPrivacy title={character.name} isPrivate={character.is_private} />
+                        <Link
+                          href={`/characters/${character.id}`}
+                          className={textLinkClassName}
+                        >
+                          <TitleWithPrivacy
+                            title={character.name}
+                            isPrivate={character.is_private}
+                          />
                         </Link>
                       </div>
                     </ListItemRow>
@@ -188,7 +231,7 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
                   {!hasItems(searchedAndSortedCharacters) ? (
                     <EmptyState
                       label={t("ui.feedback.empty")}
-                      className="border-0 bg-transparent p-0 text-muted-foreground"
+                      className="text-muted-foreground border-0 bg-transparent p-0"
                     />
                   ) : null}
                 </div>
@@ -212,8 +255,14 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
                     return (
                       <ListItemRow key={campaign.id}>
                         <div className="space-y-1">
-                          <Link href={`/campaigns/${campaign.id}`} className={textLinkClassName}>
-                            <TitleWithPrivacy title={campaign.title} isPrivate={campaign.is_private} />
+                          <Link
+                            href={`/campaigns/${campaign.id}`}
+                            className={textLinkClassName}
+                          >
+                            <TitleWithPrivacy
+                              title={campaign.title}
+                              isPrivate={campaign.is_private}
+                            />
                           </Link>
                           <CampaignRoleBadge role={role} t={t} />
                         </div>
@@ -223,7 +272,7 @@ export function UserProfilePageView({ locale, userId }: UserProfilePageViewProps
                   {!hasItems(sortedCampaignEntries) ? (
                     <EmptyState
                       label={t("ui.feedback.empty")}
-                      className="border-0 bg-transparent p-0 text-muted-foreground"
+                      className="text-muted-foreground border-0 bg-transparent p-0"
                     />
                   ) : null}
                 </div>

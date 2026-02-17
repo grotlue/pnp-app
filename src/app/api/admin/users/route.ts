@@ -14,12 +14,17 @@ type CreateAdminUserBody = {
   locale?: "en" | "de";
 };
 
-async function listAllAuthUsers(service: ReturnType<typeof createServiceRoleSupabaseClient>) {
+async function listAllAuthUsers(
+  service: ReturnType<typeof createServiceRoleSupabaseClient>,
+) {
   const users: Array<{ id: string; email?: string | null }> = [];
   let page = 1;
 
   while (true) {
-    const { data, error } = await service.auth.admin.listUsers({ page, perPage: 1000 });
+    const { data, error } = await service.auth.admin.listUsers({
+      page,
+      perPage: 1000,
+    });
     if (error) {
       return { ok: false as const, errorMessage: error.message };
     }
@@ -54,22 +59,32 @@ export async function GET(request: Request) {
     }
   })();
   const dataClient = service ?? admin.context.client;
-  const [{ data: profiles, error: profilesError }, authUsersResult] = await Promise.all([
-    dataClient
-      .from("profiles")
-      .select("id, username, description, role, locale, created_at, updated_at")
-      .order("created_at", { ascending: false }),
-    service
-      ? listAllAuthUsers(service)
-      : Promise.resolve({ ok: true as const, users: [] as Array<{ id: string; email?: string | null }> }),
-  ]);
+  const [{ data: profiles, error: profilesError }, authUsersResult] =
+    await Promise.all([
+      dataClient
+        .from("profiles")
+        .select(
+          "id, username, description, role, locale, created_at, updated_at",
+        )
+        .order("created_at", { ascending: false }),
+      service
+        ? listAllAuthUsers(service)
+        : Promise.resolve({
+            ok: true as const,
+            users: [] as Array<{ id: string; email?: string | null }>,
+          }),
+    ]);
 
   if (profilesError) {
     return jsonError(400, "admin_users_list_failed", profilesError.message);
   }
 
   if (!authUsersResult.ok) {
-    return jsonError(400, "admin_users_list_failed", authUsersResult.errorMessage);
+    return jsonError(
+      400,
+      "admin_users_list_failed",
+      authUsersResult.errorMessage,
+    );
   }
 
   const emailByUserId = new Map(
@@ -93,7 +108,11 @@ export async function POST(request: Request) {
 
     const body = await parseJsonBody<CreateAdminUserBody>(request);
     if (!body?.email || !body.password || !body.username) {
-      return jsonError(400, "invalid_payload", "email, password, and username are required");
+      return jsonError(
+        400,
+        "invalid_payload",
+        "email, password, and username are required",
+      );
     }
     const email = normalizeAndValidateEmail(body.email);
     if (!email) {
@@ -107,18 +126,23 @@ export async function POST(request: Request) {
     const locale = body.locale === "de" ? "de" : "en";
     const service = createServiceRoleSupabaseClient();
 
-    const { data: authData, error: authError } = await service.auth.admin.createUser({
-      email,
-      password: body.password,
-      email_confirm: true,
-      user_metadata: {
-        username: body.username,
-        locale,
-      },
-    });
+    const { data: authData, error: authError } =
+      await service.auth.admin.createUser({
+        email,
+        password: body.password,
+        email_confirm: true,
+        user_metadata: {
+          username: body.username,
+          locale,
+        },
+      });
 
     if (authError || !authData.user) {
-      return jsonError(400, "admin_user_create_failed", authError?.message ?? "Failed to create user");
+      return jsonError(
+        400,
+        "admin_user_create_failed",
+        authError?.message ?? "Failed to create user",
+      );
     }
 
     const { error: profileError } = await service.from("profiles").upsert(
@@ -140,10 +164,6 @@ export async function POST(request: Request) {
     return jsonOk({ userId: authData.user.id }, 201);
   } catch (error) {
     console.warn("admin users create failed", error);
-    return jsonError(
-      500,
-      "admin_user_create_failed",
-      "Failed to create user",
-    );
+    return jsonError(500, "admin_user_create_failed", "Failed to create user");
   }
 }

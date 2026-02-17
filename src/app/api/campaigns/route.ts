@@ -1,5 +1,9 @@
 import { requireAuth } from "@/server/auth/require-auth";
 import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { listCampaignsRpcQuery } from "@/features/campaigns/queries/list-campaigns-rpc.query";
+import { mapCampaignRpcRow } from "@/features/campaigns/logic/map-campaign-rpc-row.logic";
+import { parseCampaignListScopeParam } from "@/server/api/validation/campaign-scope";
+import { parseListLimitParam } from "@/server/api/validation/list-query";
 
 type CreateCampaignBody = {
   title?: string;
@@ -13,116 +17,24 @@ export async function GET(request: Request) {
     return auth.response;
   }
 
-  const { client, user } = auth.context;
+  const { client } = auth.context;
   const url = new URL(request.url);
   const roleForUserId = url.searchParams.get("roleForUserId");
-  const scopeParam = url.searchParams.get("scope");
-  const scope =
-    scopeParam === "member" || scopeParam === "public" ? scopeParam : "all";
-  const limitParam = Number(url.searchParams.get("limit") ?? "100");
-  const limit = Number.isFinite(limitParam)
-    ? Math.min(Math.max(limitParam, 1), 500)
-    : 100;
+  const scope = parseCampaignListScopeParam(url.searchParams.get("scope"));
+  const limit = parseListLimitParam(url.searchParams.get("limit"), 100, 1, 500);
 
-  let campaignsQuery = client
-    .from("campaigns")
-    .select("id, owner_user_id, title, description, is_private, created_at, updated_at")
-    .limit(limit);
-
-  if (scope === "public") {
-    campaignsQuery = campaignsQuery.eq("is_private", false);
-  }
-
-  const { data, error } = await campaignsQuery.order("updated_at", { ascending: false });
-
-  if (error) {
-    return jsonError(400, "campaign_list_failed", error.message);
-  }
-
-  const campaigns = data ?? [];
-  if (campaigns.length === 0) {
-    return jsonOk([]);
-  }
-
-  const campaignIds = campaigns.map((campaign) => campaign.id);
-  const ownerIds = [...new Set(campaigns.map((campaign) => campaign.owner_user_id))];
-
-  const [
-    { data: memberships, error: membershipError },
-    { data: owners, error: ownersError },
-    { data: membershipsForTargetUser, error: membershipsForTargetUserError },
-  ] =
-    await Promise.all([
-      client
-        .from("campaign_memberships")
-        .select("campaign_id, user_id, state")
-        .in("campaign_id", campaignIds)
-        .eq("state", "accepted"),
-      client.from("profiles").select("id, username, role").in("id", ownerIds),
-      roleForUserId
-        ? client
-            .from("campaign_memberships")
-            .select("campaign_id")
-            .in("campaign_id", campaignIds)
-            .eq("state", "accepted")
-            .eq("user_id", roleForUserId)
-        : Promise.resolve({ data: null, error: null }),
-    ]);
-
-  if (membershipError) {
-    return jsonError(400, "campaign_list_failed", membershipError.message);
-  }
-  if (ownersError) {
-    return jsonError(400, "campaign_list_failed", ownersError.message);
-  }
-  if (membershipsForTargetUserError) {
-    return jsonError(400, "campaign_list_failed", membershipsForTargetUserError.message);
-  }
-
-  const ownerMap = new Map(
-    (owners ?? []).map((entry) => [entry.id, { username: entry.username, role: entry.role }]),
-  );
-  const acceptedMembersByCampaign = new Map<string, string[]>();
-  for (const membership of memberships ?? []) {
-    const campaignMemberIds = acceptedMembersByCampaign.get(membership.campaign_id) ?? [];
-    campaignMemberIds.push(membership.user_id);
-    acceptedMembersByCampaign.set(membership.campaign_id, campaignMemberIds);
-  }
-  const acceptedTargetCampaignIds = new Set(
-    (membershipsForTargetUser ?? []).map((membership) => membership.campaign_id),
-  );
-
-  const enrichedCampaigns = campaigns.map((campaign) => {
-      const acceptedMemberIds = acceptedMembersByCampaign.get(campaign.id) ?? [];
-      const isOwner = campaign.owner_user_id === user.id;
-      const isAcceptedPlayer =
-        !isOwner && acceptedMemberIds.some((memberUserId) => memberUserId === user.id);
-      const owner = ownerMap.get(campaign.owner_user_id);
-      const roleForTargetUser = roleForUserId
-        ? campaign.owner_user_id === roleForUserId
-          ? "owner"
-          : acceptedTargetCampaignIds.has(campaign.id)
-            ? "player"
-            : null
-        : null;
-
-      return {
-        ...campaign,
-        owner_username: owner?.username ?? null,
-        owner_role: owner?.role ?? null,
-        player_count: acceptedMemberIds.filter((memberUserId) => memberUserId !== campaign.owner_user_id)
-          .length,
-        current_user_role: isOwner ? "owner" : isAcceptedPlayer ? "player" : null,
-        role_for_user: roleForTargetUser,
-      };
+  try {
+    const rows = await listCampaignsRpcQuery(client, {
+      scope,
+      roleForUserId,
+      limit,
     });
 
-  const visibleCampaigns =
-    scope === "member"
-      ? enrichedCampaigns.filter((campaign) => campaign.current_user_role !== null)
-      : enrichedCampaigns;
-
-  return jsonOk(visibleCampaigns);
+    return jsonOk(rows.map(mapCampaignRpcRow));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return jsonError(400, "campaign_list_failed", message);
+  }
 }
 
 export async function POST(request: Request) {

@@ -29,5 +29,10 @@ export function FormLabel({
   className,
   ...props
 }: ComponentPropsWithoutRef<"label">) {
-  return <label className={cn("text-xs text-muted-foreground", className)} {...props} />;
+  return (
+    <label
+      className={cn("text-muted-foreground text-xs", className)}
+      {...props}
+    />
+  );
 }

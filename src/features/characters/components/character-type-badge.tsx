@@ -9,7 +9,11 @@ type CharacterTypeBadgeProps = {
   className?: string;
 };
 
-export function CharacterTypeBadge({ type, t, className }: CharacterTypeBadgeProps) {
+export function CharacterTypeBadge({
+  type,
+  t,
+  className,
+}: CharacterTypeBadgeProps) {
   return (
     <StatusBadge
       label={t(`ui.labels.characterType.${type}`)}

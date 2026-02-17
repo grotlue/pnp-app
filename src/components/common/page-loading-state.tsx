@@ -5,10 +5,15 @@ type PageLoadingStateProps = {
   className?: string;
 };
 
-export function PageLoadingState({ label, className = "" }: PageLoadingStateProps) {
+export function PageLoadingState({
+  label,
+  className = "",
+}: PageLoadingStateProps) {
   return (
     <Card>
-      <CardContent className={`py-8 text-sm text-muted-foreground ${className}`.trim()}>
+      <CardContent
+        className={`text-muted-foreground py-8 text-sm ${className}`.trim()}
+      >
         {label}
       </CardContent>
     </Card>

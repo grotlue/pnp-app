@@ -49,7 +49,11 @@ export async function POST(request: Request) {
 
   const body = await parseJsonBody<CreateCharacterBody>(request);
   if (!body?.ownerUserId || !body.type || !body.name) {
-    return jsonError(400, "invalid_payload", "ownerUserId, type, and name are required");
+    return jsonError(
+      400,
+      "invalid_payload",
+      "ownerUserId, type, and name are required",
+    );
   }
 
   const client = (() => {
