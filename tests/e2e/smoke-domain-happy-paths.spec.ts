@@ -58,7 +58,9 @@ test("FLOW-CHARACTERS-CREATE-EDIT @smoke @characters creates and edits a charact
   await page.getByRole("button", { name: "Save" }).click();
 
   await expect(page).toHaveURL(/\/characters\/[0-9a-f-]+$/);
-  await expect(page.getByText(updatedCharacterName)).toBeVisible();
+  await expect(
+    page.getByText(updatedCharacterName, { exact: true }).first(),
+  ).toBeVisible();
 });
 
 test("FLOW-NOTIFICATIONS-MARK-READ @smoke @notifications marks an unread notification as read", async ({
