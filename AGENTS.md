@@ -245,6 +245,14 @@ Before opening or merging a PR, ensure all points are addressed:
   - test/verification results
   - risk notes
 
+### 13.2) Mandatory PR Template Compliance (Agents)
+
+- Every agent-created or agent-updated PR body must follow `.github/pull_request_template.md` headings and checkbox structure exactly.
+- Do not submit a free-form PR body that omits template sections, even if the content exists elsewhere in prose.
+- When using GitHub CLI, prefer template-derived body files (for example `--body-file`) and fill all required policy sections (`Linked Issue(s)`, `Flow Impact`, `E2E Coverage Matrix`).
+- Before finalizing PR creation/update, run the same policy validation locally:
+  - `BASE_REF=main PR_BODY="$(cat <pr-body-file>)" node .github/scripts/e2e-policy-check.mjs`
+
 ## 14) Definition of Done
 
 A task is done only when all conditions are met:
