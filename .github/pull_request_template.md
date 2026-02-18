@@ -13,6 +13,12 @@
 - [ ] Existing flow changed
 - [ ] New flow added
 
+## Impact Signals (Regression Auto-Label)
+
+- [ ] Security impact
+- [ ] Data model impact
+- [ ] Performance impact
+
 ## E2E Coverage Matrix
 
 | AC / User Flow Ref | Scenario ID      | Test status              | Why E2E vs feature test          |

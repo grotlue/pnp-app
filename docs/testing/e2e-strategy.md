@@ -28,3 +28,22 @@ yarn test:e2e --grep @smoke
 ## PR Requirement
 
 Flow-impacting PRs must fill the E2E Coverage Matrix in the [PR template](../../.github/pull_request_template.md).
+
+Additionally, the `PR Screenshots` workflow runs automatically on PR updates, detects changed/new UI areas from the PR diff, and posts a sticky PR comment with the `pr-screenshots` artifact link when captures are relevant. The workflow enforces mapping coverage and fails if changed UI files are not mapped to screenshot targets.
+
+## Regression Triggering
+
+- `@smoke` runs on all PRs in CI.
+- `@regression` runs when PR label `e2e-regression` is present.
+- CI E2E runs set `REQUIRE_ADMIN_MFA=true` to keep admin MFA step-up flows covered in smoke.
+- High-risk PRs are auto-labeled via `.github/workflows/e2e-regression-autolabel.yml` based on:
+  - PR template impact signals (`Security`, `Data model`, `Performance`)
+  - sensitive path changes (`src/app/api/**`, `server/auth/**`, `supabase/migrations/**`, etc.)
+
+## Scenario Scaffolding
+
+Use the scaffold generator for consistent IDs/tags:
+
+```bash
+yarn test:e2e:new --domain campaigns --slug request-join --level regression --description "requests to join a campaign"
+```

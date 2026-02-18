@@ -44,6 +44,8 @@ import {
 } from "@/features/characters/logic/character-list.logic";
 import { getCharacters } from "@/features/characters/queries/characters-screen.query";
 import { loginUser } from "@/features/users/queries/users-auth.query";
+import { resolveAdminMfaStepUpDecision } from "@/features/users/logic/admin-mfa-step-up.logic";
+import { getAdminMfaStatus } from "@/features/users/queries/users-mfa.query";
 import { getMe } from "@/features/users/queries/users-profile.query";
 import type { LoginResponse, MeResponse } from "@/features/users/types";
 import { queryKeys } from "@/lib/client/query-keys";
@@ -171,15 +173,35 @@ export function HomePageView({
         ...loginForm,
         ...(captchaToken ? { captchaToken } : {}),
       });
-      setSession({
+      const nextSession = {
         accessToken: response.accessToken,
         refreshToken: response.refreshToken,
         expiresAt: response.expiresAt,
-      });
+      };
+
+      setSession(nextSession);
       if (response.locale) {
         setLocaleCookie(resolveLocale(response.locale));
       }
-      router.replace("/");
+
+      const me = await getMe(nextSession);
+      queryClient.setQueryData(queryKeys.me(nextSession.accessToken), me);
+
+      if (me.profile.role === "admin") {
+        const mfaStatus = await getAdminMfaStatus(nextSession);
+        const stepUpDecision = resolveAdminMfaStepUpDecision({
+          role: me.profile.role,
+          mfaStatus,
+        });
+
+        if (stepUpDecision.kind !== "none") {
+          const challengeHref = `${appRoutes.adminMfaChallenge}?returnTo=${encodeURIComponent(appRoutes.adminUsers)}`;
+          router.replace(challengeHref);
+          return;
+        }
+      }
+
+      router.replace(appRoutes.home);
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
