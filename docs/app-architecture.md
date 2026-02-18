@@ -32,6 +32,7 @@ src/
     client/                     # client session/api helpers
     logic/                      # shared pure helper logic (e.g. hasItems)
     features/                   # runtime feature flags
+    security/                   # shared security constants (origins/script URLs)
     i18n/                       # localization helpers
     supabase/                   # browser supabase setup
     utils/
@@ -57,6 +58,7 @@ src/
 - Pure business rules live in `features/*/logic`.
 - Route/page modules orchestrate hooks and presentation.
 - Features do not import from `src/app`.
+- Reusable literals (origins, CSP/header names, enum-like mode strings) are defined in domain `constants.ts` modules and imported where used instead of repeating inline string literals.
 
 ## React Query
 
@@ -89,6 +91,7 @@ src/
 - API responses are marked `no-store` via shared HTTP/security helpers.
 - Access tokens are accepted from bearer headers and secure HttpOnly cookies.
 - Security headers (including CSP) are applied centrally via `src/proxy.ts`.
+- CSP/header literals are centralized in `src/server/security/constants.ts` and shared security origins/script URLs in `src/lib/security/constants.ts`.
 - New public-schema tables must enable RLS in the same migration.
 - Admin APIs enforce role checks plus MFA `aal2` session level in preview/production by default.
 - Auth CAPTCHA support is centralized and env-driven (`AUTH_CAPTCHA_MODE`, `NEXT_PUBLIC_AUTH_CAPTCHA_MODE`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`).

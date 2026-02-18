@@ -1,12 +1,15 @@
 import { resolveRuntimeEnvironment } from "@/lib/features/feature-flags";
+import {
+  AUTH_CAPTCHA_MODE_LIST,
+  AUTH_CAPTCHA_MODES,
+  BOOLEAN_ENV_VALUES,
+  PRODUCTION_RUNTIME_ENVIRONMENTS,
+  type AuthCaptchaMode,
+} from "@/lib/features/constants";
 
-export type AuthCaptchaMode = "off" | "optional" | "required";
+export type { AuthCaptchaMode };
 
-const KNOWN_CAPTCHA_MODES = new Set<AuthCaptchaMode>([
-  "off",
-  "optional",
-  "required",
-]);
+const KNOWN_CAPTCHA_MODES = new Set<AuthCaptchaMode>(AUTH_CAPTCHA_MODE_LIST);
 
 function normalizeEnvValue(value?: string): string | null {
   if (!value) {
@@ -33,10 +36,10 @@ function parseBooleanEnv(value?: string): boolean | null {
     return null;
   }
 
-  if (normalized === "true") {
+  if (normalized === BOOLEAN_ENV_VALUES.true) {
     return true;
   }
-  if (normalized === "false") {
+  if (normalized === BOOLEAN_ENV_VALUES.false) {
     return false;
   }
   return null;
@@ -78,15 +81,15 @@ export function resolveAuthCaptchaMode(): AuthCaptchaMode {
   }
 
   const environment = resolveRuntimeEnvironment();
-  if (environment === "preview" || environment === "production") {
-    return "optional";
+  if (PRODUCTION_RUNTIME_ENVIRONMENTS.has(environment)) {
+    return AUTH_CAPTCHA_MODES.optional;
   }
 
-  return "off";
+  return AUTH_CAPTCHA_MODES.off;
 }
 
 export function isCaptchaRequiredForAuth(): boolean {
-  return resolveAuthCaptchaMode() === "required";
+  return resolveAuthCaptchaMode() === AUTH_CAPTCHA_MODES.required;
 }
 
 export function hasAal2AuthLevel(accessToken: string): boolean {

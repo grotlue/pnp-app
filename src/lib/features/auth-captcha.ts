@@ -1,5 +1,14 @@
-export type RuntimeEnvironment = "development" | "preview" | "production";
-export type AuthCaptchaMode = "off" | "optional" | "required";
+import {
+  AUTH_CAPTCHA_MODE_LIST,
+  AUTH_CAPTCHA_MODES,
+  PRODUCTION_RUNTIME_ENVIRONMENTS,
+  RUNTIME_ENVIRONMENT_LIST,
+  RUNTIME_ENVIRONMENTS,
+  type AuthCaptchaMode,
+  type RuntimeEnvironment,
+} from "./constants";
+
+export type { AuthCaptchaMode, RuntimeEnvironment };
 
 type AuthCaptchaClientConfig = {
   mode: AuthCaptchaMode;
@@ -8,11 +17,7 @@ type AuthCaptchaClientConfig = {
   enabled: boolean;
 };
 
-const KNOWN_CAPTCHA_MODES = new Set<AuthCaptchaMode>([
-  "off",
-  "optional",
-  "required",
-]);
+const KNOWN_CAPTCHA_MODES = new Set<AuthCaptchaMode>(AUTH_CAPTCHA_MODE_LIST);
 
 function normalizeEnvValue(value?: string | null): string | null {
   if (!value) {
@@ -41,12 +46,8 @@ function normalizeRuntimeEnvironment(
     return null;
   }
 
-  if (
-    normalized === "development" ||
-    normalized === "preview" ||
-    normalized === "production"
-  ) {
-    return normalized;
+  if (RUNTIME_ENVIRONMENT_LIST.includes(normalized as RuntimeEnvironment)) {
+    return normalized as RuntimeEnvironment;
   }
 
   return null;
@@ -76,7 +77,7 @@ export function resolveAuthCaptchaRuntimeEnvironment(): RuntimeEnvironment {
     return vercelEnvironment;
   }
 
-  return "development";
+  return RUNTIME_ENVIRONMENTS.development;
 }
 
 export function resolveClientAuthCaptchaMode(): AuthCaptchaMode {
@@ -88,11 +89,11 @@ export function resolveClientAuthCaptchaMode(): AuthCaptchaMode {
   }
 
   const environment = resolveAuthCaptchaRuntimeEnvironment();
-  if (environment === "preview" || environment === "production") {
-    return "optional";
+  if (PRODUCTION_RUNTIME_ENVIRONMENTS.has(environment)) {
+    return AUTH_CAPTCHA_MODES.optional;
   }
 
-  return "off";
+  return AUTH_CAPTCHA_MODES.off;
 }
 
 export function getTurnstileSiteKey(): string | null {
@@ -106,8 +107,8 @@ export function resolveAuthCaptchaClientConfig(): AuthCaptchaClientConfig {
 
   return {
     mode,
-    required: mode === "required",
+    required: mode === AUTH_CAPTCHA_MODES.required,
     siteKey,
-    enabled: mode !== "off" && Boolean(siteKey),
+    enabled: mode !== AUTH_CAPTCHA_MODES.off && Boolean(siteKey),
   };
 }

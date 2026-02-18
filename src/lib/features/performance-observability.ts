@@ -1,4 +1,10 @@
-type RuntimeEnvironment = "development" | "preview" | "production";
+import {
+  BOOLEAN_ENV_VALUES,
+  PRODUCTION_RUNTIME_ENVIRONMENTS,
+  RUNTIME_ENVIRONMENT_LIST,
+  RUNTIME_ENVIRONMENTS,
+  type RuntimeEnvironment,
+} from "./constants";
 
 function normalizeRuntimeEnvironment(
   value?: string | null,
@@ -7,12 +13,8 @@ function normalizeRuntimeEnvironment(
     return null;
   }
 
-  if (
-    value === "development" ||
-    value === "preview" ||
-    value === "production"
-  ) {
-    return value;
+  if (RUNTIME_ENVIRONMENT_LIST.includes(value as RuntimeEnvironment)) {
+    return value as RuntimeEnvironment;
   }
 
   return null;
@@ -29,19 +31,19 @@ export function resolvePerformanceRuntimeEnvironment(): RuntimeEnvironment {
     return vercelEnvironment;
   }
 
-  return "development";
+  return RUNTIME_ENVIRONMENTS.development;
 }
 
 export function resolveSpeedInsightsEnabled(): boolean {
   const explicit = process.env.ENABLE_VERCEL_SPEED_INSIGHTS;
-  if (explicit === "true") {
+  if (explicit === BOOLEAN_ENV_VALUES.true) {
     return true;
   }
 
-  if (explicit === "false") {
+  if (explicit === BOOLEAN_ENV_VALUES.false) {
     return false;
   }
 
   const environment = resolvePerformanceRuntimeEnvironment();
-  return environment === "preview" || environment === "production";
+  return PRODUCTION_RUNTIME_ENVIRONMENTS.has(environment);
 }
