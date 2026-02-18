@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, LogOut, Settings, Shield, User } from "lucide-react";
+import { Bell, LogOut, Moon, Settings, Shield, Sun, User } from "lucide-react";
 import {
   IconActionButton,
   IconActionLinkButton,
@@ -20,6 +20,7 @@ import { logoutUser } from "@/features/users/queries/users-auth.query";
 import { useNotificationsUnreadCount } from "@/features/notifications/hooks/use-notifications-unread-count";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
 import { appNavigationRoutes, appRoutes } from "@/app/router";
+import { useThemePreference } from "@/lib/client/theme-provider";
 
 type AppHeaderProps = {
   locale: AppLocale;
@@ -39,6 +40,7 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
   const notificationsUnreadCountQuery = useNotificationsUnreadCount(session);
   const unreadNotifications =
     notificationsUnreadCountQuery.data?.unreadCount ?? 0;
+  const { themeMode, toggleThemePreference } = useThemePreference();
 
   useEffect(() => {
     if (!profileLocale) {
@@ -99,6 +101,17 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
           })}
         </nav>
         <div className="ml-auto flex items-center gap-1">
+          <IconActionButton
+            label={
+              themeMode === "dark"
+                ? t("ui.actions.toggleThemeToLight")
+                : t("ui.actions.toggleThemeToDark")
+            }
+            icon={themeMode === "dark" ? Sun : Moon}
+            variant="ghost"
+            dataTestId="theme-toggle"
+            onClick={toggleThemePreference}
+          />
           <IconActionLinkButton
             label={t("ui.menu.notifications")}
             icon={Bell}

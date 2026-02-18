@@ -11,6 +11,7 @@ type IconActionButtonProps = {
   icon: LucideIcon;
   variant?: ButtonVariant;
   size?: ButtonSize;
+  dataTestId?: string;
   disabled?: boolean;
   onClick?: () => void;
 };
@@ -29,6 +30,7 @@ export function IconActionButton({
   icon: Icon,
   variant = "outline",
   size = "icon-sm",
+  dataTestId,
   disabled,
   onClick,
 }: IconActionButtonProps) {
@@ -38,6 +40,7 @@ export function IconActionButton({
       size={size}
       aria-label={label}
       title={label}
+      data-testid={dataTestId}
       disabled={disabled}
       onClick={onClick}
     >
