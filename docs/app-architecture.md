@@ -68,6 +68,18 @@ src/
 - Mutations invalidate domain query keys.
 - Prefer shared hooks for common identity reads (e.g. `use-me-query`) to avoid duplicate fetches.
 
+## Testing Strategy
+
+- E2E tests (`tests/e2e/*`) cover only critical user-visible happy paths across UI + API + auth/session boundaries.
+- Feature/API/unit tests cover edge cases, validation/error permutations, and logic combinatorics.
+- E2E scenarios use stable IDs in test titles: `FLOW-<domain>-<slug>`.
+- E2E scenarios are tagged for execution policy:
+  - `@smoke`: mandatory on PR CI
+  - `@regression`: full-suite/nightly coverage
+- CI policy:
+  - PR CI runs smoke subset: `yarn test:e2e --grep @smoke`
+  - Nightly/manual full run executes complete Playwright suite.
+
 ## Loading UX
 
 - Reusable loading card lives in `src/components/common/page-loading-state.tsx`.
@@ -152,3 +164,10 @@ src/
 - Hooks: `use-*.ts`.
 - Domain types: `features/<domain>/types.ts`.
 - Tests: place in `tests/` subfolders next to the code under test.
+
+## Feature Dev Flow and E2E Coverage
+
+- Source input for flow coverage is GitHub issue user flows + acceptance criteria.
+- Flow-impacting PRs must include an `E2E Coverage Matrix` in the PR template that maps AC/flow items to scenario IDs.
+- If no linked issue exists, PR must provide inline acceptance criteria and happy paths.
+- Policy enforcement is automated in `.github/workflows/e2e-policy.yml`.

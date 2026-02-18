@@ -89,7 +89,7 @@ jobs:
       - name: E2E smoke tests
         env:
           PLAYWRIGHT_WEB_SERVER_CMD: yarn start --port 3000
-        run: yarn test:e2e
+        run: yarn test:e2e --grep @smoke
 
       - name: Upload Playwright artifacts on failure
         if: ${{ failure() }}

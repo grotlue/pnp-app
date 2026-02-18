@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-test("home page renders login form for logged-out users", async ({ page }) => {
+test("FLOW-auth-login-entry @smoke @auth home page renders login form for logged-out users", async ({
+  page,
+}) => {
   await page.goto("/");
 
   await expect(page.locator("main input[type='email']").first()).toBeVisible();

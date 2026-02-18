@@ -84,6 +84,28 @@ body:
     validations:
       required: true
 
+  - type: textarea
+    id: e2e-happy-paths
+    attributes:
+      label: E2E happy paths (critical only)
+      description: List the critical user-visible happy paths that must be covered by E2E tests.
+      placeholder: |
+        - FLOW-auth-login-entry: logged-out user reaches login form
+        - FLOW-campaign-create: GM creates a campaign and sees it in list
+    validations:
+      required: true
+
+  - type: textarea
+    id: e2e-out-of-scope
+    attributes:
+      label: E2E out of scope (covered by feature/API tests)
+      description: List alternate/error/edge paths that are intentionally not covered by E2E.
+      placeholder: |
+        - invalid email format variants -> feature tests
+        - API error permutations -> route tests
+    validations:
+      required: true
+
   - type: checkboxes
     id: non-functional-requirements
     attributes:
