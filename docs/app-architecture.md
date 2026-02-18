@@ -50,6 +50,7 @@ src/
 - `src/app/layout.tsx` stays presentational (HTML shell).
 - `src/app/app.tsx` contains app-level runtime composition (providers/layout wrapper).
 - `src/app/template.tsx` mounts `app.tsx` for all routes.
+- Shared authenticated app chrome (header/navigation) is mounted once in `src/components/common/frontend-layout.tsx`.
 
 ## Separation of Concerns
 
@@ -66,7 +67,7 @@ src/
 - Query keys are centralized in `src/lib/client/query-keys.ts`.
 - Interactive flows use `useQuery` / `useMutation` in feature hooks.
 - Mutations invalidate domain query keys.
-- Prefer shared hooks for common identity reads (e.g. `use-me-query`) to avoid duplicate fetches.
+- Shared identity reads must reuse `queryKeys.me(token)` and prefer `queryClient.ensureQueryData(...)` in composite screen hooks to avoid duplicate `/api/me` calls.
 
 ## Testing Strategy
 

@@ -7,22 +7,23 @@ import type { Campaign, CampaignDetail, UserEntry } from "../types";
 export async function getCampaignDetailContext(
   session: ClientSession,
   campaignId: string,
+  me: MeResponse,
 ): Promise<{
   me: MeResponse;
   detail: CampaignDetail;
   characters: Character[];
   users: UserEntry[];
 }> {
-  const [meResponse, detailResponse, charactersResponse, usersResponse] =
-    await Promise.all([
-      apiRequest<MeResponse>("/api/me", { session }),
+  const [detailResponse, charactersResponse, usersResponse] = await Promise.all(
+    [
       apiRequest<CampaignDetail>(`/api/campaigns/${campaignId}`, { session }),
       apiRequest<Character[]>("/api/characters", { session }),
       apiRequest<UserEntry[]>("/api/users", { session }),
-    ]);
+    ],
+  );
 
   return {
-    me: unwrapApiResponse(meResponse, "Failed to load user"),
+    me,
     detail: unwrapApiResponse(detailResponse, "Failed to load campaign"),
     characters: unwrapApiResponse(
       charactersResponse,

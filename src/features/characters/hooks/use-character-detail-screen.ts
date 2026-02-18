@@ -3,6 +3,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ClientSession } from "@/lib/client/session";
 import type { RelationshipDetail } from "@/features/relationships/types";
+import { queryKeys } from "@/lib/client/query-keys";
+import { getMe } from "@/features/users/queries/users-profile.query";
 import {
   addRelationshipTimelineEntry,
   assignCharacterCampaign,
@@ -21,12 +23,8 @@ export function useCharacterDetailScreen(
   characterId: string,
 ) {
   const queryClient = useQueryClient();
-  const detailQueryKey = [
-    "characters",
-    "detail",
-    characterId,
-    session?.accessToken ?? "no-session",
-  ] as const;
+  const token = session?.accessToken ?? "no-session";
+  const detailQueryKey = ["characters", "detail", characterId, token] as const;
 
   const detailQuery = useQuery({
     queryKey: detailQueryKey,
@@ -35,7 +33,12 @@ export function useCharacterDetailScreen(
       if (!session) {
         throw new Error("Missing session");
       }
-      return getCharacterDetailContext(session, characterId);
+      const me = await queryClient.ensureQueryData({
+        queryKey: queryKeys.me(token),
+        staleTime: 60_000,
+        queryFn: async () => getMe(session),
+      });
+      return getCharacterDetailContext(session, characterId, me);
     },
   });
 
@@ -47,7 +50,7 @@ export function useCharacterDetailScreen(
       "avatar",
       characterId,
       avatarPath ?? "no-avatar",
-      session?.accessToken ?? "no-session",
+      token,
     ],
     enabled: Boolean(session && avatarPath),
     queryFn: async () => {

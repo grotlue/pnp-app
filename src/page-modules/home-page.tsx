@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { EmptyState } from "@/components/common/empty-state";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import { FormInput } from "@/components/common/form-controls";
@@ -28,7 +28,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { appRoutes } from "@/app/router";
-import { AppHeader } from "@/components/common/app-header";
 import { CampaignRoleBadge } from "@/features/campaigns/components/campaign-role-badge";
 import {
   type CampaignListSort,
@@ -47,6 +46,7 @@ import { getCharacters } from "@/features/characters/queries/characters-screen.q
 import { loginUser } from "@/features/users/queries/users-auth.query";
 import { getMe } from "@/features/users/queries/users-profile.query";
 import type { LoginResponse, MeResponse } from "@/features/users/types";
+import { queryKeys } from "@/lib/client/query-keys";
 import { setLocaleCookie } from "@/lib/client/locale-cookie";
 import { clearSession, setSession } from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
@@ -101,6 +101,7 @@ export function HomePageView({
   const authCaptchaConfig = useMemo(() => resolveAuthCaptchaClientConfig(), []);
   const { session, ready } = useClientSession();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState(
@@ -133,8 +134,13 @@ export function HomePageView({
         throw new Error("Missing session");
       }
 
+      const token = session.accessToken;
       const [me, campaigns, characters] = await Promise.all([
-        getMe(session),
+        queryClient.ensureQueryData({
+          queryKey: queryKeys.me(token),
+          staleTime: 60_000,
+          queryFn: async () => getMe(session),
+        }),
         getCampaignsQuery(session, { scope: "public" }),
         getCharacters(session, { scope: "public" }),
       ]);
@@ -276,7 +282,6 @@ export function HomePageView({
   if (loggedInQuery.isLoading) {
     return (
       <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <AppHeader locale={locale} session={session} />
         <main className="mx-auto w-full max-w-7xl px-4 py-8">
           <PageLoadingState label={t("ui.loading.page")} className="py-6" />
         </main>
@@ -344,7 +349,6 @@ export function HomePageView({
 
   return (
     <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <AppHeader locale={locale} session={session} />
       <main className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-8">
         <Card>
           <CardHeader>

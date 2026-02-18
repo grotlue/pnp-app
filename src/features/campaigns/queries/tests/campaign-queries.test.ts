@@ -14,7 +14,6 @@ import { createCampaignMutation } from "../create-campaign.mutation";
 import { updateCampaignMutation } from "../update-campaign.mutation";
 import { deleteCampaignMutation } from "../delete-campaign.mutation";
 import { getCampaignsQuery } from "../get-campaigns.query";
-import { getMyUserQuery } from "../get-my-user.query";
 import {
   assignCharacterToCampaign,
   decideCampaignMembership,
@@ -136,21 +135,12 @@ describe("campaign queries", () => {
     });
   });
 
-  it("getMyUserQuery loads /api/me", async () => {
-    const data = { user: { id: "u1" } };
-    apiRequestMock.mockResolvedValueOnce({ data, error: null, status: 200 });
-
-    await expect(getMyUserQuery(session)).resolves.toEqual(data);
-    expect(apiRequestMock).toHaveBeenCalledWith("/api/me", { session });
-  });
-
   it("getCampaignDetailContext aggregates dependent resources", async () => {
+    const me = {
+      user: { id: "u1" },
+      profile: { username: "u1", description: "", locale: "en" as const },
+    };
     apiRequestMock
-      .mockResolvedValueOnce({
-        data: { user: { id: "u1" } },
-        error: null,
-        status: 200,
-      })
       .mockResolvedValueOnce({
         data: { campaign: { id: "c1" }, memberships: [] },
         error: null,
@@ -167,21 +157,20 @@ describe("campaign queries", () => {
         status: 200,
       });
 
-    const result = await getCampaignDetailContext(session, "c1");
+    const result = await getCampaignDetailContext(session, "c1", me);
 
-    expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/me", { session });
-    expect(apiRequestMock).toHaveBeenNthCalledWith(2, "/api/campaigns/c1", {
+    expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/campaigns/c1", {
       session,
     });
-    expect(apiRequestMock).toHaveBeenNthCalledWith(3, "/api/characters", {
+    expect(apiRequestMock).toHaveBeenNthCalledWith(2, "/api/characters", {
       session,
     });
-    expect(apiRequestMock).toHaveBeenNthCalledWith(4, "/api/users", {
+    expect(apiRequestMock).toHaveBeenNthCalledWith(3, "/api/users", {
       session,
     });
 
     expect(result).toEqual({
-      me: { user: { id: "u1" } },
+      me,
       detail: { campaign: { id: "c1" }, memberships: [] },
       characters: [{ id: "char1" }],
       users: [{ id: "user2", username: "x" }],

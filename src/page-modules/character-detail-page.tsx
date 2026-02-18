@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
-import { AppHeader } from "@/components/common/app-header";
 import { EmptyState } from "@/components/common/empty-state";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import { IconActionButton } from "@/components/common/icon-action-button";
@@ -121,7 +120,6 @@ export function CharacterDetailPageView({
   if (detailQuery.isLoading || !detailQuery.data) {
     return (
       <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <AppHeader locale={locale} session={session} />
         <main className="mx-auto w-full max-w-7xl px-4 py-8">
           <PageLoadingState label={t("ui.loading.page")} />
         </main>
@@ -231,7 +229,6 @@ export function CharacterDetailPageView({
 
   return (
     <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <AppHeader locale={locale} session={session} />
       <main className="mx-auto w-full max-w-7xl px-4 py-8">
         <Card>
           <CardHeader>
