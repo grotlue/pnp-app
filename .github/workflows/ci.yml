@@ -131,7 +131,7 @@ jobs:
 
       - name: E2E smoke tests
         env:
-          PLAYWRIGHT_WEB_SERVER_CMD: yarn start --port 3000
+          PLAYWRIGHT_WEB_SERVER_CMD: REQUIRE_ADMIN_MFA=true yarn start --port 3000
         run: yarn test:e2e --grep @smoke
 
       - name: Upload Playwright artifacts on failure
@@ -209,7 +209,7 @@ jobs:
 
       - name: E2E regression tests
         env:
-          PLAYWRIGHT_WEB_SERVER_CMD: yarn start --port 3000
+          PLAYWRIGHT_WEB_SERVER_CMD: REQUIRE_ADMIN_MFA=true yarn start --port 3000
         run: yarn test:e2e --grep @regression --pass-with-no-tests
 
       - name: Upload Playwright artifacts on failure
