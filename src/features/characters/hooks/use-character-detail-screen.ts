@@ -24,7 +24,7 @@ export function useCharacterDetailScreen(
 ) {
   const queryClient = useQueryClient();
   const token = session?.accessToken ?? "no-session";
-  const detailQueryKey = ["characters", "detail", characterId, token] as const;
+  const detailQueryKey = queryKeys.characterDetail(characterId, token);
 
   const detailQuery = useQuery({
     queryKey: detailQueryKey,

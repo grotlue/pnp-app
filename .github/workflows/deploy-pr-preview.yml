@@ -84,21 +84,18 @@ jobs:
         with:
           version: latest
 
+      - name: Link Supabase project (PR preview)
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+
       - name: Reset Supabase DB (preview) and apply migrations
-        run: |
-          supabase link --project-ref "$SUPABASE_PROJECT_REF"
-          supabase db reset --linked --no-seed --yes
+        run: supabase db reset --linked --no-seed --yes
 
       - name: Lint Supabase DB (PR preview, public schema)
-        run: |
-          supabase link --project-ref "$SUPABASE_PROJECT_REF"
-          supabase db lint --linked --schema public --fail-on warning
+        run: supabase db lint --linked --schema public --fail-on warning
 
       - name: Inspect Supabase DB outliers (PR preview)
         continue-on-error: true
-        run: |
-          supabase link --project-ref "$SUPABASE_PROJECT_REF"
-          supabase inspect db outliers --linked
+        run: supabase inspect db outliers --linked
 
       - name: Ensure admin user (preview)
         run: node scripts/ensure-admin-user.mjs

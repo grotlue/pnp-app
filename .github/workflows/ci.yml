@@ -83,6 +83,50 @@ jobs:
       - name: Build
         run: yarn build
 
+  e2e_smoke:
+    if: ${{ github.event_name == 'pull_request' }}
+    needs:
+      - quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Setup Supabase CLI (E2E fixture backend)
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase services (E2E fixture backend)
+        run: supabase start
+
+      - name: Reset local Supabase DB with fixture seed (E2E)
+        run: supabase db reset --local --yes
+
+      - name: Generate .env.local from local Supabase status (E2E)
+        run: ./scripts/update-local-supabase-env.sh
+
+      - name: Build
+        run: yarn build
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: .playwright-browsers
+          key: ${{ runner.os }}-playwright-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
       - name: Install Playwright browsers
         run: yarn test:e2e:install
 
@@ -95,7 +139,7 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-artifacts
+          name: playwright-artifacts-smoke
           path: |
             playwright-report
             test-results
@@ -164,6 +208,7 @@ jobs:
   dispatch_deploy_pr_preview:
     needs:
       - quality
+      - e2e_smoke
       - db_schema_guardrails
     if: >-
       ${{

@@ -154,6 +154,10 @@ set
 from fixture_users u
 where p.id = u.id;
 
+update public.profiles
+set locale = 'en', updated_at = now()
+where id = '00000000-0000-0000-0000-0000000000a8'::uuid;
+
 insert into public.campaigns (
   id,
   owner_user_id,
@@ -210,3 +214,24 @@ values
   -- 2 users with one standalone character each
   ('20000000-0000-0000-0000-00000000000b'::uuid, '00000000-0000-0000-0000-0000000000a8'::uuid, null, 'player', 'Yara Nebelblick', 27, 'Freie Abenteurerin'),
   ('20000000-0000-0000-0000-00000000000c'::uuid, '00000000-0000-0000-0000-0000000000a9'::uuid, null, 'player', 'Dorian Falk', 35, 'Scharfschuetze auf Reisen');
+
+insert into public.notifications (
+  id,
+  recipient_user_id,
+  event_type,
+  source_character_id,
+  target_character_id,
+  payload,
+  is_read,
+  created_at
+)
+values (
+  '30000000-0000-0000-0000-000000000001'::uuid,
+  '00000000-0000-0000-0000-0000000000a8'::uuid,
+  'relationship_created',
+  '20000000-0000-0000-0000-000000000006'::uuid,
+  '20000000-0000-0000-0000-00000000000b'::uuid,
+  '{"source_character_name":"Aldric Sternklinge","target_character_name":"Yara Nebelblick"}'::jsonb,
+  false,
+  now()
+);
