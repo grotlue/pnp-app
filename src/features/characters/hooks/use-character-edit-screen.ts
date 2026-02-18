@@ -17,8 +17,20 @@ export function useCharacterEditScreen(
 ) {
   const queryClient = useQueryClient();
   const token = session?.accessToken ?? "no-session";
+  const editQueryKey = queryKeys.characterEdit(characterId, token);
+  const detailQueryKey = queryKeys.characterDetail(characterId, token);
+  const charactersScreenQueryKey = queryKeys.charactersScreen(token);
+
+  async function invalidateCharacterData() {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: editQueryKey }),
+      queryClient.invalidateQueries({ queryKey: detailQueryKey }),
+      queryClient.invalidateQueries({ queryKey: charactersScreenQueryKey }),
+    ]);
+  }
+
   const editQuery = useQuery({
-    queryKey: ["characters", "edit", characterId, token],
+    queryKey: editQueryKey,
     enabled: Boolean(session),
     queryFn: async () => {
       if (!session) {
@@ -40,6 +52,7 @@ export function useCharacterEditScreen(
       }
       return updateCharacter(session, characterId, input);
     },
+    onSuccess: invalidateCharacterData,
   });
 
   const deleteMutation = useMutation({
@@ -49,6 +62,7 @@ export function useCharacterEditScreen(
       }
       return deleteCharacterFromEdit(session, characterId);
     },
+    onSuccess: invalidateCharacterData,
   });
 
   return {
