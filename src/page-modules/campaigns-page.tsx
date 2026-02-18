@@ -1,5 +1,7 @@
 "use client";
 
+import { UiDiv, UiMain } from "@/components/ui/html-elements";
+
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/common/feedback-message";
@@ -102,23 +104,23 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
   ];
 
   if (!ready || !session) {
-    return <main className="min-h-screen" />;
+    return <UiMain className="min-h-screen" />;
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-7xl px-4 py-8">
+    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+      <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.campaigns.title")}</CardTitle>
             <CardDescription>{t("ui.campaigns.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
+            <UiDiv className="flex flex-wrap gap-2">
               <Button onClick={() => setCreateOpen(true)}>
                 {t("ui.campaigns.create")}
               </Button>
-            </div>
+            </UiDiv>
 
             <FeedbackMessage message={feedback} />
 
@@ -175,7 +177,7 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
             )}
           </CardContent>
         </Card>
-      </main>
+      </UiMain>
 
       <Modal
         open={createOpen}
@@ -305,8 +307,8 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
           </>
         }
       >
-        <div className="text-sm">{t("ui.campaigns.deleteConfirm")}</div>
+        <UiDiv className="text-sm">{t("ui.campaigns.deleteConfirm")}</UiDiv>
       </Modal>
-    </div>
+    </UiDiv>
   );
 }

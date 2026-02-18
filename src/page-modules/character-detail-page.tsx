@@ -1,5 +1,8 @@
 "use client";
 
+import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { TextLink } from "@/components/ui/text-link";
+
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -39,7 +42,6 @@ import type {
 } from "@/features/relationships/types";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { useClientSession } from "@/lib/client/use-client-session";
-import { textLinkClassName } from "@/lib/utils/link";
 
 type CharacterDetailScreenProps = {
   locale: AppLocale;
@@ -114,16 +116,16 @@ export function CharacterDetailPageView({
   }, [ready, router, session]);
 
   if (!ready || !session) {
-    return <main className="min-h-screen" />;
+    return <UiMain className="min-h-screen" />;
   }
 
   if (detailQuery.isLoading || !detailQuery.data) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <main className="mx-auto w-full max-w-7xl px-4 py-8">
+      <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+        <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
           <PageLoadingState label={t("ui.loading.page")} />
-        </main>
-      </div>
+        </UiMain>
+      </UiDiv>
     );
   }
 
@@ -228,8 +230,8 @@ export function CharacterDetailPageView({
     : relationshipTargetOptions;
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-7xl px-4 py-8">
+    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+      <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -243,14 +245,14 @@ export function CharacterDetailPageView({
               {t("ui.characterDetail.subtitle")}
             </CardDescription>
             {isForeignAdminView ? (
-              <div className="border-destructive/40 bg-destructive/10 text-destructive inline-flex w-fit rounded-md border px-2 py-1 text-xs font-medium">
+              <UiDiv className="border-destructive/40 bg-destructive/10 text-destructive inline-flex w-fit rounded-md border px-2 py-1 text-xs font-medium">
                 {t("ui.admin.foreignItemLabel")}
-              </div>
+              </UiDiv>
             ) : null}
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-[200px_1fr]">
-              <div className="border-border bg-muted/30 overflow-hidden rounded-lg border">
+            <UiDiv className="grid gap-4 md:grid-cols-[200px_1fr]">
+              <UiDiv className="border-border bg-muted/30 overflow-hidden rounded-lg border">
                 {avatarUrl ? (
                   <Image
                     src={avatarUrl}
@@ -260,58 +262,52 @@ export function CharacterDetailPageView({
                     className="h-[200px] w-full object-cover"
                   />
                 ) : (
-                  <div className="text-muted-foreground flex h-[200px] items-center justify-center text-xs">
+                  <UiDiv className="text-muted-foreground flex h-[200px] items-center justify-center text-xs">
                     {t("ui.characterDetail.noImage")}
-                  </div>
+                  </UiDiv>
                 )}
-              </div>
-              <div className="space-y-2 text-sm">
-                <div>
+              </UiDiv>
+              <UiDiv className="space-y-2 text-sm">
+                <UiDiv>
                   <strong>{t("ui.fields.characterName")}</strong>:{" "}
                   {character.name}
-                </div>
-                <div>
+                </UiDiv>
+                <UiDiv>
                   <strong>{t("ui.fields.characterAge")}</strong>:{" "}
                   {character.age ?? "-"}
-                </div>
-                <div>
+                </UiDiv>
+                <UiDiv>
                   <strong>{t("ui.fields.type")}</strong>:{" "}
                   <CharacterTypeBadge type={character.type} t={t} />
-                </div>
-                <div>
+                </UiDiv>
+                <UiDiv>
                   <strong>{t("ui.admin.ownerLabel")}</strong>:{" "}
                   {ownerUser?.role === "admin" ? (
                     <span>{ownerUser.username ?? character.owner_user_id}</span>
                   ) : (
-                    <Link
-                      href={`/users/${character.owner_user_id}`}
-                      className={textLinkClassName}
-                    >
+                    <TextLink href={`/users/${character.owner_user_id}`}>
                       {ownerUser?.username ?? character.owner_user_id}
-                    </Link>
+                    </TextLink>
                   )}
-                </div>
-                <div>
+                </UiDiv>
+                <UiDiv>
                   <strong>{t("ui.characterDetail.assignedCampaign")}</strong>:{" "}
                   {assignedCampaign ? (
-                    <Link
-                      href={`/campaigns/${assignedCampaign.id}`}
-                      className={textLinkClassName}
-                    >
+                    <TextLink href={`/campaigns/${assignedCampaign.id}`}>
                       {assignedCampaign.title}
-                    </Link>
+                    </TextLink>
                   ) : (
                     "-"
                   )}
-                </div>
-                <div>
+                </UiDiv>
+                <UiDiv>
                   <strong>{t("ui.fields.description")}</strong>:{" "}
                   {character.description || "-"}
-                </div>
-              </div>
-            </div>
+                </UiDiv>
+              </UiDiv>
+            </UiDiv>
 
-            <div className="flex flex-wrap gap-2">
+            <UiDiv className="flex flex-wrap gap-2">
               {canManage && !character.campaign_id ? (
                 <Button variant="outline" onClick={() => setAssignOpen(true)}>
                   {t("ui.characterDetail.assignCampaign")}
@@ -337,14 +333,14 @@ export function CharacterDetailPageView({
                   {t("ui.characterDetail.addRelationship")}
                 </Button>
               ) : null}
-            </div>
+            </UiDiv>
 
             <FeedbackMessage message={feedback} />
 
-            <div className="space-y-2">
-              <div className="text-sm font-medium">
+            <UiDiv className="space-y-2">
+              <UiDiv className="text-sm font-medium">
                 {t("ui.characterDetail.relationships")}
-              </div>
+              </UiDiv>
               {mergedRelations.map((entry, index) => (
                 <ListItemRow
                   key={`${entry.other_character_id ?? `external-${index}`}`}
@@ -377,8 +373,9 @@ export function CharacterDetailPageView({
                     ) : null
                   }
                 >
-                  <button
-                    className="text-left"
+                  <Button
+                    variant="ghost"
+                    className="h-auto justify-start p-0 text-left hover:bg-transparent"
                     onClick={async () => {
                       setMessage("");
                       try {
@@ -398,15 +395,15 @@ export function CharacterDetailPageView({
                       }
                     }}
                   >
-                    <div className="font-medium">
+                    <UiDiv className="font-medium">
                       {entry.other_character_name}
-                    </div>
-                    <div className="text-muted-foreground text-xs">
+                    </UiDiv>
+                    <UiDiv className="text-muted-foreground text-xs">
                       {entry.other_character_deleted
                         ? t("ui.characterDetail.externalOneWay")
                         : ""}
-                    </div>
-                  </button>
+                    </UiDiv>
+                  </Button>
                 </ListItemRow>
               ))}
               {mergedRelations.length === 0 ? (
@@ -415,10 +412,10 @@ export function CharacterDetailPageView({
                   className="bg-background p-3"
                 />
               ) : null}
-            </div>
+            </UiDiv>
           </CardContent>
         </Card>
-      </main>
+      </UiMain>
 
       <AssignCampaignModal
         t={t}
@@ -603,6 +600,6 @@ export function CharacterDetailPageView({
           setDetailContent(null);
         }}
       />
-    </div>
+    </UiDiv>
   );
 }

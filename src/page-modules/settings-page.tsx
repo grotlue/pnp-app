@@ -1,5 +1,7 @@
 "use client";
 
+import { UiDiv, UiMain } from "@/components/ui/html-elements";
+
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
@@ -110,16 +112,16 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
   }
 
   if (!ready) {
-    return <main className="min-h-screen" />;
+    return <UiMain className="min-h-screen" />;
   }
 
   if (!session) {
-    return <main className="min-h-screen" />;
+    return <UiMain className="min-h-screen" />;
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-4xl space-y-4 px-4 py-8">
+    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+      <UiMain className="mx-auto w-full max-w-4xl space-y-4 px-4 py-8">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.settings.title")}</CardTitle>
@@ -198,7 +200,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
               <CardDescription>{t("ui.settings.mfaSubtitle")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <div className="text-sm">
+              <UiDiv className="text-sm">
                 {adminMfaQuery.isLoading
                   ? t("ui.loading.section")
                   : adminNeedsMfaStepUp
@@ -208,20 +210,20 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
                     : hasVerifiedTotp
                       ? t("ui.settings.mfaEnabled")
                       : t("ui.settings.mfaNotEnabled")}
-              </div>
+              </UiDiv>
 
               {mfaEnrollment ? (
-                <div className="border-border bg-muted/40 space-y-2 rounded-md border p-3">
-                  <div className="text-muted-foreground text-xs">
+                <UiDiv className="border-border bg-muted/40 space-y-2 rounded-md border p-3">
+                  <UiDiv className="text-muted-foreground text-xs">
                     {t("ui.settings.mfaSetupStep")}
-                  </div>
-                  <div className="font-mono text-xs break-all">
+                  </UiDiv>
+                  <UiDiv className="font-mono text-xs break-all">
                     {mfaEnrollment.secret}
-                  </div>
-                  <div className="text-muted-foreground font-mono text-[11px] break-all">
+                  </UiDiv>
+                  <UiDiv className="text-muted-foreground font-mono text-[11px] break-all">
                     {mfaEnrollment.uri}
-                  </div>
-                </div>
+                  </UiDiv>
+                </UiDiv>
               ) : null}
 
               <FormInput
@@ -230,7 +232,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
                 onChange={(event) => setMfaCode(event.target.value)}
               />
 
-              <div className="flex flex-wrap gap-2">
+              <UiDiv className="flex flex-wrap gap-2">
                 <Button
                   variant="outline"
                   disabled={busy}
@@ -299,7 +301,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
                 >
                   {t("ui.actions.reload")}
                 </Button>
-              </div>
+              </UiDiv>
 
               <FeedbackMessage
                 message={
@@ -311,7 +313,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
             </CardContent>
           </Card>
         ) : null}
-      </main>
+      </UiMain>
 
       <Modal
         open={deleteOpen}
@@ -347,8 +349,8 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
           </>
         }
       >
-        <div className="text-sm">{t("ui.settings.deleteConfirm")}</div>
+        <UiDiv className="text-sm">{t("ui.settings.deleteConfirm")}</UiDiv>
       </Modal>
-    </div>
+    </UiDiv>
   );
 }

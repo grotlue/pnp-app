@@ -1,5 +1,8 @@
 "use client";
 
+import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { TextLink } from "@/components/ui/text-link";
+
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -29,7 +32,6 @@ import { queryKeys } from "@/lib/client/query-keys";
 import { setSession as persistSession } from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n";
-import { textLinkClassName } from "@/lib/utils/link";
 
 type AdminMfaChallengePageProps = {
   locale: AppLocale;
@@ -155,17 +157,17 @@ export function AdminMfaChallengePageView({
     (isAdminUser && adminMfaQuery.isLoading)
   ) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <main className="mx-auto w-full max-w-4xl px-4 py-8">
+      <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+        <UiMain className="mx-auto w-full max-w-4xl px-4 py-8">
           <PageLoadingState label={t("ui.loading.page")} className="py-6" />
-        </main>
-      </div>
+        </UiMain>
+      </UiDiv>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-md px-4 py-8">
+    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+      <UiMain className="mx-auto w-full max-w-md px-4 py-8">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.settings.mfaTitle")}</CardTitle>
@@ -177,7 +179,7 @@ export function AdminMfaChallengePageView({
             {decision.kind === "setup" ? (
               <>
                 <FeedbackMessage message={t("ui.settings.mfaRequired")} />
-                <div className="flex items-center gap-2">
+                <UiDiv className="flex items-center gap-2">
                   <Link href={appRoutes.settings}>
                     <Button>{t("ui.menu.settings")}</Button>
                   </Link>
@@ -187,7 +189,7 @@ export function AdminMfaChallengePageView({
                   >
                     {t("ui.actions.reload")}
                   </Button>
-                </div>
+                </UiDiv>
               </>
             ) : (
               <>
@@ -202,11 +204,11 @@ export function AdminMfaChallengePageView({
                 >
                   {t("ui.actions.verifyMfa")}
                 </Button>
-                <div className="text-xs">
-                  <Link href={appRoutes.home} className={textLinkClassName}>
+                <UiDiv className="text-xs">
+                  <TextLink href={appRoutes.home}>
                     {t("ui.nav.backToLogin")}
-                  </Link>
-                </div>
+                  </TextLink>
+                </UiDiv>
               </>
             )}
 
@@ -220,7 +222,7 @@ export function AdminMfaChallengePageView({
             />
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </UiMain>
+    </UiDiv>
   );
 }

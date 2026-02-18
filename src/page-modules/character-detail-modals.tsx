@@ -11,6 +11,7 @@ import type {
   RelationshipCatalog,
   RelationshipDetail,
 } from "@/features/relationships/types";
+import { UiDiv, UiPre } from "@/components/ui/html-elements";
 
 type Translator = (key: string) => string;
 
@@ -73,8 +74,8 @@ function RelationshipFormFields<TForm extends RelationshipBaseFormValues>({
   labelPresetValue,
 }: RelationshipFormFieldsProps<TForm>) {
   return (
-    <div className="grid gap-2">
-      <div className="flex gap-2">
+    <UiDiv className="grid gap-2">
+      <UiDiv className="flex gap-2">
         <Button
           size="sm"
           variant={mode === "existing" ? "default" : "outline"}
@@ -89,7 +90,7 @@ function RelationshipFormFields<TForm extends RelationshipBaseFormValues>({
         >
           {t("ui.characterDetail.targetExternal")}
         </Button>
-      </div>
+      </UiDiv>
 
       {mode === "existing" ? (
         <FormSelect
@@ -175,7 +176,7 @@ function RelationshipFormFields<TForm extends RelationshipBaseFormValues>({
           onFormChange((prev) => ({ ...prev, description: event.target.value }))
         }
       />
-    </div>
+    </UiDiv>
   );
 }
 
@@ -269,12 +270,12 @@ export function UnassignCampaignModal({
         </>
       }
     >
-      <div className="space-y-2 text-sm">
-        <div>{t("ui.characterDetail.unassignConfirm")}</div>
-        <div className="text-muted-foreground text-xs">
+      <UiDiv className="space-y-2 text-sm">
+        <UiDiv>{t("ui.characterDetail.unassignConfirm")}</UiDiv>
+        <UiDiv className="text-muted-foreground text-xs">
           {t("ui.characterDetail.unassignInfo")}
-        </div>
-      </div>
+        </UiDiv>
+      </UiDiv>
     </Modal>
   );
 }
@@ -326,7 +327,7 @@ export function AddRelationshipModal({
         </>
       }
     >
-      <div className="grid gap-2">
+      <UiDiv className="grid gap-2">
         <RelationshipFormFields
           t={t}
           mode={mode}
@@ -349,7 +350,7 @@ export function AddRelationshipModal({
             }))
           }
         />
-      </div>
+      </UiDiv>
     </Modal>
   );
 }
@@ -451,9 +452,9 @@ export function DeleteRelationshipModal({
         </>
       }
     >
-      <div className="text-sm">
+      <UiDiv className="text-sm">
         {t("ui.characterDetail.deleteRelationshipConfirm")}
-      </div>
+      </UiDiv>
     </Modal>
   );
 }
@@ -483,32 +484,32 @@ export function RelationshipDetailModal({
       }
     >
       {detail ? (
-        <div className="space-y-3 text-sm">
-          <div className="border-border rounded border p-2">
-            <div className="font-medium">
+        <UiDiv className="space-y-3 text-sm">
+          <UiDiv className="border-border rounded border p-2">
+            <UiDiv className="font-medium">
               {t("ui.characterDetail.howThisSeesOther")}
-            </div>
-            <pre className="mt-1 overflow-auto text-xs whitespace-pre-wrap">
+            </UiDiv>
+            <UiPre className="mt-1 overflow-auto text-xs whitespace-pre-wrap">
               {JSON.stringify(detail.outgoing, null, 2)}
-            </pre>
-          </div>
-          <div className="border-border rounded border p-2">
-            <div className="font-medium">
+            </UiPre>
+          </UiDiv>
+          <UiDiv className="border-border rounded border p-2">
+            <UiDiv className="font-medium">
               {t("ui.characterDetail.howOtherSeesThis")}
-            </div>
-            <pre className="mt-1 overflow-auto text-xs whitespace-pre-wrap">
+            </UiDiv>
+            <UiPre className="mt-1 overflow-auto text-xs whitespace-pre-wrap">
               {JSON.stringify(detail.incoming, null, 2)}
-            </pre>
-          </div>
-          <div className="border-border rounded border p-2">
-            <div className="font-medium">
+            </UiPre>
+          </UiDiv>
+          <UiDiv className="border-border rounded border p-2">
+            <UiDiv className="font-medium">
               {t("ui.characterDetail.timeline")}
-            </div>
-            <pre className="mt-1 overflow-auto text-xs whitespace-pre-wrap">
+            </UiDiv>
+            <UiPre className="mt-1 overflow-auto text-xs whitespace-pre-wrap">
               {JSON.stringify(detail.timeline, null, 2)}
-            </pre>
-          </div>
-        </div>
+            </UiPre>
+          </UiDiv>
+        </UiDiv>
       ) : null}
     </Modal>
   );

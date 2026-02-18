@@ -1,6 +1,7 @@
 import type { CampaignFormValues } from "../types";
 import { FormInput, FormTextarea } from "@/components/common/form-controls";
 import { VisibilityToggle } from "@/components/common/visibility-toggle";
+import { UiDiv } from "@/components/ui/html-elements";
 
 type CampaignFormProps = {
   values: CampaignFormValues;
@@ -22,7 +23,7 @@ export function CampaignForm({
   onChange,
 }: CampaignFormProps) {
   return (
-    <div className="grid gap-2">
+    <UiDiv className="grid gap-2">
       <FormInput
         placeholder={titlePlaceholder}
         value={values.title}
@@ -56,6 +57,6 @@ export function CampaignForm({
           })
         }
       />
-    </div>
+    </UiDiv>
   );
 }

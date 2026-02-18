@@ -1,6 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { TextLink } from "@/components/ui/text-link";
+
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/common/empty-state";
@@ -28,7 +30,6 @@ import { useCampaignDetailScreen } from "@/features/campaigns/hooks/use-campaign
 import { canManageCampaign, isAdmin } from "@/features/users/logic/role.logic";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { useClientSession } from "@/lib/client/use-client-session";
-import { textLinkClassName } from "@/lib/utils/link";
 
 type CampaignDetailScreenProps = {
   locale: AppLocale;
@@ -78,16 +79,16 @@ export function CampaignDetailPageView({
   }, [ready, router, session]);
 
   if (!ready || !session) {
-    return <main className="min-h-screen" />;
+    return <UiMain className="min-h-screen" />;
   }
 
   if (detailQuery.isLoading || !detailQuery.data) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <main className="mx-auto w-full max-w-7xl px-4 py-8">
+      <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+        <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
           <PageLoadingState label={t("ui.loading.page")} />
-        </main>
-      </div>
+        </UiMain>
+      </UiDiv>
     );
   }
 
@@ -160,8 +161,8 @@ export function CampaignDetailPageView({
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-7xl px-4 py-8">
+    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+      <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -173,13 +174,13 @@ export function CampaignDetailPageView({
             </CardTitle>
             <CardDescription>{t("ui.campaignDetail.subtitle")}</CardDescription>
             {isForeignAdminView ? (
-              <div className="border-destructive/40 bg-destructive/10 text-destructive inline-flex w-fit rounded-md border px-2 py-1 text-xs font-medium">
+              <UiDiv className="border-destructive/40 bg-destructive/10 text-destructive inline-flex w-fit rounded-md border px-2 py-1 text-xs font-medium">
                 {t("ui.admin.foreignItemLabel")}
-              </div>
+              </UiDiv>
             ) : null}
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
+            <UiDiv className="flex flex-wrap gap-2">
               {canManage ? (
                 <>
                   <Button
@@ -216,7 +217,7 @@ export function CampaignDetailPageView({
                   {t("ui.campaignDetail.requestJoin")}
                 </Button>
               ) : null}
-            </div>
+            </UiDiv>
 
             <FeedbackMessage message={feedback} />
             <FeedbackMessage
@@ -229,24 +230,24 @@ export function CampaignDetailPageView({
               title={t("ui.fields.campaignDescription")}
               className="text-sm"
             >
-              <div className="text-muted-foreground mt-1">
+              <UiDiv className="text-muted-foreground mt-1">
                 {detail.campaign.description || "-"}
-              </div>
+              </UiDiv>
             </SectionBox>
 
             <SectionBox title={t("ui.campaignDetail.players")}>
-              <div className="space-y-1 text-xs">
+              <UiDiv className="space-y-1 text-xs">
                 {acceptedPlayers.map((entry) =>
                   isAdminUser(entry.user_id) ? (
-                    <div key={entry.id}>{usernameFor(entry.user_id)}</div>
+                    <UiDiv key={entry.id}>{usernameFor(entry.user_id)}</UiDiv>
                   ) : (
-                    <Link
+                    <TextLink
                       key={entry.id}
                       href={`/users/${entry.user_id}`}
-                      className={`block ${textLinkClassName}`}
+                      display="block"
                     >
                       {usernameFor(entry.user_id)}
-                    </Link>
+                    </TextLink>
                   ),
                 )}
                 {acceptedPlayers.length === 0 ? (
@@ -255,26 +256,23 @@ export function CampaignDetailPageView({
                     className="text-muted-foreground border-0 bg-transparent p-0"
                   />
                 ) : null}
-              </div>
+              </UiDiv>
             </SectionBox>
 
             {canManage && pendingRequests.length > 0 ? (
               <SectionBox title={t("ui.campaignDetail.pendingRequests")}>
-                <div className="space-y-2">
+                <UiDiv className="space-y-2">
                   {pendingRequests.map((entry) => (
-                    <div
+                    <UiDiv
                       key={entry.id}
                       className="border-border flex flex-wrap items-center gap-2 rounded border px-2 py-2 text-xs"
                     >
                       {isAdminUser(entry.user_id) ? (
                         <span>{usernameFor(entry.user_id)}</span>
                       ) : (
-                        <Link
-                          href={`/users/${entry.user_id}`}
-                          className={textLinkClassName}
-                        >
+                        <TextLink href={`/users/${entry.user_id}`}>
                           {usernameFor(entry.user_id)}
-                        </Link>
+                        </TextLink>
                       )}
                       <Button
                         size="sm"
@@ -322,14 +320,14 @@ export function CampaignDetailPageView({
                       >
                         {t("ui.actions.reject")}
                       </Button>
-                    </div>
+                    </UiDiv>
                   ))}
-                </div>
+                </UiDiv>
               </SectionBox>
             ) : null}
 
             <SectionBox>
-              <div className="mb-2">
+              <UiDiv className="mb-2">
                 <ToggleTabs
                   value={tab}
                   onChange={setTab}
@@ -341,20 +339,20 @@ export function CampaignDetailPageView({
                     { value: "npc", label: t("ui.campaignDetail.npcs") },
                   ]}
                 />
-              </div>
-              <div className="space-y-1 text-xs">
+              </UiDiv>
+              <UiDiv className="space-y-1 text-xs">
                 {(tab === "player" ? playerCharacters : npcCharacters).map(
                   (entry) => (
-                    <Link
+                    <TextLink
                       key={entry.id}
                       href={`/characters/${entry.id}`}
-                      className={`flex items-center gap-1 ${textLinkClassName}`}
+                      display="inline-flex"
                     >
                       <TitleWithPrivacy
                         title={entry.name}
                         isPrivate={entry.is_private}
                       />
-                    </Link>
+                    </TextLink>
                   ),
                 )}
                 {(tab === "player" ? playerCharacters : npcCharacters)
@@ -364,11 +362,11 @@ export function CampaignDetailPageView({
                     className="text-muted-foreground border-0 bg-transparent p-0"
                   />
                 ) : null}
-              </div>
+              </UiDiv>
             </SectionBox>
           </CardContent>
         </Card>
-      </main>
+      </UiMain>
 
       <Modal
         open={editOpen}
@@ -401,7 +399,7 @@ export function CampaignDetailPageView({
           </>
         }
       >
-        <div className="grid gap-2">
+        <UiDiv className="grid gap-2">
           <FormInput
             value={editForm.title}
             placeholder={t("ui.fields.campaignTitle")}
@@ -429,7 +427,7 @@ export function CampaignDetailPageView({
               setEditForm((prev) => ({ ...prev, isPrivate: !prev.isPrivate }))
             }
           />
-        </div>
+        </UiDiv>
       </Modal>
 
       <Modal
@@ -464,7 +462,7 @@ export function CampaignDetailPageView({
           </>
         }
       >
-        <div className="text-sm">{t("ui.campaigns.deleteConfirm")}</div>
+        <UiDiv className="text-sm">{t("ui.campaigns.deleteConfirm")}</UiDiv>
       </Modal>
 
       <Modal
@@ -588,8 +586,8 @@ export function CampaignDetailPageView({
           </>
         }
       >
-        <div className="text-sm">{t("ui.campaignDetail.joinConfirm")}</div>
+        <UiDiv className="text-sm">{t("ui.campaignDetail.joinConfirm")}</UiDiv>
       </Modal>
-    </div>
+    </UiDiv>
   );
 }

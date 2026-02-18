@@ -1,5 +1,7 @@
 "use client";
 
+import { UiDiv, UiMain } from "@/components/ui/html-elements";
+
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/common/empty-state";
@@ -129,7 +131,7 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
   }
 
   if (!ready || !session) {
-    return <main className="min-h-screen" />;
+    return <UiMain className="min-h-screen" />;
   }
 
   const queryError =
@@ -139,15 +141,15 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
   const feedback = message || queryError;
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-5xl px-4 py-8">
+    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+      <UiMain className="mx-auto w-full max-w-5xl px-4 py-8">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.notifications.title")}</CardTitle>
             <CardDescription>{t("ui.notifications.subtitle")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
+            <UiDiv className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
               <StatusBadge
                 label={t("ui.notifications.unread", "Unread")}
                 tone="violet"
@@ -173,18 +175,18 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
               >
                 {t("ui.notifications.markAllRead")}
               </Button>
-            </div>
+            </UiDiv>
 
             <FeedbackMessage message={feedback} />
 
             {notificationsQuery.isLoading ? (
-              <div className="border-border bg-background/70 text-muted-foreground rounded-lg border p-3 text-xs">
+              <UiDiv className="border-border bg-background/70 text-muted-foreground rounded-lg border p-3 text-xs">
                 {t("ui.loading.section")}
-              </div>
+              </UiDiv>
             ) : notifications.length === 0 ? (
               <EmptyState label={t("ui.feedback.empty")} />
             ) : (
-              <div className="space-y-2">
+              <UiDiv className="space-y-2">
                 {notifications.map((notification) => {
                   const viewPath = getNotificationViewPath(notification);
                   const canDecideMembership =
@@ -259,9 +261,9 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
                         </>
                       }
                     >
-                      <div className="space-y-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <div className="text-sm font-medium">{title}</div>
+                      <UiDiv className="space-y-1">
+                        <UiDiv className="flex flex-wrap items-center gap-2">
+                          <UiDiv className="text-sm font-medium">{title}</UiDiv>
                           <StatusBadge
                             label={eventLabel}
                             tone={notificationTone(notification)}
@@ -272,22 +274,22 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
                               tone="violet"
                             />
                           ) : null}
-                        </div>
-                        <div className="text-muted-foreground text-xs">
+                        </UiDiv>
+                        <UiDiv className="text-muted-foreground text-xs">
                           {formatNotificationTimestamp(
                             notification.created_at,
                             locale,
                           )}
-                        </div>
-                      </div>
+                        </UiDiv>
+                      </UiDiv>
                     </ListItemRow>
                   );
                 })}
-              </div>
+              </UiDiv>
             )}
           </CardContent>
         </Card>
-      </main>
-    </div>
+      </UiMain>
+    </UiDiv>
   );
 }

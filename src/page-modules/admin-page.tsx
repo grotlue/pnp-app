@@ -1,5 +1,8 @@
 "use client";
 
+import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { TextLink } from "@/components/ui/text-link";
+
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -40,7 +43,6 @@ import type {
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n";
 import { hasItems } from "@/lib/logic/collections";
-import { textLinkClassName } from "@/lib/utils/link";
 
 type AdminPageViewProps = {
   locale: AppLocale;
@@ -227,13 +229,13 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
         : appRoutes.adminUsers;
 
   if (!ready || !session) {
-    return <main className="min-h-screen" />;
+    return <UiMain className="min-h-screen" />;
   }
 
   if (mfaRequiredError) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <main className="mx-auto w-full max-w-4xl px-4 py-8">
+      <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+        <UiMain className="mx-auto w-full max-w-4xl px-4 py-8">
           <Card>
             <CardHeader>
               <CardTitle>{t("ui.settings.mfaTitle")}</CardTitle>
@@ -248,24 +250,24 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
               </Link>
             </CardContent>
           </Card>
-        </main>
-      </div>
+        </UiMain>
+      </UiDiv>
     );
   }
 
   if (admin.meQuery.isLoading || meRole !== "admin") {
     return (
-      <div className="min-h-screen">
-        <main className="mx-auto w-full max-w-7xl px-4 py-8">
+      <UiDiv className="min-h-screen">
+        <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
           <PageLoadingState label={t("ui.loading.page")} className="py-6" />
-        </main>
-      </div>
+        </UiMain>
+      </UiDiv>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-7xl space-y-4 px-4 py-8">
+    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+      <UiMain className="mx-auto w-full max-w-7xl space-y-4 px-4 py-8">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.admin.title")}</CardTitle>
@@ -327,26 +329,23 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
                     }
                   >
                     {isProtectedAdminUser(user) ? (
-                      <div>
-                        <div className="font-medium">
+                      <UiDiv>
+                        <UiDiv className="font-medium">
                           {user.username} ({user.email})
-                        </div>
-                        <div className="text-muted-foreground text-xs">
+                        </UiDiv>
+                        <UiDiv className="text-muted-foreground text-xs">
                           {user.role} - {user.id}
-                        </div>
-                      </div>
+                        </UiDiv>
+                      </UiDiv>
                     ) : (
-                      <Link
-                        href={`/users/${user.id}`}
-                        className={`block ${textLinkClassName}`}
-                      >
-                        <div className="font-medium">
+                      <TextLink href={`/users/${user.id}`} display="block">
+                        <UiDiv className="font-medium">
                           {user.username} ({user.email})
-                        </div>
-                        <div className="text-muted-foreground text-xs">
+                        </UiDiv>
+                        <UiDiv className="text-muted-foreground text-xs">
                           {user.role} - {user.id}
-                        </div>
-                      </Link>
+                        </UiDiv>
+                      </TextLink>
                     )}
                   </ListItemRow>
                 ))
@@ -405,21 +404,21 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
                       </>
                     }
                   >
-                    <Link
+                    <TextLink
                       href={`/campaigns/${campaign.id}`}
-                      className={`block ${textLinkClassName}`}
+                      display="block"
                     >
                       <TitleWithPrivacy
                         title={campaign.title}
                         isPrivate={campaign.is_private}
                         className="font-medium"
                       />
-                      <div className="text-muted-foreground text-xs">
+                      <UiDiv className="text-muted-foreground text-xs">
                         {t("ui.admin.ownerLabel")}:{" "}
                         {userById.get(campaign.owner_user_id)?.username ??
                           campaign.owner_user_id}
-                      </div>
-                    </Link>
+                      </UiDiv>
+                    </TextLink>
                   </ListItemRow>
                 ))
               )}
@@ -485,9 +484,9 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
                       </>
                     }
                   >
-                    <Link
+                    <TextLink
                       href={`/characters/${character.id}`}
-                      className={`block ${textLinkClassName}`}
+                      display="block"
                     >
                       <TitleWithPrivacy
                         title={character.name}
@@ -499,19 +498,19 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
                         t={t}
                         className="mt-1"
                       />
-                      <div className="text-muted-foreground text-xs">
+                      <UiDiv className="text-muted-foreground text-xs">
                         {t("ui.admin.ownerLabel")}:{" "}
                         {userById.get(character.owner_user_id)?.username ??
                           character.owner_user_id}
-                      </div>
-                    </Link>
+                      </UiDiv>
+                    </TextLink>
                   </ListItemRow>
                 ))
               )}
             </CardContent>
           </Card>
         ) : null}
-      </main>
+      </UiMain>
 
       <Modal
         open={createUserOpen}
@@ -656,7 +655,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
           </>
         }
       >
-        <div className="text-sm">{t("ui.admin.deleteUserConfirm")}</div>
+        <UiDiv className="text-sm">{t("ui.admin.deleteUserConfirm")}</UiDiv>
       </Modal>
 
       <Modal
@@ -789,7 +788,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
           </>
         }
       >
-        <div className="text-sm">{t("ui.campaigns.deleteConfirm")}</div>
+        <UiDiv className="text-sm">{t("ui.campaigns.deleteConfirm")}</UiDiv>
       </Modal>
 
       <Modal
@@ -940,8 +939,8 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
           </>
         }
       >
-        <div className="text-sm">{t("ui.characters.deleteConfirm")}</div>
+        <UiDiv className="text-sm">{t("ui.characters.deleteConfirm")}</UiDiv>
       </Modal>
-    </div>
+    </UiDiv>
   );
 }

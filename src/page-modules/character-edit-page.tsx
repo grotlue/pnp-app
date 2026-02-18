@@ -1,5 +1,7 @@
 "use client";
 
+import { UiDiv, UiMain } from "@/components/ui/html-elements";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/common/feedback-message";
@@ -104,7 +106,7 @@ export function CharacterEditPageView({
   );
 
   if (!ready || !session || !editQuery.data) {
-    return <main className="min-h-screen" />;
+    return <UiMain className="min-h-screen" />;
   }
 
   const character = editQuery.data.character;
@@ -127,8 +129,8 @@ export function CharacterEditPageView({
     isAdmin(editQuery.data.me.profile.role) && !isOwner;
   if (!canManage) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <main className="mx-auto w-full max-w-4xl px-4 py-8">
+      <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+        <UiMain className="mx-auto w-full max-w-4xl px-4 py-8">
           <Card>
             <CardHeader>
               <CardTitle>{t("ui.feedback.requestFailed")}</CardTitle>
@@ -137,22 +139,22 @@ export function CharacterEditPageView({
               </CardDescription>
             </CardHeader>
           </Card>
-        </main>
-      </div>
+        </UiMain>
+      </UiDiv>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-4xl px-4 py-8">
+    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+      <UiMain className="mx-auto w-full max-w-4xl px-4 py-8">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.characterEdit.title")}</CardTitle>
             <CardDescription>{t("ui.characterEdit.subtitle")}</CardDescription>
             {isForeignAdminView ? (
-              <div className="border-destructive/40 bg-destructive/10 text-destructive inline-flex w-fit rounded-md border px-2 py-1 text-xs font-medium">
+              <UiDiv className="border-destructive/40 bg-destructive/10 text-destructive inline-flex w-fit rounded-md border px-2 py-1 text-xs font-medium">
                 {t("ui.admin.foreignItemLabel")}
-              </div>
+              </UiDiv>
             ) : null}
           </CardHeader>
           <CardContent className="space-y-3">
@@ -228,7 +230,7 @@ export function CharacterEditPageView({
               }
             />
 
-            <div className="flex flex-wrap gap-2">
+            <UiDiv className="flex flex-wrap gap-2">
               <Button
                 disabled={anyPending}
                 onClick={() =>
@@ -267,12 +269,12 @@ export function CharacterEditPageView({
               <Button variant="destructive" onClick={() => setDeleteOpen(true)}>
                 {t("ui.actions.delete")}
               </Button>
-            </div>
+            </UiDiv>
 
             <FeedbackMessage message={message} />
           </CardContent>
         </Card>
-      </main>
+      </UiMain>
 
       <Modal
         open={deleteOpen}
@@ -307,8 +309,8 @@ export function CharacterEditPageView({
           </>
         }
       >
-        <div className="text-sm">{t("ui.characters.deleteConfirm")}</div>
+        <UiDiv className="text-sm">{t("ui.characters.deleteConfirm")}</UiDiv>
       </Modal>
-    </div>
+    </UiDiv>
   );
 }

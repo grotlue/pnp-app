@@ -1,6 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { TextLink } from "@/components/ui/text-link";
+
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/common/feedback-message";
@@ -19,7 +21,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
-import { textLinkClassName } from "@/lib/utils/link";
 import { resolveAuthCaptchaClientConfig } from "@/lib/features/auth-captcha";
 import { registerUser } from "@/features/users/queries/users-auth.query";
 
@@ -94,8 +95,8 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))] px-4 py-12">
-      <div className="mx-auto w-full max-w-md">
+    <UiMain className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))] px-4 py-12">
+      <UiDiv className="mx-auto w-full max-w-md">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.register.title")}</CardTitle>
@@ -145,14 +146,12 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
             <Button disabled={busy} onClick={onSubmit}>
               {t("ui.actions.register")}
             </Button>
-            <div className="text-xs">
-              <Link className={textLinkClassName} href="/">
-                {t("ui.register.alreadyRegistered")}
-              </Link>
-            </div>
+            <UiDiv className="text-xs">
+              <TextLink href="/">{t("ui.register.alreadyRegistered")}</TextLink>
+            </UiDiv>
           </CardFooter>
         </Card>
-      </div>
-    </main>
+      </UiDiv>
+    </UiMain>
   );
 }

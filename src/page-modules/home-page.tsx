@@ -1,6 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { TextLink } from "@/components/ui/text-link";
+
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -54,7 +56,6 @@ import { clearSession, setSession } from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { resolveAuthCaptchaClientConfig } from "@/lib/features/auth-captcha";
 import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
-import { textLinkClassName } from "@/lib/utils/link";
 import {
   clampListPage,
   DEFAULT_LIST_PAGE_SIZE,
@@ -217,13 +218,13 @@ export function HomePageView({
   }
 
   if (!ready) {
-    return <main className="mx-auto min-h-screen w-full max-w-3xl p-4" />;
+    return <UiMain className="mx-auto min-h-screen w-full max-w-3xl p-4" />;
   }
 
   if (!session) {
     return (
-      <main className="min-h-screen bg-[radial-gradient(circle_at_12%_20%,oklch(0.94_0.06_80),transparent_40%),radial-gradient(circle_at_90%_25%,oklch(0.93_0.04_185),transparent_35%)] px-4 py-12">
-        <div className="mx-auto w-full max-w-md">
+      <UiMain className="min-h-screen bg-[radial-gradient(circle_at_12%_20%,oklch(0.94_0.06_80),transparent_40%),radial-gradient(circle_at_90%_25%,oklch(0.93_0.04_185),transparent_35%)] px-4 py-12">
+        <UiDiv className="mx-auto w-full max-w-md">
           <Card>
             <CardHeader>
               <CardTitle>{t("ui.start.loggedOutTitle")}</CardTitle>
@@ -274,23 +275,20 @@ export function HomePageView({
               <Button disabled={busy} onClick={onLogin}>
                 {t("ui.actions.login")}
               </Button>
-              <div className="flex items-center justify-between text-xs">
-                <Link
-                  href={appRoutes.passwordReset}
-                  className={textLinkClassName}
-                >
+              <UiDiv className="flex items-center justify-between text-xs">
+                <TextLink href={appRoutes.passwordReset}>
                   {t("ui.nav.passwordReset")}
-                </Link>
+                </TextLink>
                 {registrationEnabled ? (
-                  <Link href={appRoutes.register} className={textLinkClassName}>
+                  <TextLink href={appRoutes.register}>
                     {t("ui.nav.register")}
-                  </Link>
+                  </TextLink>
                 ) : null}
-              </div>
+              </UiDiv>
             </CardFooter>
           </Card>
-        </div>
-      </main>
+        </UiDiv>
+      </UiMain>
     );
   }
 
@@ -298,16 +296,16 @@ export function HomePageView({
     clearSession();
     router.replace("/");
     router.refresh();
-    return <main className="min-h-screen" />;
+    return <UiMain className="min-h-screen" />;
   }
 
   if (loggedInQuery.isLoading) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <main className="mx-auto w-full max-w-7xl px-4 py-8">
+      <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+        <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
           <PageLoadingState label={t("ui.loading.page")} className="py-6" />
-        </main>
-      </div>
+        </UiMain>
+      </UiDiv>
     );
   }
 
@@ -370,8 +368,8 @@ export function HomePageView({
   ];
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-8">
+    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
+      <UiMain className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-8">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.start.loggedInTitle")}</CardTitle>
@@ -384,7 +382,7 @@ export function HomePageView({
           </CardContent>
         </Card>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <UiDiv className="grid gap-4 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>{t("ui.characters.title")}</CardTitle>
@@ -423,11 +421,11 @@ export function HomePageView({
                 ]}
               />
 
-              <div className="space-y-2">
-                <div className="text-muted-foreground grid gap-2 px-1 text-[11px] font-medium md:grid-cols-[1fr_170px]">
-                  <div>{t("ui.characters.title")}</div>
-                  <div>{t("ui.fields.campaign")}</div>
-                </div>
+              <UiDiv className="space-y-2">
+                <UiDiv className="text-muted-foreground grid gap-2 px-1 text-[11px] font-medium md:grid-cols-[1fr_170px]">
+                  <UiDiv>{t("ui.characters.title")}</UiDiv>
+                  <UiDiv>{t("ui.fields.campaign")}</UiDiv>
+                </UiDiv>
                 {pagedCharacters.map((character) => {
                   const campaign = character.campaign_id
                     ? (campaignById.get(character.campaign_id) ?? null)
@@ -435,37 +433,31 @@ export function HomePageView({
 
                   return (
                     <ListItemRow key={character.id}>
-                      <div className="grid gap-2 md:grid-cols-[1fr_170px]">
-                        <div className="space-y-1">
-                          <Link
-                            href={`/characters/${character.id}`}
-                            className={textLinkClassName}
-                          >
+                      <UiDiv className="grid gap-2 md:grid-cols-[1fr_170px]">
+                        <UiDiv className="space-y-1">
+                          <TextLink href={`/characters/${character.id}`}>
                             <TitleWithPrivacy
                               title={character.name}
                               isPrivate={character.is_private}
                               className="font-medium"
                             />
-                          </Link>
-                          <div className="flex flex-wrap items-center gap-2">
+                          </TextLink>
+                          <UiDiv className="flex flex-wrap items-center gap-2">
                             {character.owner_user_id === currentUserId ? (
                               <OwnershipBadge mode="mine" t={t} />
                             ) : null}
-                          </div>
-                        </div>
-                        <div className="text-muted-foreground text-xs">
+                          </UiDiv>
+                        </UiDiv>
+                        <UiDiv className="text-muted-foreground text-xs">
                           {campaign ? (
-                            <Link
-                              href={`/campaigns/${campaign.id}`}
-                              className={textLinkClassName}
-                            >
+                            <TextLink href={`/campaigns/${campaign.id}`}>
                               {campaign.title}
-                            </Link>
+                            </TextLink>
                           ) : (
                             "-"
                           )}
-                        </div>
-                      </div>
+                        </UiDiv>
+                      </UiDiv>
                     </ListItemRow>
                   );
                 })}
@@ -475,7 +467,7 @@ export function HomePageView({
                     className="text-muted-foreground border-0 bg-transparent p-0"
                   />
                 ) : null}
-              </div>
+              </UiDiv>
 
               <PaginationControls
                 page={safeCharacterPage}
@@ -506,53 +498,47 @@ export function HomePageView({
                 sortOptions={campaignSortOptions}
               />
 
-              <div className="space-y-2">
-                <div className="text-muted-foreground grid gap-2 px-1 text-[11px] font-medium md:grid-cols-[1fr_150px_80px]">
-                  <div>{t("ui.campaigns.title")}</div>
-                  <div>{t("ui.admin.ownerLabel")}</div>
-                  <div>{t("ui.fields.players")}</div>
-                </div>
+              <UiDiv className="space-y-2">
+                <UiDiv className="text-muted-foreground grid gap-2 px-1 text-[11px] font-medium md:grid-cols-[1fr_150px_80px]">
+                  <UiDiv>{t("ui.campaigns.title")}</UiDiv>
+                  <UiDiv>{t("ui.admin.ownerLabel")}</UiDiv>
+                  <UiDiv>{t("ui.fields.players")}</UiDiv>
+                </UiDiv>
                 {pagedCampaigns.map((campaign) => (
                   <ListItemRow key={campaign.id}>
-                    <div className="grid gap-2 md:grid-cols-[1fr_150px_80px]">
-                      <div className="space-y-1">
-                        <Link
-                          href={`/campaigns/${campaign.id}`}
-                          className={textLinkClassName}
-                        >
+                    <UiDiv className="grid gap-2 md:grid-cols-[1fr_150px_80px]">
+                      <UiDiv className="space-y-1">
+                        <TextLink href={`/campaigns/${campaign.id}`}>
                           <TitleWithPrivacy
                             title={campaign.title}
                             isPrivate={campaign.is_private}
                             className="font-medium"
                           />
-                        </Link>
-                        <div className="flex flex-wrap items-center gap-2">
+                        </TextLink>
+                        <UiDiv className="flex flex-wrap items-center gap-2">
                           {campaign.current_user_role ? (
                             <CampaignRoleBadge
                               role={campaign.current_user_role}
                               t={t}
                             />
                           ) : null}
-                        </div>
-                      </div>
-                      <div className="text-muted-foreground text-xs">
+                        </UiDiv>
+                      </UiDiv>
+                      <UiDiv className="text-muted-foreground text-xs">
                         {campaign.owner_role === "admin" ? (
                           <span>
                             {campaign.owner_username ?? campaign.owner_user_id}
                           </span>
                         ) : (
-                          <Link
-                            href={`/users/${campaign.owner_user_id}`}
-                            className={textLinkClassName}
-                          >
+                          <TextLink href={`/users/${campaign.owner_user_id}`}>
                             {campaign.owner_username ?? campaign.owner_user_id}
-                          </Link>
+                          </TextLink>
                         )}
-                      </div>
-                      <div className="text-muted-foreground text-xs">
+                      </UiDiv>
+                      <UiDiv className="text-muted-foreground text-xs">
                         {campaign.player_count ?? 0}
-                      </div>
-                    </div>
+                      </UiDiv>
+                    </UiDiv>
                   </ListItemRow>
                 ))}
                 {searchedAndSortedCampaigns.length === 0 ? (
@@ -561,7 +547,7 @@ export function HomePageView({
                     className="text-muted-foreground border-0 bg-transparent p-0"
                   />
                 ) : null}
-              </div>
+              </UiDiv>
 
               <PaginationControls
                 page={safeCampaignPage}
@@ -574,8 +560,8 @@ export function HomePageView({
               />
             </CardContent>
           </Card>
-        </div>
-      </main>
-    </div>
+        </UiDiv>
+      </UiMain>
+    </UiDiv>
   );
 }
