@@ -55,3 +55,8 @@ For flow-impacting PRs, map acceptance criteria/user-flow items to scenario IDs 
 - `FLOW-CAMPAIGNS-CREATE` (`@campaigns`)
 - `FLOW-CHARACTERS-CREATE-EDIT` (`@characters`)
 - `FLOW-NOTIFICATIONS-MARK-READ` (`@notifications`)
+
+## Current Regression Baseline
+
+- `FLOW-RELATIONSHIPS-CREATE-EDIT-VIEW` (`@relationships`)
+- `FLOW-CAMPAIGNS-REQUEST-JOIN` (`@campaigns`)

@@ -156,7 +156,10 @@ where p.id = u.id;
 
 update public.profiles
 set locale = 'en', updated_at = now()
-where id = '00000000-0000-0000-0000-0000000000a8'::uuid;
+where id in (
+  '00000000-0000-0000-0000-0000000000a3'::uuid,
+  '00000000-0000-0000-0000-0000000000a8'::uuid
+);
 
 insert into public.campaigns (
   id,
