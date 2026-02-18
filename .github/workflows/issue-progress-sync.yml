@@ -1,0 +1,286 @@
+name: Issue Progress Sync
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - closed
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+  repository-projects: write
+
+concurrency:
+  group: issue-progress-sync-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  sync-issue-progress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Sync linked issue project status
+        uses: actions/github-script@v8
+        env:
+          PROJECT_NUMBER: ${{ vars.ISSUE_PROGRESS_PROJECT_NUMBER || '1' }}
+          PROJECT_OWNER: ${{ vars.ISSUE_PROGRESS_PROJECT_OWNER || github.repository_owner }}
+          STATUS_FIELD_NAME: ${{ vars.ISSUE_PROGRESS_STATUS_FIELD || 'Status' }}
+          STATUS_IN_PROGRESS: ${{ vars.ISSUE_PROGRESS_STATUS_IN_PROGRESS || 'In Progress' }}
+          STATUS_DONE: ${{ vars.ISSUE_PROGRESS_STATUS_DONE || 'Done' }}
+          STATUS_TODO: ${{ vars.ISSUE_PROGRESS_STATUS_TODO || 'Todo' }}
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const prNumber = context.payload.pull_request.number;
+            const action = context.payload.action;
+            const body = context.payload.pull_request.body || "";
+            const merged = Boolean(context.payload.pull_request.merged);
+
+            const projectOwner = process.env.PROJECT_OWNER || owner;
+            const projectNumber = Number(process.env.PROJECT_NUMBER || "1");
+            const statusFieldName = process.env.STATUS_FIELD_NAME || "Status";
+            const statusInProgress = process.env.STATUS_IN_PROGRESS || "In Progress";
+            const statusDone = process.env.STATUS_DONE || "Done";
+            const statusTodo = process.env.STATUS_TODO || "Todo";
+
+            function parseLinkedIssueNumbers(prBody) {
+              const numbers = new Set();
+              const localRefRegex = /(^|[\s(])#(\d+)\b/gm;
+              const fullUrlRegex = new RegExp(
+                `https://github\\.com/${owner}/${repo}/issues/(\\d+)`,
+                "gi",
+              );
+
+              let match;
+              while ((match = localRefRegex.exec(prBody)) !== null) {
+                numbers.add(Number(match[2]));
+              }
+              while ((match = fullUrlRegex.exec(prBody)) !== null) {
+                numbers.add(Number(match[1]));
+              }
+
+              return [...numbers];
+            }
+
+            async function getProjectAndStatusField() {
+              const query = `
+                query($owner: String!, $number: Int!) {
+                  user(login: $owner) {
+                    projectV2(number: $number) {
+                      id
+                      title
+                      fields(first: 50) {
+                        nodes {
+                          ... on ProjectV2SingleSelectField {
+                            id
+                            name
+                            options {
+                              id
+                              name
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                  organization(login: $owner) {
+                    projectV2(number: $number) {
+                      id
+                      title
+                      fields(first: 50) {
+                        nodes {
+                          ... on ProjectV2SingleSelectField {
+                            id
+                            name
+                            options {
+                              id
+                              name
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              `;
+              const data = await github.graphql(query, {
+                owner: projectOwner,
+                number: projectNumber,
+              });
+
+              const project =
+                data?.user?.projectV2 ?? data?.organization?.projectV2;
+              if (!project) {
+                throw new Error(
+                  `Project #${projectNumber} for owner '${projectOwner}' not found.`,
+                );
+              }
+
+              const statusField = project.fields.nodes.find(
+                (field) => field && field.name === statusFieldName,
+              );
+              if (!statusField) {
+                throw new Error(
+                  `Project field '${statusFieldName}' was not found.`,
+                );
+              }
+
+              return {
+                projectId: project.id,
+                statusFieldId: statusField.id,
+                statusOptions: statusField.options ?? [],
+              };
+            }
+
+            async function getIssueNodeId(issueNumber) {
+              const result = await github.graphql(
+                `
+                query($owner: String!, $repo: String!, $issueNumber: Int!) {
+                  repository(owner: $owner, name: $repo) {
+                    issue(number: $issueNumber) {
+                      id
+                    }
+                  }
+                }
+                `,
+                { owner, repo, issueNumber },
+              );
+              const issueId = result?.repository?.issue?.id;
+              if (!issueId) {
+                throw new Error(`Issue #${issueNumber} was not found.`);
+              }
+              return issueId;
+            }
+
+            async function getProjectItemId(projectId, issueId) {
+              const response = await github.graphql(
+                `
+                query($id: ID!) {
+                  node(id: $id) {
+                    ... on Issue {
+                      projectItems(first: 100) {
+                        nodes {
+                          id
+                          project {
+                            id
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                `,
+                { id: issueId },
+              );
+
+              const existing = response?.node?.projectItems?.nodes?.find(
+                (item) => item?.project?.id === projectId,
+              );
+              if (existing?.id) {
+                return existing.id;
+              }
+
+              const created = await github.graphql(
+                `
+                mutation($projectId: ID!, $contentId: ID!) {
+                  addProjectV2ItemById(
+                    input: { projectId: $projectId, contentId: $contentId }
+                  ) {
+                    item {
+                      id
+                    }
+                  }
+                }
+                `,
+                { projectId, contentId: issueId },
+              );
+              return created?.addProjectV2ItemById?.item?.id;
+            }
+
+            async function hasOtherOpenLinkedPr(issueNumber) {
+              const result = await github.rest.search.issuesAndPullRequests({
+                q: `repo:${owner}/${repo} is:pr is:open in:body #${issueNumber}`,
+                per_page: 100,
+              });
+              return result.data.items.some((item) => item.number !== prNumber);
+            }
+
+            async function setStatus(projectId, itemId, fieldId, optionId) {
+              await github.graphql(
+                `
+                mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                  updateProjectV2ItemFieldValue(
+                    input: {
+                      projectId: $projectId
+                      itemId: $itemId
+                      fieldId: $fieldId
+                      value: { singleSelectOptionId: $optionId }
+                    }
+                  ) {
+                    projectV2Item {
+                      id
+                    }
+                  }
+                }
+                `,
+                { projectId, itemId, fieldId, optionId },
+              );
+            }
+
+            const linkedIssues = parseLinkedIssueNumbers(body);
+            if (linkedIssues.length === 0) {
+              core.notice("No linked issues found in PR body. Nothing to sync.");
+              return;
+            }
+
+            const { projectId, statusFieldId, statusOptions } =
+              await getProjectAndStatusField();
+
+            const getOptionId = (name) =>
+              statusOptions.find((opt) => opt.name === name)?.id;
+
+            const inProgressOptionId = getOptionId(statusInProgress);
+            const doneOptionId = getOptionId(statusDone);
+            const todoOptionId = getOptionId(statusTodo);
+
+            if (!inProgressOptionId || !doneOptionId || !todoOptionId) {
+              throw new Error(
+                `Required status option missing. Needed: '${statusInProgress}', '${statusDone}', '${statusTodo}'.`,
+              );
+            }
+
+            for (const issueNumber of linkedIssues) {
+              const issueId = await getIssueNodeId(issueNumber);
+              const itemId = await getProjectItemId(projectId, issueId);
+              if (!itemId) {
+                throw new Error(
+                  `Could not resolve/create project item for issue #${issueNumber}.`,
+                );
+              }
+
+              if (action === "closed") {
+                const keepInProgress = await hasOtherOpenLinkedPr(issueNumber);
+                const optionId = keepInProgress
+                  ? inProgressOptionId
+                  : merged
+                    ? doneOptionId
+                    : todoOptionId;
+                await setStatus(projectId, itemId, statusFieldId, optionId);
+                core.notice(
+                  `Set issue #${issueNumber} to '${
+                    keepInProgress ? statusInProgress : merged ? statusDone : statusTodo
+                  }' from PR #${prNumber}.`,
+                );
+                continue;
+              }
+
+              await setStatus(projectId, itemId, statusFieldId, inProgressOptionId);
+              core.notice(
+                `Set issue #${issueNumber} to '${statusInProgress}' from PR #${prNumber}.`,
+              );
+            }
