@@ -92,6 +92,7 @@ function main() {
       contractPath,
       "--max-parallel",
       String(args.maxParallel),
+      ...(args.verbose ? ["--verbose"] : []),
       ...(args.allowDestructive ? ["--allow-destructive"] : []),
     ],
     {
@@ -449,6 +450,7 @@ function parseArgs(argv) {
     allowDestructive: false,
     confirmRisky: false,
     approvalPolicy: "on-request",
+    verbose: false,
   };
   const positional = [];
 
@@ -516,6 +518,11 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (current === "--verbose") {
+      args.verbose = true;
+      continue;
+    }
+
     if (current === "--confirm-risky") {
       args.confirmRisky = true;
       continue;
@@ -563,6 +570,7 @@ Options:
   --dry-run                 Generate contract only, do not execute
   --no-run                  Alias for --dry-run
   --approval-policy <name>  untrusted | on-failure | on-request | never (default: on-request)
+  --verbose                 Show per-command orchestrator progress and log tails
   --confirm-risky           Explicitly confirm high-risk prompts (destructive/secrets)
   --allow-destructive       Allow destructive commands in contract execution policy
   --checkout-pr             Checkout PR branch in pr-review profile

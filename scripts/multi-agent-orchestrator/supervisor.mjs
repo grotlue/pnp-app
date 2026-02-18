@@ -12,6 +12,11 @@ import {
 import { matchesAnyGlob } from "./lib/glob-utils.mjs";
 import { getWorkingTreeFiles } from "./lib/git-utils.mjs";
 import { runShellCommand } from "./lib/command-utils.mjs";
+import {
+  normalizeTailLines,
+  readLogTail,
+  summarizeCommand,
+} from "./lib/log-utils.mjs";
 import { evaluateCommandSafety } from "./lib/safety-utils.mjs";
 
 async function main() {
@@ -75,57 +80,105 @@ async function main() {
   );
   const stages = resolveExecutionStages(task.workstreams);
   const workstreamResults = [];
-
-  if (args.maxParallel > 1) {
-    console.log(
-      "[orchestrator] max_parallel > 1 uses same working tree. Prefer isolated worktrees for true parallel workers.",
-    );
-  }
-
-  for (const stage of stages) {
-    const stageWorkstreams = stage.map((name) => workstreamMap.get(name));
-
-    const stageResults = await runWithConcurrency(
-      stageWorkstreams,
-      args.maxParallel,
-      async (workstream) =>
-        runWorkstream(workstream, { cwd, runDir, taskId: task.task_id }),
-    );
-
-    workstreamResults.push(...stageResults);
-
-    const hasFailure = stageResults.some(
-      (result) => result.status !== "success",
-    );
-    if (hasFailure) {
-      console.log("[orchestrator] stage failed; stopping remaining stages.");
-      break;
-    }
-  }
-
-  const mergeGate = await runMergeGate(task, workstreamResults, {
-    cwd,
-    runDir,
-  });
-
-  const summary = {
-    task_id: task.task_id,
-    run_id: runId,
-    started_at: runMeta.started_at,
-    finished_at: new Date().toISOString(),
-    execution_policy: executionPolicy,
-    workstream_results: workstreamResults,
-    merge_gate: mergeGate,
-    status: mergeGate.status,
+  const interruptState = {
+    requested: false,
   };
+  const signalHandler = createSigintHandler(interruptState);
+  process.on("SIGINT", signalHandler);
 
-  writeJson(join(runDir, "run-summary.json"), summary);
-  console.log(
-    `[orchestrator] summary written to ${join(runDir, "run-summary.json")}`,
-  );
+  try {
+    if (args.maxParallel > 1) {
+      console.log(
+        "[orchestrator] max_parallel > 1 uses same working tree. Prefer isolated worktrees for true parallel workers.",
+      );
+    }
 
-  if (summary.status !== "success") {
-    process.exit(1);
+    for (const stage of stages) {
+      if (interruptState.requested) {
+        break;
+      }
+
+      if (args.verbose) {
+        console.log(
+          `[orchestrator] starting stage: ${stage.join(", ")} (${stage.length} workstream(s))`,
+        );
+      }
+
+      const stageWorkstreams = stage.map((name) => workstreamMap.get(name));
+      const stageResults = await runWithConcurrency(
+        stageWorkstreams,
+        args.maxParallel,
+        async (workstream) =>
+          runWorkstream(workstream, {
+            cwd,
+            runDir,
+            taskId: task.task_id,
+            verbose: args.verbose,
+            tailLines: args.tailLines,
+            interruptState,
+          }),
+        () => interruptState.requested,
+      );
+
+      workstreamResults.push(...stageResults);
+
+      const hasFailure = stageResults.some(
+        (result) => result.status === "failure",
+      );
+      const hasInterrupted = stageResults.some(
+        (result) => result.status === "interrupted",
+      );
+
+      if (hasInterrupted || interruptState.requested) {
+        console.log(
+          "[orchestrator] run interrupted; stopping remaining stages.",
+        );
+        break;
+      }
+
+      if (hasFailure) {
+        console.log("[orchestrator] stage failed; stopping remaining stages.");
+        break;
+      }
+
+      if (args.verbose) {
+        console.log("[orchestrator] stage completed.");
+      }
+    }
+
+    const mergeGate = await runMergeGate(task, workstreamResults, {
+      cwd,
+      runDir,
+      verbose: args.verbose,
+      tailLines: args.tailLines,
+      interruptState,
+    });
+
+    const summary = {
+      task_id: task.task_id,
+      run_id: runId,
+      started_at: runMeta.started_at,
+      finished_at: new Date().toISOString(),
+      execution_policy: executionPolicy,
+      workstream_results: workstreamResults,
+      merge_gate: mergeGate,
+      status: interruptState.requested ? "interrupted" : mergeGate.status,
+    };
+
+    writeJson(join(runDir, "run-summary.json"), summary);
+    console.log(
+      `[orchestrator] summary written to ${join(runDir, "run-summary.json")}`,
+    );
+
+    if (summary.status === "interrupted") {
+      process.exit(130);
+    }
+
+    if (summary.status !== "success") {
+      process.exit(1);
+    }
+  } finally {
+    process.off("SIGINT", signalHandler);
   }
 }
 
@@ -139,19 +192,55 @@ async function runWorkstream(workstream, context) {
   let status = "success";
 
   for (let index = 0; index < workstream.commands.length; index += 1) {
+    if (context.interruptState.requested) {
+      status = "interrupted";
+      residualRisks.push("Interrupted before command execution completed.");
+      break;
+    }
+
     const command = workstream.commands[index];
     const commandId = String(index + 1).padStart(2, "0");
+    const stdoutPath = join(workerDir, `command-${commandId}.stdout.log`);
+    const stderrPath = join(workerDir, `command-${commandId}.stderr.log`);
+
+    if (context.verbose) {
+      console.log(
+        `[orchestrator][${workstream.name}] command ${index + 1}/${workstream.commands.length} start: ${summarizeCommand(command)}`,
+      );
+      console.log(
+        `[orchestrator][${workstream.name}] logs: stdout=${stdoutPath} stderr=${stderrPath}`,
+      );
+    }
+
     const commandResult = await runShellCommand(command, {
       cwd: context.cwd,
-      stdoutPath: join(workerDir, `command-${commandId}.stdout.log`),
-      stderrPath: join(workerDir, `command-${commandId}.stderr.log`),
+      stdoutPath,
+      stderrPath,
     });
 
     commandResults.push(commandResult);
 
+    if (context.verbose) {
+      console.log(
+        `[orchestrator][${workstream.name}] command ${index + 1}/${workstream.commands.length} done: exit=${commandResult.exit_code} duration=${commandResult.duration_ms}ms`,
+      );
+      printCommandTail(workstream.name, "stdout", commandResult.stdout_path, {
+        tailLines: context.tailLines,
+      });
+      printCommandTail(workstream.name, "stderr", commandResult.stderr_path, {
+        tailLines: context.tailLines,
+      });
+    }
+
     if (commandResult.exit_code !== 0) {
       status = "failure";
       residualRisks.push(`Command failed: ${command}`);
+      break;
+    }
+
+    if (context.interruptState.requested) {
+      status = "interrupted";
+      residualRisks.push("Interrupted after command execution.");
       break;
     }
   }
@@ -166,7 +255,9 @@ async function runWorkstream(workstream, context) {
   );
 
   if (scopeViolations.length > 0) {
-    status = "failure";
+    if (status !== "interrupted") {
+      status = "failure";
+    }
     residualRisks.push(
       `Workstream changed files outside files_allowed: ${scopeViolations.join(", ")}`,
     );
@@ -203,6 +294,12 @@ async function runMergeGate(task, workstreamResults, context) {
   const requiredWorkers =
     gate.required_workers ?? task.workstreams.map((item) => item.name);
   const failures = [];
+  let interrupted = false;
+
+  if (context.interruptState.requested) {
+    failures.push("Run interrupted by SIGINT before merge gate checks.");
+    interrupted = true;
+  }
 
   for (const requiredWorkstream of requiredWorkers) {
     const result = workstreamResults.find(
@@ -215,36 +312,65 @@ async function runMergeGate(task, workstreamResults, context) {
       continue;
     }
 
-    if (result.status !== "success") {
+    if (result.status === "failure") {
       failures.push(`Required workstream failed: ${requiredWorkstream}`);
     }
   }
 
   const checks = normalizeChecks(task.checks_required ?? []);
   const checkResults = [];
-  for (const check of checks.valid) {
-    const command = CHECK_COMMANDS[check];
-    const checkResult = await runShellCommand(command, {
-      cwd: context.cwd,
-      stdoutPath: join(context.runDir, `merge-gate-${check}.stdout.log`),
-      stderrPath: join(context.runDir, `merge-gate-${check}.stderr.log`),
-    });
+  if (!interrupted) {
+    for (const check of checks.valid) {
+      if (context.interruptState.requested) {
+        interrupted = true;
+        failures.push("Run interrupted by SIGINT during merge gate checks.");
+        break;
+      }
 
-    checkResults.push({
-      check,
-      ...checkResult,
-    });
+      const command = CHECK_COMMANDS[check];
+      const stdoutPath = join(context.runDir, `merge-gate-${check}.stdout.log`);
+      const stderrPath = join(context.runDir, `merge-gate-${check}.stderr.log`);
 
-    if (checkResult.exit_code !== 0) {
-      failures.push(`Merge gate check failed: ${check}`);
+      if (context.verbose) {
+        console.log(`[orchestrator][merge-gate] running check: ${check}`);
+      }
+
+      const checkResult = await runShellCommand(command, {
+        cwd: context.cwd,
+        stdoutPath,
+        stderrPath,
+      });
+
+      checkResults.push({
+        check,
+        ...checkResult,
+      });
+
+      if (context.verbose) {
+        console.log(
+          `[orchestrator][merge-gate] check ${check} done: exit=${checkResult.exit_code} duration=${checkResult.duration_ms}ms`,
+        );
+        printCommandTail("merge-gate", "stdout", checkResult.stdout_path, {
+          tailLines: context.tailLines,
+        });
+        printCommandTail("merge-gate", "stderr", checkResult.stderr_path, {
+          tailLines: context.tailLines,
+        });
+      }
+
+      if (checkResult.exit_code !== 0) {
+        failures.push(`Merge gate check failed: ${check}`);
+      }
     }
   }
 
-  const policyResults = runPolicyChecks(
-    gate.policy ?? {},
-    getWorkingTreeFiles(context.cwd),
-    context.cwd,
-  );
+  const policyResults = interrupted
+    ? { failures: [], details: [] }
+    : runPolicyChecks(
+        gate.policy ?? {},
+        getWorkingTreeFiles(context.cwd),
+        context.cwd,
+      );
   failures.push(...policyResults.failures);
 
   const report = {
@@ -252,7 +378,11 @@ async function runMergeGate(task, workstreamResults, context) {
     checks_run: checkResults,
     policy_results: policyResults,
     failures,
-    status: failures.length === 0 ? "success" : "failure",
+    status: interrupted
+      ? "interrupted"
+      : failures.length === 0
+        ? "success"
+        : "failure",
     finished_at: new Date().toISOString(),
   };
 
@@ -325,15 +455,21 @@ function runPolicyChecks(policy, changedFiles, cwd) {
   };
 }
 
-async function runWithConcurrency(items, concurrency, worker) {
+async function runWithConcurrency(items, concurrency, worker, shouldStop) {
   const effectiveConcurrency = Math.max(1, Number(concurrency) || 1);
   const queue = [...items];
   const results = [];
+  const stopRequested =
+    typeof shouldStop === "function" ? shouldStop : () => false;
 
   const runners = Array.from({
     length: Math.min(effectiveConcurrency, queue.length),
   }).map(async () => {
     while (queue.length > 0) {
+      if (stopRequested()) {
+        break;
+      }
+
       const item = queue.shift();
       if (!item) {
         break;
@@ -364,6 +500,8 @@ function parseArgs(argv) {
     taskPath: "",
     maxParallel: 1,
     allowDestructive: false,
+    verbose: false,
+    tailLines: 30,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -383,6 +521,17 @@ function parseArgs(argv) {
 
     if (current === "--allow-destructive") {
       args.allowDestructive = true;
+      continue;
+    }
+
+    if (current === "--verbose") {
+      args.verbose = true;
+      continue;
+    }
+
+    if (current === "--tail-lines") {
+      args.tailLines = normalizeTailLines(argv[index + 1], 30);
+      index += 1;
       continue;
     }
 
@@ -423,10 +572,48 @@ Usage:
 Options:
   --task <path>            Task contract path
   --max-parallel <n>       Maximum parallel workstreams per stage
+  --verbose                Show per-command progress and log tails
+  --tail-lines <n>         Number of log tail lines per command (default: 30)
   --allow-destructive      Allow destructive commands in task contracts
   --help, -h               Show this help
 `.trim(),
   );
+}
+
+function createSigintHandler(interruptState) {
+  let signalCount = 0;
+
+  return () => {
+    signalCount += 1;
+
+    if (signalCount > 1) {
+      console.error(
+        "[orchestrator] second interrupt received; exiting immediately.",
+      );
+      process.exit(130);
+    }
+
+    interruptState.requested = true;
+    console.log(
+      "[orchestrator] interrupt received (SIGINT). Finishing active command and writing partial summary...",
+    );
+  };
+}
+
+function printCommandTail(scope, streamName, filePath, options = {}) {
+  const tailLines = normalizeTailLines(options.tailLines, 30);
+  const lines = readLogTail(filePath, tailLines);
+
+  if (lines.length === 0) {
+    return;
+  }
+
+  console.log(
+    `[orchestrator][${scope}] ${streamName} tail (${lines.length} line(s)):`,
+  );
+  for (const line of lines) {
+    console.log(`  ${line}`);
+  }
 }
 
 function sumDurations(commandResults) {
