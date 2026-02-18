@@ -16,9 +16,9 @@
 
 ## E2E Coverage Matrix
 
-| AC / User Flow Ref | Scenario ID | Test status | Why E2E vs feature test |
-| --- | --- | --- | --- |
-| AC-1 | FLOW-domain-slug | Existing / Updated / New | Critical user-visible happy path |
+| AC / User Flow Ref | Scenario ID      | Test status              | Why E2E vs feature test          |
+| ------------------ | ---------------- | ------------------------ | -------------------------------- |
+| AC-1               | FLOW-domain-slug | Existing / Updated / New | Critical user-visible happy path |
 
 ## PR Acceptance Criteria (Required When No Linked Issue)
 
