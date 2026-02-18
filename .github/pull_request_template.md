@@ -43,6 +43,7 @@
 ## Documentation
 
 - [ ] Relevant docs updated when conventions/behavior changed
+- [ ] ADR linked or rationale given when architecture/security/runtime boundaries changed
 
 ## Risk and Rollback
 

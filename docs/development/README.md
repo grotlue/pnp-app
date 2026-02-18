@@ -5,6 +5,7 @@ Project-specific development and deployment docs for maintainers.
 ## Core Docs
 
 - Architecture: `docs/app-architecture.md`
+- Architecture decisions (ADR log): `docs/development/decisions/README.md`
 - Branching and PR workflow: `docs/development/branching-and-pr-workflow.md`
 - Deployment: `docs/development/deployment-production.md`
 - Local fixture users: `docs/development/local-dev-fixture-users.md`

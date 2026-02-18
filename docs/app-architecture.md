@@ -44,3 +44,7 @@ src/
 - Unit/integration tests in colocated `tests/` folders.
 - E2E tests under `tests/e2e/`.
 - Testing policy and tags: `docs/testing/e2e-strategy.md`.
+
+## Decision Log
+
+- Architecture-significant decisions are tracked as ADRs in `docs/development/decisions/README.md`.
