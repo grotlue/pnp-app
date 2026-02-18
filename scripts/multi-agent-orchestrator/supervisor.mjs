@@ -12,9 +12,15 @@ import {
 import { matchesAnyGlob } from "./lib/glob-utils.mjs";
 import { getWorkingTreeFiles } from "./lib/git-utils.mjs";
 import { runShellCommand } from "./lib/command-utils.mjs";
+import { evaluateCommandSafety } from "./lib/safety-utils.mjs";
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (args.help) {
+    printUsage();
+    return;
+  }
+
   if (!args.taskPath) {
     fail("Missing --task <path-to-task-contract.json>");
   }
@@ -30,6 +36,22 @@ async function main() {
     );
   }
 
+  const executionPolicy = resolveExecutionPolicy(task, args);
+  const safetyReport = evaluateCommandSafety(task.workstreams, {
+    allowDestructiveCommands: executionPolicy.allow_destructive_commands,
+  });
+  if (safetyReport.violations.length > 0) {
+    fail(
+      [
+        "Command safety validation failed.",
+        ...safetyReport.violations.map(
+          (violation) =>
+            `${violation.workstream}: ${violation.rule_id} (${violation.message}) -> ${violation.command}`,
+        ),
+      ].join("\n- "),
+    );
+  }
+
   const runId = `${Date.now()}-${sanitizeRunId(task.task_id)}`;
   const runDir = resolve(cwd, ".orchestrator", "runs", runId);
   mkdirSync(runDir, { recursive: true });
@@ -41,6 +63,10 @@ async function main() {
     task_title: task.title,
     task_path: taskPath,
     max_parallel: args.maxParallel,
+    execution_policy: executionPolicy,
+    command_safety: {
+      violations: safetyReport.violations.length,
+    },
   };
   writeJson(join(runDir, "run-meta.json"), runMeta);
 
@@ -87,6 +113,7 @@ async function main() {
     run_id: runId,
     started_at: runMeta.started_at,
     finished_at: new Date().toISOString(),
+    execution_policy: executionPolicy,
     workstream_results: workstreamResults,
     merge_gate: mergeGate,
     status: mergeGate.status,
@@ -333,8 +360,10 @@ function writeJson(filePath, data) {
 
 function parseArgs(argv) {
   const args = {
+    help: false,
     taskPath: "",
     maxParallel: 1,
+    allowDestructive: false,
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -349,10 +378,55 @@ function parseArgs(argv) {
     if (current === "--max-parallel") {
       args.maxParallel = Number(argv[index + 1] ?? "1");
       index += 1;
+      continue;
+    }
+
+    if (current === "--allow-destructive") {
+      args.allowDestructive = true;
+      continue;
+    }
+
+    if (current === "--help" || current === "-h") {
+      args.help = true;
+      continue;
+    }
+
+    if (current.startsWith("-")) {
+      fail(`Unknown argument: ${current}`);
     }
   }
 
   return args;
+}
+
+function resolveExecutionPolicy(task, args) {
+  const taskPolicy = task.execution_policy ?? {};
+
+  return {
+    allow_destructive_commands:
+      Boolean(taskPolicy.allow_destructive_commands) ||
+      Boolean(args.allowDestructive),
+    approval_policy: taskPolicy.approval_policy ?? "on-request",
+    risk_tier: taskPolicy.risk_tier ?? "unknown",
+    risk_reasons: Array.isArray(taskPolicy.risk_reasons)
+      ? taskPolicy.risk_reasons
+      : [],
+  };
+}
+
+function printUsage() {
+  console.log(
+    `
+Usage:
+  yarn orchestrator:run --task path/to/task.json
+
+Options:
+  --task <path>            Task contract path
+  --max-parallel <n>       Maximum parallel workstreams per stage
+  --allow-destructive      Allow destructive commands in task contracts
+  --help, -h               Show this help
+`.trim(),
+  );
 }
 
 function sumDurations(commandResults) {

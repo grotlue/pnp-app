@@ -103,6 +103,49 @@ export function validateTaskContract(task) {
     );
   }
 
+  if (task.execution_policy !== undefined) {
+    if (!task.execution_policy || typeof task.execution_policy !== "object") {
+      errors.push("execution_policy must be an object when provided.");
+    } else {
+      const { execution_policy: executionPolicy } = task;
+
+      if (
+        executionPolicy.allow_destructive_commands !== undefined &&
+        typeof executionPolicy.allow_destructive_commands !== "boolean"
+      ) {
+        errors.push(
+          "execution_policy.allow_destructive_commands must be boolean.",
+        );
+      }
+
+      if (
+        executionPolicy.approval_policy !== undefined &&
+        !isNonEmptyString(executionPolicy.approval_policy)
+      ) {
+        errors.push("execution_policy.approval_policy must be a string.");
+      }
+
+      if (
+        executionPolicy.risk_tier !== undefined &&
+        !isNonEmptyString(executionPolicy.risk_tier)
+      ) {
+        errors.push("execution_policy.risk_tier must be a string.");
+      }
+
+      if (
+        executionPolicy.risk_reasons !== undefined &&
+        (!Array.isArray(executionPolicy.risk_reasons) ||
+          executionPolicy.risk_reasons.some(
+            (reason) => !isNonEmptyString(reason),
+          ))
+      ) {
+        errors.push(
+          "execution_policy.risk_reasons must be an array of strings.",
+        );
+      }
+    }
+  }
+
   return errors;
 }
 

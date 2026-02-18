@@ -21,6 +21,9 @@ Useful flags:
 - `--print-analysis`: show detected intent and selected skills
 - `--profile <name>`: override routing (`pr-review`, `feature-delivery`, `docs-maintenance`)
 - `--max-parallel 2`: run independent workstreams in parallel
+- `--approval-policy <name>`: `untrusted | on-failure | on-request | never`
+- `--confirm-risky`: required for high-risk prompts
+- `--allow-destructive`: allow destructive commands (blocked by default)
 
 Generated contracts are saved under `.orchestrator/contracts/`.  
 You do not need to create one JSON file per task unless you want full manual control.
@@ -35,6 +38,28 @@ Auto mode uses prompt intent + profile override.
 - Migration/RLS/SQL hints additionally route DB guardrails
 
 Skill policy and mandatory routing rules are defined in [Agent Rules](../../AGENTS.md).
+
+## Safety Defaults
+
+Orchestrator safety model:
+
+- Prompts are risk-classified (`low`, `medium`, `high`) before execution.
+- High-risk prompts fail unless `--confirm-risky` is explicitly provided.
+- Task contracts include `execution_policy` metadata for traceability.
+- Supervisor blocks forbidden command patterns (for example approval bypass and pipe-to-shell).
+- Destructive commands (for example `rm -rf`, `git reset --hard`) are blocked unless `--allow-destructive` is explicitly enabled.
+
+Recommended default:
+
+```bash
+yarn orchestrator:auto --prompt "<task>" --approval-policy on-request
+```
+
+For sensitive work, tighten approval policy:
+
+```bash
+yarn orchestrator:auto --prompt "<task>" --approval-policy untrusted
+```
 
 ## Conversation Mode (Planning First)
 

@@ -15,6 +15,13 @@ Developer quickstart for using project AI agents and the orchestrator workflow.
 
 Recommended default for most tasks: `orchestrator:auto`.
 
+## Safety Defaults You Should Know
+
+- High-risk prompts (destructive actions or secret/credential access) are blocked unless you add `--confirm-risky`.
+- Destructive command patterns are blocked unless `--allow-destructive` is explicitly provided.
+- Default approval policy is `on-request`; use `--approval-policy untrusted` for stricter manual control.
+- Keep using sandboxed execution (`workspace-write`), do not bypass approvals/sandbox.
+
 ## 1) Complete Local Prerequisites
 
 - Follow: [Local Setup and CLI Tooling](local-setup-and-cli-tooling.md)

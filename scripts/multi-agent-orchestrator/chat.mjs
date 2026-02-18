@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
+import {
+  buildSafeAgentPrompt,
+  normalizeApprovalPolicy,
+} from "./lib/safety-utils.mjs";
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -9,9 +13,16 @@ function main() {
     return;
   }
 
-  const prompt = buildBootstrapPrompt(args.mode, args.prompt);
+  const prompt = buildSafeAgentPrompt(
+    buildBootstrapPrompt(args.mode, args.prompt),
+  );
 
-  const codexArgs = [];
+  const codexArgs = [
+    "--sandbox",
+    "workspace-write",
+    "--ask-for-approval",
+    args.approvalPolicy,
+  ];
   if (args.mode === "plan") {
     codexArgs.push("--search");
   }
@@ -52,6 +63,7 @@ function parseArgs(argv) {
     help: false,
     mode: "default",
     prompt: "",
+    approvalPolicy: "on-request",
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -74,7 +86,19 @@ function parseArgs(argv) {
       index += 1;
       continue;
     }
+
+    if (current === "--approval-policy") {
+      args.approvalPolicy = argv[index + 1] ?? "on-request";
+      index += 1;
+      continue;
+    }
+
+    if (current.startsWith("-")) {
+      throw new Error(`Unknown argument: ${current}`);
+    }
   }
+
+  args.approvalPolicy = normalizeApprovalPolicy(args.approvalPolicy);
 
   return args;
 }
@@ -88,11 +112,21 @@ Usage:
   node scripts/multi-agent-orchestrator/chat.mjs --mode default --prompt "review PR 48"
 
 Options:
-  --mode <default|plan>   default: execution-oriented routing, plan: planning conversation first
-  --prompt "<text>"       Optional initial user task
-  --help, -h              Show this help
+  --mode <default|plan>      default: execution-oriented routing, plan: planning conversation first
+  --prompt "<text>"          Optional initial user task
+  --approval-policy <name>   untrusted | on-failure | on-request | never (default: on-request)
+  --help, -h                 Show this help
 `.trim(),
   );
 }
 
-main();
+function fail(message) {
+  console.error(`[orchestrator:chat] ${message}`);
+  process.exit(1);
+}
+
+try {
+  main();
+} catch (error) {
+  fail(error instanceof Error ? error.message : "Unexpected error.");
+}

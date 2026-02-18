@@ -140,3 +140,9 @@ Use this as default decision guide:
 | Execute in conversational mode immediately | `yarn orchestrator:chat --prompt "<task>"`                            | You want interactive execution-focused chat    |
 | Preview routing without running            | `yarn orchestrator:auto --prompt "<task>" --dry-run --print-analysis` | Validate profile/skills before execution       |
 | Fully custom orchestration                 | `yarn orchestrator:run --task path/to/task.json`                      | Advanced/manual workstream control             |
+
+Safety notes for all modes:
+
+- High-risk prompts require `--confirm-risky`.
+- Destructive commands are blocked unless `--allow-destructive` is explicitly set.
+- Default approval policy is `on-request`; for stricter control use `--approval-policy untrusted`.

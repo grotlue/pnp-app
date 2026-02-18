@@ -5,6 +5,11 @@ import { dirname, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { analyzePrompt } from "./lib/prompt-router.mjs";
 import { sanitizeRunId } from "./lib/contract-utils.mjs";
+import {
+  assessPromptRisk,
+  buildSafeAgentPrompt,
+  normalizeApprovalPolicy,
+} from "./lib/safety-utils.mjs";
 
 const AUTO_PROFILES = new Set([
   "auto",
@@ -39,6 +44,7 @@ function main() {
     profile: args.profile,
     prNumber: args.pr,
   });
+  const risk = assessPromptRisk(analysis);
 
   if (analysis.primaryProfile === "pr-review" && !analysis.prNumber) {
     fail(
@@ -46,7 +52,16 @@ function main() {
     );
   }
 
-  const task = buildTaskContract(analysis, args);
+  if (risk.requiresExplicitConfirmation && !args.confirmRisky) {
+    fail(
+      [
+        "High-risk prompt detected. Re-run with --confirm-risky if intentional.",
+        `Reasons: ${risk.reasons.join("; ")}`,
+      ].join("\n"),
+    );
+  }
+
+  const task = buildTaskContract(analysis, args, risk);
   const contractPath = writeContract(task);
 
   console.log("[orchestrator:auto] profile:", analysis.primaryProfile);
@@ -55,10 +70,11 @@ function main() {
     analysis.requiredSkills.join(", "),
   );
   console.log("[orchestrator:auto] contract:", contractPath);
+  console.log("[orchestrator:auto] risk tier:", risk.tier);
 
   if (args.printAnalysis) {
     console.log("[orchestrator:auto] analysis:");
-    console.log(JSON.stringify(analysis, null, 2));
+    console.log(JSON.stringify({ ...analysis, risk }, null, 2));
   }
 
   if (args.dryRun || args.noRun) {
@@ -76,6 +92,7 @@ function main() {
       contractPath,
       "--max-parallel",
       String(args.maxParallel),
+      ...(args.allowDestructive ? ["--allow-destructive"] : []),
     ],
     {
       stdio: "inherit",
@@ -87,19 +104,19 @@ function main() {
   }
 }
 
-function buildTaskContract(analysis, args) {
+function buildTaskContract(analysis, args, risk) {
   if (analysis.primaryProfile === "pr-review") {
-    return buildPrReviewContract(analysis, args);
+    return buildPrReviewContract(analysis, args, risk);
   }
 
   if (analysis.primaryProfile === "docs-maintenance") {
-    return buildDocsContract(analysis);
+    return buildDocsContract(analysis, args, risk);
   }
 
-  return buildFeatureContract(analysis);
+  return buildFeatureContract(analysis, args, risk);
 }
 
-function buildPrReviewContract(analysis, args) {
+function buildPrReviewContract(analysis, args, risk) {
   const pr = analysis.prNumber;
   const outputPrefix = `.orchestrator/output/pr-${pr}`;
 
@@ -130,6 +147,7 @@ function buildPrReviewContract(analysis, args) {
             "Focus on correctness, regressions, security boundaries, query invalidation, and missing tests.",
           ].join(" "),
           `${outputPrefix}-review.md`,
+          args,
         ),
       ],
     },
@@ -149,6 +167,7 @@ function buildPrReviewContract(analysis, args) {
     task_id: `AUTO-PR-REVIEW-${pr}`,
     title: `Auto PR review for PR #${pr}`,
     checks_required: [],
+    execution_policy: buildExecutionPolicy(args, risk),
     workstreams,
     merge_gate: {
       required_workers: workstreams.map((item) => item.name),
@@ -160,7 +179,7 @@ function buildPrReviewContract(analysis, args) {
   };
 }
 
-function buildFeatureContract(analysis) {
+function buildFeatureContract(analysis, args, risk) {
   const workstreams = [
     {
       name: "planning",
@@ -179,6 +198,7 @@ function buildFeatureContract(analysis) {
               : "Do not create GitHub issues unless necessary.",
           ].join(" "),
           ".orchestrator/output/feature-plan.md",
+          args,
         ),
       ],
     },
@@ -205,6 +225,7 @@ function buildFeatureContract(analysis) {
             "Run and pass required quality gates for changed scope.",
           ].join(" "),
           ".orchestrator/output/feature-implementation.md",
+          args,
         ),
       ],
     },
@@ -227,6 +248,7 @@ function buildFeatureContract(analysis) {
             "Ensure PR template fields and docs/ADR expectations are satisfied.",
           ].join(" "),
           ".orchestrator/output/pr-readiness.md",
+          args,
         ),
       ],
     },
@@ -238,6 +260,7 @@ function buildFeatureContract(analysis) {
     task_id: `AUTO-FEATURE-${sanitizeRunId(analysis.prompt).slice(0, 36)}`,
     title: `Auto feature delivery: ${analysis.prompt.slice(0, 80)}`,
     checks_required: ["typecheck", "lint", "test:run", "build"],
+    execution_policy: buildExecutionPolicy(args, risk),
     workstreams,
     merge_gate: {
       required_workers: workstreams.map((item) => item.name),
@@ -249,7 +272,7 @@ function buildFeatureContract(analysis) {
   };
 }
 
-function buildDocsContract(analysis) {
+function buildDocsContract(analysis, args, risk) {
   const workstreams = [
     {
       name: "docs-maintenance",
@@ -264,6 +287,7 @@ function buildDocsContract(analysis) {
             "Keep docs link-first and avoid duplication.",
           ].join(" "),
           ".orchestrator/output/docs-maintenance.md",
+          args,
         ),
       ],
     },
@@ -282,6 +306,7 @@ function buildDocsContract(analysis) {
         buildCodexExecCommand(
           "Use pnp-pr-readiness and verify docs-only PR completeness.",
           ".orchestrator/output/docs-pr-readiness.md",
+          args,
         ),
       ],
     },
@@ -291,6 +316,7 @@ function buildDocsContract(analysis) {
     task_id: `AUTO-DOCS-${sanitizeRunId(analysis.prompt).slice(0, 36)}`,
     title: `Auto docs maintenance: ${analysis.prompt.slice(0, 80)}`,
     checks_required: ["lint"],
+    execution_policy: buildExecutionPolicy(args, risk),
     workstreams,
     merge_gate: {
       required_workers: workstreams.map((item) => item.name),
@@ -302,14 +328,25 @@ function buildDocsContract(analysis) {
   };
 }
 
-function buildCodexExecCommand(prompt, outputFile) {
+function buildCodexExecCommand(prompt, outputFile, args) {
+  const safePrompt = buildSafeAgentPrompt(prompt);
+
   return [
     "codex exec",
-    "--full-auto",
     "--sandbox workspace-write",
+    `--ask-for-approval ${args.approvalPolicy}`,
     `--output-last-message ${shellQuote(outputFile)}`,
-    shellQuote(prompt),
+    shellQuote(safePrompt),
   ].join(" ");
+}
+
+function buildExecutionPolicy(args, risk) {
+  return {
+    allow_destructive_commands: Boolean(args.allowDestructive),
+    approval_policy: args.approvalPolicy,
+    risk_tier: risk.tier,
+    risk_reasons: risk.reasons,
+  };
 }
 
 function writeContract(contract) {
@@ -341,6 +378,9 @@ function parseArgs(argv) {
     printAnalysis: false,
     maxParallel: 1,
     checkoutPr: false,
+    allowDestructive: false,
+    confirmRisky: false,
+    approvalPolicy: "on-request",
   };
   const positional = [];
 
@@ -403,6 +443,22 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (current === "--allow-destructive") {
+      args.allowDestructive = true;
+      continue;
+    }
+
+    if (current === "--confirm-risky") {
+      args.confirmRisky = true;
+      continue;
+    }
+
+    if (current === "--approval-policy") {
+      args.approvalPolicy = argv[index + 1] ?? "on-request";
+      index += 1;
+      continue;
+    }
+
     if (current.startsWith("-")) {
       fail(`Unknown argument: ${current}`);
     }
@@ -412,6 +468,12 @@ function parseArgs(argv) {
 
   if (!args.prompt && positional.length > 0) {
     args.prompt = positional.join(" ");
+  }
+
+  try {
+    args.approvalPolicy = normalizeApprovalPolicy(args.approvalPolicy);
+  } catch (error) {
+    fail(error instanceof Error ? error.message : "Invalid approval policy.");
   }
 
   return args;
@@ -432,6 +494,9 @@ Options:
   --print-analysis          Print detected routing analysis
   --dry-run                 Generate contract only, do not execute
   --no-run                  Alias for --dry-run
+  --approval-policy <name>  untrusted | on-failure | on-request | never (default: on-request)
+  --confirm-risky           Explicitly confirm high-risk prompts (destructive/secrets)
+  --allow-destructive       Allow destructive commands in contract execution policy
   --checkout-pr             Checkout PR branch in pr-review profile
   --no-checkout-pr          Do not checkout PR branch (default)
   --help, -h                Show this help

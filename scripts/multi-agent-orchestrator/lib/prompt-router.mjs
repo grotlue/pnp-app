@@ -29,6 +29,18 @@ export function analyzePrompt(prompt, options = {}) {
       /\barchitektur\b|\barchitecture\b|\bruntime\b|\bsecurity model\b|\bfolder convention\b|\badr\b/.test(
         normalized,
       ),
+    asksDestructiveAction:
+      /\brm -rf\b|\bgit reset --hard\b|\bforce push\b|\bdelete\b|\bdrop table\b|\btruncate\b|\bdestroy\b/.test(
+        normalized,
+      ),
+    asksSecretsAccess:
+      /\bsecret\b|\btoken\b|\bapi key\b|\bpassword\b|\bcredential\b|\.env\b/.test(
+        normalized,
+      ),
+    asksProductionAction:
+      /\bproduction\b|\bprod\b|\bdeploy\b|\brelease\b|\bmain branch\b/.test(
+        normalized,
+      ),
   };
 
   const primaryProfile =

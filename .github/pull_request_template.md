@@ -49,3 +49,8 @@
 
 - Risk notes:
 - Rollback approach:
+
+## Agent Automation Safety (when applicable)
+
+- [ ] No sandbox/approval bypass flags used
+- [ ] High-risk or destructive overrides (`--confirm-risky`, `--allow-destructive`) documented with rationale
