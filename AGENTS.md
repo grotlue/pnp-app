@@ -266,3 +266,42 @@ Code reviews should prioritize:
 - Data access boundaries (queries/hooks/UI separation).
 - Query performance and cache invalidation correctness.
 - Test adequacy for changed behavior.
+
+## 16) Skill Orchestration
+
+Use the local skill set in `skills/*` as a boss-agent orchestration layer.
+
+Available project skills:
+
+- `pnp-orchestrator` -> top-level routing across specialized skills
+- `pnp-feature-delivery` -> implementation/refactor/test delivery
+- `pnp-db-migration-guardrails` -> migration/RLS/index/performance safety
+- `pnp-pr-readiness` -> pre-PR completeness and compliance checks
+- `pnp-pr-review` -> findings-first PR review (bugs/regressions/security/perf/tests)
+- `pnp-docs-maintainer` -> lean README/docs/AGENTS maintenance
+
+### 16.1) Routing Rules (Mandatory)
+
+For each incoming task:
+
+1. Start with `pnp-orchestrator` when scope spans multiple concerns.
+2. Route to `pnp-feature-delivery` for product code changes.
+3. Route to `pnp-db-migration-guardrails` when SQL, migrations, RLS, or DB runtime behavior changes.
+4. Route to `pnp-docs-maintainer` for README/docs/AGENTS changes.
+5. Route to `pnp-pr-review` when user asks for a review.
+6. Route to `pnp-pr-readiness` before opening/updating PRs.
+
+### 16.2) `pr-review` vs `pr-readiness`
+
+- `pnp-pr-review`: quality of the change itself (findings by severity).
+- `pnp-pr-readiness`: release/process completeness (checks green, template complete, docs/ADR linked).
+
+Use both for merge-ready PRs.
+
+## 17) External Multi-Agent Orchestration (Optional Extension)
+
+For true parallel multi-agent systems outside this runtime, use:
+
+- `skills/pnp-orchestrator/references/external-multi-agent-orchestration.md`
+
+Default here remains single-agent execution with skill-based orchestration and tool-level parallelism.
