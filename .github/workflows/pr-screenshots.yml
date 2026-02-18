@@ -163,7 +163,7 @@ jobs:
             if compgen -G "${dest_dir}/*.png" > /dev/null; then
               images_markdown="$(
                 for file in $(find "${dest_dir}" -maxdepth 1 -type f -name '*.png' -exec basename {} \; | sort); do
-                  image_url="https://github.com/${GITHUB_REPOSITORY}/blob/${PREVIEW_BRANCH}/${dest_dir}/${file}?raw=1"
+                  image_url="https://github.com/${GITHUB_REPOSITORY}/raw/${PREVIEW_BRANCH}/${dest_dir}/${file}"
                   printf -- "- \`%s\`\n\n![%s](%s)\n\n" "${file}" "${file}" "${image_url}"
                 done
               )"
