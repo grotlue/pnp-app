@@ -138,11 +138,100 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-artifacts-smoke
+          name: playwright-artifacts-smoke-attempt-${{ github.run_attempt }}
           path: |
             playwright-report
             test-results
           if-no-files-found: ignore
+
+      - name: Append smoke failure debug summary
+        if: ${{ failure() }}
+        run: |
+          {
+            echo "### E2E Smoke Failure Debug"
+            echo "- Artifact: \`playwright-artifacts-smoke-attempt-${{ github.run_attempt }}\`"
+            echo "- Inspect \`test-results/**/trace.zip\` with: \`npx playwright show-trace <trace.zip>\`"
+            echo "- Inspect \`test-results/**/video.webm\` and \`error-context.md\` for retry context"
+            echo "- Open \`playwright-report/index.html\` for timeline and locator snapshots"
+          } >> \"$GITHUB_STEP_SUMMARY\"
+
+  e2e_regression:
+    if: >-
+      ${{
+        github.event_name == 'pull_request' &&
+        contains(github.event.pull_request.labels.*.name, 'e2e-regression')
+      }}
+    needs:
+      - quality
+      - e2e_smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Setup Supabase CLI (E2E fixture backend)
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase services (E2E fixture backend)
+        run: supabase start
+
+      - name: Reset local Supabase DB with fixture seed (E2E)
+        run: supabase db reset --local --yes
+
+      - name: Generate .env.local from local Supabase status (E2E)
+        run: ./scripts/update-local-supabase-env.sh
+
+      - name: Build
+        run: yarn build
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: .playwright-browsers
+          key: ${{ runner.os }}-playwright-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright browsers
+        run: yarn test:e2e:install
+
+      - name: E2E regression tests
+        env:
+          PLAYWRIGHT_WEB_SERVER_CMD: yarn start --port 3000
+        run: yarn test:e2e --grep @regression --pass-with-no-tests
+
+      - name: Upload Playwright artifacts on failure
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts-regression-attempt-${{ github.run_attempt }}
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+
+      - name: Append regression failure debug summary
+        if: ${{ failure() }}
+        run: |
+          {
+            echo "### E2E Regression Failure Debug"
+            echo "- Artifact: \`playwright-artifacts-regression-attempt-${{ github.run_attempt }}\`"
+            echo "- Inspect \`test-results/**/trace.zip\` with: \`npx playwright show-trace <trace.zip>\`"
+            echo "- Inspect \`test-results/**/video.webm\` and \`error-context.md\` for retry context"
+            echo "- Open \`playwright-report/index.html\` for timeline and locator snapshots"
+          } >> \"$GITHUB_STEP_SUMMARY\"
 
   db_schema_guardrails:
     runs-on: ubuntu-latest

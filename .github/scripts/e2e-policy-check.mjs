@@ -1,8 +1,9 @@
 import { execSync } from "node:child_process";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
-const REQUIRED_HEADINGS = {
+export const REQUIRED_HEADINGS = {
   linkedIssues: "Linked Issue(s)",
   flowImpact: "Flow Impact",
   coverageMatrix: "E2E Coverage Matrix",
@@ -11,13 +12,13 @@ const REQUIRED_HEADINGS = {
   noIssueHappyPaths: "PR Happy Paths (Required When No Linked Issue)",
 };
 
-const FLOW_IMPACT_CHECKBOXES = {
+export const FLOW_IMPACT_CHECKBOXES = {
   noImpact: "No user-flow impact",
   existingFlow: "Existing flow changed",
   newFlow: "New flow added",
 };
 
-const FLOW_IMPACT_PATH_PATTERNS = [
+export const FLOW_IMPACT_PATH_PATTERNS = [
   /^src\/app\/.+\/page\.tsx$/,
   /^src\/page-modules\//,
   /^src\/components\//,
@@ -27,8 +28,9 @@ const FLOW_IMPACT_PATH_PATTERNS = [
 ];
 
 const SCENARIO_ID_PATTERN = /\bFLOW-[a-z0-9]+-[a-z0-9-]+\b/gi;
+const TABLE_SEPARATOR_PATTERN = /^:?-{3,}:?$/;
 
-function sectionize(markdown) {
+export function sectionize(markdown) {
   const sections = new Map();
   const lines = markdown.split("\n");
   let currentHeading = null;
@@ -73,13 +75,13 @@ function getChangedFiles(baseRef) {
     .filter(Boolean);
 }
 
-function isChecked(markdown, label) {
+export function isChecked(markdown, label) {
   const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const pattern = new RegExp(`^-\\s*\\[x\\]\\s*${escaped}\\s*$`, "im");
   return pattern.test(markdown);
 }
 
-function hasMeaningfulContent(sectionContent) {
+export function hasMeaningfulContent(sectionContent) {
   if (!sectionContent) {
     return false;
   }
@@ -161,9 +163,112 @@ function statSafe(path) {
   }
 }
 
-function extractScenarioIds(text) {
+export function extractScenarioIds(text) {
   const matches = text.match(SCENARIO_ID_PATTERN) ?? [];
   return [...new Set(matches.map((match) => match.toUpperCase()))];
+}
+
+function splitTableCells(line) {
+  return line
+    .trim()
+    .split("|")
+    .map((cell) => cell.trim())
+    .filter((cell, index, all) => {
+      if (index === 0 && cell === "") {
+        return false;
+      }
+      if (index === all.length - 1 && cell === "") {
+        return false;
+      }
+      return true;
+    });
+}
+
+function isSeparatorRow(cells) {
+  return (
+    cells.length > 0 &&
+    cells.every((cell) => TABLE_SEPARATOR_PATTERN.test(cell))
+  );
+}
+
+function normalizeCell(cell) {
+  return cell
+    .replace(/[`*_]/g, "")
+    .replace(/<br\s*\/?\s*>/gi, " ")
+    .trim();
+}
+
+function isMeaningfulFlowReference(ref) {
+  if (!ref) {
+    return false;
+  }
+
+  const normalized = normalizeCell(ref).toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+
+  if (["...", "n/a", "na", "none", "tbd"].includes(normalized)) {
+    return false;
+  }
+
+  if (/^ac[-\s]*\d*$/i.test(normalized)) {
+    return false;
+  }
+
+  if (/^flow[-\s]*\d*$/i.test(normalized)) {
+    return false;
+  }
+
+  if (/^user\s*flow[-\s]*\d*$/i.test(normalized)) {
+    return false;
+  }
+
+  return /[a-z0-9]/i.test(normalized);
+}
+
+function parseCoverageRows(matrixSection) {
+  const lines = matrixSection
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith("|"));
+
+  const rows = [];
+  for (const line of lines) {
+    const cells = splitTableCells(line);
+    if (cells.length < 3 || isSeparatorRow(cells)) {
+      continue;
+    }
+
+    rows.push({
+      flowRef: normalizeCell(cells[0] ?? ""),
+      scenarioIds: extractScenarioIds(cells[1] ?? ""),
+      testStatus: normalizeCell(cells[2] ?? ""),
+    });
+  }
+
+  return rows;
+}
+
+function parseStatuses(rows) {
+  return rows
+    .map((row) => row.testStatus.toLowerCase())
+    .filter(Boolean)
+    .flatMap((statusCell) =>
+      statusCell
+        .split(/[\/,|]/)
+        .map((part) => part.trim())
+        .filter(Boolean),
+    );
+}
+
+function hasLinkedIssueReference(linkedIssuesSection) {
+  return (
+    /#\d+/.test(linkedIssuesSection) ||
+    /https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/issues\/\d+/i.test(
+      linkedIssuesSection,
+    )
+  );
 }
 
 function fail(errors) {
@@ -173,18 +278,24 @@ function fail(errors) {
   process.exit(1);
 }
 
-function main() {
-  const baseRef = process.env.BASE_REF;
-  const prBody = process.env.PR_BODY ?? "";
+export function evaluateE2EPolicy({
+  prBody,
+  changedFiles,
+  availableScenarioIds,
+}) {
   const sections = sectionize(prBody);
-  const changedFiles = getChangedFiles(baseRef);
   const isFlowImpacting = changedFiles.some((filePath) =>
     FLOW_IMPACT_PATH_PATTERNS.some((pattern) => pattern.test(filePath)),
   );
 
   if (!isFlowImpacting) {
-    console.log("E2E policy: no flow-impacting file changes detected.");
-    return;
+    return {
+      errors: [],
+      skipped: true,
+      message: "E2E policy: no flow-impacting file changes detected.",
+      scenarioCount: 0,
+      changedFileCount: changedFiles.length,
+    };
   }
 
   const errors = [];
@@ -197,11 +308,7 @@ function main() {
   const noIssueHappyPathsSection =
     sections.get(REQUIRED_HEADINGS.noIssueHappyPaths) ?? "";
 
-  const hasLinkedIssue =
-    /#\d+/.test(linkedIssuesSection) ||
-    /https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/issues\/\d+/i.test(
-      linkedIssuesSection,
-    );
+  const hasLinkedIssue = hasLinkedIssueReference(linkedIssuesSection);
 
   const flowNoImpactChecked = isChecked(
     flowImpactSection,
@@ -228,24 +335,44 @@ function main() {
     );
   }
 
-  const scenarioIds = extractScenarioIds(matrixSection);
+  const matrixRows = parseCoverageRows(matrixSection);
+  const scenarioRows = matrixRows.filter((row) => row.scenarioIds.length > 0);
+  const scenarioIds = [
+    ...new Set(scenarioRows.flatMap((row) => row.scenarioIds)),
+  ];
   if (scenarioIds.length === 0) {
     errors.push(
       "E2E Coverage Matrix must contain at least one scenario ID in format FLOW-<domain>-<slug>.",
     );
   }
 
+  if (hasLinkedIssue && scenarioRows.length > 0) {
+    const missingFlowRefs = scenarioRows.filter(
+      (row) => !isMeaningfulFlowReference(row.flowRef),
+    );
+    if (missingFlowRefs.length > 0) {
+      errors.push(
+        "Linked Issue PRs must map each scenario to a concrete AC/User Flow reference in 'E2E Coverage Matrix' column 'AC / User Flow Ref'.",
+      );
+    }
+  }
+
   const changedE2EFiles = changedFiles.some((filePath) =>
     filePath.startsWith("tests/e2e/"),
   );
-  const reusesExistingScenarios = /\bexisting\b/i.test(matrixSection);
-  if (!changedE2EFiles && !reusesExistingScenarios) {
-    errors.push(
-      "Flow-impacting PRs must either update tests under tests/e2e/ or explicitly mark scenario reuse as 'Existing' in the E2E Coverage Matrix.",
-    );
-  }
+  const matrixStatuses = parseStatuses(matrixRows);
+  const marksExisting = matrixStatuses.some((status) => status === "existing");
+  const marksNewOrUpdated = matrixStatuses.some(
+    (status) => status === "new" || status === "updated",
+  );
 
   if (!hasLinkedIssue) {
+    if (!marksNewOrUpdated) {
+      errors.push(
+        "No linked issue detected. At least one scenario in 'E2E Coverage Matrix' must be marked as 'New' or 'Updated' (only 'Existing' is not allowed).",
+      );
+    }
+
     if (!hasMeaningfulContent(noIssueAcceptanceCriteriaSection)) {
       errors.push(
         "No linked issue detected. Fill 'PR Acceptance Criteria (Required When No Linked Issue)'.",
@@ -259,11 +386,15 @@ function main() {
     }
   }
 
+  if (!changedE2EFiles && !marksExisting) {
+    errors.push(
+      "Flow-impacting PRs must either update tests under tests/e2e/ or explicitly mark scenario reuse as 'Existing' in the E2E Coverage Matrix.",
+    );
+  }
+
   if (scenarioIds.length > 0) {
-    const e2eSpecs = getE2ESpecFiles("tests/e2e");
-    const e2eContents = e2eSpecs.map((file) => readFileSync(file, "utf8"));
     const missingScenarioIds = scenarioIds.filter(
-      (id) => !e2eContents.some((content) => content.includes(id)),
+      (id) => !availableScenarioIds.has(id),
     );
 
     if (missingScenarioIds.length > 0) {
@@ -275,13 +406,55 @@ function main() {
     }
   }
 
-  if (errors.length > 0) {
-    fail(errors);
-  }
-
-  console.log(
-    `E2E policy passed for flow-impacting PR. Changed files: ${changedFiles.length}, scenarios: ${scenarioIds.length}.`,
-  );
+  return {
+    errors,
+    skipped: false,
+    message: `E2E policy passed for flow-impacting PR. Changed files: ${changedFiles.length}, scenarios: ${scenarioIds.length}.`,
+    scenarioCount: scenarioIds.length,
+    changedFileCount: changedFiles.length,
+  };
 }
 
-main();
+function getScenarioIdsFromSpecs() {
+  const e2eSpecs = getE2ESpecFiles("tests/e2e");
+  const e2eContents = e2eSpecs.map((file) => readFileSync(file, "utf8"));
+  return new Set(e2eContents.flatMap((content) => extractScenarioIds(content)));
+}
+
+export function runPolicyCheck({ baseRef, prBody }) {
+  const changedFiles = getChangedFiles(baseRef);
+  const availableScenarioIds = getScenarioIdsFromSpecs();
+
+  return evaluateE2EPolicy({
+    prBody,
+    changedFiles,
+    availableScenarioIds,
+  });
+}
+
+function isDirectRun() {
+  const entryFile = process.argv[1];
+  if (!entryFile) {
+    return false;
+  }
+
+  return pathToFileURL(entryFile).href === import.meta.url;
+}
+
+if (isDirectRun()) {
+  const result = runPolicyCheck({
+    baseRef: process.env.BASE_REF,
+    prBody: process.env.PR_BODY ?? "",
+  });
+
+  if (result.skipped) {
+    console.log(result.message);
+    process.exit(0);
+  }
+
+  if (result.errors.length > 0) {
+    fail(result.errors);
+  }
+
+  console.log(result.message);
+}
