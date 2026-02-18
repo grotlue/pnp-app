@@ -80,6 +80,7 @@ src/
 - CI policy:
   - E2E runs only on PR workflows.
   - PR CI runs smoke subset in a dedicated `e2e_smoke` job: `yarn test:e2e --grep @smoke`
+  - Optional deep PR coverage runs in `e2e_regression` when label `e2e-regression` is present: `yarn test:e2e --grep @regression --pass-with-no-tests`
 - PR smoke execution uses local Supabase fixture data for authenticated domain happy paths (campaigns, characters, notifications) in addition to auth entry paths.
 
 ## Loading UX
