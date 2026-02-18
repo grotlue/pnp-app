@@ -80,6 +80,28 @@ jobs:
       - name: Test
         run: yarn test:run
 
+      - name: Build
+        run: yarn build
+
+  e2e_smoke:
+    if: ${{ github.event_name == 'pull_request' }}
+    needs:
+      - quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
       - name: Setup Supabase CLI (E2E fixture backend)
         uses: supabase/setup-cli@v1
         with:
@@ -109,7 +131,7 @@ jobs:
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-artifacts
+          name: playwright-artifacts-smoke
           path: |
             playwright-report
             test-results
@@ -178,6 +200,7 @@ jobs:
   dispatch_deploy_pr_preview:
     needs:
       - quality
+      - e2e_smoke
       - db_schema_guardrails
     if: >-
       ${{

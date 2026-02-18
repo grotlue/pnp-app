@@ -76,10 +76,10 @@ src/
 - E2E scenarios use stable IDs in test titles: `FLOW-<domain>-<slug>`.
 - E2E scenarios are tagged for execution policy:
   - `@smoke`: mandatory on PR CI
-  - `@regression`: full-suite/nightly coverage
+  - `@regression`: deeper full-suite coverage when explicitly run
 - CI policy:
-  - PR CI runs smoke subset: `yarn test:e2e --grep @smoke`
-  - Nightly/manual full run executes complete Playwright suite.
+  - E2E runs only on PR workflows.
+  - PR CI runs smoke subset in a dedicated `e2e_smoke` job: `yarn test:e2e --grep @smoke`
 - PR smoke execution uses local Supabase fixture data for authenticated domain happy paths (campaigns, characters, notifications) in addition to auth entry paths.
 
 ## Loading UX

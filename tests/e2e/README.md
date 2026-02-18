@@ -28,7 +28,7 @@ E2E tests verify critical user-visible happy paths end-to-end (UI + API + auth/s
 ## Required Tags
 
 - `@smoke`: critical path that must run on PR CI.
-- `@regression`: deeper but still user-visible path (nightly/full suite).
+- `@regression`: deeper but still user-visible path for explicitly triggered full-suite runs.
 - Domain tag for filtering/review clarity:
   - `@auth`, `@campaigns`, `@characters`, `@relationships`, `@notifications`.
 
