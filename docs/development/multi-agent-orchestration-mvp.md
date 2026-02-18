@@ -2,6 +2,8 @@
 
 This is a practical external-orchestration MVP for staged worker execution with contracts and a merge gate.
 
+Initial local prerequisites are documented in `docs/development/local-setup-and-cli-tooling.md`.
+
 ## Location
 
 - Supervisor: `scripts/multi-agent-orchestrator/supervisor.mjs`
