@@ -1,4 +1,8 @@
 export const E2E_USERS = {
+  admin: {
+    email: "admin@pnp.test",
+    password: "admin",
+  },
   smokePlayer: {
     email: "solo1.local@pnp.test",
     password: "DevPass123!",

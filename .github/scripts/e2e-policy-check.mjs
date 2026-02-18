@@ -60,14 +60,30 @@ export function sectionize(markdown) {
 }
 
 function getChangedFiles(baseRef) {
-  const diffRange = baseRef ? `origin/${baseRef}...HEAD` : "HEAD~1...HEAD";
-  const output = execSync(
-    `git diff --name-only --diff-filter=ACMRTUXB ${diffRange}`,
-    {
+  const compareTarget = baseRef ? `origin/${baseRef}` : "HEAD~1";
+  const diffFilter = "--name-only --diff-filter=ACMRTUXB";
+  let output = "";
+
+  try {
+    output = execSync(`git diff ${diffFilter} ${compareTarget}...HEAD`, {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "pipe"],
-    },
-  );
+    });
+  } catch (error) {
+    const stderr =
+      error && typeof error === "object" && "stderr" in error
+        ? String(error.stderr ?? "")
+        : "";
+
+    if (!stderr.includes("no merge base")) {
+      throw error;
+    }
+
+    output = execSync(`git diff ${diffFilter} ${compareTarget}..HEAD`, {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  }
 
   return output
     .split("\n")

@@ -131,7 +131,7 @@ jobs:
 
       - name: E2E smoke tests
         env:
-          PLAYWRIGHT_WEB_SERVER_CMD: yarn start --port 3000
+          PLAYWRIGHT_WEB_SERVER_CMD: REQUIRE_ADMIN_MFA=true yarn start --port 3000
         run: yarn test:e2e --grep @smoke
 
       - name: Upload Playwright artifacts on failure
@@ -153,7 +153,7 @@ jobs:
             echo "- Inspect \`test-results/**/trace.zip\` with: \`npx playwright show-trace <trace.zip>\`"
             echo "- Inspect \`test-results/**/video.webm\` and \`error-context.md\` for retry context"
             echo "- Open \`playwright-report/index.html\` for timeline and locator snapshots"
-          } >> \"$GITHUB_STEP_SUMMARY\"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   e2e_regression:
     if: >-
@@ -209,7 +209,7 @@ jobs:
 
       - name: E2E regression tests
         env:
-          PLAYWRIGHT_WEB_SERVER_CMD: yarn start --port 3000
+          PLAYWRIGHT_WEB_SERVER_CMD: REQUIRE_ADMIN_MFA=true yarn start --port 3000
         run: yarn test:e2e --grep @regression --pass-with-no-tests
 
       - name: Upload Playwright artifacts on failure
@@ -231,7 +231,7 @@ jobs:
             echo "- Inspect \`test-results/**/trace.zip\` with: \`npx playwright show-trace <trace.zip>\`"
             echo "- Inspect \`test-results/**/video.webm\` and \`error-context.md\` for retry context"
             echo "- Open \`playwright-report/index.html\` for timeline and locator snapshots"
-          } >> \"$GITHUB_STEP_SUMMARY\"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   db_schema_guardrails:
     runs-on: ubuntu-latest

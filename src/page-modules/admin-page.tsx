@@ -21,6 +21,7 @@ import {
 } from "@/page-modules/admin-page-forms";
 import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
 import { Button } from "@/components/ui/button";
+import { appRoutes } from "@/app/router";
 import {
   Card,
   CardContent,
@@ -218,6 +219,12 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
       label: t("ui.admin.charactersTitle"),
     },
   ];
+  const adminSectionRoute =
+    section === "campaigns"
+      ? appRoutes.adminCampaigns
+      : section === "characters"
+        ? appRoutes.adminCharacters
+        : appRoutes.adminUsers;
 
   if (!ready || !session) {
     return <main className="min-h-screen" />;
@@ -234,8 +241,10 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
             </CardHeader>
             <CardContent className="space-y-3">
               <FeedbackMessage message={mfaRequiredError} />
-              <Link href="/settings">
-                <Button>{t("ui.menu.settings")}</Button>
+              <Link
+                href={`${appRoutes.adminMfaChallenge}?returnTo=${encodeURIComponent(adminSectionRoute)}`}
+              >
+                <Button>{t("ui.actions.verifyMfa")}</Button>
               </Link>
             </CardContent>
           </Card>

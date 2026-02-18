@@ -39,6 +39,7 @@ E2E tests verify critical user-visible happy paths end-to-end (UI + API + auth/s
 - Smoke E2E runs on every PR in CI (`e2e_smoke` job).
 - Regression E2E runs only when the PR has label `e2e-regression` (`e2e_regression` job).
 - High-risk PRs are auto-labeled `e2e-regression` via `E2E Regression Auto-Label` workflow.
+- CI smoke/regression runs enforce `REQUIRE_ADMIN_MFA=true` to keep admin auth step-up coverage active.
 
 ## Authoring Rules
 
@@ -74,7 +75,9 @@ For flow-impacting PRs, map acceptance criteria/user-flow items to scenario IDs 
 ## Current Smoke Baseline
 
 - `FLOW-AUTH-LOGIN-ENTRY` (`@auth`)
+- `FLOW-AUTH-REGISTER-ENTRY` (`@auth`)
 - `FLOW-AUTH-PASSWORD-RESET-ENTRY` (`@auth`)
+- `FLOW-AUTH-ADMIN-MFA-SETUP-REDIRECT` (`@auth`)
 - `FLOW-CAMPAIGNS-CREATE` (`@campaigns`)
 - `FLOW-CHARACTERS-CREATE-EDIT` (`@characters`)
 - `FLOW-NOTIFICATIONS-MARK-READ` (`@notifications`)

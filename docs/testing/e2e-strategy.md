@@ -33,6 +33,7 @@ Flow-impacting PRs must fill the E2E Coverage Matrix in the [PR template](../../
 
 - `@smoke` runs on all PRs in CI.
 - `@regression` runs when PR label `e2e-regression` is present.
+- CI E2E runs set `REQUIRE_ADMIN_MFA=true` to keep admin MFA step-up flows covered in smoke.
 - High-risk PRs are auto-labeled via `.github/workflows/e2e-regression-autolabel.yml` based on:
   - PR template impact signals (`Security`, `Data model`, `Performance`)
   - sensitive path changes (`src/app/api/**`, `server/auth/**`, `supabase/migrations/**`, etc.)
