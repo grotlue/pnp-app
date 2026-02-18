@@ -23,4 +23,6 @@ yarn build
 ## Documentation
 
 - Documentation hub: [Documentation Hub](docs/README.md)
+- Developer setup and tooling: [Local Setup and CLI Tooling](docs/development/local-setup-and-cli-tooling.md)
+- AI agent usage (auto mode + planning mode): [AI Agent Quickstart](docs/development/ai-agent-quickstart.md)
 - AI agent workflow rules: [Agent Rules](AGENTS.md)

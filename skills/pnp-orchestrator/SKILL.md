@@ -7,6 +7,11 @@ description: Boss-agent orchestration for pnp-app. Use when a request spans mult
 
 Use this skill as the top-level controller. Route work to specialized skills, collect outputs, and publish one consolidated result.
 
+Preferred entrypoints:
+
+- `yarn orchestrator:auto --prompt "<task>"` for automatic routing/execution
+- `yarn orchestrator:plan --prompt "<task>"` for planning-first conversations
+
 ## Use Routing Rules
 
 1. Use `pnp-feature-delivery` for product/code changes.

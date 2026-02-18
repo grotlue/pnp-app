@@ -15,3 +15,4 @@
 
 - Agent rules and orchestration policy: [Agent Rules and Policy](../AGENTS.md)
 - AI agent quickstart for developers: [AI Agent Quickstart](development/ai-agent-quickstart.md)
+- Orchestrator modes (auto, plan, manual): [Multi-Agent Orchestration](development/multi-agent-orchestration-mvp.md)

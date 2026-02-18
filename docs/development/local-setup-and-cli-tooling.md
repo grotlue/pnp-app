@@ -97,8 +97,23 @@ cp -R skills/pnp-docs-maintainer ~/.codex/skills/
 
 2. Restart Codex to load newly installed skills.
 
-3. Run orchestrator MVP:
+3. Run orchestrator auto mode:
+
+```bash
+yarn orchestrator:auto --prompt "review PR 48"
+```
+
+4. Use planning conversation mode when needed:
+
+```bash
+yarn orchestrator:plan --prompt "Plan feature xy"
+```
+
+5. Manual contract mode (advanced only):
 
 ```bash
 yarn orchestrator:example
+yarn orchestrator:run --task path/to/task.json
 ```
+
+Full usage: [Multi-Agent Orchestration](multi-agent-orchestration-mvp.md)

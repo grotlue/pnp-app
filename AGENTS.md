@@ -298,6 +298,22 @@ For each incoming task:
 
 Use both for merge-ready PRs.
 
+### 16.3) Auto-Mode Entry Points (Preferred)
+
+Prefer the local auto orchestration wrapper for day-to-day execution:
+
+- `yarn orchestrator:auto --prompt "<task>"`
+- `yarn orchestrator:plan --prompt "<task>"` for planning-first conversation mode
+
+Auto mode routing defaults:
+
+- prompts with `review` + `PR` -> `pr-review` (+ `pnp-pr-readiness`)
+- feature/fix/refactor prompts -> `pnp-feature-delivery` (+ `pnp-pr-readiness`)
+- docs/README prompts -> `pnp-docs-maintainer` (+ `pnp-pr-readiness`)
+- migration/RLS/SQL indicators -> also include `pnp-db-migration-guardrails`
+
+Manual JSON contracts remain supported for advanced custom workflows via `yarn orchestrator:run`.
+
 ## 17) External Multi-Agent Orchestration (Optional Extension)
 
 For true parallel multi-agent systems outside this runtime, use:
