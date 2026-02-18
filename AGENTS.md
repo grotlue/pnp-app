@@ -66,6 +66,7 @@ src/
 ### 4.2 Separation of Concerns
 
 - **UI components**: no direct network/Supabase calls.
+- In `src/page-modules/**` and `src/features/**`, do not style native JSX elements via `className`; use reusable UI components (for example `TextLink`, `UiDiv`, `UiMain`, `UiPre`) that encapsulate styling concerns.
 - **Queries modules**: all external I/O (API calls, persistence adapters).
 - **Logic modules**: pure functions only (no I/O, no random, no env reads).
 - **Hooks**: orchestrate query + mutation + invalidation; keep hooks focused.

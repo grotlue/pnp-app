@@ -29,6 +29,20 @@ const eslintConfig = defineConfig([
       "func-style": ["error", "declaration", { allowArrowFunctions: true }],
     },
   },
+  {
+    files: ["src/page-modules/**/*.{ts,tsx}", "src/features/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "JSXOpeningElement[name.type='JSXIdentifier'][name.name=/^[a-z]/] > JSXAttribute[name.name='className']",
+          message:
+            "Use reusable UI components instead of className on native JSX elements in page/features modules.",
+        },
+      ],
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
