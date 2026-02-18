@@ -131,6 +131,8 @@ src/
   - Toolbar script injected in `src/app/layout.tsx`
   - Next plugin enabled in `next.config.ts`
   - Flags discovery endpoint at `src/app/.well-known/vercel/flags/route.ts`
+  - Production default is disabled; enable via `NEXT_PUBLIC_ENABLE_VERCEL_TOOLBAR=true`
+  - CSP in `src/proxy.ts` allows `https://vercel.live` (`script-src`, `connect-src`, `frame-src`) only when toolbar is enabled
 - Optional overrides:
   - `FEATURE_FLAGS_ENABLE` (comma-separated)
   - `FEATURE_FLAGS_DISABLE` (comma-separated)

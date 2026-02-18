@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { VercelToolbar } from "@vercel/toolbar/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { resolveSpeedInsightsEnabled } from "@/lib/features/performance-observability";
+import { resolveVercelToolbarEnabled } from "@/lib/features/vercel-toolbar";
 import { getTranslator } from "@/lib/i18n/index";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 import "./globals.css";
@@ -27,15 +28,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getRequestLocale();
-  const enableToolbar =
-    process.env.NODE_ENV === "development" ||
-    process.env.NEXT_PUBLIC_ENABLE_VERCEL_TOOLBAR === "true";
+  const enableToolbar = resolveVercelToolbarEnabled();
   const enableSpeedInsights = resolveSpeedInsightsEnabled();
 
   return (

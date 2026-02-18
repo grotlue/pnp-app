@@ -1,25 +1,16 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-
-function buildCsp() {
-  return [
-    "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://vercel.live https://challenges.cloudflare.com",
-    "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https:",
-    "font-src 'self' data:",
-    "connect-src 'self' https://*.supabase.co https://*.supabase.in wss://*.supabase.co https://vercel.live https://challenges.cloudflare.com",
-    "frame-src 'self' https://challenges.cloudflare.com",
-    "frame-ancestors 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-  ].join("; ");
-}
+import { resolveVercelToolbarEnabled } from "@/lib/features/vercel-toolbar";
+import { buildContentSecurityPolicy } from "@/server/security/csp";
 
 export function proxy(request: NextRequest) {
   const response = NextResponse.next();
+  const toolbarEnabled = resolveVercelToolbarEnabled();
 
-  response.headers.set("Content-Security-Policy", buildCsp());
+  response.headers.set(
+    "Content-Security-Policy",
+    buildContentSecurityPolicy(toolbarEnabled),
+  );
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");
