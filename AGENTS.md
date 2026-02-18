@@ -165,6 +165,8 @@ Minimum expectations:
 ## 10) Documentation Policy
 
 - Keep architecture docs in **one place**: `docs/app-architecture.md`.
+- Keep developer-facing docs in `docs/development/*` and `docs/testing/*`.
+- Keep AI-agent workflow instructions exclusively in `AGENTS.md` (not in `docs/*`).
 - Update docs when changing:
   - folder conventions
   - data flow patterns
