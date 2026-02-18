@@ -1,7 +1,9 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ClientSession } from "@/lib/client/session";
+import { queryKeys } from "@/lib/client/query-keys";
+import { getMe } from "@/features/users/queries/users-profile.query";
 import type { CharacterUpdateInput } from "../types";
 import {
   deleteCharacterFromEdit,
@@ -13,19 +15,21 @@ export function useCharacterEditScreen(
   session: ClientSession | null,
   characterId: string,
 ) {
+  const queryClient = useQueryClient();
+  const token = session?.accessToken ?? "no-session";
   const editQuery = useQuery({
-    queryKey: [
-      "characters",
-      "edit",
-      characterId,
-      session?.accessToken ?? "no-session",
-    ],
+    queryKey: ["characters", "edit", characterId, token],
     enabled: Boolean(session),
     queryFn: async () => {
       if (!session) {
         throw new Error("Missing session");
       }
-      return getCharacterEditContext(session, characterId);
+      const me = await queryClient.ensureQueryData({
+        queryKey: queryKeys.me(token),
+        staleTime: 60_000,
+        queryFn: async () => getMe(session),
+      });
+      return getCharacterEditContext(session, characterId, me);
     },
   });
 

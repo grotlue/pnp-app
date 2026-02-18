@@ -2,6 +2,8 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ClientSession } from "@/lib/client/session";
+import { queryKeys } from "@/lib/client/query-keys";
+import { getMe } from "@/features/users/queries/users-profile.query";
 import {
   assignCharacterToCampaign,
   decideCampaignMembership,
@@ -17,12 +19,8 @@ export function useCampaignDetailScreen(
   campaignId: string,
 ) {
   const queryClient = useQueryClient();
-  const queryKey = [
-    "campaigns",
-    "detail",
-    campaignId,
-    session?.accessToken ?? "no-session",
-  ] as const;
+  const token = session?.accessToken ?? "no-session";
+  const queryKey = ["campaigns", "detail", campaignId, token] as const;
 
   const detailQuery = useQuery({
     queryKey,
@@ -31,7 +29,12 @@ export function useCampaignDetailScreen(
       if (!session) {
         throw new Error("Missing session");
       }
-      return getCampaignDetailContext(session, campaignId);
+      const me = await queryClient.ensureQueryData({
+        queryKey: queryKeys.me(token),
+        staleTime: 60_000,
+        queryFn: async () => getMe(session),
+      });
+      return getCampaignDetailContext(session, campaignId, me);
     },
   });
 

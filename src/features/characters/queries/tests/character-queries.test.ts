@@ -118,24 +118,23 @@ describe("character queries", () => {
   });
 
   it("getCharacterEditContext loads me and character", async () => {
-    apiRequestMock
-      .mockResolvedValueOnce({
-        data: { user: { id: "u1" } },
-        error: null,
-        status: 200,
-      })
-      .mockResolvedValueOnce({
-        data: { id: "char1" },
-        error: null,
-        status: 200,
-      });
+    const me = {
+      user: { id: "u1" },
+      profile: { username: "u1", description: "", locale: "en" as const },
+    };
+    apiRequestMock.mockResolvedValueOnce({
+      data: { id: "char1" },
+      error: null,
+      status: 200,
+    });
 
-    await expect(getCharacterEditContext(session, "char1")).resolves.toEqual({
-      me: { user: { id: "u1" } },
+    await expect(
+      getCharacterEditContext(session, "char1", me),
+    ).resolves.toEqual({
+      me,
       character: { id: "char1" },
     });
-    expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/me", { session });
-    expect(apiRequestMock).toHaveBeenNthCalledWith(2, "/api/characters/char1", {
+    expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/characters/char1", {
       session,
     });
   });
@@ -232,12 +231,11 @@ describe("character queries", () => {
   });
 
   it("getCharacterDetailContext aggregates all related resources", async () => {
+    const me = {
+      user: { id: "u1" },
+      profile: { username: "u1", description: "", locale: "en" as const },
+    };
     apiRequestMock
-      .mockResolvedValueOnce({
-        data: { user: { id: "u1" } },
-        error: null,
-        status: 200,
-      })
       .mockResolvedValueOnce({
         data: { id: "char1" },
         error: null,
@@ -270,8 +268,10 @@ describe("character queries", () => {
         status: 200,
       });
 
-    await expect(getCharacterDetailContext(session, "char1")).resolves.toEqual({
-      me: { user: { id: "u1" } },
+    await expect(
+      getCharacterDetailContext(session, "char1", me),
+    ).resolves.toEqual({
+      me,
       character: { id: "char1" },
       campaigns: [{ id: "c1" }],
       allCharacters: [{ id: "char1" }, { id: "char2" }],
@@ -280,33 +280,32 @@ describe("character queries", () => {
       summary: [{ other_character_name: "B" }],
       outgoing: [{ id: "rel1" }],
     });
-    expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/me", { session });
-    expect(apiRequestMock).toHaveBeenNthCalledWith(2, "/api/characters/char1", {
+    expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/characters/char1", {
       session,
     });
-    expect(apiRequestMock).toHaveBeenNthCalledWith(3, "/api/campaigns", {
+    expect(apiRequestMock).toHaveBeenNthCalledWith(2, "/api/campaigns", {
       session,
     });
     expect(apiRequestMock).toHaveBeenNthCalledWith(
-      4,
+      3,
       "/api/characters?limit=500",
       { session },
     );
-    expect(apiRequestMock).toHaveBeenNthCalledWith(5, "/api/users?limit=1000", {
+    expect(apiRequestMock).toHaveBeenNthCalledWith(4, "/api/users?limit=1000", {
       session,
     });
     expect(apiRequestMock).toHaveBeenNthCalledWith(
-      6,
+      5,
       "/api/relationships/catalogs",
       { session },
     );
     expect(apiRequestMock).toHaveBeenNthCalledWith(
-      7,
+      6,
       "/api/characters/char1/relations-summary",
       { session },
     );
     expect(apiRequestMock).toHaveBeenNthCalledWith(
-      8,
+      7,
       "/api/characters/char1/outgoing-relationships",
       { session },
     );

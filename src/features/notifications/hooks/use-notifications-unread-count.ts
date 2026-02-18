@@ -16,6 +16,8 @@ export function useNotificationsUnreadCount(session: ClientSession | null) {
       session?.accessToken ?? "no-session",
     ],
     enabled: Boolean(session),
+    staleTime: 30_000,
+    refetchOnMount: false,
     queryFn: async () => {
       if (!session) {
         throw new Error("Missing session");
