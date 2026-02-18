@@ -29,6 +29,8 @@ yarn test:e2e --grep @smoke
 
 Flow-impacting PRs must fill the E2E Coverage Matrix in the [PR template](../../.github/pull_request_template.md).
 
+Additionally, the `PR Screenshots` workflow runs automatically on PR updates, detects changed/new UI areas from the PR diff, and posts a sticky PR comment with the `pr-screenshots` artifact link when captures are relevant. The workflow enforces mapping coverage and fails if changed UI files are not mapped to screenshot targets.
+
 ## Regression Triggering
 
 - `@smoke` runs on all PRs in CI.

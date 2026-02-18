@@ -1,0 +1,193 @@
+name: PR Screenshots
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: pr-screenshots-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch PR base branch
+        run: git fetch origin "${{ github.base_ref }}" --depth=200
+
+      - name: Detect screenshot targets for this PR
+        id: targets
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: node .github/scripts/pr-screenshot-targets.mjs
+
+      - name: Enforce screenshot mapping coverage
+        if: ${{ steps.targets.outputs.has_unmapped_files == 'true' }}
+        run: |
+          echo "Unmapped screenshot files detected. Update screenshot mappings:"
+          cat <<'EOF'
+          ${{ steps.targets.outputs.unmapped_files_markdown }}
+          EOF
+          exit 1
+
+      - name: Setup Node.js
+        if: ${{ steps.targets.outputs.has_targets == 'true' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Install dependencies
+        if: ${{ steps.targets.outputs.has_targets == 'true' }}
+        run: yarn install --frozen-lockfile
+
+      - name: Setup Supabase CLI (E2E fixture backend)
+        if: ${{ steps.targets.outputs.has_targets == 'true' }}
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase services (E2E fixture backend)
+        if: ${{ steps.targets.outputs.has_targets == 'true' }}
+        run: supabase start
+
+      - name: Reset local Supabase DB with fixture seed (E2E)
+        if: ${{ steps.targets.outputs.has_targets == 'true' }}
+        run: supabase db reset --local --yes
+
+      - name: Generate .env.local from local Supabase status (E2E)
+        if: ${{ steps.targets.outputs.has_targets == 'true' }}
+        run: ./scripts/update-local-supabase-env.sh
+
+      - name: Build
+        if: ${{ steps.targets.outputs.has_targets == 'true' }}
+        run: yarn build
+
+      - name: Cache Playwright browsers
+        if: ${{ steps.targets.outputs.has_targets == 'true' }}
+        uses: actions/cache@v4
+        with:
+          path: .playwright-browsers
+          key: ${{ runner.os }}-playwright-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install Playwright browsers
+        if: ${{ steps.targets.outputs.has_targets == 'true' }}
+        run: yarn test:e2e:install
+
+      - name: Capture PR screenshots
+        if: ${{ steps.targets.outputs.has_targets == 'true' }}
+        env:
+          PLAYWRIGHT_WEB_SERVER_CMD: yarn start --port 3000
+          PR_SCREENSHOT_DIR: artifacts/pr-screenshots
+          PR_SCREENSHOT_TARGETS: ${{ steps.targets.outputs.targets_csv }}
+          PR_SCREENSHOT_EXTRA_ROUTES: ${{ steps.targets.outputs.extra_routes_csv }}
+        run: yarn test:e2e tests/e2e/pr-screenshots.spec.ts
+
+      - name: Upload PR screenshots artifact
+        if: ${{ always() && steps.targets.outputs.has_targets == 'true' }}
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-screenshots
+          path: artifacts/pr-screenshots
+          if-no-files-found: ignore
+
+      - name: Comment screenshot artifact on PR
+        if: ${{ always() }}
+        uses: actions/github-script@v7
+        env:
+          JOB_STATUS: ${{ job.status }}
+          HAS_TARGETS: ${{ steps.targets.outputs.has_targets }}
+          TARGETS_MD: ${{ steps.targets.outputs.selected_targets_markdown }}
+          EXTRA_ROUTES_MD: ${{ steps.targets.outputs.extra_routes_markdown }}
+          EXPECTED_FILES_MD: ${{ steps.targets.outputs.expected_files_markdown }}
+          CHANGED_FILES_MD: ${{ steps.targets.outputs.changed_files_markdown }}
+          HAS_UNMAPPED_FILES: ${{ steps.targets.outputs.has_unmapped_files }}
+          UNMAPPED_FILES_MD: ${{ steps.targets.outputs.unmapped_files_markdown }}
+          ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
+        with:
+          script: |
+            const marker = '<!-- pr-screenshots -->';
+            const issue_number = context.issue.number;
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const artifactId = process.env.ARTIFACT_ID;
+            const artifactUrl = artifactId ? `${runUrl}/artifacts/${artifactId}` : null;
+            const status = process.env.JOB_STATUS ?? 'unknown';
+            const hasTargets = process.env.HAS_TARGETS === 'true';
+            const targetsMd = process.env.TARGETS_MD ?? '- none';
+            const extraRoutesMd = process.env.EXTRA_ROUTES_MD ?? '- none';
+            const expectedFilesMd = process.env.EXPECTED_FILES_MD ?? '- none';
+            const changedFilesMd = process.env.CHANGED_FILES_MD ?? '- none';
+            const hasUnmappedFiles = process.env.HAS_UNMAPPED_FILES === 'true';
+            const unmappedFilesMd = process.env.UNMAPPED_FILES_MD ?? '- none';
+
+            const lines = [
+              marker,
+              `PR screenshots status: \`${status}\``,
+              `Workflow run: ${runUrl}`,
+              hasTargets
+                ? artifactUrl
+                  ? `Artifact: [pr-screenshots](${artifactUrl})`
+                  : 'Artifact: not available (check workflow logs).'
+                : 'Artifact: skipped (no relevant UI targets changed).',
+              '',
+              'Detected target groups:',
+              targetsMd,
+              '',
+              'Detected extra routes:',
+              extraRoutesMd,
+              '',
+              'Expected screenshots:',
+              expectedFilesMd,
+              '',
+              'Unmapped files requiring mapping updates:',
+              hasUnmappedFiles ? unmappedFilesMd : '- none',
+              '',
+              'Changed files used for detection:',
+              changedFilesMd,
+            ];
+            const body = lines.join('\n');
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+            });
+
+            const existing = comments.find((comment) =>
+              comment.user?.type === 'Bot' && comment.body?.includes(marker),
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+              return;
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              body,
+            });
