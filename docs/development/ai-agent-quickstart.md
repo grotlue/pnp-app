@@ -41,8 +41,16 @@ Recommended default for most tasks: `orchestrator:auto`.
 - PR review: `yarn orchestrator:auto --prompt "review PR 48"`
 - Docs maintenance: `yarn orchestrator:auto --prompt "clean up docs links"`
 - Optional preview without execution: `yarn orchestrator:auto --prompt "..." --dry-run --print-analysis`
+- Verbose progress during execution: `yarn orchestrator:auto --prompt "..." --verbose`
 
 Full routing and execution details: [Multi-Agent Orchestration](multi-agent-orchestration-mvp.md)
+
+## 4.1) If Output Looks Too Minimal
+
+- Use verbose mode for progress and log tails: `yarn orchestrator:auto --prompt "<task>" --verbose`
+- For manual contracts, control tail size: `yarn orchestrator:run --task path/to/task.json --verbose --tail-lines 50`
+- Inspect persisted run artifacts under `.orchestrator/runs/<run-id>/` (`run-summary.json`, worker `*.stdout.log`, worker `*.stderr.log`)
+- `Ctrl+C` is graceful: active command is allowed to finish, then partial run reports are written before exit (`130`)
 
 ## 5) Use Planning Conversation Mode
 

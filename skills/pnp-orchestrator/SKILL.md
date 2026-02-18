@@ -34,6 +34,13 @@ Preferred entrypoints:
    - risks and rollback
 5. Ensure branch/PR constraints from `AGENTS.md` remain satisfied.
 
+## Skill Disclosure (Mandatory)
+
+1. At the start of every new user task, explicitly state the primary skill being used.
+2. Explicitly list any routed subskills and the one-line reason for the chosen order.
+3. If no subskills are used, explicitly state that no subskill routing is required.
+4. Keep this disclosure concise (one short line) and place it before substantive execution updates.
+
 ## Enforce Completion Standard
 
 1. Do not stop at planning unless asked.

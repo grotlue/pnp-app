@@ -12,6 +12,10 @@ export const appRoutes = {
   profile: "/profile",
   settings: "/settings",
   admin: "/admin",
+  adminUsers: "/admin/users",
+  adminCampaigns: "/admin/campaigns",
+  adminCharacters: "/admin/characters",
+  adminMfaChallenge: "/admin/mfa-challenge",
   dashboard: "/dashboard",
 } as const;
 
