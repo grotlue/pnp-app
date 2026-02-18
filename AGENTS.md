@@ -304,6 +304,7 @@ Prefer the local auto orchestration wrapper for day-to-day execution:
 
 - `yarn orchestrator:auto --prompt "<task>"`
 - `yarn orchestrator:plan --prompt "<task>"` for planning-first conversation mode
+- `yarn orchestrator:chat --prompt "<task>"` for interactive execution mode
 
 Auto mode routing defaults:
 
@@ -314,9 +315,12 @@ Auto mode routing defaults:
 
 Manual JSON contracts remain supported for advanced custom workflows via `yarn orchestrator:run`.
 
+Single-skill mode is allowed by explicitly naming the skill in prompt text (for example: "Use `pnp-pr-review` as primary skill ...") when full routing is not needed.
+
 ### 16.4) Automation Safety Rules (Mandatory)
 
 - Keep orchestrator execution sandboxed (`workspace-write`) and approval-aware.
+- Keep `orchestrator:plan` and `orchestrator:chat` on `untrusted` approval policy by default.
 - High-risk prompts (destructive actions, credential/secret access) require explicit confirmation (`--confirm-risky`).
 - Destructive commands are blocked by default and require explicit opt-in (`--allow-destructive`) plus justification in PR risk notes.
 - Never use bypass flags that disable approvals/sandbox.

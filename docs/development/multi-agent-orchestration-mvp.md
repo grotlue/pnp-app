@@ -61,6 +61,8 @@ For sensitive work, tighten approval policy:
 yarn orchestrator:auto --prompt "<task>" --approval-policy untrusted
 ```
 
+`orchestrator:plan` and `orchestrator:chat` already default to `untrusted`.
+
 ## Conversation Mode (Planning First)
 
 If you want planning chat before execution:

@@ -19,7 +19,8 @@ Recommended default for most tasks: `orchestrator:auto`.
 
 - High-risk prompts (destructive actions or secret/credential access) are blocked unless you add `--confirm-risky`.
 - Destructive command patterns are blocked unless `--allow-destructive` is explicitly provided.
-- Default approval policy is `on-request`; use `--approval-policy untrusted` for stricter manual control.
+- `orchestrator:plan` and `orchestrator:chat` run with `--approval-policy untrusted` by default.
+- `orchestrator:auto` defaults to `on-request`; for stricter control, add `--approval-policy untrusted`.
 - Keep using sandboxed execution (`workspace-write`), do not bypass approvals/sandbox.
 
 ## 1) Complete Local Prerequisites
@@ -70,3 +71,23 @@ Full routing and execution details: [Multi-Agent Orchestration](multi-agent-orch
 - `yarn orchestrator:auto --prompt "implement campaign invitation acceptance flow incl. tests"`
 - `yarn orchestrator:auto --prompt "review PR 48 with focus on security and regressions"`
 - `yarn orchestrator:plan --prompt "plan rollout for notification preferences feature"`
+
+## Use A Single Skill Directly
+
+When you do not want full routing, call one skill explicitly in the prompt.
+
+- Orchestrator skill only:
+  - `codex --sandbox workspace-write -a untrusted "Use pnp-orchestrator as primary skill. Task: <your task>"`
+- PR review skill only:
+  - `codex exec --sandbox workspace-write --ask-for-approval untrusted "Use pnp-pr-review as primary skill. Review PR 48 and output findings by severity."`
+- Docs maintainer skill only:
+  - `codex exec --sandbox workspace-write --ask-for-approval untrusted "Use pnp-docs-maintainer as primary skill. Clean up docs links and remove duplication."`
+
+Skill definitions and responsibilities:
+
+- [PNP Orchestrator Skill](../../skills/pnp-orchestrator/SKILL.md)
+- [PNP Feature Delivery Skill](../../skills/pnp-feature-delivery/SKILL.md)
+- [PNP DB Migration Guardrails Skill](../../skills/pnp-db-migration-guardrails/SKILL.md)
+- [PNP PR Review Skill](../../skills/pnp-pr-review/SKILL.md)
+- [PNP PR Readiness Skill](../../skills/pnp-pr-readiness/SKILL.md)
+- [PNP Docs Maintainer Skill](../../skills/pnp-docs-maintainer/SKILL.md)

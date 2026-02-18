@@ -145,4 +145,5 @@ Safety notes for all modes:
 
 - High-risk prompts require `--confirm-risky`.
 - Destructive commands are blocked unless `--allow-destructive` is explicitly set.
-- Default approval policy is `on-request`; for stricter control use `--approval-policy untrusted`.
+- `orchestrator:plan` and `orchestrator:chat` default to `--approval-policy untrusted`.
+- `orchestrator:auto` defaults to `on-request`; use `--approval-policy untrusted` when you want stricter approval gating.

@@ -63,7 +63,7 @@ function parseArgs(argv) {
     help: false,
     mode: "default",
     prompt: "",
-    approvalPolicy: "on-request",
+    approvalPolicy: "untrusted",
   };
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -114,7 +114,7 @@ Usage:
 Options:
   --mode <default|plan>      default: execution-oriented routing, plan: planning conversation first
   --prompt "<text>"          Optional initial user task
-  --approval-policy <name>   untrusted | on-failure | on-request | never (default: on-request)
+  --approval-policy <name>   untrusted | on-failure | on-request | never (default: untrusted)
   --help, -h                 Show this help
 `.trim(),
   );
