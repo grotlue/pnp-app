@@ -28,7 +28,7 @@ jobs:
       SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.checkout_ref || github.sha }}
 
@@ -100,7 +100,7 @@ jobs:
       STATUS_SHA: ${{ github.event.inputs.checkout_ref || github.sha }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.checkout_ref || github.sha }}
 
