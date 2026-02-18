@@ -2,6 +2,19 @@
 
 Developer quickstart for using project AI agents and the orchestrator workflow.
 
+## What To Use For What
+
+| You want to...                                  | Use this                                                              | Why                                          |
+| ----------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------- |
+| Build a feature/fix with minimal overhead       | `yarn orchestrator:auto --prompt "implement <task>"`                  | Best default. Auto-routes to required skills |
+| Review PR quality and risks                     | `yarn orchestrator:auto --prompt "review PR <number>"`                | Uses review/readiness flow                   |
+| Discuss and shape the solution first            | `yarn orchestrator:plan --prompt "plan <task>"`                       | Planning conversation before file mutations  |
+| Work interactively with direct execution intent | `yarn orchestrator:chat --prompt "<task>"`                            | Conversational execution mode                |
+| Check routing/profile selection before run      | `yarn orchestrator:auto --prompt "<task>" --dry-run --print-analysis` | Safe preview of skill orchestration          |
+| Control every workstream manually               | `yarn orchestrator:run --task path/to/task.json`                      | Advanced custom orchestration                |
+
+Recommended default for most tasks: `orchestrator:auto`.
+
 ## 1) Complete Local Prerequisites
 
 - Follow: [Local Setup and CLI Tooling](local-setup-and-cli-tooling.md)
@@ -44,3 +57,9 @@ Full routing and execution details: [Multi-Agent Orchestration](multi-agent-orch
 1. Give one task with clear scope and desired outcome.
 2. Let auto mode route to specialized skills.
 3. Verify output with quality gates and PR checks.
+
+## Example Prompts
+
+- `yarn orchestrator:auto --prompt "implement campaign invitation acceptance flow incl. tests"`
+- `yarn orchestrator:auto --prompt "review PR 48 with focus on security and regressions"`
+- `yarn orchestrator:plan --prompt "plan rollout for notification preferences feature"`

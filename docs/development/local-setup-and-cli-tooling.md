@@ -4,6 +4,16 @@ Initial local setup for developers and required CLI tools for project workflows.
 
 For a minimal AI-agent usage flow, see [AI Agent Quickstart](ai-agent-quickstart.md).
 
+## Fast Path (New Developer)
+
+Run these steps in order:
+
+1. Install required tools from [Required Tools](#required-tools).
+2. Run one-time project setup from [One-Time Project Setup](#one-time-project-setup).
+3. Authenticate GitHub CLI using [GitHub CLI Setup](#github-cli-setup).
+4. Install/sync project skills using [Orchestrator and Skills Setup](#orchestrator-and-skills-setup).
+5. Start with `yarn orchestrator:auto --prompt "<your task>"`.
+
 ## Required Tools
 
 | Tool              | Why it is needed                  | Check                |
@@ -117,3 +127,16 @@ yarn orchestrator:run --task path/to/task.json
 ```
 
 Full usage: [Multi-Agent Orchestration](multi-agent-orchestration-mvp.md)
+
+## Which Command To Use
+
+Use this as default decision guide:
+
+| Goal                                       | Best command                                                          | When to use                                    |
+| ------------------------------------------ | --------------------------------------------------------------------- | ---------------------------------------------- |
+| Deliver a feature/fix/refactor end-to-end  | `yarn orchestrator:auto --prompt "implement <task>"`                  | Default for most coding tasks                  |
+| Review an existing PR                      | `yarn orchestrator:auto --prompt "review PR <number>"`                | Findings-first quality review                  |
+| Plan first, execute later                  | `yarn orchestrator:plan --prompt "plan <task>"`                       | You want discussion/clarification before edits |
+| Execute in conversational mode immediately | `yarn orchestrator:chat --prompt "<task>"`                            | You want interactive execution-focused chat    |
+| Preview routing without running            | `yarn orchestrator:auto --prompt "<task>" --dry-run --print-analysis` | Validate profile/skills before execution       |
+| Fully custom orchestration                 | `yarn orchestrator:run --task path/to/task.json`                      | Advanced/manual workstream control             |
