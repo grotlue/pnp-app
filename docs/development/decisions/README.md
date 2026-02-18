@@ -22,9 +22,9 @@ Accepted ADRs are not edited for new decisions. Create a new ADR and mark the ol
 
 ## ADR Index
 
-| ID   | Title                                 | Status   | Date       | Owner  |
-| ---- | ------------------------------------- | -------- | ---------- | ------ |
-| 0001 | Record architecture decisions as ADRs | Accepted | 2026-02-18 | @team  |
+| ID   | Title                                 | Status   | Date       | Owner |
+| ---- | ------------------------------------- | -------- | ---------- | ----- |
+| 0001 | Record architecture decisions as ADRs | Accepted | 2026-02-18 | @team |
 
 ## Template
 
