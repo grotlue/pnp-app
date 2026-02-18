@@ -1,15 +1,20 @@
 "use client";
 
-import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AppPageBackground,
+  AppPageMain,
+  PageViewport,
+} from "@/components/ui/page-shell";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FeedbackMessage } from "@/components/common/feedback-message";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
   FormInput,
   FormSelect,
   FormTextarea,
-} from "@/components/common/form-controls";
+} from "@/components/ui/form-controls";
 import { ImageUploadField } from "@/components/common/image-upload-field";
 import { Button } from "@/components/ui/button";
 import {
@@ -148,18 +153,18 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
   }
 
   if (!ready || !session) {
-    return <UiMain className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   return (
-    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <UiMain className="mx-auto w-full max-w-4xl px-4 py-8">
+    <AppPageBackground>
+      <AppPageMain maxWidth="4xl">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.profile.title")}</CardTitle>
             <CardDescription>{t("ui.profile.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent stack={3}>
             <ImageUploadField
               value={form.avatarPath}
               label={t("ui.fields.profileImage")}
@@ -200,7 +205,7 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
               <option value="de">Deutsch</option>
             </FormSelect>
             <FormTextarea
-              className="min-h-24"
+              size="lg"
               value={form.description}
               placeholder={t("ui.fields.description")}
               onChange={(event) =>
@@ -210,7 +215,7 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
                 }))
               }
             />
-            <UiDiv className="flex gap-2">
+            <UiDiv inlineGap={2}>
               <Button disabled={busy} onClick={save}>
                 {t("ui.actions.save")}
               </Button>
@@ -218,7 +223,7 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
             <FeedbackMessage message={message} />
           </CardContent>
         </Card>
-      </UiMain>
-    </UiDiv>
+      </AppPageMain>
+    </AppPageBackground>
   );
 }

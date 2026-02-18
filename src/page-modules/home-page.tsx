@@ -1,25 +1,33 @@
 "use client";
 
-import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AppPageBackground,
+  AppPageMain,
+  AuthRadialPageMain,
+  AuthCardPageContent,
+  CompactPageViewport,
+  PageViewport,
+} from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { EmptyState } from "@/components/common/empty-state";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { FormInput } from "@/components/common/form-controls";
-import { ListControls } from "@/components/common/list-controls";
-import { ListItemRow } from "@/components/common/list-item-row";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { FormInput } from "@/components/ui/form-controls";
+import { ListControls } from "@/components/ui/list-controls";
+import { ListItemRow } from "@/components/ui/list-item-row";
 import { OwnershipBadge } from "@/components/common/ownership-badge";
-import { PageLoadingState } from "@/components/common/page-loading-state";
-import { PaginationControls } from "@/components/common/pagination-controls";
+import { PageLoadingState } from "@/components/ui/page-loading-state";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import {
   TurnstileWidget,
   type TurnstileErrorReason,
 } from "@/components/common/turnstile-widget";
-import { ToggleTabs } from "@/components/common/toggle-tabs";
-import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
+import { ToggleTabs } from "@/components/ui/toggle-tabs";
+import { TitleWithPrivacy } from "@/components/ui/title-with-privacy";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -218,13 +226,13 @@ export function HomePageView({
   }
 
   if (!ready) {
-    return <UiMain className="mx-auto min-h-screen w-full max-w-3xl p-4" />;
+    return <CompactPageViewport />;
   }
 
   if (!session) {
     return (
-      <UiMain className="min-h-screen bg-[radial-gradient(circle_at_12%_20%,oklch(0.94_0.06_80),transparent_40%),radial-gradient(circle_at_90%_25%,oklch(0.93_0.04_185),transparent_35%)] px-4 py-12">
-        <UiDiv className="mx-auto w-full max-w-md">
+      <AuthRadialPageMain>
+        <AuthCardPageContent>
           <Card>
             <CardHeader>
               <CardTitle>{t("ui.start.loggedOutTitle")}</CardTitle>
@@ -232,7 +240,7 @@ export function HomePageView({
                 {t("ui.start.loggedOutSubtitle")}
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent stack={3}>
               <FormInput
                 type="email"
                 placeholder={t("ui.fields.email")}
@@ -271,11 +279,11 @@ export function HomePageView({
               ) : null}
               <FeedbackMessage message={message} />
             </CardContent>
-            <CardFooter className="flex-col items-stretch gap-2">
+            <CardFooter layout="column-stretch">
               <Button disabled={busy} onClick={onLogin}>
                 {t("ui.actions.login")}
               </Button>
-              <UiDiv className="flex items-center justify-between text-xs">
+              <UiDiv contentAlign="between" textStyle="xs">
                 <TextLink href={appRoutes.passwordReset}>
                   {t("ui.nav.passwordReset")}
                 </TextLink>
@@ -287,8 +295,8 @@ export function HomePageView({
               </UiDiv>
             </CardFooter>
           </Card>
-        </UiDiv>
-      </UiMain>
+        </AuthCardPageContent>
+      </AuthRadialPageMain>
     );
   }
 
@@ -296,16 +304,16 @@ export function HomePageView({
     clearSession();
     router.replace("/");
     router.refresh();
-    return <UiMain className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   if (loggedInQuery.isLoading) {
     return (
-      <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
-          <PageLoadingState label={t("ui.loading.page")} className="py-6" />
-        </UiMain>
-      </UiDiv>
+      <AppPageBackground>
+        <AppPageMain maxWidth="7xl">
+          <PageLoadingState label={t("ui.loading.page")} density="section" />
+        </AppPageMain>
+      </AppPageBackground>
     );
   }
 
@@ -368,26 +376,26 @@ export function HomePageView({
   ];
 
   return (
-    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <UiMain className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-8">
+    <AppPageBackground>
+      <AppPageMain maxWidth="7xl" layout="grid-4">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.start.loggedInTitle")}</CardTitle>
             <CardDescription>{t("ui.start.loggedInSubtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="text-muted-foreground text-sm">
+          <CardContent textStyle="muted-sm">
             {me
               ? `${t("ui.start.welcome")}: ${me.profile.username}`
               : t("ui.start.loggedInSubtitle")}
           </CardContent>
         </Card>
 
-        <UiDiv className="grid gap-4 md:grid-cols-2">
+        <UiDiv gridPreset="two-md">
           <Card>
             <CardHeader>
               <CardTitle>{t("ui.characters.title")}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent stack={3}>
               <ToggleTabs
                 value={characterTab}
                 onChange={setCharacterTab}
@@ -421,8 +429,8 @@ export function HomePageView({
                 ]}
               />
 
-              <UiDiv className="space-y-2">
-                <UiDiv className="text-muted-foreground grid gap-2 px-1 text-[11px] font-medium md:grid-cols-[1fr_170px]">
+              <UiDiv stack={2}>
+                <UiDiv gridPreset="home-character-header">
                   <UiDiv>{t("ui.characters.title")}</UiDiv>
                   <UiDiv>{t("ui.fields.campaign")}</UiDiv>
                 </UiDiv>
@@ -433,22 +441,22 @@ export function HomePageView({
 
                   return (
                     <ListItemRow key={character.id}>
-                      <UiDiv className="grid gap-2 md:grid-cols-[1fr_170px]">
-                        <UiDiv className="space-y-1">
+                      <UiDiv gridPreset="home-character-row">
+                        <UiDiv stack={1}>
                           <TextLink href={`/characters/${character.id}`}>
                             <TitleWithPrivacy
                               title={character.name}
                               isPrivate={character.is_private}
-                              className="font-medium"
+                              weight="medium"
                             />
                           </TextLink>
-                          <UiDiv className="flex flex-wrap items-center gap-2">
+                          <UiDiv wrapGap={2} contentAlign="center">
                             {character.owner_user_id === currentUserId ? (
                               <OwnershipBadge mode="mine" t={t} />
                             ) : null}
                           </UiDiv>
                         </UiDiv>
-                        <UiDiv className="text-muted-foreground text-xs">
+                        <UiDiv textStyle="muted-xs">
                           {campaign ? (
                             <TextLink href={`/campaigns/${campaign.id}`}>
                               {campaign.title}
@@ -462,10 +470,7 @@ export function HomePageView({
                   );
                 })}
                 {searchedAndSortedCharacters.length === 0 ? (
-                  <EmptyState
-                    label={t("ui.feedback.empty")}
-                    className="text-muted-foreground border-0 bg-transparent p-0"
-                  />
+                  <EmptyState label={t("ui.feedback.empty")} variant="ghost" />
                 ) : null}
               </UiDiv>
 
@@ -485,7 +490,7 @@ export function HomePageView({
             <CardHeader>
               <CardTitle>{t("ui.campaigns.title")}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent stack={3}>
               <ListControls
                 searchValue={campaignSearchQuery}
                 onSearchChange={setCampaignSearchQuery}
@@ -498,24 +503,24 @@ export function HomePageView({
                 sortOptions={campaignSortOptions}
               />
 
-              <UiDiv className="space-y-2">
-                <UiDiv className="text-muted-foreground grid gap-2 px-1 text-[11px] font-medium md:grid-cols-[1fr_150px_80px]">
+              <UiDiv stack={2}>
+                <UiDiv gridPreset="home-campaign-header">
                   <UiDiv>{t("ui.campaigns.title")}</UiDiv>
                   <UiDiv>{t("ui.admin.ownerLabel")}</UiDiv>
                   <UiDiv>{t("ui.fields.players")}</UiDiv>
                 </UiDiv>
                 {pagedCampaigns.map((campaign) => (
                   <ListItemRow key={campaign.id}>
-                    <UiDiv className="grid gap-2 md:grid-cols-[1fr_150px_80px]">
-                      <UiDiv className="space-y-1">
+                    <UiDiv gridPreset="home-campaign-row">
+                      <UiDiv stack={1}>
                         <TextLink href={`/campaigns/${campaign.id}`}>
                           <TitleWithPrivacy
                             title={campaign.title}
                             isPrivate={campaign.is_private}
-                            className="font-medium"
+                            weight="medium"
                           />
                         </TextLink>
-                        <UiDiv className="flex flex-wrap items-center gap-2">
+                        <UiDiv wrapGap={2} contentAlign="center">
                           {campaign.current_user_role ? (
                             <CampaignRoleBadge
                               role={campaign.current_user_role}
@@ -524,7 +529,7 @@ export function HomePageView({
                           ) : null}
                         </UiDiv>
                       </UiDiv>
-                      <UiDiv className="text-muted-foreground text-xs">
+                      <UiDiv textStyle="muted-xs">
                         {campaign.owner_role === "admin" ? (
                           <span>
                             {campaign.owner_username ?? campaign.owner_user_id}
@@ -535,17 +540,14 @@ export function HomePageView({
                           </TextLink>
                         )}
                       </UiDiv>
-                      <UiDiv className="text-muted-foreground text-xs">
+                      <UiDiv textStyle="muted-xs">
                         {campaign.player_count ?? 0}
                       </UiDiv>
                     </UiDiv>
                   </ListItemRow>
                 ))}
                 {searchedAndSortedCampaigns.length === 0 ? (
-                  <EmptyState
-                    label={t("ui.feedback.empty")}
-                    className="text-muted-foreground border-0 bg-transparent p-0"
-                  />
+                  <EmptyState label={t("ui.feedback.empty")} variant="ghost" />
                 ) : null}
               </UiDiv>
 
@@ -561,7 +563,7 @@ export function HomePageView({
             </CardContent>
           </Card>
         </UiDiv>
-      </UiMain>
-    </UiDiv>
+      </AppPageMain>
+    </AppPageBackground>
   );
 }

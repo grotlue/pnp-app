@@ -1,15 +1,16 @@
 "use client";
 
-import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { UiDiv } from "@/components/ui/html-elements";
+import { AppPageBackground, AppPageMain } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { FormInput } from "@/components/common/form-controls";
-import { PageLoadingState } from "@/components/common/page-loading-state";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { FormInput } from "@/components/ui/form-controls";
+import { PageLoadingState } from "@/components/ui/page-loading-state";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -157,17 +158,17 @@ export function AdminMfaChallengePageView({
     (isAdminUser && adminMfaQuery.isLoading)
   ) {
     return (
-      <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <UiMain className="mx-auto w-full max-w-4xl px-4 py-8">
-          <PageLoadingState label={t("ui.loading.page")} className="py-6" />
-        </UiMain>
-      </UiDiv>
+      <AppPageBackground>
+        <AppPageMain maxWidth="4xl">
+          <PageLoadingState label={t("ui.loading.page")} density="section" />
+        </AppPageMain>
+      </AppPageBackground>
     );
   }
 
   return (
-    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <UiMain className="mx-auto w-full max-w-md px-4 py-8">
+    <AppPageBackground>
+      <AppPageMain maxWidth="md">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.settings.mfaTitle")}</CardTitle>
@@ -175,11 +176,11 @@ export function AdminMfaChallengePageView({
               {t("ui.settings.mfaStepUpRequired")}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent stack={3}>
             {decision.kind === "setup" ? (
               <>
                 <FeedbackMessage message={t("ui.settings.mfaRequired")} />
-                <UiDiv className="flex items-center gap-2">
+                <UiDiv inlineGap={2} contentAlign="center">
                   <Link href={appRoutes.settings}>
                     <Button>{t("ui.menu.settings")}</Button>
                   </Link>
@@ -204,7 +205,7 @@ export function AdminMfaChallengePageView({
                 >
                   {t("ui.actions.verifyMfa")}
                 </Button>
-                <UiDiv className="text-xs">
+                <UiDiv textStyle="xs">
                   <TextLink href={appRoutes.home}>
                     {t("ui.nav.backToLogin")}
                   </TextLink>
@@ -222,7 +223,7 @@ export function AdminMfaChallengePageView({
             />
           </CardContent>
         </Card>
-      </UiMain>
-    </UiDiv>
+      </AppPageMain>
+    </AppPageBackground>
   );
 }

@@ -1,11 +1,11 @@
 import type { Dispatch, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
-import { Modal } from "@/components/common/modal";
+import { Modal } from "@/components/ui/modal";
 import {
   FormInput,
   FormSelect,
   FormTextarea,
-} from "@/components/common/form-controls";
+} from "@/components/ui/form-controls";
 import type { Campaign } from "@/features/campaigns/types";
 import type {
   RelationshipCatalog,
@@ -74,8 +74,8 @@ function RelationshipFormFields<TForm extends RelationshipBaseFormValues>({
   labelPresetValue,
 }: RelationshipFormFieldsProps<TForm>) {
   return (
-    <UiDiv className="grid gap-2">
-      <UiDiv className="flex gap-2">
+    <UiDiv gridGap={2}>
+      <UiDiv inlineGap={2}>
         <Button
           size="sm"
           variant={mode === "existing" ? "default" : "outline"}
@@ -169,7 +169,7 @@ function RelationshipFormFields<TForm extends RelationshipBaseFormValues>({
       />
 
       <FormTextarea
-        className="min-h-20"
+        size="md"
         value={form.description}
         placeholder={t("ui.fields.description")}
         onChange={(event) =>
@@ -270,9 +270,9 @@ export function UnassignCampaignModal({
         </>
       }
     >
-      <UiDiv className="space-y-2 text-sm">
+      <UiDiv stack={2} textStyle="sm">
         <UiDiv>{t("ui.characterDetail.unassignConfirm")}</UiDiv>
-        <UiDiv className="text-muted-foreground text-xs">
+        <UiDiv textStyle="muted-xs">
           {t("ui.characterDetail.unassignInfo")}
         </UiDiv>
       </UiDiv>
@@ -327,7 +327,7 @@ export function AddRelationshipModal({
         </>
       }
     >
-      <UiDiv className="grid gap-2">
+      <UiDiv gridGap={2}>
         <RelationshipFormFields
           t={t}
           mode={mode}
@@ -340,7 +340,7 @@ export function AddRelationshipModal({
           labelPresetValue={form.labelPresetId || defaultLabelPresetId}
         />
         <FormTextarea
-          className="min-h-20"
+          size="md"
           placeholder={t("ui.characterDetail.firstTimelineEntry")}
           value={form.firstTimelineEntry}
           onChange={(event) =>
@@ -452,7 +452,7 @@ export function DeleteRelationshipModal({
         </>
       }
     >
-      <UiDiv className="text-sm">
+      <UiDiv textStyle="sm">
         {t("ui.characterDetail.deleteRelationshipConfirm")}
       </UiDiv>
     </Modal>
@@ -484,28 +484,26 @@ export function RelationshipDetailModal({
       }
     >
       {detail ? (
-        <UiDiv className="space-y-3 text-sm">
-          <UiDiv className="border-border rounded border p-2">
-            <UiDiv className="font-medium">
+        <UiDiv stack={3} textStyle="sm">
+          <UiDiv surface="outlined-box">
+            <UiDiv textStyle="medium">
               {t("ui.characterDetail.howThisSeesOther")}
             </UiDiv>
-            <UiPre className="mt-1 overflow-auto text-xs whitespace-pre-wrap">
+            <UiPre format="log">
               {JSON.stringify(detail.outgoing, null, 2)}
             </UiPre>
           </UiDiv>
-          <UiDiv className="border-border rounded border p-2">
-            <UiDiv className="font-medium">
+          <UiDiv surface="outlined-box">
+            <UiDiv textStyle="medium">
               {t("ui.characterDetail.howOtherSeesThis")}
             </UiDiv>
-            <UiPre className="mt-1 overflow-auto text-xs whitespace-pre-wrap">
+            <UiPre format="log">
               {JSON.stringify(detail.incoming, null, 2)}
             </UiPre>
           </UiDiv>
-          <UiDiv className="border-border rounded border p-2">
-            <UiDiv className="font-medium">
-              {t("ui.characterDetail.timeline")}
-            </UiDiv>
-            <UiPre className="mt-1 overflow-auto text-xs whitespace-pre-wrap">
+          <UiDiv surface="outlined-box">
+            <UiDiv textStyle="medium">{t("ui.characterDetail.timeline")}</UiDiv>
+            <UiPre format="log">
               {JSON.stringify(detail.timeline, null, 2)}
             </UiPre>
           </UiDiv>

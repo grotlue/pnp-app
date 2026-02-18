@@ -1,18 +1,23 @@
 "use client";
 
-import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AppPageBackground,
+  AppPageMain,
+  PageViewport,
+} from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { EmptyState } from "@/components/common/empty-state";
-import { FeedbackMessage } from "@/components/common/feedback-message";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
   FormInput,
   FormSelect,
   FormTextarea,
-} from "@/components/common/form-controls";
-import { SectionBox } from "@/components/common/section-box";
+} from "@/components/ui/form-controls";
+import { SectionBox } from "@/components/ui/section-box";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,11 +26,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Modal } from "@/components/common/modal";
-import { PageLoadingState } from "@/components/common/page-loading-state";
-import { ToggleTabs } from "@/components/common/toggle-tabs";
-import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
-import { VisibilityToggle } from "@/components/common/visibility-toggle";
+import { Modal } from "@/components/ui/modal";
+import { PageLoadingState } from "@/components/ui/page-loading-state";
+import { ToggleTabs } from "@/components/ui/toggle-tabs";
+import { TitleWithPrivacy } from "@/components/ui/title-with-privacy";
+import { VisibilityToggle } from "@/components/ui/visibility-toggle";
 import { useCampaignDetailScreen } from "@/features/campaigns/hooks/use-campaign-detail-screen";
 import { canManageCampaign, isAdmin } from "@/features/users/logic/role.logic";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
@@ -79,16 +84,16 @@ export function CampaignDetailPageView({
   }, [ready, router, session]);
 
   if (!ready || !session) {
-    return <UiMain className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   if (detailQuery.isLoading || !detailQuery.data) {
     return (
-      <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
+      <AppPageBackground>
+        <AppPageMain maxWidth="7xl">
           <PageLoadingState label={t("ui.loading.page")} />
-        </UiMain>
-      </UiDiv>
+        </AppPageMain>
+      </AppPageBackground>
     );
   }
 
@@ -161,8 +166,8 @@ export function CampaignDetailPageView({
   }
 
   return (
-    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
+    <AppPageBackground>
+      <AppPageMain maxWidth="7xl">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -174,13 +179,13 @@ export function CampaignDetailPageView({
             </CardTitle>
             <CardDescription>{t("ui.campaignDetail.subtitle")}</CardDescription>
             {isForeignAdminView ? (
-              <UiDiv className="border-destructive/40 bg-destructive/10 text-destructive inline-flex w-fit rounded-md border px-2 py-1 text-xs font-medium">
+              <UiDiv surface="danger-chip">
                 {t("ui.admin.foreignItemLabel")}
               </UiDiv>
             ) : null}
           </CardHeader>
-          <CardContent className="space-y-4">
-            <UiDiv className="flex flex-wrap gap-2">
+          <CardContent stack={4}>
+            <UiDiv wrapGap={2}>
               {canManage ? (
                 <>
                   <Button
@@ -228,15 +233,15 @@ export function CampaignDetailPageView({
 
             <SectionBox
               title={t("ui.fields.campaignDescription")}
-              className="text-sm"
+              textStyle="sm"
             >
-              <UiDiv className="text-muted-foreground mt-1">
+              <UiDiv textStyle="muted" mt={1}>
                 {detail.campaign.description || "-"}
               </UiDiv>
             </SectionBox>
 
             <SectionBox title={t("ui.campaignDetail.players")}>
-              <UiDiv className="space-y-1 text-xs">
+              <UiDiv stack={1} textStyle="xs">
                 {acceptedPlayers.map((entry) =>
                   isAdminUser(entry.user_id) ? (
                     <UiDiv key={entry.id}>{usernameFor(entry.user_id)}</UiDiv>
@@ -251,22 +256,16 @@ export function CampaignDetailPageView({
                   ),
                 )}
                 {acceptedPlayers.length === 0 ? (
-                  <EmptyState
-                    label={t("ui.feedback.empty")}
-                    className="text-muted-foreground border-0 bg-transparent p-0"
-                  />
+                  <EmptyState label={t("ui.feedback.empty")} variant="ghost" />
                 ) : null}
               </UiDiv>
             </SectionBox>
 
             {canManage && pendingRequests.length > 0 ? (
               <SectionBox title={t("ui.campaignDetail.pendingRequests")}>
-                <UiDiv className="space-y-2">
+                <UiDiv stack={2}>
                   {pendingRequests.map((entry) => (
-                    <UiDiv
-                      key={entry.id}
-                      className="border-border flex flex-wrap items-center gap-2 rounded border px-2 py-2 text-xs"
-                    >
+                    <UiDiv key={entry.id} surface="pending-row">
                       {isAdminUser(entry.user_id) ? (
                         <span>{usernameFor(entry.user_id)}</span>
                       ) : (
@@ -327,7 +326,7 @@ export function CampaignDetailPageView({
             ) : null}
 
             <SectionBox>
-              <UiDiv className="mb-2">
+              <UiDiv mb={2}>
                 <ToggleTabs
                   value={tab}
                   onChange={setTab}
@@ -340,7 +339,7 @@ export function CampaignDetailPageView({
                   ]}
                 />
               </UiDiv>
-              <UiDiv className="space-y-1 text-xs">
+              <UiDiv stack={1} textStyle="xs">
                 {(tab === "player" ? playerCharacters : npcCharacters).map(
                   (entry) => (
                     <TextLink
@@ -357,16 +356,13 @@ export function CampaignDetailPageView({
                 )}
                 {(tab === "player" ? playerCharacters : npcCharacters)
                   .length === 0 ? (
-                  <EmptyState
-                    label={t("ui.feedback.empty")}
-                    className="text-muted-foreground border-0 bg-transparent p-0"
-                  />
+                  <EmptyState label={t("ui.feedback.empty")} variant="ghost" />
                 ) : null}
               </UiDiv>
             </SectionBox>
           </CardContent>
         </Card>
-      </UiMain>
+      </AppPageMain>
 
       <Modal
         open={editOpen}
@@ -399,7 +395,7 @@ export function CampaignDetailPageView({
           </>
         }
       >
-        <UiDiv className="grid gap-2">
+        <UiDiv gridGap={2}>
           <FormInput
             value={editForm.title}
             placeholder={t("ui.fields.campaignTitle")}
@@ -408,7 +404,7 @@ export function CampaignDetailPageView({
             }
           />
           <FormTextarea
-            className="min-h-24"
+            size="lg"
             value={editForm.description}
             placeholder={t("ui.fields.campaignDescription")}
             onChange={(event) =>
@@ -462,7 +458,7 @@ export function CampaignDetailPageView({
           </>
         }
       >
-        <UiDiv className="text-sm">{t("ui.campaigns.deleteConfirm")}</UiDiv>
+        <UiDiv textStyle="sm">{t("ui.campaigns.deleteConfirm")}</UiDiv>
       </Modal>
 
       <Modal
@@ -586,8 +582,8 @@ export function CampaignDetailPageView({
           </>
         }
       >
-        <UiDiv className="text-sm">{t("ui.campaignDetail.joinConfirm")}</UiDiv>
+        <UiDiv textStyle="sm">{t("ui.campaignDetail.joinConfirm")}</UiDiv>
       </Modal>
-    </UiDiv>
+    </AppPageBackground>
   );
 }

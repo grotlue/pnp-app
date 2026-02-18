@@ -7,7 +7,7 @@ import { Bell, LogOut, Moon, Settings, Shield, Sun, User } from "lucide-react";
 import {
   IconActionButton,
   IconActionLinkButton,
-} from "@/components/common/icon-action-button";
+} from "@/components/ui/icon-action-button";
 import {
   clearLocaleCookie,
   readLocaleCookie,

@@ -1,14 +1,19 @@
 "use client";
 
-import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AppPageBackground,
+  AppPageMain,
+  PageViewport,
+} from "@/components/ui/page-shell";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { ListControls } from "@/components/common/list-controls";
-import { Modal } from "@/components/common/modal";
-import { PageLoadingState } from "@/components/common/page-loading-state";
-import { PaginationControls } from "@/components/common/pagination-controls";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { ListControls } from "@/components/ui/list-controls";
+import { Modal } from "@/components/ui/modal";
+import { PageLoadingState } from "@/components/ui/page-loading-state";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -104,19 +109,19 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
   ];
 
   if (!ready || !session) {
-    return <UiMain className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   return (
-    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
+    <AppPageBackground>
+      <AppPageMain maxWidth="7xl">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.campaigns.title")}</CardTitle>
             <CardDescription>{t("ui.campaigns.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <UiDiv className="flex flex-wrap gap-2">
+          <CardContent stack={4}>
+            <UiDiv wrapGap={2}>
               <Button onClick={() => setCreateOpen(true)}>
                 {t("ui.campaigns.create")}
               </Button>
@@ -137,7 +142,7 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
             {campaignsQuery.isLoading ? (
               <PageLoadingState
                 label={t("ui.loading.section")}
-                className="py-3 text-xs"
+                density="compact"
               />
             ) : (
               <>
@@ -177,7 +182,7 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
             )}
           </CardContent>
         </Card>
-      </UiMain>
+      </AppPageMain>
 
       <Modal
         open={createOpen}
@@ -307,8 +312,8 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
           </>
         }
       >
-        <UiDiv className="text-sm">{t("ui.campaigns.deleteConfirm")}</UiDiv>
+        <UiDiv textStyle="sm">{t("ui.campaigns.deleteConfirm")}</UiDiv>
       </Modal>
-    </UiDiv>
+    </AppPageBackground>
   );
 }

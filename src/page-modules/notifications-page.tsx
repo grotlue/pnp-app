@@ -1,13 +1,18 @@
 "use client";
 
-import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AppPageBackground,
+  AppPageMain,
+  PageViewport,
+} from "@/components/ui/page-shell";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { EmptyState } from "@/components/common/empty-state";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { ListItemRow } from "@/components/common/list-item-row";
-import { StatusBadge } from "@/components/common/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { ListItemRow } from "@/components/ui/list-item-row";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -131,7 +136,7 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
   }
 
   if (!ready || !session) {
-    return <UiMain className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   const queryError =
@@ -141,15 +146,15 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
   const feedback = message || queryError;
 
   return (
-    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <UiMain className="mx-auto w-full max-w-5xl px-4 py-8">
+    <AppPageBackground>
+      <AppPageMain maxWidth="5xl">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.notifications.title")}</CardTitle>
             <CardDescription>{t("ui.notifications.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <UiDiv className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
+          <CardContent stack={4}>
+            <UiDiv textStyle="muted-xs" wrapGap={2} contentAlign="center">
               <StatusBadge
                 label={t("ui.notifications.unread", "Unread")}
                 tone="violet"
@@ -180,13 +185,11 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
             <FeedbackMessage message={feedback} />
 
             {notificationsQuery.isLoading ? (
-              <UiDiv className="border-border bg-background/70 text-muted-foreground rounded-lg border p-3 text-xs">
-                {t("ui.loading.section")}
-              </UiDiv>
+              <UiDiv surface="info-box">{t("ui.loading.section")}</UiDiv>
             ) : notifications.length === 0 ? (
               <EmptyState label={t("ui.feedback.empty")} />
             ) : (
-              <UiDiv className="space-y-2">
+              <UiDiv stack={2}>
                 {notifications.map((notification) => {
                   const viewPath = getNotificationViewPath(notification);
                   const canDecideMembership =
@@ -198,7 +201,7 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
                   return (
                     <ListItemRow
                       key={notification.id}
-                      className={notification.is_read ? "opacity-80" : ""}
+                      dimmed={notification.is_read}
                       actions={
                         <>
                           {canDecideMembership ? (
@@ -261,9 +264,9 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
                         </>
                       }
                     >
-                      <UiDiv className="space-y-1">
-                        <UiDiv className="flex flex-wrap items-center gap-2">
-                          <UiDiv className="text-sm font-medium">{title}</UiDiv>
+                      <UiDiv stack={1}>
+                        <UiDiv wrapGap={2} contentAlign="center">
+                          <UiDiv textStyle="sm-medium">{title}</UiDiv>
                           <StatusBadge
                             label={eventLabel}
                             tone={notificationTone(notification)}
@@ -275,7 +278,7 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
                             />
                           ) : null}
                         </UiDiv>
-                        <UiDiv className="text-muted-foreground text-xs">
+                        <UiDiv textStyle="muted-xs">
                           {formatNotificationTimestamp(
                             notification.created_at,
                             locale,
@@ -289,7 +292,7 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
             )}
           </CardContent>
         </Card>
-      </UiMain>
-    </UiDiv>
+      </AppPageMain>
+    </AppPageBackground>
   );
 }

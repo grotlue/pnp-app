@@ -1,12 +1,16 @@
 "use client";
 
-import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AuthCardPageContent,
+  AuthCardPageMain,
+} from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { FormInput } from "@/components/common/form-controls";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { FormInput } from "@/components/ui/form-controls";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -162,18 +166,16 @@ export function AuthResetPasswordPageView({
   }
 
   return (
-    <UiMain className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))] px-4 py-12">
-      <UiDiv className="mx-auto w-full max-w-md">
+    <AuthCardPageMain>
+      <AuthCardPageContent>
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.authReset.title")}</CardTitle>
             <CardDescription>{t("ui.authReset.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent stack={3}>
             {resolving ? (
-              <UiDiv className="text-muted-foreground text-sm">
-                {t("ui.authReset.processing")}
-              </UiDiv>
+              <UiDiv textStyle="muted-sm">{t("ui.authReset.processing")}</UiDiv>
             ) : sessionTokens ? (
               <FormInput
                 type="password"
@@ -189,7 +191,7 @@ export function AuthResetPasswordPageView({
 
             <FeedbackMessage message={message} />
           </CardContent>
-          <CardFooter className="flex-col items-stretch gap-2">
+          <CardFooter layout="column-stretch">
             {sessionTokens ? (
               <Button
                 disabled={busy || !newPassword}
@@ -204,12 +206,12 @@ export function AuthResetPasswordPageView({
                 </TextLink>
               </Button>
             )}
-            <UiDiv className="text-xs">
+            <UiDiv textStyle="xs">
               <TextLink href="/">{t("ui.nav.backToLogin")}</TextLink>
             </UiDiv>
           </CardFooter>
         </Card>
-      </UiDiv>
-    </UiMain>
+      </AuthCardPageContent>
+    </AuthCardPageMain>
   );
 }

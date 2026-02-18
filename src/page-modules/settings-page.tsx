@@ -1,13 +1,18 @@
 "use client";
 
-import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AppPageBackground,
+  AppPageMain,
+  PageViewport,
+} from "@/components/ui/page-shell";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { FormInput } from "@/components/common/form-controls";
-import { Modal } from "@/components/common/modal";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { FormInput } from "@/components/ui/form-controls";
+import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -112,22 +117,22 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
   }
 
   if (!ready) {
-    return <UiMain className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   if (!session) {
-    return <UiMain className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   return (
-    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <UiMain className="mx-auto w-full max-w-4xl space-y-4 px-4 py-8">
+    <AppPageBackground>
+      <AppPageMain maxWidth="4xl" layout="stack-4">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.settings.title")}</CardTitle>
             <CardDescription>{t("ui.settings.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent stack={3}>
             <FormInput
               value={newEmail}
               placeholder={t("ui.fields.newEmail")}
@@ -199,8 +204,8 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
               <CardTitle>{t("ui.settings.mfaTitle")}</CardTitle>
               <CardDescription>{t("ui.settings.mfaSubtitle")}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <UiDiv className="text-sm">
+            <CardContent stack={3}>
+              <UiDiv textStyle="sm">
                 {adminMfaQuery.isLoading
                   ? t("ui.loading.section")
                   : adminNeedsMfaStepUp
@@ -213,14 +218,14 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
               </UiDiv>
 
               {mfaEnrollment ? (
-                <UiDiv className="border-border bg-muted/40 space-y-2 rounded-md border p-3">
-                  <UiDiv className="text-muted-foreground text-xs">
+                <UiDiv surface="muted-panel" stack={2}>
+                  <UiDiv textStyle="muted-xs">
                     {t("ui.settings.mfaSetupStep")}
                   </UiDiv>
-                  <UiDiv className="font-mono text-xs break-all">
+                  <UiDiv textStyle="mono-xs-break">
                     {mfaEnrollment.secret}
                   </UiDiv>
-                  <UiDiv className="text-muted-foreground font-mono text-[11px] break-all">
+                  <UiDiv textStyle="muted-mono-2xs-break">
                     {mfaEnrollment.uri}
                   </UiDiv>
                 </UiDiv>
@@ -232,7 +237,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
                 onChange={(event) => setMfaCode(event.target.value)}
               />
 
-              <UiDiv className="flex flex-wrap gap-2">
+              <UiDiv wrapGap={2}>
                 <Button
                   variant="outline"
                   disabled={busy}
@@ -313,7 +318,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
             </CardContent>
           </Card>
         ) : null}
-      </UiMain>
+      </AppPageMain>
 
       <Modal
         open={deleteOpen}
@@ -349,8 +354,8 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
           </>
         }
       >
-        <UiDiv className="text-sm">{t("ui.settings.deleteConfirm")}</UiDiv>
+        <UiDiv textStyle="sm">{t("ui.settings.deleteConfirm")}</UiDiv>
       </Modal>
-    </UiDiv>
+    </AppPageBackground>
   );
 }

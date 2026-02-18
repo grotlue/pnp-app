@@ -13,9 +13,22 @@ export function FormInput({
 
 export function FormTextarea({
   className,
+  size = "default",
   ...props
-}: ComponentPropsWithoutRef<"textarea">) {
-  return <textarea className={cn(formControlClass, className)} {...props} />;
+}: ComponentPropsWithoutRef<"textarea"> & {
+  size?: "default" | "md" | "lg";
+}) {
+  return (
+    <textarea
+      className={cn(
+        formControlClass,
+        size === "md" ? "min-h-20" : "",
+        size === "lg" ? "min-h-24" : "",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 export function FormSelect({

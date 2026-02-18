@@ -1,19 +1,24 @@
 "use client";
 
-import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AppPageBackground,
+  AppPageMain,
+  PageViewport,
+} from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { EmptyState } from "@/components/common/empty-state";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { ListItemRow } from "@/components/common/list-item-row";
-import { PageLoadingState } from "@/components/common/page-loading-state";
-import { PaginationControls } from "@/components/common/pagination-controls";
-import { SectionBox } from "@/components/common/section-box";
-import { ToggleTabs } from "@/components/common/toggle-tabs";
-import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { ListItemRow } from "@/components/ui/list-item-row";
+import { PageLoadingState } from "@/components/ui/page-loading-state";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import { SectionBox } from "@/components/ui/section-box";
+import { ToggleTabs } from "@/components/ui/toggle-tabs";
+import { TitleWithPrivacy } from "@/components/ui/title-with-privacy";
 import {
   Card,
   CardContent,
@@ -106,16 +111,16 @@ export function UserProfilePageView({
   });
 
   if (!ready || !session) {
-    return <UiMain className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   if (profileQuery.isLoading) {
     return (
-      <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <UiMain className="mx-auto w-full max-w-4xl px-4 py-8">
+      <AppPageBackground>
+        <AppPageMain maxWidth="4xl">
           <PageLoadingState label={t("ui.loading.page")} />
-        </UiMain>
-      </UiDiv>
+        </AppPageMain>
+      </AppPageBackground>
     );
   }
 
@@ -124,15 +129,15 @@ export function UserProfilePageView({
     profileQuery.error instanceof Error ? profileQuery.error.message : "";
   if (!profile) {
     return (
-      <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <UiMain className="mx-auto w-full max-w-4xl px-4 py-8">
+      <AppPageBackground>
+        <AppPageMain maxWidth="4xl">
           <Card>
-            <CardContent className="text-muted-foreground py-8 text-sm">
+            <CardContent textStyle="muted-sm" paddingY={8}>
               {errorMessage || t("ui.feedback.requestFailed")}
             </CardContent>
           </Card>
-        </UiMain>
-      </UiDiv>
+        </AppPageMain>
+      </AppPageBackground>
     );
   }
 
@@ -173,14 +178,14 @@ export function UserProfilePageView({
   );
 
   return (
-    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <UiMain className="mx-auto w-full max-w-5xl px-4 py-8">
+    <AppPageBackground>
+      <AppPageMain maxWidth="5xl">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.userProfile.title")}</CardTitle>
             <CardDescription>{t("ui.userProfile.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 text-sm">
+          <CardContent stack={4} textStyle="sm">
             <FeedbackMessage message={errorMessage} />
             <UiDiv>
               <strong>{t("ui.fields.username")}</strong>:{" "}
@@ -191,11 +196,8 @@ export function UserProfilePageView({
               {profile.profile.description || "-"}
             </UiDiv>
 
-            <UiDiv className="grid gap-4 md:grid-cols-2">
-              <SectionBox
-                title={t("ui.characters.title")}
-                className="space-y-2"
-              >
+            <UiDiv gridPreset="two-md">
+              <SectionBox title={t("ui.characters.title")} stack={2}>
                 <ToggleTabs
                   value={characterTab}
                   onChange={setCharacterTab}
@@ -208,10 +210,10 @@ export function UserProfilePageView({
                   ]}
                 />
 
-                <UiDiv className="space-y-1">
+                <UiDiv stack={1}>
                   {pagedCharacters.map((character) => (
                     <ListItemRow key={character.id}>
-                      <UiDiv className="space-y-1">
+                      <UiDiv stack={1}>
                         <TextLink href={`/characters/${character.id}`}>
                           <TitleWithPrivacy
                             title={character.name}
@@ -224,7 +226,7 @@ export function UserProfilePageView({
                   {!hasItems(searchedAndSortedCharacters) ? (
                     <EmptyState
                       label={t("ui.feedback.empty")}
-                      className="text-muted-foreground border-0 bg-transparent p-0"
+                      variant="ghost"
                     />
                   ) : null}
                 </UiDiv>
@@ -240,14 +242,14 @@ export function UserProfilePageView({
                 />
               </SectionBox>
 
-              <SectionBox title={t("ui.campaigns.title")} className="space-y-2">
-                <UiDiv className="space-y-1">
+              <SectionBox title={t("ui.campaigns.title")} stack={2}>
+                <UiDiv stack={1}>
                   {pagedCampaigns.map((campaign) => {
                     const role = roleByCampaignId.get(campaign.id) ?? "player";
 
                     return (
                       <ListItemRow key={campaign.id}>
-                        <UiDiv className="space-y-1">
+                        <UiDiv stack={1}>
                           <TextLink href={`/campaigns/${campaign.id}`}>
                             <TitleWithPrivacy
                               title={campaign.title}
@@ -262,7 +264,7 @@ export function UserProfilePageView({
                   {!hasItems(sortedCampaignEntries) ? (
                     <EmptyState
                       label={t("ui.feedback.empty")}
-                      className="text-muted-foreground border-0 bg-transparent p-0"
+                      variant="ghost"
                     />
                   ) : null}
                 </UiDiv>
@@ -280,7 +282,7 @@ export function UserProfilePageView({
             </UiDiv>
           </CardContent>
         </Card>
-      </UiMain>
-    </UiDiv>
+      </AppPageMain>
+    </AppPageBackground>
   );
 }

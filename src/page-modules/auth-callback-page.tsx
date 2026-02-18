@@ -1,11 +1,15 @@
 "use client";
 
-import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AuthCardPageContent,
+  AuthCardPageMain,
+} from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FeedbackMessage } from "@/components/common/feedback-message";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
   Card,
   CardContent,
@@ -106,20 +110,18 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
   }, [router, t]);
 
   return (
-    <UiMain className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))] px-4 py-12">
-      <UiDiv className="mx-auto w-full max-w-md">
+    <AuthCardPageMain>
+      <AuthCardPageContent>
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.authCallback.title")}</CardTitle>
             <CardDescription>{t("ui.authCallback.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm">
+          <CardContent stack={2} textStyle="sm">
             {errorMessage ? (
               <FeedbackMessage message={errorMessage} />
             ) : (
-              <UiDiv className="text-muted-foreground">
-                {t("ui.authCallback.processing")}
-              </UiDiv>
+              <UiDiv textStyle="muted">{t("ui.authCallback.processing")}</UiDiv>
             )}
             {errorMessage ? (
               <TextLink href="/" size="xs">
@@ -128,7 +130,7 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
             ) : null}
           </CardContent>
         </Card>
-      </UiDiv>
-    </UiMain>
+      </AuthCardPageContent>
+    </AuthCardPageMain>
   );
 }

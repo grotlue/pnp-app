@@ -1,7 +1,7 @@
-import { EmptyState } from "@/components/common/empty-state";
+import { EmptyState } from "@/components/ui/empty-state";
 import { CampaignCard } from "./campaign-card";
 import type { Campaign } from "../types";
-import { UiDiv } from "@/components/ui/html-elements";
+import { UiStack } from "@/components/ui/html-elements";
 
 type CampaignsListProps = {
   campaigns: Campaign[];
@@ -35,7 +35,7 @@ export function CampaignsList({
   }
 
   return (
-    <UiDiv className="space-y-2">
+    <UiStack>
       {campaigns.map((campaign) => (
         <CampaignCard
           key={campaign.id}
@@ -50,6 +50,6 @@ export function CampaignsList({
           onDelete={() => onDelete(campaign)}
         />
       ))}
-    </UiDiv>
+    </UiStack>
   );
 }

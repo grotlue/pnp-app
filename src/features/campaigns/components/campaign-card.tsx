@@ -1,10 +1,10 @@
 import { Pencil, Trash2 } from "lucide-react";
-import { IconActionButton } from "@/components/common/icon-action-button";
-import { ListItemRow } from "@/components/common/list-item-row";
-import { StatusBadge } from "@/components/common/status-badge";
-import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
+import { IconActionButton } from "@/components/ui/icon-action-button";
+import { ListItemRow } from "@/components/ui/list-item-row";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { TitleWithPrivacy } from "@/components/ui/title-with-privacy";
 import type { Campaign } from "../types";
-import { UiDiv } from "@/components/ui/html-elements";
+import { UiMutedText } from "@/components/ui/html-elements";
 import { TextLink } from "@/components/ui/text-link";
 
 type CampaignCardProps = {
@@ -54,15 +54,13 @@ export function CampaignCard({
         <TitleWithPrivacy
           title={campaign.title}
           isPrivate={campaign.is_private}
-          className="font-medium"
+          weight="medium"
         />
-        <UiDiv className="text-muted-foreground text-xs">
-          {campaign.description || "-"}
-        </UiDiv>
+        <UiMutedText size="xs">{campaign.description || "-"}</UiMutedText>
         <StatusBadge
           label={isOwner ? ownerLabel : roleLabel}
           tone={isOwner ? "green" : "violet"}
-          className="mt-1"
+          withTopSpacing
         />
       </TextLink>
     </ListItemRow>

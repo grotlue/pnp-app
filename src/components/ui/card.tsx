@@ -61,21 +61,57 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+type CardContentProps = React.ComponentProps<"div"> & {
+  stack?: 2 | 3 | 4;
+  textStyle?: "sm" | "muted-sm";
+  paddingY?: 8;
+  paddingTop?: 6;
+};
+
+function CardContent({
+  className,
+  stack,
+  textStyle,
+  paddingY,
+  paddingTop,
+  ...props
+}: CardContentProps) {
   return (
     <div
       data-slot="card-content"
-      className={cn("px-6", className)}
+      className={cn(
+        "px-6",
+        stack === 2 ? "space-y-2" : "",
+        stack === 3 ? "space-y-3" : "",
+        stack === 4 ? "space-y-4" : "",
+        textStyle === "sm" ? "text-sm" : "",
+        textStyle === "muted-sm" ? "text-muted-foreground text-sm" : "",
+        paddingY === 8 ? "py-8" : "",
+        paddingTop === 6 ? "pt-6" : "",
+        className,
+      )}
       {...props}
     />
   );
 }
 
-function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+type CardFooterProps = React.ComponentProps<"div"> & {
+  layout?: "default" | "column-stretch";
+};
+
+function CardFooter({
+  className,
+  layout = "default",
+  ...props
+}: CardFooterProps) {
   return (
     <div
       data-slot="card-footer"
-      className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
+      className={cn(
+        "flex items-center px-6 [.border-t]:pt-6",
+        layout === "column-stretch" ? "flex-col items-stretch gap-2" : "",
+        className,
+      )}
       {...props}
     />
   );

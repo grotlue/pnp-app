@@ -1,7 +1,7 @@
 import type { CampaignFormValues } from "../types";
-import { FormInput, FormTextarea } from "@/components/common/form-controls";
-import { VisibilityToggle } from "@/components/common/visibility-toggle";
-import { UiDiv } from "@/components/ui/html-elements";
+import { FormInput, FormTextarea } from "@/components/ui/form-controls";
+import { VisibilityToggle } from "@/components/ui/visibility-toggle";
+import { UiFormGrid } from "@/components/ui/html-elements";
 
 type CampaignFormProps = {
   values: CampaignFormValues;
@@ -23,7 +23,7 @@ export function CampaignForm({
   onChange,
 }: CampaignFormProps) {
   return (
-    <UiDiv className="grid gap-2">
+    <UiFormGrid>
       <FormInput
         placeholder={titlePlaceholder}
         value={values.title}
@@ -35,7 +35,7 @@ export function CampaignForm({
         }
       />
       <FormTextarea
-        className="min-h-24"
+        size="lg"
         placeholder={descriptionPlaceholder}
         value={values.description}
         onChange={(event) =>
@@ -57,6 +57,6 @@ export function CampaignForm({
           })
         }
       />
-    </UiDiv>
+    </UiFormGrid>
   );
 }

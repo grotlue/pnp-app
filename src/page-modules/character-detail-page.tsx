@@ -1,19 +1,24 @@
 "use client";
 
-import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AppPageBackground,
+  AppPageMain,
+  PageViewport,
+} from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
-import { EmptyState } from "@/components/common/empty-state";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { IconActionButton } from "@/components/common/icon-action-button";
-import { ListItemRow } from "@/components/common/list-item-row";
-import { PageLoadingState } from "@/components/common/page-loading-state";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { IconActionButton } from "@/components/ui/icon-action-button";
+import { ListItemRow } from "@/components/ui/list-item-row";
+import { PageLoadingState } from "@/components/ui/page-loading-state";
 import { Button } from "@/components/ui/button";
+import { AvatarImage } from "@/components/ui/avatar-image";
 import {
   Card,
   CardContent,
@@ -32,7 +37,7 @@ import {
   type RelationshipTargetMode,
   UnassignCampaignModal,
 } from "@/page-modules/character-detail-modals";
-import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
+import { TitleWithPrivacy } from "@/components/ui/title-with-privacy";
 import { CharacterTypeBadge } from "@/features/characters/components/character-type-badge";
 import { useCharacterDetailScreen } from "@/features/characters/hooks/use-character-detail-screen";
 import { canManageCharacter, isAdmin } from "@/features/users/logic/role.logic";
@@ -116,16 +121,16 @@ export function CharacterDetailPageView({
   }, [ready, router, session]);
 
   if (!ready || !session) {
-    return <UiMain className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   if (detailQuery.isLoading || !detailQuery.data) {
     return (
-      <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
+      <AppPageBackground>
+        <AppPageMain maxWidth="7xl">
           <PageLoadingState label={t("ui.loading.page")} />
-        </UiMain>
-      </UiDiv>
+        </AppPageMain>
+      </AppPageBackground>
     );
   }
 
@@ -230,8 +235,8 @@ export function CharacterDetailPageView({
     : relationshipTargetOptions;
 
   return (
-    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
+    <AppPageBackground>
+      <AppPageMain maxWidth="7xl">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -245,29 +250,23 @@ export function CharacterDetailPageView({
               {t("ui.characterDetail.subtitle")}
             </CardDescription>
             {isForeignAdminView ? (
-              <UiDiv className="border-destructive/40 bg-destructive/10 text-destructive inline-flex w-fit rounded-md border px-2 py-1 text-xs font-medium">
+              <UiDiv surface="danger-chip">
                 {t("ui.admin.foreignItemLabel")}
               </UiDiv>
             ) : null}
           </CardHeader>
-          <CardContent className="space-y-4">
-            <UiDiv className="grid gap-4 md:grid-cols-[200px_1fr]">
-              <UiDiv className="border-border bg-muted/30 overflow-hidden rounded-lg border">
+          <CardContent stack={4}>
+            <UiDiv gridPreset="character-detail">
+              <UiDiv surface="avatar-frame">
                 {avatarUrl ? (
-                  <Image
-                    src={avatarUrl}
-                    alt={character.name}
-                    width={200}
-                    height={200}
-                    className="h-[200px] w-full object-cover"
-                  />
+                  <AvatarImage src={avatarUrl} alt={character.name} />
                 ) : (
-                  <UiDiv className="text-muted-foreground flex h-[200px] items-center justify-center text-xs">
+                  <UiDiv surface="avatar-fallback">
                     {t("ui.characterDetail.noImage")}
                   </UiDiv>
                 )}
               </UiDiv>
-              <UiDiv className="space-y-2 text-sm">
+              <UiDiv stack={2} textStyle="sm">
                 <UiDiv>
                   <strong>{t("ui.fields.characterName")}</strong>:{" "}
                   {character.name}
@@ -307,7 +306,7 @@ export function CharacterDetailPageView({
               </UiDiv>
             </UiDiv>
 
-            <UiDiv className="flex flex-wrap gap-2">
+            <UiDiv wrapGap={2}>
               {canManage && !character.campaign_id ? (
                 <Button variant="outline" onClick={() => setAssignOpen(true)}>
                   {t("ui.characterDetail.assignCampaign")}
@@ -337,8 +336,8 @@ export function CharacterDetailPageView({
 
             <FeedbackMessage message={feedback} />
 
-            <UiDiv className="space-y-2">
-              <UiDiv className="text-sm font-medium">
+            <UiDiv stack={2}>
+              <UiDiv textStyle="sm-medium">
                 {t("ui.characterDetail.relationships")}
               </UiDiv>
               {mergedRelations.map((entry, index) => (
@@ -374,8 +373,7 @@ export function CharacterDetailPageView({
                   }
                 >
                   <Button
-                    variant="ghost"
-                    className="h-auto justify-start p-0 text-left hover:bg-transparent"
+                    variant="ghost-row"
                     onClick={async () => {
                       setMessage("");
                       try {
@@ -395,10 +393,10 @@ export function CharacterDetailPageView({
                       }
                     }}
                   >
-                    <UiDiv className="font-medium">
+                    <UiDiv textStyle="medium">
                       {entry.other_character_name}
                     </UiDiv>
-                    <UiDiv className="text-muted-foreground text-xs">
+                    <UiDiv textStyle="muted-xs">
                       {entry.other_character_deleted
                         ? t("ui.characterDetail.externalOneWay")
                         : ""}
@@ -407,15 +405,12 @@ export function CharacterDetailPageView({
                 </ListItemRow>
               ))}
               {mergedRelations.length === 0 ? (
-                <EmptyState
-                  label={t("ui.feedback.empty")}
-                  className="bg-background p-3"
-                />
+                <EmptyState label={t("ui.feedback.empty")} variant="panel" />
               ) : null}
             </UiDiv>
           </CardContent>
         </Card>
-      </UiMain>
+      </AppPageMain>
 
       <AssignCampaignModal
         t={t}
@@ -600,6 +595,6 @@ export function CharacterDetailPageView({
           setDetailContent(null);
         }}
       />
-    </UiDiv>
+    </AppPageBackground>
   );
 }

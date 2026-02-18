@@ -1,30 +1,35 @@
 "use client";
 
-import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AppPageBackground,
+  AppPageMain,
+  PageViewport,
+} from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil, Trash2 } from "lucide-react";
-import { EmptyState } from "@/components/common/empty-state";
-import { FeedbackMessage } from "@/components/common/feedback-message";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
   FormInput,
   FormSelect,
   FormTextarea,
-} from "@/components/common/form-controls";
+} from "@/components/ui/form-controls";
 import {
   IconActionButton,
   IconActionLinkButton,
-} from "@/components/common/icon-action-button";
-import { ListControls } from "@/components/common/list-controls";
-import { ListItemRow } from "@/components/common/list-item-row";
-import { Modal } from "@/components/common/modal";
-import { PageLoadingState } from "@/components/common/page-loading-state";
-import { PaginationControls } from "@/components/common/pagination-controls";
-import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
-import { VisibilityToggle } from "@/components/common/visibility-toggle";
+} from "@/components/ui/icon-action-button";
+import { ListControls } from "@/components/ui/list-controls";
+import { ListItemRow } from "@/components/ui/list-item-row";
+import { Modal } from "@/components/ui/modal";
+import { PageLoadingState } from "@/components/ui/page-loading-state";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import { TitleWithPrivacy } from "@/components/ui/title-with-privacy";
+import { VisibilityToggle } from "@/components/ui/visibility-toggle";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -142,29 +147,29 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
   ];
 
   if (!ready || !session) {
-    return <UiMain className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   if (meQuery.isLoading) {
     return (
-      <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
+      <AppPageBackground>
+        <AppPageMain maxWidth="7xl">
           <PageLoadingState label={t("ui.loading.page")} />
-        </UiMain>
-      </UiDiv>
+        </AppPageMain>
+      </AppPageBackground>
     );
   }
 
   return (
-    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
+    <AppPageBackground>
+      <AppPageMain maxWidth="7xl">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.characters.title")}</CardTitle>
             <CardDescription>{t("ui.characters.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <UiDiv className="flex flex-wrap gap-2">
+          <CardContent stack={4}>
+            <UiDiv wrapGap={2}>
               <Button onClick={() => setCreateOpen(true)}>
                 {t("ui.characters.create")}
               </Button>
@@ -182,7 +187,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
               sortOptions={sortOptions}
             />
 
-            <UiDiv className="space-y-2">
+            <UiDiv stack={2}>
               {pagedCharacters.map((character) => {
                 const campaign = character.campaign_id
                   ? (campaignsById.get(character.campaign_id) ?? null)
@@ -207,15 +212,15 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
                       </>
                     }
                   >
-                    <UiDiv className="space-y-1">
+                    <UiDiv stack={1}>
                       <TextLink href={`/characters/${character.id}`}>
                         <TitleWithPrivacy
                           title={character.name}
                           isPrivate={character.is_private}
-                          className="font-medium"
+                          weight="medium"
                         />
                       </TextLink>
-                      <UiDiv className="flex flex-wrap items-center gap-2">
+                      <UiDiv wrapGap={2} contentAlign="center">
                         <CharacterTypeBadge type={character.type} t={t} />
                         {campaign ? (
                           <TextLink
@@ -246,7 +251,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
             />
           </CardContent>
         </Card>
-      </UiMain>
+      </AppPageMain>
 
       <Modal
         open={createOpen}
@@ -294,7 +299,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
           </>
         }
       >
-        <UiDiv className="grid gap-2">
+        <UiDiv gridGap={2}>
           <FormSelect
             value={createForm.type}
             onChange={(event) =>
@@ -321,7 +326,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
             }
           />
           <FormTextarea
-            className="min-h-24"
+            size="lg"
             placeholder={t("ui.fields.description")}
             value={createForm.description}
             onChange={(event) =>
@@ -380,8 +385,8 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
           </>
         }
       >
-        <UiDiv className="text-sm">{t("ui.characters.deleteConfirm")}</UiDiv>
+        <UiDiv textStyle="sm">{t("ui.characters.deleteConfirm")}</UiDiv>
       </Modal>
-    </UiDiv>
+    </AppPageBackground>
   );
 }

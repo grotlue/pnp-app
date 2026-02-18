@@ -1,19 +1,24 @@
 "use client";
 
-import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AppPageBackground,
+  AppPageMain,
+  PageViewport,
+} from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
-import { EmptyState } from "@/components/common/empty-state";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { IconActionButton } from "@/components/common/icon-action-button";
-import { ListItemRow } from "@/components/common/list-item-row";
-import { NavTabs } from "@/components/common/nav-tabs";
-import { Modal } from "@/components/common/modal";
-import { PageLoadingState } from "@/components/common/page-loading-state";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { IconActionButton } from "@/components/ui/icon-action-button";
+import { ListItemRow } from "@/components/ui/list-item-row";
+import { NavTabs } from "@/components/ui/nav-tabs";
+import { Modal } from "@/components/ui/modal";
+import { PageLoadingState } from "@/components/ui/page-loading-state";
 import {
   CampaignFormFields,
   CharacterFormFields,
@@ -22,7 +27,7 @@ import {
   type AdminUserFormValues,
   UserFormFields,
 } from "@/page-modules/admin-page-forms";
-import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
+import { TitleWithPrivacy } from "@/components/ui/title-with-privacy";
 import { Button } from "@/components/ui/button";
 import { appRoutes } from "@/app/router";
 import {
@@ -229,19 +234,19 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
         : appRoutes.adminUsers;
 
   if (!ready || !session) {
-    return <UiMain className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   if (mfaRequiredError) {
     return (
-      <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <UiMain className="mx-auto w-full max-w-4xl px-4 py-8">
+      <AppPageBackground>
+        <AppPageMain maxWidth="4xl">
           <Card>
             <CardHeader>
               <CardTitle>{t("ui.settings.mfaTitle")}</CardTitle>
               <CardDescription>{t("ui.settings.mfaRequired")}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent stack={3}>
               <FeedbackMessage message={mfaRequiredError} />
               <Link
                 href={`${appRoutes.adminMfaChallenge}?returnTo=${encodeURIComponent(adminSectionRoute)}`}
@@ -250,24 +255,24 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
               </Link>
             </CardContent>
           </Card>
-        </UiMain>
-      </UiDiv>
+        </AppPageMain>
+      </AppPageBackground>
     );
   }
 
   if (admin.meQuery.isLoading || meRole !== "admin") {
     return (
-      <UiDiv className="min-h-screen">
-        <UiMain className="mx-auto w-full max-w-7xl px-4 py-8">
-          <PageLoadingState label={t("ui.loading.page")} className="py-6" />
-        </UiMain>
-      </UiDiv>
+      <AppPageBackground>
+        <AppPageMain maxWidth="7xl">
+          <PageLoadingState label={t("ui.loading.page")} density="section" />
+        </AppPageMain>
+      </AppPageBackground>
     );
   }
 
   return (
-    <UiDiv className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <UiMain className="mx-auto w-full max-w-7xl space-y-4 px-4 py-8">
+    <AppPageBackground>
+      <AppPageMain maxWidth="7xl" layout="stack-4">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.admin.title")}</CardTitle>
@@ -279,7 +284,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
         </Card>
 
         <Card>
-          <CardContent className="pt-6">
+          <CardContent paddingTop={6}>
             <NavTabs activeKey={section} tabs={sectionTabs} />
           </CardContent>
         </Card>
@@ -290,7 +295,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
               <CardTitle>{t("ui.admin.usersTitle")}</CardTitle>
               <CardDescription>{t("ui.admin.usersSubtitle")}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent stack={3}>
               <Button onClick={() => setCreateUserOpen(true)}>
                 {t("ui.admin.createUser")}
               </Button>
@@ -330,19 +335,19 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
                   >
                     {isProtectedAdminUser(user) ? (
                       <UiDiv>
-                        <UiDiv className="font-medium">
+                        <UiDiv textStyle="medium">
                           {user.username} ({user.email})
                         </UiDiv>
-                        <UiDiv className="text-muted-foreground text-xs">
+                        <UiDiv textStyle="muted-xs">
                           {user.role} - {user.id}
                         </UiDiv>
                       </UiDiv>
                     ) : (
                       <TextLink href={`/users/${user.id}`} display="block">
-                        <UiDiv className="font-medium">
+                        <UiDiv textStyle="medium">
                           {user.username} ({user.email})
                         </UiDiv>
-                        <UiDiv className="text-muted-foreground text-xs">
+                        <UiDiv textStyle="muted-xs">
                           {user.role} - {user.id}
                         </UiDiv>
                       </TextLink>
@@ -362,7 +367,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
                 {t("ui.admin.campaignsSubtitle")}
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent stack={3}>
               <Button
                 onClick={() => {
                   setCreateCampaignForm((prev) => ({
@@ -411,9 +416,9 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
                       <TitleWithPrivacy
                         title={campaign.title}
                         isPrivate={campaign.is_private}
-                        className="font-medium"
+                        weight="medium"
                       />
-                      <UiDiv className="text-muted-foreground text-xs">
+                      <UiDiv textStyle="muted-xs">
                         {t("ui.admin.ownerLabel")}:{" "}
                         {userById.get(campaign.owner_user_id)?.username ??
                           campaign.owner_user_id}
@@ -434,7 +439,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
                 {t("ui.admin.charactersSubtitle")}
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent stack={3}>
               <Button
                 onClick={() => {
                   setCreateCharacterForm((prev) => ({
@@ -491,14 +496,14 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
                       <TitleWithPrivacy
                         title={character.name}
                         isPrivate={character.is_private}
-                        className="font-medium"
+                        weight="medium"
                       />
                       <CharacterTypeBadge
                         type={character.type}
                         t={t}
-                        className="mt-1"
+                        withTopSpacing
                       />
-                      <UiDiv className="text-muted-foreground text-xs">
+                      <UiDiv textStyle="muted-xs">
                         {t("ui.admin.ownerLabel")}:{" "}
                         {userById.get(character.owner_user_id)?.username ??
                           character.owner_user_id}
@@ -510,7 +515,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
             </CardContent>
           </Card>
         ) : null}
-      </UiMain>
+      </AppPageMain>
 
       <Modal
         open={createUserOpen}
@@ -655,7 +660,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
           </>
         }
       >
-        <UiDiv className="text-sm">{t("ui.admin.deleteUserConfirm")}</UiDiv>
+        <UiDiv textStyle="sm">{t("ui.admin.deleteUserConfirm")}</UiDiv>
       </Modal>
 
       <Modal
@@ -788,7 +793,7 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
           </>
         }
       >
-        <UiDiv className="text-sm">{t("ui.campaigns.deleteConfirm")}</UiDiv>
+        <UiDiv textStyle="sm">{t("ui.campaigns.deleteConfirm")}</UiDiv>
       </Modal>
 
       <Modal
@@ -939,8 +944,8 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
           </>
         }
       >
-        <UiDiv className="text-sm">{t("ui.characters.deleteConfirm")}</UiDiv>
+        <UiDiv textStyle="sm">{t("ui.characters.deleteConfirm")}</UiDiv>
       </Modal>
-    </UiDiv>
+    </AppPageBackground>
   );
 }

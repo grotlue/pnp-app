@@ -1,4 +1,4 @@
-import { FormInput, FormSelect } from "@/components/common/form-controls";
+import { FormInput, FormSelect } from "@/components/ui/form-controls";
 import { Button } from "@/components/ui/button";
 
 type ListControlOption = {

@@ -1,12 +1,16 @@
 "use client";
 
-import { UiDiv, UiMain } from "@/components/ui/html-elements";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AuthCardPageContent,
+  AuthCardPageMain,
+} from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { FormInput } from "@/components/common/form-controls";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { FormInput } from "@/components/ui/form-controls";
 import {
   TurnstileWidget,
   type TurnstileErrorReason,
@@ -95,14 +99,14 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
   }
 
   return (
-    <UiMain className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))] px-4 py-12">
-      <UiDiv className="mx-auto w-full max-w-md">
+    <AuthCardPageMain>
+      <AuthCardPageContent>
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.register.title")}</CardTitle>
             <CardDescription>{t("ui.register.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent stack={3}>
             <FormInput
               placeholder={t("ui.fields.username")}
               value={form.username}
@@ -142,16 +146,16 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
             ) : null}
             <FeedbackMessage message={message} />
           </CardContent>
-          <CardFooter className="flex-col items-stretch gap-2">
+          <CardFooter layout="column-stretch">
             <Button disabled={busy} onClick={onSubmit}>
               {t("ui.actions.register")}
             </Button>
-            <UiDiv className="text-xs">
+            <UiDiv textStyle="xs">
               <TextLink href="/">{t("ui.register.alreadyRegistered")}</TextLink>
             </UiDiv>
           </CardFooter>
         </Card>
-      </UiDiv>
-    </UiMain>
+      </AuthCardPageContent>
+    </AuthCardPageMain>
   );
 }
