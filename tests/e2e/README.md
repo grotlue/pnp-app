@@ -10,6 +10,14 @@ E2E tests verify critical user-visible happy paths end-to-end (UI + API + auth/s
 - Keep edge cases, validation permutations, and error matrix coverage in feature/API tests.
 - Prefer short deterministic scenarios over long multi-purpose test scripts.
 
+## Runtime Prerequisites
+
+- Domain smoke flows require local Supabase fixture data.
+- Prepare the backend before running smoke locally:
+  - `yarn supabase:start`
+  - `yarn supabase:db:reset`
+  - `yarn supabase:env:local`
+
 ## Scenario ID Contract
 
 - Every scenario uses a stable ID in the test title:
@@ -34,3 +42,11 @@ E2E tests verify critical user-visible happy paths end-to-end (UI + API + auth/s
 ## PR Mapping Requirement
 
 For flow-impacting PRs, map acceptance criteria/user-flow items to scenario IDs in the PR `E2E Coverage Matrix`.
+
+## Current Smoke Baseline
+
+- `FLOW-auth-login-entry` (`@auth`)
+- `FLOW-auth-password-reset-entry` (`@auth`)
+- `FLOW-campaigns-create` (`@campaigns`)
+- `FLOW-characters-create-edit` (`@characters`)
+- `FLOW-notifications-mark-read` (`@notifications`)

@@ -29,6 +29,20 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Setup Supabase CLI (E2E fixture backend)
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase services (E2E fixture backend)
+        run: supabase start
+
+      - name: Reset local Supabase DB with fixture seed (E2E)
+        run: supabase db reset --local --yes
+
+      - name: Generate .env.local from local Supabase status (E2E)
+        run: ./scripts/update-local-supabase-env.sh
+
       - name: Build
         run: yarn build
 

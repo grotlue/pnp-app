@@ -80,6 +80,7 @@ src/
 - CI policy:
   - PR CI runs smoke subset: `yarn test:e2e --grep @smoke`
   - Nightly/manual full run executes complete Playwright suite.
+- PR smoke execution uses local Supabase fixture data for authenticated domain happy paths (campaigns, characters, notifications) in addition to auth entry paths.
 
 ## Loading UX
 
