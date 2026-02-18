@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AppHeader } from "@/components/common/app-header";
 import { FeedbackMessage } from "@/components/common/feedback-message";
 import {
   FormInput,
@@ -129,7 +128,6 @@ export function CharacterEditPageView({
   if (!canManage) {
     return (
       <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <AppHeader locale={locale} session={session} />
         <main className="mx-auto w-full max-w-4xl px-4 py-8">
           <Card>
             <CardHeader>
@@ -146,7 +144,6 @@ export function CharacterEditPageView({
 
   return (
     <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <AppHeader locale={locale} session={session} />
       <main className="mx-auto w-full max-w-4xl px-4 py-8">
         <Card>
           <CardHeader>

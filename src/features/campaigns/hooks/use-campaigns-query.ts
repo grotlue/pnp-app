@@ -1,14 +1,15 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/client/query-keys";
 import type { ClientSession } from "@/lib/client/session";
 import { getCampaignsQuery } from "../queries/get-campaigns.query";
-import { getMyUserQuery } from "../queries/get-my-user.query";
+import { getMe } from "@/features/users/queries/users-profile.query";
 
 export const campaignsQueryKey = ["campaigns", "screen"] as const;
 
 export function useCampaignsQuery(session: ClientSession | null) {
+  const queryClient = useQueryClient();
   const token = session?.accessToken ?? "no-session";
 
   return useQuery({
@@ -21,7 +22,11 @@ export function useCampaignsQuery(session: ClientSession | null) {
 
       const [campaigns, me] = await Promise.all([
         getCampaignsQuery(session, { scope: "member" }),
-        getMyUserQuery(session),
+        queryClient.ensureQueryData({
+          queryKey: queryKeys.me(token),
+          staleTime: 60_000,
+          queryFn: async () => getMe(session),
+        }),
       ]);
 
       return {

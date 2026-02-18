@@ -14,6 +14,7 @@ import type { Character } from "../types";
 export async function getCharacterDetailContext(
   session: ClientSession,
   characterId: string,
+  me: MeResponse,
 ): Promise<{
   me: MeResponse;
   character: Character;
@@ -25,7 +26,6 @@ export async function getCharacterDetailContext(
   outgoing: OutgoingRelationship[];
 }> {
   const [
-    meResponse,
     characterResponse,
     campaignsResponse,
     allCharactersResponse,
@@ -34,7 +34,6 @@ export async function getCharacterDetailContext(
     summaryResponse,
     outgoingResponse,
   ] = await Promise.all([
-    apiRequest<MeResponse>("/api/me", { session }),
     apiRequest<Character>(`/api/characters/${characterId}`, { session }),
     apiRequest<Campaign[]>("/api/campaigns", { session }),
     apiRequest<Character[]>("/api/characters?limit=500", { session }),
@@ -53,7 +52,7 @@ export async function getCharacterDetailContext(
   ]);
 
   return {
-    me: unwrapApiResponse(meResponse, "Failed to load user"),
+    me,
     character: unwrapApiResponse(characterResponse, "Failed to load character"),
     campaigns: unwrapApiResponse(campaignsResponse, "Failed to load campaigns"),
     allCharacters: unwrapApiResponse(

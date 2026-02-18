@@ -19,7 +19,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { AppHeader } from "@/components/common/app-header";
 import { Modal } from "@/components/common/modal";
 import { PageLoadingState } from "@/components/common/page-loading-state";
 import { ToggleTabs } from "@/components/common/toggle-tabs";
@@ -85,7 +84,6 @@ export function CampaignDetailPageView({
   if (detailQuery.isLoading || !detailQuery.data) {
     return (
       <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <AppHeader locale={locale} session={session} />
         <main className="mx-auto w-full max-w-7xl px-4 py-8">
           <PageLoadingState label={t("ui.loading.page")} />
         </main>
@@ -163,7 +161,6 @@ export function CampaignDetailPageView({
 
   return (
     <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <AppHeader locale={locale} session={session} />
       <main className="mx-auto w-full max-w-7xl px-4 py-8">
         <Card>
           <CardHeader>

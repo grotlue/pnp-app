@@ -6,14 +6,14 @@ import type { MeResponse } from "@/features/users/types";
 export async function getCharacterEditContext(
   session: ClientSession,
   characterId: string,
+  me: MeResponse,
 ): Promise<{ me: MeResponse; character: Character }> {
-  const [meResponse, characterResponse] = await Promise.all([
-    apiRequest<MeResponse>("/api/me", { session }),
+  const [characterResponse] = await Promise.all([
     apiRequest<Character>(`/api/characters/${characterId}`, { session }),
   ]);
 
   return {
-    me: unwrapApiResponse(meResponse, "Failed to load user"),
+    me,
     character: unwrapApiResponse(characterResponse, "Failed to load character"),
   };
 }

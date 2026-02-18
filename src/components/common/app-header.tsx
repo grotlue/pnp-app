@@ -19,30 +19,22 @@ import type { ClientSession } from "@/lib/client/session";
 import { logoutUser } from "@/features/users/queries/users-auth.query";
 import { useNotificationsUnreadCount } from "@/features/notifications/hooks/use-notifications-unread-count";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
-import type { MeResponse } from "@/features/users/types";
 import { appNavigationRoutes, appRoutes } from "@/app/router";
 
 type AppHeaderProps = {
   locale: AppLocale;
   session: ClientSession;
-  me?: MeResponse | null;
-  fetchMe?: boolean;
 };
 
-export function AppHeader({
-  locale,
-  session,
-  me: providedMe = null,
-  fetchMe = true,
-}: AppHeaderProps) {
+export function AppHeader({ locale, session }: AppHeaderProps) {
   const t = getTranslator(locale);
   const pathname = usePathname();
   const router = useRouter();
   const currentPath = pathname ?? "";
-  const meQuery = useMeQuery(session, { enabled: fetchMe });
-  const me = providedMe ?? meQuery.data ?? null;
+  const meQuery = useMeQuery(session);
+  const me = meQuery.data ?? null;
   const role = me?.profile.role;
-  const roleResolved = me !== null || (fetchMe && meQuery.isSuccess);
+  const roleResolved = me !== null || meQuery.isSuccess;
   const profileLocale = me?.profile.locale;
   const notificationsUnreadCountQuery = useNotificationsUnreadCount(session);
   const unreadNotifications =
