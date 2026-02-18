@@ -21,6 +21,11 @@ jobs:
       contents: read
       statuses: write
     environment: preview
+    env:
+      STATUS_SHA: ${{ github.event.inputs.checkout_ref || github.sha }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,7 +36,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           STATUS_CONTEXT: "Vercel - pnp-app: deploy-preview-db"
-          STATUS_SHA: ${{ github.event.inputs.checkout_ref || github.sha }}
         run: |
           curl --fail-with-body --silent --show-error \
             --request POST \
@@ -46,33 +50,17 @@ jobs:
           version: latest
 
       - name: Link Supabase project (preview)
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
 
       - name: Reset Supabase DB (preview) and apply migrations
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: |
           supabase db reset --linked --no-seed --yes
 
       - name: Lint Supabase DB (preview, public schema)
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: supabase db lint --linked --schema public --fail-on warning
 
       - name: Inspect Supabase DB outliers (preview)
         continue-on-error: true
-        env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
         run: supabase inspect db outliers --linked
 
       - name: Set commit status (deploy DB final)
@@ -80,7 +68,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           STATUS_CONTEXT: "Vercel - pnp-app: deploy-preview-db"
-          STATUS_SHA: ${{ github.event.inputs.checkout_ref || github.sha }}
         run: |
           status_state="failure"
           status_description="Database deployment failed."
@@ -109,6 +96,8 @@ jobs:
       contents: read
       statuses: write
     environment: preview
+    env:
+      STATUS_SHA: ${{ github.event.inputs.checkout_ref || github.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -119,7 +108,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           STATUS_CONTEXT: "Vercel - pnp-app: deploy"
-          STATUS_SHA: ${{ github.event.inputs.checkout_ref || github.sha }}
         run: |
           curl --fail-with-body --silent --show-error \
             --request POST \
@@ -164,7 +152,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           STATUS_CONTEXT: "Vercel - pnp-app: deploy"
-          STATUS_SHA: ${{ github.event.inputs.checkout_ref || github.sha }}
         run: |
           status_state="failure"
           status_description="Admin bootstrap failed."

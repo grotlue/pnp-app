@@ -26,6 +26,7 @@ import { sortCharacters } from "@/features/characters/logic/character-list.logic
 import { getCharacters } from "@/features/characters/queries/characters-screen.query";
 import type { Campaign } from "@/features/campaigns/types";
 import { getPublicUserProfile } from "@/features/users/queries/users-public-profile.query";
+import { queryKeys } from "@/lib/client/query-keys";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { hasItems } from "@/lib/logic/collections";
@@ -67,12 +68,10 @@ export function UserProfilePageView({
   }, [ready, router, session]);
 
   const profileQuery = useQuery({
-    queryKey: [
-      "users",
-      "public-profile",
+    queryKey: queryKeys.usersPublicProfile(
       userId,
       session?.accessToken ?? "no-session",
-    ],
+    ),
     enabled: Boolean(session),
     queryFn: async () => {
       if (!session) {

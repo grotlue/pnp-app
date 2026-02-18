@@ -2,10 +2,8 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ClientSession } from "@/lib/client/session";
-import {
-  notificationsQueryKey,
-  useNotificationsQuery,
-} from "./use-notifications-query";
+import { queryKeys } from "@/lib/client/query-keys";
+import { useNotificationsQuery } from "./use-notifications-query";
 import { markNotificationReadMutation } from "@/features/notifications/queries/mark-notification-read.mutation";
 import { markAllNotificationsReadMutation } from "@/features/notifications/queries/mark-all-notifications-read.mutation";
 import { decideNotificationMembershipMutation } from "@/features/notifications/queries/decide-notification-membership.mutation";
@@ -15,7 +13,14 @@ export function useNotificationsScreen(session: ClientSession | null) {
   const notificationsQuery = useNotificationsQuery(session);
 
   async function invalidateNotifications() {
-    await queryClient.invalidateQueries({ queryKey: notificationsQueryKey });
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.notifications() }),
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.notificationsUnreadCount(
+          session?.accessToken ?? "no-session",
+        ),
+      }),
+    ]);
   }
 
   const markReadMutation = useMutation({

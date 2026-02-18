@@ -1,0 +1,3 @@
+interface:
+  display_name: "PNP DB Guardrails"
+  short_description: "Run migration, RLS, and DB safety checks"

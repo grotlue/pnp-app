@@ -127,7 +127,7 @@ export function HomePageView({
   const [campaignPage, setCampaignPage] = useState(1);
 
   const loggedInQuery = useQuery({
-    queryKey: ["home", "logged-in", session?.accessToken ?? "no-session"],
+    queryKey: queryKeys.homeLoggedIn(session?.accessToken ?? "no-session"),
     enabled: Boolean(session),
     queryFn: async () => {
       if (!session) {

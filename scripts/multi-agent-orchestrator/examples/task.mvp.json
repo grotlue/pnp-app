@@ -1,0 +1,44 @@
+{
+  "task_id": "MVP-ORCH-001",
+  "title": "MVP multi-agent orchestration run",
+  "checks_required": ["typecheck", "lint"],
+  "workstreams": [
+    {
+      "name": "feature-workstream",
+      "worker": "pnp-feature-delivery",
+      "files_allowed": ["src/**", "tests/**"],
+      "commands": [
+        "echo '[feature-worker] apply feature changes in dedicated worker runtime'"
+      ]
+    },
+    {
+      "name": "docs-workstream",
+      "worker": "pnp-docs-maintainer",
+      "depends_on": ["feature-workstream"],
+      "files_allowed": ["README.md", "docs/**", "AGENTS.md"],
+      "commands": [
+        "echo '[docs-worker] update docs after feature behavior is final'"
+      ]
+    },
+    {
+      "name": "pr-readiness-workstream",
+      "worker": "pnp-pr-readiness",
+      "depends_on": ["docs-workstream"],
+      "files_allowed": [".github/**", "docs/**", "AGENTS.md"],
+      "commands": [
+        "echo '[pr-readiness-worker] run readiness checks and produce handoff'"
+      ]
+    }
+  ],
+  "merge_gate": {
+    "required_workers": [
+      "feature-workstream",
+      "docs-workstream",
+      "pr-readiness-workstream"
+    ],
+    "policy": {
+      "require_pr_template_sections": true,
+      "require_adr_for_architecture_changes": false
+    }
+  }
+}
