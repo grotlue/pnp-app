@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("FLOW-auth-password-reset-entry @smoke @auth password reset page renders expected controls", async ({
+test("FLOW-AUTH-PASSWORD-RESET-ENTRY @smoke @auth password reset page renders expected controls", async ({
   page,
 }) => {
   await page.goto("/password-reset");

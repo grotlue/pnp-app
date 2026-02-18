@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("FLOW-auth-login-entry @smoke @auth home page renders login form for logged-out users", async ({
+test("FLOW-AUTH-LOGIN-ENTRY @smoke @auth home page renders login form for logged-out users", async ({
   page,
 }) => {
   await page.goto("/");

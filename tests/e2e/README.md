@@ -23,7 +23,7 @@ E2E tests verify critical user-visible happy paths end-to-end (UI + API + auth/s
 - Every scenario uses a stable ID in the test title:
   - `FLOW-<domain>-<slug>`
 - Example:
-  - `FLOW-auth-login-entry`
+  - `FLOW-AUTH-LOGIN-ENTRY`
 
 ## Required Tags
 
@@ -45,8 +45,8 @@ For flow-impacting PRs, map acceptance criteria/user-flow items to scenario IDs 
 
 ## Current Smoke Baseline
 
-- `FLOW-auth-login-entry` (`@auth`)
-- `FLOW-auth-password-reset-entry` (`@auth`)
-- `FLOW-campaigns-create` (`@campaigns`)
-- `FLOW-characters-create-edit` (`@characters`)
-- `FLOW-notifications-mark-read` (`@notifications`)
+- `FLOW-AUTH-LOGIN-ENTRY` (`@auth`)
+- `FLOW-AUTH-PASSWORD-RESET-ENTRY` (`@auth`)
+- `FLOW-CAMPAIGNS-CREATE` (`@campaigns`)
+- `FLOW-CHARACTERS-CREATE-EDIT` (`@characters`)
+- `FLOW-NOTIFICATIONS-MARK-READ` (`@notifications`)

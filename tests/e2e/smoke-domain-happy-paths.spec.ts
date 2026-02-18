@@ -8,7 +8,7 @@ import {
 
 test.describe.configure({ mode: "serial" });
 
-test("FLOW-campaigns-create @smoke @campaigns creates a new campaign from the campaigns screen", async ({
+test("FLOW-CAMPAIGNS-CREATE @smoke @campaigns creates a new campaign from the campaigns screen", async ({
   page,
 }) => {
   await loginAsFixtureUser(page, E2E_USERS.smokePlayer);
@@ -31,7 +31,7 @@ test("FLOW-campaigns-create @smoke @campaigns creates a new campaign from the ca
   await expect(page.getByRole("link", { name: campaignTitle })).toBeVisible();
 });
 
-test("FLOW-characters-create-edit @smoke @characters creates and edits a character from user flows", async ({
+test("FLOW-CHARACTERS-CREATE-EDIT @smoke @characters creates and edits a character from user flows", async ({
   page,
 }) => {
   await loginAsFixtureUser(page, E2E_USERS.smokePlayer);
@@ -61,7 +61,7 @@ test("FLOW-characters-create-edit @smoke @characters creates and edits a charact
   await expect(page.getByText(updatedCharacterName)).toBeVisible();
 });
 
-test("FLOW-notifications-mark-read @smoke @notifications marks an unread notification as read", async ({
+test("FLOW-NOTIFICATIONS-MARK-READ @smoke @notifications marks an unread notification as read", async ({
   page,
 }) => {
   await loginAsFixtureUser(page, E2E_USERS.smokePlayer);
