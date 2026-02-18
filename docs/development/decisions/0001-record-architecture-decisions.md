@@ -12,12 +12,12 @@ Project architecture, security, testing, and deployment guardrails are documente
 
 ## Decision
 
-We adopt a lightweight ADR process in `docs/development/decisions/`:
+We adopt a lightweight ADR process in [`docs/development/decisions/`](./):
 
 - one ADR per architecture-significant decision
 - fixed ADR template with context, decision, consequences, alternatives
 - explicit lifecycle status (`Proposed`, `Accepted`, `Rejected`, `Superseded`)
-- central index in `docs/development/decisions/README.md`
+- central index in [`docs/development/decisions/README.md`](README.md)
 
 PRs that change architecture/security/runtime boundaries must link an ADR (new or existing), or explicitly state why no ADR is needed.
 
@@ -29,5 +29,5 @@ PRs that change architecture/security/runtime boundaries must link an ADR (new o
 
 ## Alternatives Considered
 
-- Keep all decisions only in `docs/app-architecture.md`: rejected, because history and rationale are hard to track.
+- Keep all decisions only in [`docs/app-architecture.md`](../../app-architecture.md): rejected, because history and rationale are hard to track.
 - Capture decisions only in PR descriptions/issues: rejected, because decision history becomes fragmented and harder to discover.

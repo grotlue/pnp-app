@@ -22,5 +22,5 @@ yarn build
 
 ## Documentation
 
-- Documentation hub: `docs/README.md`
-- AI agent workflow rules: `AGENTS.md`
+- Documentation hub: [`docs/README.md`](docs/README.md)
+- AI agent workflow rules: [`AGENTS.md`](AGENTS.md)

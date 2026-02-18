@@ -2,13 +2,13 @@
 
 This is a practical external-orchestration MVP for staged worker execution with contracts and a merge gate.
 
-Initial local prerequisites are documented in `docs/development/local-setup-and-cli-tooling.md`.
-Developer quickstart for AI-agent usage is in `docs/development/ai-agent-quickstart.md`.
+Initial local prerequisites are documented in [`docs/development/local-setup-and-cli-tooling.md`](local-setup-and-cli-tooling.md).
+Developer quickstart for AI-agent usage is in [`docs/development/ai-agent-quickstart.md`](ai-agent-quickstart.md).
 
 ## Location
 
-- Supervisor: `scripts/multi-agent-orchestrator/supervisor.mjs`
-- Example contract: `scripts/multi-agent-orchestrator/examples/task.mvp.json`
+- Supervisor: [`scripts/multi-agent-orchestrator/supervisor.mjs`](../../scripts/multi-agent-orchestrator/supervisor.mjs)
+- Example contract: [`scripts/multi-agent-orchestrator/examples/task.mvp.json`](../../scripts/multi-agent-orchestrator/examples/task.mvp.json)
 
 ## Run
 
@@ -53,7 +53,7 @@ Optional merge gate:
 
 Run artifacts are written to:
 
-- `.orchestrator/runs/<run-id>/`
+- [`.orchestrator/runs/<run-id>/`](../../.orchestrator/)
 
 Includes:
 
@@ -65,4 +65,4 @@ Includes:
 ## Notes
 
 - This MVP executes in one local workspace.
-- For true parallel autonomous workers, use isolated worktrees/containers + queue orchestration as described in `skills/pnp-orchestrator/references/external-multi-agent-orchestration.md`.
+- For true parallel autonomous workers, use isolated worktrees/containers + queue orchestration as described in [`skills/pnp-orchestrator/references/external-multi-agent-orchestration.md`](../../skills/pnp-orchestrator/references/external-multi-agent-orchestration.md).
