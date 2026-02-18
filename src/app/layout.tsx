@@ -28,7 +28,11 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
+type RootLayoutProps = Readonly<{
+  children: React.ReactNode;
+}>;
+
+export default async function RootLayout({ children }: RootLayoutProps) {
   const locale = await getRequestLocale();
   const enableToolbar = resolveVercelToolbarEnabled();
   const enableSpeedInsights = resolveSpeedInsightsEnabled();
