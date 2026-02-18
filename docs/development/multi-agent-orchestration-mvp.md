@@ -21,6 +21,7 @@ Useful flags:
 - `--print-analysis`: show detected intent and selected skills
 - `--profile <name>`: override routing (`pr-review`, `feature-delivery`, `docs-maintenance`)
 - `--max-parallel 2`: run independent workstreams in parallel
+- `--verbose`: print per-command progress and log tails while running
 - `--approval-policy <name>`: `untrusted | on-failure | on-request | never`
 - `--confirm-risky`: required for high-risk prompts
 - `--allow-destructive`: allow destructive commands (blocked by default)
@@ -86,6 +87,7 @@ Use manual contracts when you need exact workstream definitions.
 ```bash
 yarn orchestrator:run --task path/to/task.json
 yarn orchestrator:run --task path/to/task.json --max-parallel 2
+yarn orchestrator:run --task path/to/task.json --verbose --tail-lines 50
 ```
 
 Example contract: [Example Task Contract](../../scripts/multi-agent-orchestrator/examples/task.mvp.json)
@@ -125,6 +127,15 @@ Run artifacts are written to [Orchestrator Runs Directory](../../.orchestrator/)
 - per-worker command logs and `result.json`
 - `merge-gate-report.json`
 - `run-summary.json`
+
+When you use `--verbose`, the supervisor prints command start/end progress and the last log lines from each command file.
+
+On `Ctrl+C` (`SIGINT`), the supervisor now performs a graceful interrupt:
+
+- finish the active command
+- stop remaining stages/checks
+- write partial `merge-gate-report.json` and `run-summary.json`
+- exit with code `130`
 
 ## Limit and Extension
 

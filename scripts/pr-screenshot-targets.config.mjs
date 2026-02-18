@@ -134,8 +134,10 @@ export const TARGET_RULES = [
     patterns: [
       /^src\/app\/dashboard\/page\.tsx$/,
       /^src\/app\/admin\/page\.tsx$/,
+      /^src\/app\/admin\/mfa-challenge\/page\.tsx$/,
       /^src\/page-modules\/admin-page\.tsx$/,
       /^src\/page-modules\/admin-page-forms\.tsx$/,
+      /^src\/page-modules\/admin-mfa-challenge-page\.tsx$/,
       /^src\/features\/admin\//,
       /^src\/app\/api\/admin\//,
     ],
