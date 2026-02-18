@@ -87,6 +87,16 @@ test("FLOW-CAMPAIGNS-REQUEST-JOIN @regression @campaigns requests to join a camp
   const requestJoinButton = page.getByRole("button", {
     name: "Request to join",
   });
+  const joinPendingMessage = page.getByText("Your join request is pending.");
+
+  await expect
+    .poll(async () => {
+      const canRequest = await requestJoinButton.count();
+      const alreadyPending = await joinPendingMessage.count();
+      return canRequest + alreadyPending;
+    })
+    .toBeGreaterThan(0);
+
   if ((await requestJoinButton.count()) > 0) {
     await requestJoinButton.first().click();
     const joinModal = page.locator(".fixed.inset-0").first();
@@ -94,5 +104,5 @@ test("FLOW-CAMPAIGNS-REQUEST-JOIN @regression @campaigns requests to join a camp
     await expect(page.getByText("Sent successfully.").first()).toBeVisible();
   }
 
-  await expect(page.getByText("Your join request is pending.")).toBeVisible();
+  await expect(joinPendingMessage).toBeVisible();
 });
