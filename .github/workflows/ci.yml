@@ -153,7 +153,7 @@ jobs:
             echo "- Inspect \`test-results/**/trace.zip\` with: \`npx playwright show-trace <trace.zip>\`"
             echo "- Inspect \`test-results/**/video.webm\` and \`error-context.md\` for retry context"
             echo "- Open \`playwright-report/index.html\` for timeline and locator snapshots"
-          } >> \"$GITHUB_STEP_SUMMARY\"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   e2e_regression:
     if: >-
@@ -231,7 +231,7 @@ jobs:
             echo "- Inspect \`test-results/**/trace.zip\` with: \`npx playwright show-trace <trace.zip>\`"
             echo "- Inspect \`test-results/**/video.webm\` and \`error-context.md\` for retry context"
             echo "- Open \`playwright-report/index.html\` for timeline and locator snapshots"
-          } >> \"$GITHUB_STEP_SUMMARY\"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   db_schema_guardrails:
     runs-on: ubuntu-latest

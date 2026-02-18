@@ -75,9 +75,9 @@ test("FLOW-CAMPAIGNS-REQUEST-JOIN @regression @campaigns requests to join a camp
   page,
 }) => {
   await loginAsFixtureUser(page, E2E_USERS.smokePlayer);
-  await page.goto("/campaigns");
+  await page.goto("/");
 
-  await expect(page).toHaveURL("/campaigns");
+  await expect(page).toHaveURL("/");
   await page
     .getByRole("link", { name: E2E_CAMPAIGNS.fixtureCampaignTitle })
     .first()
