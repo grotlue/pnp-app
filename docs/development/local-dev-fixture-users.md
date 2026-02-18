@@ -1,6 +1,6 @@
 # Local Dev Fixture Users
 
-These login credentials apply to the local fixture defined in `supabase/seed.sql`.
+Credentials for the fixture accounts in `supabase/seed.sql`.
 
 ## Passwords
 
@@ -24,9 +24,7 @@ These login credentials apply to the local fixture defined in `supabase/seed.sql
 | Standalone Player 1 (no campaign)        | `solo1.local@pnp.test`             |
 | Standalone Player 2 (no campaign)        | `solo2.local@pnp.test`             |
 
-## Reset / Reload
-
-After changing the fixture:
+## Reload Fixture
 
 ```bash
 yarn supabase:db:reset

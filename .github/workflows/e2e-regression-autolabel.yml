@@ -1,0 +1,96 @@
+name: E2E Regression Auto-Label
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
+      - ready_for_review
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: e2e-regression-autolabel-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  autolabel:
+    if: ${{ github.event.pull_request.draft == false }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Collect changed files
+        id: changed_files
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100,
+            });
+
+            core.setOutput(
+              "changed_files_json",
+              JSON.stringify(files.map((file) => file.filename)),
+            );
+
+      - name: Evaluate auto-label risk signals
+        id: risk
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+          CHANGED_FILES_JSON: ${{ steps.changed_files.outputs.changed_files_json }}
+        run: node .github/scripts/e2e-regression-autolabel.mjs
+
+      - name: Ensure regression label exists and apply it
+        if: ${{ steps.risk.outputs.should_label == 'true' }}
+        uses: actions/github-script@v7
+        env:
+          REASONS: ${{ steps.risk.outputs.reasons }}
+        with:
+          script: |
+            const labelName = "e2e-regression";
+            const issueNumber = context.payload.pull_request.number;
+            const currentLabels = context.payload.pull_request.labels.map((label) => label.name);
+
+            if (currentLabels.includes(labelName)) {
+              core.info("Label already present; skipping add.");
+              return;
+            }
+
+            try {
+              await github.rest.issues.getLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: labelName,
+              });
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error;
+              }
+
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: labelName,
+                color: "d93f0b",
+                description: "Run opt-in E2E regression suite on PR",
+              });
+            }
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              labels: [labelName],
+            });
+
+            core.notice(`Applied ${labelName} because: ${process.env.REASONS}`);

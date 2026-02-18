@@ -1,0 +1,3 @@
+interface:
+  display_name: "PNP PR Readiness"
+  short_description: "Verify PR completeness and merge readiness"

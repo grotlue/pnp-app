@@ -1,0 +1,3 @@
+interface:
+  display_name: "PNP Quality Gatekeeper"
+  short_description: "Final cross-cutting quality gate (correctness, security, performance)"

@@ -44,14 +44,11 @@ export function useCharacterDetailScreen(
 
   const avatarPath = detailQuery.data?.character.avatar_path;
   const avatarQuery = useQuery({
-    queryKey: [
-      "characters",
-      "detail",
-      "avatar",
+    queryKey: queryKeys.characterAvatar(
       characterId,
       avatarPath ?? "no-avatar",
       token,
-    ],
+    ),
     enabled: Boolean(session && avatarPath),
     queryFn: async () => {
       if (!session || !avatarPath) {
@@ -65,8 +62,8 @@ export function useCharacterDetailScreen(
   async function invalidateCharacterData() {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: detailQueryKey }),
-      queryClient.invalidateQueries({ queryKey: ["characters"] }),
-      queryClient.invalidateQueries({ queryKey: ["campaigns"] }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.characters() }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.campaigns() }),
     ]);
   }
 

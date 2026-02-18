@@ -20,7 +20,7 @@ export function useCampaignDetailScreen(
 ) {
   const queryClient = useQueryClient();
   const token = session?.accessToken ?? "no-session";
-  const queryKey = ["campaigns", "detail", campaignId, token] as const;
+  const queryKey = queryKeys.campaignDetail(campaignId, token);
 
   const detailQuery = useQuery({
     queryKey,

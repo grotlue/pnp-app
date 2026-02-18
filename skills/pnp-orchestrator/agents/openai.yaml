@@ -1,0 +1,3 @@
+interface:
+  display_name: "PNP Orchestrator"
+  short_description: "Route pnp-app tasks to specialized skills"

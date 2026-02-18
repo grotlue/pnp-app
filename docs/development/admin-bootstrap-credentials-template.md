@@ -17,6 +17,5 @@ Do **not** commit real credentials to the repository.
 
 ## Notes
 
-- Bootstrap is idempotent and runs in deploy workflows.
-- If the admin email already exists, the script keeps the existing account and enforces `profiles.role = 'admin'`.
-- A second admin profile is blocked by the DB unique constraint.
+- Bootstrap is idempotent and runs in deployment workflows.
+- Existing admin email is reused and forced to `profiles.role = 'admin'`.

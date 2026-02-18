@@ -16,6 +16,7 @@
 /playwright-report
 /test-results
 /.playwright-browsers
+/.orchestrator
 
 # next.js
 /.next/
@@ -27,6 +28,7 @@
 # misc
 .DS_Store
 *.pem
+.orchestrator
 
 # debug
 npm-debug.log*

@@ -19,13 +19,19 @@
     "supabase:push": "supabase db push --linked",
     "supabase:types": "supabase gen types typescript --linked --schema public > src/types/database.ts",
     "supabase:env:local": "./scripts/update-local-supabase-env.sh",
+    "orchestrator:run": "node scripts/multi-agent-orchestrator/supervisor.mjs",
+    "orchestrator:example": "node scripts/multi-agent-orchestrator/supervisor.mjs --task scripts/multi-agent-orchestrator/examples/task.mvp.json",
+    "orchestrator:auto": "node scripts/multi-agent-orchestrator/auto.mjs",
+    "orchestrator:chat": "node scripts/multi-agent-orchestrator/chat.mjs --mode default --approval-policy untrusted",
+    "orchestrator:plan": "node scripts/multi-agent-orchestrator/chat.mjs --mode plan --approval-policy untrusted",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",
     "test:watch": "vitest --watch",
     "test:e2e": "PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright test",
     "test:e2e:ui": "PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright test --ui",
-    "test:e2e:install": "PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright install --with-deps chromium"
+    "test:e2e:install": "PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright install --with-deps chromium",
+    "test:e2e:new": "node scripts/new-e2e-scenario.mjs"
   },
   "dependencies": {
     "@flags-sdk/vercel": "^1.0.1",

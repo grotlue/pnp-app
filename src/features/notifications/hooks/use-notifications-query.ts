@@ -2,9 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import type { ClientSession } from "@/lib/client/session";
+import { queryKeys } from "@/lib/client/query-keys";
 import { getNotificationsQuery } from "@/features/notifications/queries/get-notifications.query";
-
-export const notificationsQueryKey = ["notifications", "list"] as const;
 
 type UseNotificationsQueryOptions = {
   limit?: number;
@@ -15,13 +14,10 @@ export function useNotificationsQuery(
   options?: UseNotificationsQueryOptions,
 ) {
   const limit = options?.limit ?? 100;
+  const token = session?.accessToken ?? "no-session";
 
   return useQuery({
-    queryKey: [
-      ...notificationsQueryKey,
-      session?.accessToken ?? "no-session",
-      limit,
-    ],
+    queryKey: queryKeys.notificationsList(token, limit),
     enabled: Boolean(session),
     queryFn: async () => {
       if (!session) {
