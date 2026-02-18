@@ -80,9 +80,9 @@ When you do not want full routing, call one skill explicitly in the prompt.
 - Orchestrator skill only:
   - `codex --sandbox workspace-write -a untrusted "Use pnp-orchestrator as primary skill. Task: <your task>"`
 - PR review skill only:
-  - `codex exec --sandbox workspace-write --ask-for-approval untrusted "Use pnp-pr-review as primary skill. Review PR 48 and output findings by severity."`
+  - `codex -a untrusted exec --sandbox workspace-write "Use pnp-pr-review as primary skill. Review PR 48 and output findings by severity."`
 - Docs maintainer skill only:
-  - `codex exec --sandbox workspace-write --ask-for-approval untrusted "Use pnp-docs-maintainer as primary skill. Clean up docs links and remove duplication."`
+  - `codex -a untrusted exec --sandbox workspace-write "Use pnp-docs-maintainer as primary skill. Clean up docs links and remove duplication."`
 
 Skill definitions and responsibilities:
 

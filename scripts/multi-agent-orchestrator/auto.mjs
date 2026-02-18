@@ -399,9 +399,10 @@ function buildCodexExecCommand(prompt, outputFile, args) {
   const safePrompt = buildSafeAgentPrompt(prompt);
 
   return [
-    "codex exec",
+    "codex",
+    `-a ${args.approvalPolicy}`,
+    "exec",
     "--sandbox workspace-write",
-    `--ask-for-approval ${args.approvalPolicy}`,
     `--output-last-message ${shellQuote(outputFile)}`,
     shellQuote(safePrompt),
   ].join(" ");
