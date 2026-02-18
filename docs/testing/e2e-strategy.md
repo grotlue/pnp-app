@@ -27,4 +27,4 @@ yarn test:e2e --grep @smoke
 
 ## PR Requirement
 
-Flow-impacting PRs must fill the E2E Coverage Matrix in [`.github/pull_request_template.md`](../../.github/pull_request_template.md).
+Flow-impacting PRs must fill the E2E Coverage Matrix in the [PR template](../../.github/pull_request_template.md).

@@ -28,4 +28,4 @@ Accepted ADRs are not edited for new decisions. Create a new ADR and mark the ol
 
 ## Template
 
-- Use: [`docs/development/decisions/_template.md`](_template.md)
+- Use: [ADR Template](_template.md)

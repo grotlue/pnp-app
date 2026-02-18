@@ -2,7 +2,7 @@
 
 Initial local setup for developers and required CLI tools for project workflows.
 
-For a minimal AI-agent usage flow, see [`docs/development/ai-agent-quickstart.md`](ai-agent-quickstart.md).
+For a minimal AI-agent usage flow, see [AI Agent Quickstart](ai-agent-quickstart.md).
 
 ## Required Tools
 
