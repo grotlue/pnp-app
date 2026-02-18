@@ -1,11 +1,7 @@
 "use client";
 
 import { UiDiv } from "@/components/ui/html-elements";
-import {
-  AppPageBackground,
-  AppPageMain,
-  PageViewport,
-} from "@/components/ui/page-shell";
+import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -146,153 +142,151 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
   const feedback = message || queryError;
 
   return (
-    <AppPageBackground>
-      <AppPageMain maxWidth="5xl">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("ui.notifications.title")}</CardTitle>
-            <CardDescription>{t("ui.notifications.subtitle")}</CardDescription>
-          </CardHeader>
-          <CardContent stack={4}>
-            <UiDiv textStyle="muted-xs" wrapGap={2} contentAlign="center">
-              <StatusBadge
-                label={t("ui.notifications.unread", "Unread")}
-                tone="violet"
-              />
-              <span>{unreadCount}</span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={anyPending || unreadCount === 0}
-                onClick={async () => {
-                  setMessage("");
-                  try {
-                    await markAllReadMutation.mutateAsync();
-                    setMessage(t("ui.feedback.saved"));
-                  } catch (error) {
-                    setMessage(
-                      error instanceof Error
-                        ? error.message
-                        : t("ui.feedback.requestFailed"),
-                    );
-                  }
-                }}
-              >
-                {t("ui.notifications.markAllRead")}
-              </Button>
-            </UiDiv>
-
-            <FeedbackMessage message={feedback} />
-
-            {notificationsQuery.isLoading ? (
-              <UiDiv surface="info-box">{t("ui.loading.section")}</UiDiv>
-            ) : notifications.length === 0 ? (
-              <EmptyState label={t("ui.feedback.empty")} />
-            ) : (
-              <UiDiv stack={2}>
-                {notifications.map((notification) => {
-                  const viewPath = getNotificationViewPath(notification);
-                  const canDecideMembership =
-                    notification.event_type === "campaign_invite" ||
-                    notification.event_type === "campaign_join_request";
-                  const eventLabel = getNotificationEventLabel(notification, t);
-                  const title = getNotificationDisplayTitle(notification, t);
-
-                  return (
-                    <ListItemRow
-                      key={notification.id}
-                      dimmed={notification.is_read}
-                      actions={
-                        <>
-                          {canDecideMembership ? (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={anyPending}
-                              onClick={() =>
-                                void onDecide(notification, "accepted")
-                              }
-                            >
-                              {t("ui.actions.accept")}
-                            </Button>
-                          ) : null}
-                          {canDecideMembership ? (
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              disabled={anyPending}
-                              onClick={() =>
-                                void onDecide(notification, "rejected")
-                              }
-                            >
-                              {t("ui.actions.reject")}
-                            </Button>
-                          ) : null}
-                          {viewPath ? (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={anyPending}
-                              onClick={() => void onView(notification)}
-                            >
-                              {t("ui.actions.view")}
-                            </Button>
-                          ) : null}
-                          {!notification.is_read ? (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              disabled={anyPending}
-                              onClick={() =>
-                                void (async () => {
-                                  setMessage("");
-                                  try {
-                                    await markAsRead(notification);
-                                  } catch (error) {
-                                    setMessage(
-                                      error instanceof Error
-                                        ? error.message
-                                        : t("ui.feedback.requestFailed"),
-                                    );
-                                  }
-                                })()
-                              }
-                            >
-                              {t("ui.notifications.markRead")}
-                            </Button>
-                          ) : null}
-                        </>
-                      }
-                    >
-                      <UiDiv stack={1}>
-                        <UiDiv wrapGap={2} contentAlign="center">
-                          <UiDiv textStyle="sm-medium">{title}</UiDiv>
-                          <StatusBadge
-                            label={eventLabel}
-                            tone={notificationTone(notification)}
-                          />
-                          {!notification.is_read ? (
-                            <StatusBadge
-                              label={t("ui.notifications.unread")}
-                              tone="violet"
-                            />
-                          ) : null}
-                        </UiDiv>
-                        <UiDiv textStyle="muted-xs">
-                          {formatNotificationTimestamp(
-                            notification.created_at,
-                            locale,
-                          )}
-                        </UiDiv>
-                      </UiDiv>
-                    </ListItemRow>
+    <AppPageMain maxWidth="5xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("ui.notifications.title")}</CardTitle>
+          <CardDescription>{t("ui.notifications.subtitle")}</CardDescription>
+        </CardHeader>
+        <CardContent stack={4}>
+          <UiDiv textStyle="muted-xs" wrapGap={2} contentAlign="center">
+            <StatusBadge
+              label={t("ui.notifications.unread", "Unread")}
+              tone="violet"
+            />
+            <span>{unreadCount}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={anyPending || unreadCount === 0}
+              onClick={async () => {
+                setMessage("");
+                try {
+                  await markAllReadMutation.mutateAsync();
+                  setMessage(t("ui.feedback.saved"));
+                } catch (error) {
+                  setMessage(
+                    error instanceof Error
+                      ? error.message
+                      : t("ui.feedback.requestFailed"),
                   );
-                })}
-              </UiDiv>
-            )}
-          </CardContent>
-        </Card>
-      </AppPageMain>
-    </AppPageBackground>
+                }
+              }}
+            >
+              {t("ui.notifications.markAllRead")}
+            </Button>
+          </UiDiv>
+
+          <FeedbackMessage message={feedback} />
+
+          {notificationsQuery.isLoading ? (
+            <UiDiv surface="info-box">{t("ui.loading.section")}</UiDiv>
+          ) : notifications.length === 0 ? (
+            <EmptyState label={t("ui.feedback.empty")} />
+          ) : (
+            <UiDiv stack={2}>
+              {notifications.map((notification) => {
+                const viewPath = getNotificationViewPath(notification);
+                const canDecideMembership =
+                  notification.event_type === "campaign_invite" ||
+                  notification.event_type === "campaign_join_request";
+                const eventLabel = getNotificationEventLabel(notification, t);
+                const title = getNotificationDisplayTitle(notification, t);
+
+                return (
+                  <ListItemRow
+                    key={notification.id}
+                    dimmed={notification.is_read}
+                    actions={
+                      <>
+                        {canDecideMembership ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={anyPending}
+                            onClick={() =>
+                              void onDecide(notification, "accepted")
+                            }
+                          >
+                            {t("ui.actions.accept")}
+                          </Button>
+                        ) : null}
+                        {canDecideMembership ? (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            disabled={anyPending}
+                            onClick={() =>
+                              void onDecide(notification, "rejected")
+                            }
+                          >
+                            {t("ui.actions.reject")}
+                          </Button>
+                        ) : null}
+                        {viewPath ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={anyPending}
+                            onClick={() => void onView(notification)}
+                          >
+                            {t("ui.actions.view")}
+                          </Button>
+                        ) : null}
+                        {!notification.is_read ? (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={anyPending}
+                            onClick={() =>
+                              void (async () => {
+                                setMessage("");
+                                try {
+                                  await markAsRead(notification);
+                                } catch (error) {
+                                  setMessage(
+                                    error instanceof Error
+                                      ? error.message
+                                      : t("ui.feedback.requestFailed"),
+                                  );
+                                }
+                              })()
+                            }
+                          >
+                            {t("ui.notifications.markRead")}
+                          </Button>
+                        ) : null}
+                      </>
+                    }
+                  >
+                    <UiDiv stack={1}>
+                      <UiDiv wrapGap={2} contentAlign="center">
+                        <UiDiv textStyle="sm-medium">{title}</UiDiv>
+                        <StatusBadge
+                          label={eventLabel}
+                          tone={notificationTone(notification)}
+                        />
+                        {!notification.is_read ? (
+                          <StatusBadge
+                            label={t("ui.notifications.unread")}
+                            tone="violet"
+                          />
+                        ) : null}
+                      </UiDiv>
+                      <UiDiv textStyle="muted-xs">
+                        {formatNotificationTimestamp(
+                          notification.created_at,
+                          locale,
+                        )}
+                      </UiDiv>
+                    </UiDiv>
+                  </ListItemRow>
+                );
+              })}
+            </UiDiv>
+          )}
+        </CardContent>
+      </Card>
+    </AppPageMain>
   );
 }

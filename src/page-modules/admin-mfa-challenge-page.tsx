@@ -1,7 +1,7 @@
 "use client";
 
 import { UiDiv } from "@/components/ui/html-elements";
-import { AppPageBackground, AppPageMain } from "@/components/ui/page-shell";
+import { AppPageMain } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import Link from "next/link";
@@ -158,72 +158,68 @@ export function AdminMfaChallengePageView({
     (isAdminUser && adminMfaQuery.isLoading)
   ) {
     return (
-      <AppPageBackground>
-        <AppPageMain maxWidth="4xl">
-          <PageLoadingState label={t("ui.loading.page")} density="section" />
-        </AppPageMain>
-      </AppPageBackground>
+      <AppPageMain maxWidth="4xl">
+        <PageLoadingState label={t("ui.loading.page")} density="section" />
+      </AppPageMain>
     );
   }
 
   return (
-    <AppPageBackground>
-      <AppPageMain maxWidth="md">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("ui.settings.mfaTitle")}</CardTitle>
-            <CardDescription>
-              {t("ui.settings.mfaStepUpRequired")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent stack={3}>
-            {decision.kind === "setup" ? (
-              <>
-                <FeedbackMessage message={t("ui.settings.mfaRequired")} />
-                <UiDiv inlineGap={2} contentAlign="center">
-                  <Link href={appRoutes.settings}>
-                    <Button>{t("ui.menu.settings")}</Button>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    onClick={() => void adminMfaQuery.refetch()}
-                  >
-                    {t("ui.actions.reload")}
-                  </Button>
-                </UiDiv>
-              </>
-            ) : (
-              <>
-                <FormInput
-                  value={code}
-                  placeholder={t("ui.fields.mfaCode")}
-                  onChange={(event) => setCode(event.target.value)}
-                />
+    <AppPageMain maxWidth="md">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("ui.settings.mfaTitle")}</CardTitle>
+          <CardDescription>
+            {t("ui.settings.mfaStepUpRequired")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent stack={3}>
+          {decision.kind === "setup" ? (
+            <>
+              <FeedbackMessage message={t("ui.settings.mfaRequired")} />
+              <UiDiv inlineGap={2} contentAlign="center">
+                <Link href={appRoutes.settings}>
+                  <Button>{t("ui.menu.settings")}</Button>
+                </Link>
                 <Button
-                  disabled={busy || !code || decision.kind !== "challenge"}
-                  onClick={() => void onVerify()}
+                  variant="ghost"
+                  onClick={() => void adminMfaQuery.refetch()}
                 >
-                  {t("ui.actions.verifyMfa")}
+                  {t("ui.actions.reload")}
                 </Button>
-                <UiDiv textStyle="xs">
-                  <TextLink href={appRoutes.home}>
-                    {t("ui.nav.backToLogin")}
-                  </TextLink>
-                </UiDiv>
-              </>
-            )}
+              </UiDiv>
+            </>
+          ) : (
+            <>
+              <FormInput
+                value={code}
+                placeholder={t("ui.fields.mfaCode")}
+                onChange={(event) => setCode(event.target.value)}
+              />
+              <Button
+                disabled={busy || !code || decision.kind !== "challenge"}
+                onClick={() => void onVerify()}
+              >
+                {t("ui.actions.verifyMfa")}
+              </Button>
+              <UiDiv textStyle="xs">
+                <TextLink href={appRoutes.home}>
+                  {t("ui.nav.backToLogin")}
+                </TextLink>
+              </UiDiv>
+            </>
+          )}
 
-            <FeedbackMessage
-              message={
-                message ||
-                (adminMfaQuery.error instanceof Error
-                  ? adminMfaQuery.error.message
-                  : "")
-              }
-            />
-          </CardContent>
-        </Card>
-      </AppPageMain>
-    </AppPageBackground>
+          <FeedbackMessage
+            message={
+              message ||
+              (adminMfaQuery.error instanceof Error
+                ? adminMfaQuery.error.message
+                : "")
+            }
+          />
+        </CardContent>
+      </Card>
+    </AppPageMain>
   );
 }

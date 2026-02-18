@@ -1,11 +1,7 @@
 "use client";
 
 import { UiDiv } from "@/components/ui/html-elements";
-import {
-  AppPageBackground,
-  AppPageMain,
-  PageViewport,
-} from "@/components/ui/page-shell";
+import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import { useEffect, useMemo, useState } from "react";
@@ -89,11 +85,9 @@ export function CampaignDetailPageView({
 
   if (detailQuery.isLoading || !detailQuery.data) {
     return (
-      <AppPageBackground>
-        <AppPageMain maxWidth="7xl">
-          <PageLoadingState label={t("ui.loading.page")} />
-        </AppPageMain>
-      </AppPageBackground>
+      <AppPageMain maxWidth="7xl">
+        <PageLoadingState label={t("ui.loading.page")} />
+      </AppPageMain>
     );
   }
 
@@ -166,7 +160,7 @@ export function CampaignDetailPageView({
   }
 
   return (
-    <AppPageBackground>
+    <>
       <AppPageMain maxWidth="7xl">
         <Card>
           <CardHeader>
@@ -584,6 +578,6 @@ export function CampaignDetailPageView({
       >
         <UiDiv textStyle="sm">{t("ui.campaignDetail.joinConfirm")}</UiDiv>
       </Modal>
-    </AppPageBackground>
+    </>
   );
 }

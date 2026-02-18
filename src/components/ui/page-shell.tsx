@@ -2,8 +2,6 @@ import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { UiDiv, UiMain } from "@/components/ui/html-elements";
 import { cn } from "@/lib/utils/cn";
 
-const APP_PAGE_BACKGROUND_CLASS =
-  "min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]";
 const APP_PAGE_MAIN_BASE_CLASS = "mx-auto w-full px-4 py-8";
 const AUTH_CARD_PAGE_MAIN_CLASS =
   "min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))] px-4 py-12";
@@ -28,11 +26,10 @@ type AppPageShellProps = {
 
 type PageViewportProps = ComponentPropsWithoutRef<"main">;
 
-type AppPageBackgroundProps = ComponentPropsWithoutRef<"div">;
-
 type AppPageMainProps = ComponentPropsWithoutRef<"main"> & {
   maxWidth?: AppPageMaxWidth;
   layout?: "default" | "stack-4" | "grid-4";
+  viewportClassName?: string;
 };
 
 type AuthCardPageShellProps = {
@@ -46,32 +43,28 @@ type AuthCardPageContentProps = ComponentPropsWithoutRef<"div">;
 type AuthRadialPageMainProps = ComponentPropsWithoutRef<"main">;
 type CompactPageViewportProps = ComponentPropsWithoutRef<"main">;
 
-export function AppPageBackground({
-  className,
-  ...props
-}: AppPageBackgroundProps) {
-  return (
-    <UiDiv className={cn(APP_PAGE_BACKGROUND_CLASS, className)} {...props} />
-  );
-}
-
 export function AppPageMain({
+  children,
   className,
+  viewportClassName,
   maxWidth = "7xl",
   layout = "default",
   ...props
 }: AppPageMainProps) {
   return (
-    <UiMain
-      className={cn(
-        APP_PAGE_MAIN_BASE_CLASS,
-        APP_PAGE_MAX_WIDTH_CLASS[maxWidth],
-        layout === "stack-4" ? "space-y-4" : "",
-        layout === "grid-4" ? "grid gap-4" : "",
-        className,
-      )}
-      {...props}
-    />
+    <UiMain className={cn("min-h-screen", viewportClassName)} {...props}>
+      <UiDiv
+        className={cn(
+          APP_PAGE_MAIN_BASE_CLASS,
+          APP_PAGE_MAX_WIDTH_CLASS[maxWidth],
+          layout === "stack-4" ? "space-y-4" : "",
+          layout === "grid-4" ? "grid gap-4" : "",
+          className,
+        )}
+      >
+        {children}
+      </UiDiv>
+    </UiMain>
   );
 }
 
@@ -82,11 +75,13 @@ export function AppPageShell({
   contentClassName,
 }: AppPageShellProps) {
   return (
-    <AppPageBackground className={className}>
-      <AppPageMain maxWidth={maxWidth} className={contentClassName}>
-        {children}
-      </AppPageMain>
-    </AppPageBackground>
+    <AppPageMain
+      maxWidth={maxWidth}
+      viewportClassName={className}
+      className={contentClassName}
+    >
+      {children}
+    </AppPageMain>
   );
 }
 

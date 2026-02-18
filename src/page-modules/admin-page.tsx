@@ -1,11 +1,7 @@
 "use client";
 
 import { UiDiv } from "@/components/ui/html-elements";
-import {
-  AppPageBackground,
-  AppPageMain,
-  PageViewport,
-} from "@/components/ui/page-shell";
+import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import Link from "next/link";
@@ -239,39 +235,35 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
 
   if (mfaRequiredError) {
     return (
-      <AppPageBackground>
-        <AppPageMain maxWidth="4xl">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("ui.settings.mfaTitle")}</CardTitle>
-              <CardDescription>{t("ui.settings.mfaRequired")}</CardDescription>
-            </CardHeader>
-            <CardContent stack={3}>
-              <FeedbackMessage message={mfaRequiredError} />
-              <Link
-                href={`${appRoutes.adminMfaChallenge}?returnTo=${encodeURIComponent(adminSectionRoute)}`}
-              >
-                <Button>{t("ui.actions.verifyMfa")}</Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </AppPageMain>
-      </AppPageBackground>
+      <AppPageMain maxWidth="4xl">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("ui.settings.mfaTitle")}</CardTitle>
+            <CardDescription>{t("ui.settings.mfaRequired")}</CardDescription>
+          </CardHeader>
+          <CardContent stack={3}>
+            <FeedbackMessage message={mfaRequiredError} />
+            <Link
+              href={`${appRoutes.adminMfaChallenge}?returnTo=${encodeURIComponent(adminSectionRoute)}`}
+            >
+              <Button>{t("ui.actions.verifyMfa")}</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </AppPageMain>
     );
   }
 
   if (admin.meQuery.isLoading || meRole !== "admin") {
     return (
-      <AppPageBackground>
-        <AppPageMain maxWidth="7xl">
-          <PageLoadingState label={t("ui.loading.page")} density="section" />
-        </AppPageMain>
-      </AppPageBackground>
+      <AppPageMain maxWidth="7xl">
+        <PageLoadingState label={t("ui.loading.page")} density="section" />
+      </AppPageMain>
     );
   }
 
   return (
-    <AppPageBackground>
+    <>
       <AppPageMain maxWidth="7xl" layout="stack-4">
         <Card>
           <CardHeader>
@@ -946,6 +938,6 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
       >
         <UiDiv textStyle="sm">{t("ui.characters.deleteConfirm")}</UiDiv>
       </Modal>
-    </AppPageBackground>
+    </>
   );
 }

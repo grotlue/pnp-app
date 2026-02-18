@@ -1,11 +1,7 @@
 "use client";
 
 import { UiDiv } from "@/components/ui/html-elements";
-import {
-  AppPageBackground,
-  AppPageMain,
-  PageViewport,
-} from "@/components/ui/page-shell";
+import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import Link from "next/link";
@@ -126,11 +122,9 @@ export function CharacterDetailPageView({
 
   if (detailQuery.isLoading || !detailQuery.data) {
     return (
-      <AppPageBackground>
-        <AppPageMain maxWidth="7xl">
-          <PageLoadingState label={t("ui.loading.page")} />
-        </AppPageMain>
-      </AppPageBackground>
+      <AppPageMain maxWidth="7xl">
+        <PageLoadingState label={t("ui.loading.page")} />
+      </AppPageMain>
     );
   }
 
@@ -235,7 +229,7 @@ export function CharacterDetailPageView({
     : relationshipTargetOptions;
 
   return (
-    <AppPageBackground>
+    <>
       <AppPageMain maxWidth="7xl">
         <Card>
           <CardHeader>
@@ -595,6 +589,6 @@ export function CharacterDetailPageView({
           setDetailContent(null);
         }}
       />
-    </AppPageBackground>
+    </>
   );
 }

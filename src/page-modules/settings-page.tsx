@@ -1,11 +1,7 @@
 "use client";
 
 import { UiDiv } from "@/components/ui/html-elements";
-import {
-  AppPageBackground,
-  AppPageMain,
-  PageViewport,
-} from "@/components/ui/page-shell";
+import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -125,7 +121,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
   }
 
   return (
-    <AppPageBackground>
+    <>
       <AppPageMain maxWidth="4xl" layout="stack-4">
         <Card>
           <CardHeader>
@@ -356,6 +352,6 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
       >
         <UiDiv textStyle="sm">{t("ui.settings.deleteConfirm")}</UiDiv>
       </Modal>
-    </AppPageBackground>
+    </>
   );
 }

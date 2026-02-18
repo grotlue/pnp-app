@@ -1,11 +1,7 @@
 "use client";
 
 import { UiDiv } from "@/components/ui/html-elements";
-import {
-  AppPageBackground,
-  AppPageMain,
-  PageViewport,
-} from "@/components/ui/page-shell";
+import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -113,7 +109,7 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
   }
 
   return (
-    <AppPageBackground>
+    <>
       <AppPageMain maxWidth="7xl">
         <Card>
           <CardHeader>
@@ -314,6 +310,6 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
       >
         <UiDiv textStyle="sm">{t("ui.campaigns.deleteConfirm")}</UiDiv>
       </Modal>
-    </AppPageBackground>
+    </>
   );
 }

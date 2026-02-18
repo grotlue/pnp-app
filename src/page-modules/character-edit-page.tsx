@@ -1,11 +1,7 @@
 "use client";
 
 import { UiDiv } from "@/components/ui/html-elements";
-import {
-  AppPageBackground,
-  AppPageMain,
-  PageViewport,
-} from "@/components/ui/page-shell";
+import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -134,23 +130,21 @@ export function CharacterEditPageView({
     isAdmin(editQuery.data.me.profile.role) && !isOwner;
   if (!canManage) {
     return (
-      <AppPageBackground>
-        <AppPageMain maxWidth="4xl">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("ui.feedback.requestFailed")}</CardTitle>
-              <CardDescription>
-                {t("ui.characterEdit.noPermission")}
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </AppPageMain>
-      </AppPageBackground>
+      <AppPageMain maxWidth="4xl">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("ui.feedback.requestFailed")}</CardTitle>
+            <CardDescription>
+              {t("ui.characterEdit.noPermission")}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </AppPageMain>
     );
   }
 
   return (
-    <AppPageBackground>
+    <>
       <AppPageMain maxWidth="4xl">
         <Card>
           <CardHeader>
@@ -316,6 +310,6 @@ export function CharacterEditPageView({
       >
         <UiDiv textStyle="sm">{t("ui.characters.deleteConfirm")}</UiDiv>
       </Modal>
-    </AppPageBackground>
+    </>
   );
 }

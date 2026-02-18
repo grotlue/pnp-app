@@ -8,6 +8,7 @@ import {
 import { TextLink } from "@/components/ui/text-link";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { FormInput } from "@/components/ui/form-controls";
@@ -201,9 +202,7 @@ export function AuthResetPasswordPageView({
               </Button>
             ) : (
               <Button asChild variant="outline">
-                <TextLink href="/password-reset">
-                  {t("ui.nav.passwordReset")}
-                </TextLink>
+                <Link href="/password-reset">{t("ui.nav.passwordReset")}</Link>
               </Button>
             )}
             <UiDiv textStyle="xs">

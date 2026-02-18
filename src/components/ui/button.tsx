@@ -1,6 +1,6 @@
 import * as React from "react";
+import { Button as BaseButton } from "@base-ui/react/button";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Slot } from "radix-ui";
 
 import { cn } from "@/lib/utils/cn";
 
@@ -24,6 +24,7 @@ const buttonVariants = cva(
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
+        link: "h-auto p-0",
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
         sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
@@ -40,26 +41,55 @@ const buttonVariants = cva(
   },
 );
 
+type BaseButtonProps = React.ComponentProps<typeof BaseButton>;
+
 function Button({
   className,
   variant = "default",
   size = "default",
   asChild = false,
+  children,
+  nativeButton,
   ...props
-}: React.ComponentProps<"button"> &
+}: Omit<BaseButtonProps, "className" | "render"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
+    className?: string;
   }) {
-  const Comp = asChild ? Slot.Root : "button";
+  const classNames = cn(buttonVariants({ variant, size, className }));
+
+  if (asChild) {
+    const child = React.Children.only(children);
+    if (!React.isValidElement(child)) {
+      throw new Error(
+        "Button with asChild expects a single valid React element",
+      );
+    }
+
+    return (
+      <BaseButton
+        data-slot="button"
+        data-variant={variant}
+        data-size={size}
+        className={classNames}
+        nativeButton={nativeButton ?? false}
+        render={child}
+        {...props}
+      />
+    );
+  }
 
   return (
-    <Comp
+    <BaseButton
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={classNames}
+      nativeButton={nativeButton ?? true}
       {...props}
-    />
+    >
+      {children}
+    </BaseButton>
   );
 }
 

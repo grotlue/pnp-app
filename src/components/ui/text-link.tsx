@@ -1,5 +1,6 @@
 import Link, { type LinkProps } from "next/link";
 import type { AnchorHTMLAttributes, ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 
 type TextLinkDisplay = "inline" | "block" | "inline-flex";
@@ -12,11 +13,9 @@ type TextLinkProps = LinkProps &
     size?: TextLinkSize;
   };
 
-const textLinkBaseClassName =
-  "text-sky-700 underline-offset-2 decoration-sky-600 hover:text-sky-800 hover:underline";
-
+const textLinkBaseClassName = "";
 const textLinkDisplayClassName: Record<TextLinkDisplay, string> = {
-  inline: "",
+  inline: "inline",
   block: "block",
   "inline-flex": "inline-flex items-center gap-1",
 };
@@ -34,16 +33,18 @@ export function TextLink({
   ...props
 }: TextLinkProps) {
   return (
-    <Link
+    <Button
+      asChild
+      variant="link"
+      size="link"
       className={cn(
         textLinkBaseClassName,
         textLinkDisplayClassName[display],
         textLinkSizeClassName[size],
         className,
       )}
-      {...props}
     >
-      {children}
-    </Link>
+      <Link {...props}>{children}</Link>
+    </Button>
   );
 }

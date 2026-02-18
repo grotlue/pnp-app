@@ -2,7 +2,6 @@
 
 import { UiDiv } from "@/components/ui/html-elements";
 import {
-  AppPageBackground,
   AppPageMain,
   AuthRadialPageMain,
   AuthCardPageContent,
@@ -309,11 +308,9 @@ export function HomePageView({
 
   if (loggedInQuery.isLoading) {
     return (
-      <AppPageBackground>
-        <AppPageMain maxWidth="7xl">
-          <PageLoadingState label={t("ui.loading.page")} density="section" />
-        </AppPageMain>
-      </AppPageBackground>
+      <AppPageMain maxWidth="7xl">
+        <PageLoadingState label={t("ui.loading.page")} density="section" />
+      </AppPageMain>
     );
   }
 
@@ -376,194 +373,192 @@ export function HomePageView({
   ];
 
   return (
-    <AppPageBackground>
-      <AppPageMain maxWidth="7xl" layout="grid-4">
+    <AppPageMain maxWidth="7xl" layout="grid-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("ui.start.loggedInTitle")}</CardTitle>
+          <CardDescription>{t("ui.start.loggedInSubtitle")}</CardDescription>
+        </CardHeader>
+        <CardContent textStyle="muted-sm">
+          {me
+            ? `${t("ui.start.welcome")}: ${me.profile.username}`
+            : t("ui.start.loggedInSubtitle")}
+        </CardContent>
+      </Card>
+
+      <UiDiv gridPreset="two-md">
         <Card>
           <CardHeader>
-            <CardTitle>{t("ui.start.loggedInTitle")}</CardTitle>
-            <CardDescription>{t("ui.start.loggedInSubtitle")}</CardDescription>
+            <CardTitle>{t("ui.characters.title")}</CardTitle>
           </CardHeader>
-          <CardContent textStyle="muted-sm">
-            {me
-              ? `${t("ui.start.welcome")}: ${me.profile.username}`
-              : t("ui.start.loggedInSubtitle")}
-          </CardContent>
-        </Card>
+          <CardContent stack={3}>
+            <ToggleTabs
+              value={characterTab}
+              onChange={setCharacterTab}
+              options={[
+                {
+                  value: "player",
+                  label: t("ui.labels.characterType.player"),
+                },
+                { value: "npc", label: t("ui.labels.characterType.npc") },
+              ]}
+            />
+            <ListControls
+              searchValue={characterSearchQuery}
+              onSearchChange={setCharacterSearchQuery}
+              searchPlaceholder={t("ui.list.searchCharacters")}
+              sortValue={characterSortBy}
+              onSortChange={(value) =>
+                setCharacterSortBy(value as CharacterListSort)
+              }
+              sortLabel={t("ui.list.sortBy")}
+              sortOptions={characterSortOptions}
+              filterLabel={t("ui.list.filterBy")}
+              filterValue={characterOwnershipFilter}
+              onFilterChange={(value) =>
+                setCharacterOwnershipFilter(value as CharacterOwnershipFilter)
+              }
+              filterOptions={[
+                { value: "all", label: t("ui.labels.ownership.all") },
+                { value: "mine", label: t("ui.labels.ownership.mine") },
+                { value: "others", label: t("ui.labels.ownership.others") },
+              ]}
+            />
 
-        <UiDiv gridPreset="two-md">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("ui.characters.title")}</CardTitle>
-            </CardHeader>
-            <CardContent stack={3}>
-              <ToggleTabs
-                value={characterTab}
-                onChange={setCharacterTab}
-                options={[
-                  {
-                    value: "player",
-                    label: t("ui.labels.characterType.player"),
-                  },
-                  { value: "npc", label: t("ui.labels.characterType.npc") },
-                ]}
-              />
-              <ListControls
-                searchValue={characterSearchQuery}
-                onSearchChange={setCharacterSearchQuery}
-                searchPlaceholder={t("ui.list.searchCharacters")}
-                sortValue={characterSortBy}
-                onSortChange={(value) =>
-                  setCharacterSortBy(value as CharacterListSort)
-                }
-                sortLabel={t("ui.list.sortBy")}
-                sortOptions={characterSortOptions}
-                filterLabel={t("ui.list.filterBy")}
-                filterValue={characterOwnershipFilter}
-                onFilterChange={(value) =>
-                  setCharacterOwnershipFilter(value as CharacterOwnershipFilter)
-                }
-                filterOptions={[
-                  { value: "all", label: t("ui.labels.ownership.all") },
-                  { value: "mine", label: t("ui.labels.ownership.mine") },
-                  { value: "others", label: t("ui.labels.ownership.others") },
-                ]}
-              />
-
-              <UiDiv stack={2}>
-                <UiDiv gridPreset="home-character-header">
-                  <UiDiv>{t("ui.characters.title")}</UiDiv>
-                  <UiDiv>{t("ui.fields.campaign")}</UiDiv>
-                </UiDiv>
-                {pagedCharacters.map((character) => {
-                  const campaign = character.campaign_id
-                    ? (campaignById.get(character.campaign_id) ?? null)
-                    : null;
-
-                  return (
-                    <ListItemRow key={character.id}>
-                      <UiDiv gridPreset="home-character-row">
-                        <UiDiv stack={1}>
-                          <TextLink href={`/characters/${character.id}`}>
-                            <TitleWithPrivacy
-                              title={character.name}
-                              isPrivate={character.is_private}
-                              weight="medium"
-                            />
-                          </TextLink>
-                          <UiDiv wrapGap={2} contentAlign="center">
-                            {character.owner_user_id === currentUserId ? (
-                              <OwnershipBadge mode="mine" t={t} />
-                            ) : null}
-                          </UiDiv>
-                        </UiDiv>
-                        <UiDiv textStyle="muted-xs">
-                          {campaign ? (
-                            <TextLink href={`/campaigns/${campaign.id}`}>
-                              {campaign.title}
-                            </TextLink>
-                          ) : (
-                            "-"
-                          )}
-                        </UiDiv>
-                      </UiDiv>
-                    </ListItemRow>
-                  );
-                })}
-                {searchedAndSortedCharacters.length === 0 ? (
-                  <EmptyState label={t("ui.feedback.empty")} variant="ghost" />
-                ) : null}
+            <UiDiv stack={2}>
+              <UiDiv gridPreset="home-character-header">
+                <UiDiv>{t("ui.characters.title")}</UiDiv>
+                <UiDiv>{t("ui.fields.campaign")}</UiDiv>
               </UiDiv>
+              {pagedCharacters.map((character) => {
+                const campaign = character.campaign_id
+                  ? (campaignById.get(character.campaign_id) ?? null)
+                  : null;
 
-              <PaginationControls
-                page={safeCharacterPage}
-                pageSize={DEFAULT_LIST_PAGE_SIZE}
-                totalItems={searchedAndSortedCharacters.length}
-                previousLabel={t("ui.list.previous")}
-                nextLabel={t("ui.list.next")}
-                pageLabel={t("ui.list.page")}
-                onPageChange={setCharacterPage}
-              />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("ui.campaigns.title")}</CardTitle>
-            </CardHeader>
-            <CardContent stack={3}>
-              <ListControls
-                searchValue={campaignSearchQuery}
-                onSearchChange={setCampaignSearchQuery}
-                searchPlaceholder={t("ui.list.searchCampaigns")}
-                sortValue={campaignSortBy}
-                onSortChange={(value) =>
-                  setCampaignSortBy(value as CampaignListSort)
-                }
-                sortLabel={t("ui.list.sortBy")}
-                sortOptions={campaignSortOptions}
-              />
-
-              <UiDiv stack={2}>
-                <UiDiv gridPreset="home-campaign-header">
-                  <UiDiv>{t("ui.campaigns.title")}</UiDiv>
-                  <UiDiv>{t("ui.admin.ownerLabel")}</UiDiv>
-                  <UiDiv>{t("ui.fields.players")}</UiDiv>
-                </UiDiv>
-                {pagedCampaigns.map((campaign) => (
-                  <ListItemRow key={campaign.id}>
-                    <UiDiv gridPreset="home-campaign-row">
+                return (
+                  <ListItemRow key={character.id}>
+                    <UiDiv gridPreset="home-character-row">
                       <UiDiv stack={1}>
-                        <TextLink href={`/campaigns/${campaign.id}`}>
+                        <TextLink href={`/characters/${character.id}`}>
                           <TitleWithPrivacy
-                            title={campaign.title}
-                            isPrivate={campaign.is_private}
+                            title={character.name}
+                            isPrivate={character.is_private}
                             weight="medium"
                           />
                         </TextLink>
                         <UiDiv wrapGap={2} contentAlign="center">
-                          {campaign.current_user_role ? (
-                            <CampaignRoleBadge
-                              role={campaign.current_user_role}
-                              t={t}
-                            />
+                          {character.owner_user_id === currentUserId ? (
+                            <OwnershipBadge mode="mine" t={t} />
                           ) : null}
                         </UiDiv>
                       </UiDiv>
                       <UiDiv textStyle="muted-xs">
-                        {campaign.owner_role === "admin" ? (
-                          <span>
-                            {campaign.owner_username ?? campaign.owner_user_id}
-                          </span>
-                        ) : (
-                          <TextLink href={`/users/${campaign.owner_user_id}`}>
-                            {campaign.owner_username ?? campaign.owner_user_id}
+                        {campaign ? (
+                          <TextLink href={`/campaigns/${campaign.id}`}>
+                            {campaign.title}
                           </TextLink>
+                        ) : (
+                          "-"
                         )}
-                      </UiDiv>
-                      <UiDiv textStyle="muted-xs">
-                        {campaign.player_count ?? 0}
                       </UiDiv>
                     </UiDiv>
                   </ListItemRow>
-                ))}
-                {searchedAndSortedCampaigns.length === 0 ? (
-                  <EmptyState label={t("ui.feedback.empty")} variant="ghost" />
-                ) : null}
-              </UiDiv>
+                );
+              })}
+              {searchedAndSortedCharacters.length === 0 ? (
+                <EmptyState label={t("ui.feedback.empty")} variant="ghost" />
+              ) : null}
+            </UiDiv>
 
-              <PaginationControls
-                page={safeCampaignPage}
-                pageSize={DEFAULT_LIST_PAGE_SIZE}
-                totalItems={searchedAndSortedCampaigns.length}
-                previousLabel={t("ui.list.previous")}
-                nextLabel={t("ui.list.next")}
-                pageLabel={t("ui.list.page")}
-                onPageChange={setCampaignPage}
-              />
-            </CardContent>
-          </Card>
-        </UiDiv>
-      </AppPageMain>
-    </AppPageBackground>
+            <PaginationControls
+              page={safeCharacterPage}
+              pageSize={DEFAULT_LIST_PAGE_SIZE}
+              totalItems={searchedAndSortedCharacters.length}
+              previousLabel={t("ui.list.previous")}
+              nextLabel={t("ui.list.next")}
+              pageLabel={t("ui.list.page")}
+              onPageChange={setCharacterPage}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("ui.campaigns.title")}</CardTitle>
+          </CardHeader>
+          <CardContent stack={3}>
+            <ListControls
+              searchValue={campaignSearchQuery}
+              onSearchChange={setCampaignSearchQuery}
+              searchPlaceholder={t("ui.list.searchCampaigns")}
+              sortValue={campaignSortBy}
+              onSortChange={(value) =>
+                setCampaignSortBy(value as CampaignListSort)
+              }
+              sortLabel={t("ui.list.sortBy")}
+              sortOptions={campaignSortOptions}
+            />
+
+            <UiDiv stack={2}>
+              <UiDiv gridPreset="home-campaign-header">
+                <UiDiv>{t("ui.campaigns.title")}</UiDiv>
+                <UiDiv>{t("ui.admin.ownerLabel")}</UiDiv>
+                <UiDiv>{t("ui.fields.players")}</UiDiv>
+              </UiDiv>
+              {pagedCampaigns.map((campaign) => (
+                <ListItemRow key={campaign.id}>
+                  <UiDiv gridPreset="home-campaign-row">
+                    <UiDiv stack={1}>
+                      <TextLink href={`/campaigns/${campaign.id}`}>
+                        <TitleWithPrivacy
+                          title={campaign.title}
+                          isPrivate={campaign.is_private}
+                          weight="medium"
+                        />
+                      </TextLink>
+                      <UiDiv wrapGap={2} contentAlign="center">
+                        {campaign.current_user_role ? (
+                          <CampaignRoleBadge
+                            role={campaign.current_user_role}
+                            t={t}
+                          />
+                        ) : null}
+                      </UiDiv>
+                    </UiDiv>
+                    <UiDiv textStyle="muted-xs">
+                      {campaign.owner_role === "admin" ? (
+                        <span>
+                          {campaign.owner_username ?? campaign.owner_user_id}
+                        </span>
+                      ) : (
+                        <TextLink href={`/users/${campaign.owner_user_id}`}>
+                          {campaign.owner_username ?? campaign.owner_user_id}
+                        </TextLink>
+                      )}
+                    </UiDiv>
+                    <UiDiv textStyle="muted-xs">
+                      {campaign.player_count ?? 0}
+                    </UiDiv>
+                  </UiDiv>
+                </ListItemRow>
+              ))}
+              {searchedAndSortedCampaigns.length === 0 ? (
+                <EmptyState label={t("ui.feedback.empty")} variant="ghost" />
+              ) : null}
+            </UiDiv>
+
+            <PaginationControls
+              page={safeCampaignPage}
+              pageSize={DEFAULT_LIST_PAGE_SIZE}
+              totalItems={searchedAndSortedCampaigns.length}
+              previousLabel={t("ui.list.previous")}
+              nextLabel={t("ui.list.next")}
+              pageLabel={t("ui.list.page")}
+              onPageChange={setCampaignPage}
+            />
+          </CardContent>
+        </Card>
+      </UiDiv>
+    </AppPageMain>
   );
 }
