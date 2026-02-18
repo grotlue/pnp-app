@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import {
+  TURNSTILE_EXPLICIT_RENDER_SCRIPT_URL,
+  TURNSTILE_SCRIPT_ELEMENT_ID,
+} from "@/lib/security/constants";
 import { cn } from "@/lib/utils/cn";
 
 type TurnstileWidgetProps = {
@@ -115,9 +119,7 @@ function ensureTurnstileScript(): Promise<void> {
   }
 
   const promise = new Promise<void>((resolve, reject) => {
-    const existingScript = document.getElementById(
-      "cloudflare-turnstile-script",
-    );
+    const existingScript = document.getElementById(TURNSTILE_SCRIPT_ELEMENT_ID);
     if (existingScript) {
       void waitForExistingTurnstileScript(existingScript as HTMLScriptElement)
         .then(resolve)
@@ -126,9 +128,8 @@ function ensureTurnstileScript(): Promise<void> {
     }
 
     const script = document.createElement("script");
-    script.id = "cloudflare-turnstile-script";
-    script.src =
-      "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    script.id = TURNSTILE_SCRIPT_ELEMENT_ID;
+    script.src = TURNSTILE_EXPLICIT_RENDER_SCRIPT_URL;
     script.async = true;
     script.defer = true;
     script.onload = () => {

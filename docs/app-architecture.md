@@ -32,6 +32,7 @@ src/
     client/                     # client session/api helpers
     logic/                      # shared pure helper logic (e.g. hasItems)
     features/                   # runtime feature flags
+    security/                   # shared security constants (origins/script URLs)
     i18n/                       # localization helpers
     supabase/                   # browser supabase setup
     utils/
@@ -57,6 +58,7 @@ src/
 - Pure business rules live in `features/*/logic`.
 - Route/page modules orchestrate hooks and presentation.
 - Features do not import from `src/app`.
+- Reusable literals (origins, CSP/header names, enum-like mode strings) are defined in domain `constants.ts` modules and imported where used instead of repeating inline string literals.
 
 ## React Query
 
@@ -89,6 +91,7 @@ src/
 - API responses are marked `no-store` via shared HTTP/security helpers.
 - Access tokens are accepted from bearer headers and secure HttpOnly cookies.
 - Security headers (including CSP) are applied centrally via `src/proxy.ts`.
+- CSP/header literals are centralized in `src/server/security/constants.ts` and shared security origins/script URLs in `src/lib/security/constants.ts`.
 - New public-schema tables must enable RLS in the same migration.
 - Admin APIs enforce role checks plus MFA `aal2` session level in preview/production by default.
 - Auth CAPTCHA support is centralized and env-driven (`AUTH_CAPTCHA_MODE`, `NEXT_PUBLIC_AUTH_CAPTCHA_MODE`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`).
@@ -131,6 +134,8 @@ src/
   - Toolbar script injected in `src/app/layout.tsx`
   - Next plugin enabled in `next.config.ts`
   - Flags discovery endpoint at `src/app/.well-known/vercel/flags/route.ts`
+  - Production default is disabled; enable via `NEXT_PUBLIC_ENABLE_VERCEL_TOOLBAR=true`
+  - CSP in `src/proxy.ts` allows `https://vercel.live` (`script-src`, `connect-src`, `frame-src`) only when toolbar is enabled
 - Optional overrides:
   - `FEATURE_FLAGS_ENABLE` (comma-separated)
   - `FEATURE_FLAGS_DISABLE` (comma-separated)

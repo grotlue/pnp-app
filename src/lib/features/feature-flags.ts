@@ -2,9 +2,18 @@ import { vercelAdapter } from "@flags-sdk/vercel";
 import { getProviderData, flag, type Flag } from "flags/next";
 import { getProviderData as getVercelProviderData } from "@flags-sdk/vercel";
 import { mergeProviderData, type ProviderData } from "flags";
+import {
+  FEATURE_FLAG_PROVIDER_LIST,
+  FEATURE_FLAG_PROVIDERS,
+  NODE_ENV_VALUES,
+  RUNTIME_ENVIRONMENT_LIST,
+  RUNTIME_ENVIRONMENTS,
+  type FeatureFlagProvider as SharedFeatureFlagProvider,
+  type RuntimeEnvironment as SharedRuntimeEnvironment,
+} from "./constants";
 
-export type RuntimeEnvironment = "development" | "preview" | "production";
-export type FeatureFlagProvider = "rules" | "vercel";
+export type RuntimeEnvironment = SharedRuntimeEnvironment;
+export type FeatureFlagProvider = SharedFeatureFlagProvider;
 export type FeatureFlag = "selfRegistration";
 
 type FeatureRule = {
@@ -22,8 +31,8 @@ const featureRules: Record<FeatureFlag, FeatureRule> = {
 const knownFeatureFlags = new Set<FeatureFlag>(
   Object.keys(featureRules) as FeatureFlag[],
 );
-const knownProviders = new Set<FeatureFlagProvider>(["rules", "vercel"]);
-const isTestEnvironment = process.env.NODE_ENV === "test";
+const knownProviders = new Set<FeatureFlagProvider>(FEATURE_FLAG_PROVIDER_LIST);
+const isTestEnvironment = process.env.NODE_ENV === NODE_ENV_VALUES.test;
 const flagOptions = [
   { label: "Disabled", value: false },
   { label: "Enabled", value: true },
@@ -36,12 +45,8 @@ function normalizeRuntimeEnvironment(
     return null;
   }
 
-  if (
-    value === "development" ||
-    value === "preview" ||
-    value === "production"
-  ) {
-    return value;
+  if (RUNTIME_ENVIRONMENT_LIST.includes(value as RuntimeEnvironment)) {
+    return value as RuntimeEnvironment;
   }
 
   return null;
@@ -150,7 +155,7 @@ export function resolveRuntimeEnvironment(): RuntimeEnvironment {
     return vercelEnvironment;
   }
 
-  return "development";
+  return RUNTIME_ENVIRONMENTS.development;
 }
 
 export function resolveFeatureFlagProvider(): FeatureFlagProvider {
@@ -163,10 +168,10 @@ export function resolveFeatureFlagProvider(): FeatureFlagProvider {
 
   // Vercel flags-client uses the FLAGS connection string environment variable.
   if (process.env.FLAGS) {
-    return "vercel";
+    return FEATURE_FLAG_PROVIDERS.vercel;
   }
 
-  return "rules";
+  return FEATURE_FLAG_PROVIDERS.rules;
 }
 
 function getActiveFeatureFlags(): Record<FeatureFlag, Flag<boolean, unknown>> {
