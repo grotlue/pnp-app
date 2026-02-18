@@ -38,6 +38,7 @@ E2E tests verify critical user-visible happy paths end-to-end (UI + API + auth/s
 
 - Smoke E2E runs on every PR in CI (`e2e_smoke` job).
 - Regression E2E runs only when the PR has label `e2e-regression` (`e2e_regression` job).
+- High-risk PRs are auto-labeled `e2e-regression` via `E2E Regression Auto-Label` workflow.
 
 ## Authoring Rules
 
@@ -49,6 +50,26 @@ E2E tests verify critical user-visible happy paths end-to-end (UI + API + auth/s
 ## PR Mapping Requirement
 
 For flow-impacting PRs, map acceptance criteria/user-flow items to scenario IDs in the PR `E2E Coverage Matrix`.
+
+## New Scenario Scaffold
+
+- Generate a consistent scenario skeleton:
+  - `yarn test:e2e:new --domain campaigns --slug request-join --level regression --description "requests to join a campaign"`
+- Generator contract:
+  - Scenario ID: `FLOW-<DOMAIN>-<SLUG>`
+  - Required tags: `@smoke` or `@regression` plus domain tag
+  - Output path defaults to `tests/e2e/<level>-<domain>-<slug>.spec.ts`
+
+## Flaky Failure Debugging
+
+- In CI artifact tab, download:
+  - `playwright-artifacts-smoke-attempt-<n>` or `playwright-artifacts-regression-attempt-<n>`
+- Inspect `playwright-report/index.html` for failed step timeline and locator snapshots.
+- Inspect retry context in `test-results/**/error-context.md`.
+- Open traces locally:
+  - `npx playwright show-trace test-results/<scenario>/trace.zip`
+- Check video evidence:
+  - `test-results/**/video.webm`
 
 ## Current Smoke Baseline
 
