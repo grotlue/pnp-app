@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { ClientSession } from "@/lib/client/session";
 import type { CampaignFormValues } from "../types";
-import { campaignsQueryKey } from "./use-campaigns-query";
+import { queryKeys } from "@/lib/client/query-keys";
 import { createCampaignMutation } from "../queries/create-campaign.mutation";
 import { updateCampaignMutation } from "../queries/update-campaign.mutation";
 import { deleteCampaignMutation } from "../queries/delete-campaign.mutation";
@@ -12,7 +12,7 @@ export function useCampaignMutations(session: ClientSession | null) {
   const queryClient = useQueryClient();
 
   async function invalidateCampaigns() {
-    await queryClient.invalidateQueries({ queryKey: campaignsQueryKey });
+    await queryClient.invalidateQueries({ queryKey: queryKeys.campaigns() });
   }
 
   const createMutation = useMutation({
