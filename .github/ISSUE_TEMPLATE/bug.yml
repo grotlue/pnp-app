@@ -2,7 +2,7 @@ name: Bug
 description: Report a defect with reproducible flow, impact, and fix acceptance criteria.
 title: "bug: "
 labels:
-  - type:bug
+  - "type:bug"
 body:
   - type: markdown
     attributes:
@@ -123,7 +123,7 @@ body:
     id: workaround
     attributes:
       label: Temporary workaround
-      description: Optional: any known user workaround.
+      description: "Optional: any known user workaround."
       placeholder: |
         Users can temporarily ...
 
