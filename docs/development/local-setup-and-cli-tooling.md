@@ -2,6 +2,8 @@
 
 Initial local setup for developers and required CLI tools for project workflows.
 
+For a minimal AI-agent usage flow, see `docs/development/ai-agent-quickstart.md`.
+
 ## Required Tools
 
 | Tool              | Why it is needed                  | Check                |

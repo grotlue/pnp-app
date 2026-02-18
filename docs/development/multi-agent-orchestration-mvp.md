@@ -3,6 +3,7 @@
 This is a practical external-orchestration MVP for staged worker execution with contracts and a merge gate.
 
 Initial local prerequisites are documented in `docs/development/local-setup-and-cli-tooling.md`.
+Developer quickstart for AI-agent usage is in `docs/development/ai-agent-quickstart.md`.
 
 ## Location
 

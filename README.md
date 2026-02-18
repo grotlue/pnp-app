@@ -22,7 +22,5 @@ yarn build
 
 ## Documentation
 
-- Development index: `docs/development/README.md`
-- Testing index: `docs/testing/README.md`
-- Architecture: `docs/app-architecture.md`
-- Agent-only workflow and constraints: `AGENTS.md`
+- Documentation hub: `docs/README.md`
+- AI agent workflow rules: `AGENTS.md`
