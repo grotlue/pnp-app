@@ -1,0 +1,107 @@
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+
+import { cn } from "@/lib/utils/cn";
+import { Separator } from "@/components/ui/separator";
+
+const buttonGroupVariants = cva(
+  "flex w-fit items-stretch [&>*]:focus-visible:z-10 [&>*]:focus-visible:relative [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1 has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-r-md has-[>[data-slot=button-group]]:gap-2",
+  {
+    variants: {
+      orientation: {
+        horizontal:
+          "[&>*:not(:first-child)]:rounded-l-none [&>*:not(:first-child)]:border-l-0 [&>*:not(:last-child)]:rounded-r-none",
+        vertical:
+          "flex-col [&>*:not(:first-child)]:rounded-t-none [&>*:not(:first-child)]:border-t-0 [&>*:not(:last-child)]:rounded-b-none",
+      },
+    },
+    defaultVariants: {
+      orientation: "horizontal",
+    },
+  },
+);
+
+function ButtonGroup({
+  className,
+  orientation,
+  ...props
+}: React.ComponentProps<"div"> & VariantProps<typeof buttonGroupVariants>) {
+  return (
+    <div
+      role="group"
+      data-slot="button-group"
+      data-orientation={orientation}
+      className={cn(buttonGroupVariants({ orientation }), className)}
+      {...props}
+    />
+  );
+}
+
+function ButtonGroupText({
+  className,
+  asChild = false,
+  children,
+  ...props
+}: React.ComponentProps<"div"> & {
+  asChild?: boolean;
+}) {
+  const classes = cn(
+    "bg-muted flex items-center gap-2 rounded-md border px-4 text-sm font-medium shadow-xs [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
+    className,
+  );
+
+  if (asChild) {
+    const child = React.Children.only(children);
+    if (!React.isValidElement(child)) {
+      throw new Error(
+        "ButtonGroupText with asChild expects a single valid React element",
+      );
+    }
+
+    return React.cloneElement(
+      child as React.ReactElement<{
+        className?: string;
+        children?: React.ReactNode;
+        [key: string]: unknown;
+      }>,
+      {
+        ...props,
+        className: cn(
+          classes,
+          (child.props as { className?: string }).className,
+        ),
+      },
+    );
+  }
+
+  return (
+    <div className={classes} {...props}>
+      {children}
+    </div>
+  );
+}
+
+function ButtonGroupSeparator({
+  className,
+  orientation = "vertical",
+  ...props
+}: React.ComponentProps<typeof Separator>) {
+  return (
+    <Separator
+      data-slot="button-group-separator"
+      orientation={orientation}
+      className={cn(
+        "bg-input relative !m-0 self-stretch data-[orientation=vertical]:h-auto",
+        className,
+      )}
+      {...props}
+    />
+  );
+}
+
+export {
+  ButtonGroup,
+  ButtonGroupSeparator,
+  ButtonGroupText,
+  buttonGroupVariants,
+};

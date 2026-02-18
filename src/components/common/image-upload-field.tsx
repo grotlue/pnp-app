@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import { type ChangeEvent, useEffect, useId, useRef, useState } from "react";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { MAX_IMAGE_UPLOAD_SIZE_BYTES } from "@/lib/storage/image-upload";
 import { cn } from "@/lib/utils/cn";
 
@@ -198,24 +200,26 @@ export function ImageUploadField({
         {label}
       </label>
       <div className="grid gap-3 md:grid-cols-[200px_1fr]">
-        <div className="border-border bg-muted/30 overflow-hidden rounded-lg border">
-          {previewUrl ? (
-            <Image
-              src={previewUrl}
-              alt={previewAlt}
-              width={200}
-              height={200}
-              className="h-[200px] w-full object-cover"
-              unoptimized
-            />
-          ) : (
-            <div className="text-muted-foreground flex h-[200px] items-center justify-center px-3 text-center text-xs">
-              {emptyLabel}
-            </div>
-          )}
+        <div className="border-border bg-muted/30 w-full max-w-[200px] overflow-hidden rounded-lg border">
+          <AspectRatio ratio={1}>
+            {previewUrl ? (
+              <Image
+                src={previewUrl}
+                alt={previewAlt}
+                fill
+                sizes="200px"
+                className="object-cover"
+                unoptimized
+              />
+            ) : (
+              <div className="text-muted-foreground flex h-full items-center justify-center px-3 text-center text-xs">
+                {emptyLabel}
+              </div>
+            )}
+          </AspectRatio>
         </div>
         <div className="space-y-2">
-          <input
+          <Input
             id={inputId}
             ref={fileInputRef}
             type="file"

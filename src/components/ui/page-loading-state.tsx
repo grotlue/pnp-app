@@ -1,4 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 
 type PageLoadingStateProps = {
   label: string;
@@ -11,18 +14,23 @@ export function PageLoadingState({
   className = "",
   density = "default",
 }: PageLoadingStateProps) {
+  const skeletonRows =
+    density === "default" ? [1, 2, 3] : density === "section" ? [1, 2] : [1];
+
   return (
     <Card>
-      <CardContent
-        className={`text-muted-foreground ${
-          density === "default"
-            ? "py-8 text-sm"
-            : density === "section"
-              ? "py-6 text-sm"
-              : "py-3 text-xs"
-        } ${className}`.trim()}
-      >
-        {label}
+      <CardContent className={className}>
+        <Empty>
+          <EmptyHeader>
+            <Spinner />
+            <EmptyDescription>{label}</EmptyDescription>
+          </EmptyHeader>
+          <div>
+            {skeletonRows.map((row) => (
+              <Skeleton key={row} />
+            ))}
+          </div>
+        </Empty>
       </CardContent>
     </Card>
   );

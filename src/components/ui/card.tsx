@@ -2,6 +2,18 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils/cn";
 
+type CardContentProps = React.ComponentProps<"div"> & {
+  stack?: number;
+  textStyle?: string;
+  paddingTop?: number;
+  paddingY?: number;
+  paddingX?: number;
+};
+
+type CardFooterProps = React.ComponentProps<"div"> & {
+  layout?: string;
+};
+
 function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -61,57 +73,35 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-type CardContentProps = React.ComponentProps<"div"> & {
-  stack?: 2 | 3 | 4;
-  textStyle?: "sm" | "muted-sm";
-  paddingY?: 8;
-  paddingTop?: 6;
-};
-
 function CardContent({
   className,
-  stack,
-  textStyle,
-  paddingY,
-  paddingTop,
+  stack: _stack,
+  textStyle: _textStyle,
+  paddingTop: _paddingTop,
+  paddingY: _paddingY,
+  paddingX: _paddingX,
   ...props
 }: CardContentProps) {
+  void _stack;
+  void _textStyle;
+  void _paddingTop;
+  void _paddingY;
+  void _paddingX;
   return (
     <div
       data-slot="card-content"
-      className={cn(
-        "px-6",
-        stack === 2 ? "space-y-2" : "",
-        stack === 3 ? "space-y-3" : "",
-        stack === 4 ? "space-y-4" : "",
-        textStyle === "sm" ? "text-sm" : "",
-        textStyle === "muted-sm" ? "text-muted-foreground text-sm" : "",
-        paddingY === 8 ? "py-8" : "",
-        paddingTop === 6 ? "pt-6" : "",
-        className,
-      )}
+      className={cn("px-6", className)}
       {...props}
     />
   );
 }
 
-type CardFooterProps = React.ComponentProps<"div"> & {
-  layout?: "default" | "column-stretch";
-};
-
-function CardFooter({
-  className,
-  layout = "default",
-  ...props
-}: CardFooterProps) {
+function CardFooter({ className, layout: _layout, ...props }: CardFooterProps) {
+  void _layout;
   return (
     <div
       data-slot="card-footer"
-      className={cn(
-        "flex items-center px-6 [.border-t]:pt-6",
-        layout === "column-stretch" ? "flex-col items-stretch gap-2" : "",
-        className,
-      )}
+      className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
       {...props}
     />
   );

@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Pencil, Trash2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { ConfirmAlertDialog } from "@/components/ui/confirm-alert-dialog";
 import {
   FormInput,
   FormSelect,
@@ -342,45 +343,36 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
         </UiDiv>
       </Modal>
 
-      <Modal
+      <ConfirmAlertDialog
         open={deleteTarget !== null}
         title={t("ui.characters.deleteTitle")}
-        onClose={() => setDeleteTarget(null)}
-        footer={
-          <>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-              {t("ui.actions.close")}
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={anyPending || !deleteTarget}
-              onClick={() =>
-                void (async () => {
-                  if (!deleteTarget) {
-                    return;
-                  }
+        description={t("ui.characters.deleteConfirm")}
+        cancelLabel={t("ui.actions.close")}
+        confirmLabel={t("ui.actions.confirmDelete")}
+        confirmDisabled={anyPending || !deleteTarget}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTarget(null);
+          }
+        }}
+        onConfirm={async () => {
+          if (!deleteTarget) {
+            return;
+          }
 
-                  try {
-                    await deleteMutation.mutateAsync(deleteTarget.id);
-                    setDeleteTarget(null);
-                    setMessage(t("ui.feedback.deleted"));
-                  } catch (error) {
-                    setMessage(
-                      error instanceof Error
-                        ? error.message
-                        : t("ui.feedback.requestFailed"),
-                    );
-                  }
-                })()
-              }
-            >
-              {t("ui.actions.confirmDelete")}
-            </Button>
-          </>
-        }
-      >
-        <UiDiv textStyle="sm">{t("ui.characters.deleteConfirm")}</UiDiv>
-      </Modal>
+          try {
+            await deleteMutation.mutateAsync(deleteTarget.id);
+            setDeleteTarget(null);
+            setMessage(t("ui.feedback.deleted"));
+          } catch (error) {
+            setMessage(
+              error instanceof Error
+                ? error.message
+                : t("ui.feedback.requestFailed"),
+            );
+          }
+        }}
+      />
     </>
   );
 }

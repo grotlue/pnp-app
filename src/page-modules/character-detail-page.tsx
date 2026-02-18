@@ -15,6 +15,7 @@ import { ListItemRow } from "@/components/ui/list-item-row";
 import { PageLoadingState } from "@/components/ui/page-loading-state";
 import { Button } from "@/components/ui/button";
 import { AvatarImage } from "@/components/ui/avatar-image";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   Card,
   CardContent,
@@ -255,9 +256,11 @@ export function CharacterDetailPageView({
                 {avatarUrl ? (
                   <AvatarImage src={avatarUrl} alt={character.name} />
                 ) : (
-                  <UiDiv surface="avatar-fallback">
-                    {t("ui.characterDetail.noImage")}
-                  </UiDiv>
+                  <AspectRatio ratio={1}>
+                    <UiDiv surface="avatar-fallback">
+                      {t("ui.characterDetail.noImage")}
+                    </UiDiv>
+                  </AspectRatio>
                 )}
               </UiDiv>
               <UiDiv stack={2} textStyle="sm">

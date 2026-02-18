@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { cn } from "@/lib/utils/cn";
 
 type ListItemRowProps = {
   children: ReactNode;
@@ -12,18 +11,13 @@ export function ListItemRow({
   children,
   actions,
   className,
-  dimmed = false,
+  dimmed: _dimmed = false,
 }: ListItemRowProps) {
+  void _dimmed;
   return (
-    <div
-      className={cn(
-        "border-border bg-background/70 grid gap-2 rounded-lg border p-3 md:grid-cols-[1fr_auto]",
-        dimmed ? "opacity-80" : "",
-        className,
-      )}
-    >
+    <div className={className}>
       {children}
-      {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+      {actions ? <div>{actions}</div> : null}
     </div>
   );
 }

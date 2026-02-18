@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type ToggleTabOption<T extends string> = {
   value: T;
@@ -17,17 +17,14 @@ export function ToggleTabs<T extends string>({
   onChange,
 }: ToggleTabsProps<T>) {
   return (
-    <div className="flex flex-wrap gap-2">
-      {options.map((option) => (
-        <Button
-          key={option.value}
-          size="sm"
-          variant={value === option.value ? "default" : "outline"}
-          onClick={() => onChange(option.value)}
-        >
-          {option.label}
-        </Button>
-      ))}
-    </div>
+    <Tabs value={value} onValueChange={(next) => onChange(next as T)}>
+      <TabsList variant="line">
+        {options.map((option) => (
+          <TabsTrigger key={option.value} value={option.value}>
+            {option.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   );
 }

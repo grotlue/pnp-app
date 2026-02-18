@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils/cn";
+import { Empty, EmptyDescription, EmptyHeader } from "@/components/ui/empty";
 
 type EmptyStateProps = {
   label: string;
@@ -9,20 +9,14 @@ type EmptyStateProps = {
 export function EmptyState({
   label,
   className,
-  variant = "default",
+  variant: _variant = "default",
 }: EmptyStateProps) {
+  void _variant;
   return (
-    <div
-      className={cn(
-        variant === "default"
-          ? "border-border bg-background/70 text-muted-foreground rounded-lg border p-3 text-xs"
-          : variant === "panel"
-            ? "text-muted-foreground bg-background p-3"
-            : "text-muted-foreground border-0 bg-transparent p-0",
-        className,
-      )}
-    >
-      {label}
-    </div>
+    <Empty className={className}>
+      <EmptyHeader>
+        <EmptyDescription>{label}</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   );
 }

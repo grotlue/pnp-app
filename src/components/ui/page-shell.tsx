@@ -1,21 +1,7 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { UiDiv, UiMain } from "@/components/ui/html-elements";
-import { cn } from "@/lib/utils/cn";
 
-const APP_PAGE_MAIN_BASE_CLASS = "mx-auto w-full px-4 py-8";
-const AUTH_CARD_PAGE_MAIN_CLASS =
-  "min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))] px-4 py-12";
-const AUTH_RADIAL_PAGE_MAIN_CLASS =
-  "min-h-screen bg-[radial-gradient(circle_at_12%_20%,oklch(0.94_0.06_80),transparent_40%),radial-gradient(circle_at_90%_25%,oklch(0.93_0.04_185),transparent_35%)] px-4 py-12";
-
-const APP_PAGE_MAX_WIDTH_CLASS = {
-  md: "max-w-md",
-  "4xl": "max-w-4xl",
-  "5xl": "max-w-5xl",
-  "7xl": "max-w-7xl",
-} as const;
-
-type AppPageMaxWidth = keyof typeof APP_PAGE_MAX_WIDTH_CLASS;
+type AppPageMaxWidth = "md" | "4xl" | "5xl" | "7xl";
 
 type AppPageShellProps = {
   children: ReactNode;
@@ -47,23 +33,15 @@ export function AppPageMain({
   children,
   className,
   viewportClassName,
-  maxWidth = "7xl",
-  layout = "default",
+  maxWidth: _maxWidth = "7xl",
+  layout: _layout = "default",
   ...props
 }: AppPageMainProps) {
+  void _maxWidth;
+  void _layout;
   return (
-    <UiMain className={cn("min-h-screen", viewportClassName)} {...props}>
-      <UiDiv
-        className={cn(
-          APP_PAGE_MAIN_BASE_CLASS,
-          APP_PAGE_MAX_WIDTH_CLASS[maxWidth],
-          layout === "stack-4" ? "space-y-4" : "",
-          layout === "grid-4" ? "grid gap-4" : "",
-          className,
-        )}
-      >
-        {children}
-      </UiDiv>
+    <UiMain className={viewportClassName} {...props}>
+      <UiDiv className={className}>{children}</UiDiv>
     </UiMain>
   );
 }
@@ -86,19 +64,14 @@ export function AppPageShell({
 }
 
 export function PageViewport({ className, ...props }: PageViewportProps) {
-  return <UiMain className={cn("min-h-screen", className)} {...props} />;
+  return <UiMain className={className} {...props} />;
 }
 
 export function CompactPageViewport({
   className,
   ...props
 }: CompactPageViewportProps) {
-  return (
-    <UiMain
-      className={cn("mx-auto min-h-screen w-full max-w-3xl p-4", className)}
-      {...props}
-    />
-  );
+  return <UiMain className={className} {...props} />;
 }
 
 export function AuthCardPageShell({
@@ -119,25 +92,19 @@ export function AuthCardPageMain({
   className,
   ...props
 }: AuthCardPageMainProps) {
-  return (
-    <UiMain className={cn(AUTH_CARD_PAGE_MAIN_CLASS, className)} {...props} />
-  );
+  return <UiMain className={className} {...props} />;
 }
 
 export function AuthRadialPageMain({
   className,
   ...props
 }: AuthRadialPageMainProps) {
-  return (
-    <UiMain className={cn(AUTH_RADIAL_PAGE_MAIN_CLASS, className)} {...props} />
-  );
+  return <UiMain className={className} {...props} />;
 }
 
 export function AuthCardPageContent({
   className,
   ...props
 }: AuthCardPageContentProps) {
-  return (
-    <UiDiv className={cn("mx-auto w-full max-w-md", className)} {...props} />
-  );
+  return <UiDiv className={className} {...props} />;
 }

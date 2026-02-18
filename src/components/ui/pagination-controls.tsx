@@ -1,4 +1,10 @@
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
 
 type PaginationControlsProps = {
   page: number;
@@ -27,30 +33,36 @@ export function PaginationControls({
   const safePage = Math.min(Math.max(page, 1), totalPages);
 
   return (
-    <div className="border-border bg-background/70 text-muted-foreground flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2 text-xs">
+    <div>
       <div>
         {pageLabel}: {safePage} / {totalPages}
       </div>
-      <div className="flex items-center gap-2">
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={safePage <= 1}
-          onClick={() => onPageChange(safePage - 1)}
-        >
-          {previousLabel}
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={safePage >= totalPages}
-          onClick={() => onPageChange(safePage + 1)}
-        >
-          {nextLabel}
-        </Button>
-      </div>
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <ButtonGroup>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={safePage <= 1}
+                onClick={() => onPageChange(safePage - 1)}
+              >
+                {previousLabel}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={safePage >= totalPages}
+                onClick={() => onPageChange(safePage + 1)}
+              >
+                {nextLabel}
+              </Button>
+            </ButtonGroup>
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </div>
   );
 }

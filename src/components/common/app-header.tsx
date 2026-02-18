@@ -9,6 +9,12 @@ import {
   IconActionLinkButton,
 } from "@/components/ui/icon-action-button";
 import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from "@/components/ui/navigation-menu";
+import {
   clearLocaleCookie,
   readLocaleCookie,
   setLocaleCookie,
@@ -80,26 +86,25 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
         <Link href={appRoutes.home} className="mr-2 font-semibold">
           pnp-app
         </Link>
-        <nav className="flex flex-wrap items-center gap-2">
-          {appNavigationRoutes.map((item) => {
-            const active =
-              currentPath === item.href ||
-              currentPath.startsWith(`${item.href}/`);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`rounded-md px-3 py-1.5 text-sm ${
-                  active
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-foreground"
-                }`}
-              >
-                {t(item.key)}
-              </Link>
-            );
-          })}
-        </nav>
+        <NavigationMenu
+          viewport={false}
+          className="max-w-full flex-1 justify-start"
+        >
+          <NavigationMenuList className="flex-wrap justify-start gap-2">
+            {appNavigationRoutes.map((item) => {
+              const active =
+                currentPath === item.href ||
+                currentPath.startsWith(`${item.href}/`);
+              return (
+                <NavigationMenuItem key={item.href}>
+                  <NavigationMenuLink asChild active={active}>
+                    <Link href={item.href}>{t(item.key)}</Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              );
+            })}
+          </NavigationMenuList>
+        </NavigationMenu>
         <div className="ml-auto flex items-center gap-1">
           <IconActionButton
             label={

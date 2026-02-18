@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { ListControls } from "@/components/ui/list-controls";
+import { ConfirmAlertDialog } from "@/components/ui/confirm-alert-dialog";
 import { Modal } from "@/components/ui/modal";
 import { PageLoadingState } from "@/components/ui/page-loading-state";
 import { PaginationControls } from "@/components/ui/pagination-controls";
@@ -272,44 +273,37 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
         />
       </Modal>
 
-      <Modal
+      <ConfirmAlertDialog
         open={deleteCampaign !== null}
         title={t("ui.campaigns.deleteTitle")}
-        onClose={() => setDeleteCampaign(null)}
-        footer={
-          <>
-            <Button variant="outline" onClick={() => setDeleteCampaign(null)}>
-              {t("ui.actions.close")}
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={anyPending || !deleteCampaign}
-              onClick={async () => {
-                if (!deleteCampaign) {
-                  return;
-                }
+        description={t("ui.campaigns.deleteConfirm")}
+        cancelLabel={t("ui.actions.close")}
+        confirmLabel={t("ui.actions.confirmDelete")}
+        confirmDisabled={anyPending || !deleteCampaign}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteCampaign(null);
+          }
+        }}
+        onConfirm={async () => {
+          if (!deleteCampaign) {
+            return;
+          }
 
-                setMessage("");
-                try {
-                  await deleteMutation.mutateAsync(deleteCampaign.id);
-                  setDeleteCampaign(null);
-                  setMessage(t("ui.feedback.deleted"));
-                } catch (error) {
-                  setMessage(
-                    error instanceof Error
-                      ? error.message
-                      : t("ui.feedback.requestFailed"),
-                  );
-                }
-              }}
-            >
-              {t("ui.actions.confirmDelete")}
-            </Button>
-          </>
-        }
-      >
-        <UiDiv textStyle="sm">{t("ui.campaigns.deleteConfirm")}</UiDiv>
-      </Modal>
+          setMessage("");
+          try {
+            await deleteMutation.mutateAsync(deleteCampaign.id);
+            setDeleteCampaign(null);
+            setMessage(t("ui.feedback.deleted"));
+          } catch (error) {
+            setMessage(
+              error instanceof Error
+                ? error.message
+                : t("ui.feedback.requestFailed"),
+            );
+          }
+        }}
+      />
     </>
   );
 }
