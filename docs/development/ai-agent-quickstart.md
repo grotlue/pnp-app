@@ -56,6 +56,7 @@ Full routing and execution details: [Multi-Agent Orchestration](multi-agent-orch
 - Specialized skills:
   - [PNP Feature Delivery Skill](../../skills/pnp-feature-delivery/SKILL.md)
   - [PNP DB Migration Guardrails Skill](../../skills/pnp-db-migration-guardrails/SKILL.md)
+  - [PNP Quality Gatekeeper Skill](../../skills/pnp-quality-gatekeeper/SKILL.md)
   - [PNP PR Review Skill](../../skills/pnp-pr-review/SKILL.md)
   - [PNP PR Readiness Skill](../../skills/pnp-pr-readiness/SKILL.md)
   - [PNP Docs Maintainer Skill](../../skills/pnp-docs-maintainer/SKILL.md)
@@ -88,6 +89,7 @@ Skill definitions and responsibilities:
 - [PNP Orchestrator Skill](../../skills/pnp-orchestrator/SKILL.md)
 - [PNP Feature Delivery Skill](../../skills/pnp-feature-delivery/SKILL.md)
 - [PNP DB Migration Guardrails Skill](../../skills/pnp-db-migration-guardrails/SKILL.md)
+- [PNP Quality Gatekeeper Skill](../../skills/pnp-quality-gatekeeper/SKILL.md)
 - [PNP PR Review Skill](../../skills/pnp-pr-review/SKILL.md)
 - [PNP PR Readiness Skill](../../skills/pnp-pr-readiness/SKILL.md)
 - [PNP Docs Maintainer Skill](../../skills/pnp-docs-maintainer/SKILL.md)

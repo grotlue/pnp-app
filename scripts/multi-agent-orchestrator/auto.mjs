@@ -152,9 +152,26 @@ function buildPrReviewContract(analysis, args, risk) {
       ],
     },
     {
+      name: "quality-gate",
+      worker: "pnp-quality-gatekeeper",
+      depends_on: ["pr-review"],
+      files_allowed: [".orchestrator/**", "docs/**", "AGENTS.md", "README.md"],
+      commands: [
+        buildCodexExecCommand(
+          [
+            "Use pnp-quality-gatekeeper as primary skill.",
+            `Validate PR review quality for PR #${pr}.`,
+            "Produce a concise pass/fail quality report with required follow-ups for correctness, security, and performance.",
+          ].join(" "),
+          `${outputPrefix}-quality-gate.md`,
+          args,
+        ),
+      ],
+    },
+    {
       name: "pr-readiness-check",
       worker: "pnp-pr-readiness",
-      depends_on: ["pr-review"],
+      depends_on: ["quality-gate"],
       files_allowed: [".orchestrator/**"],
       commands: [
         "mkdir -p .orchestrator/output",
@@ -230,9 +247,36 @@ function buildFeatureContract(analysis, args, risk) {
       ],
     },
     {
+      name: "quality-gate",
+      worker: "pnp-quality-gatekeeper",
+      depends_on: ["implementation"],
+      files_allowed: [
+        "src/**",
+        "tests/**",
+        "docs/**",
+        ".github/**",
+        "supabase/**",
+        "scripts/**",
+        "README.md",
+        "AGENTS.md",
+        ".orchestrator/**",
+      ],
+      commands: [
+        buildCodexExecCommand(
+          [
+            "Use pnp-quality-gatekeeper as primary skill.",
+            `Validate implementation quality for task: ${analysis.prompt}`,
+            "Return pass/fail plus concrete required follow-ups for correctness, security, performance, and test adequacy.",
+          ].join(" "),
+          ".orchestrator/output/feature-quality-gate.md",
+          args,
+        ),
+      ],
+    },
+    {
       name: "pr-readiness",
       worker: "pnp-pr-readiness",
-      depends_on: ["implementation"],
+      depends_on: ["quality-gate"],
       files_allowed: [
         ".github/**",
         "docs/**",
@@ -292,9 +336,32 @@ function buildDocsContract(analysis, args, risk) {
       ],
     },
     {
+      name: "quality-gate",
+      worker: "pnp-quality-gatekeeper",
+      depends_on: ["docs-maintenance"],
+      files_allowed: [
+        "README.md",
+        "docs/**",
+        "AGENTS.md",
+        ".github/**",
+        ".orchestrator/**",
+      ],
+      commands: [
+        buildCodexExecCommand(
+          [
+            "Use pnp-quality-gatekeeper as primary skill.",
+            `Validate docs quality for task: ${analysis.prompt}`,
+            "Check clarity, deduplication, and safety consistency. Return pass/fail with required follow-ups.",
+          ].join(" "),
+          ".orchestrator/output/docs-quality-gate.md",
+          args,
+        ),
+      ],
+    },
+    {
       name: "pr-readiness",
       worker: "pnp-pr-readiness",
-      depends_on: ["docs-maintenance"],
+      depends_on: ["quality-gate"],
       files_allowed: [
         "README.md",
         "docs/**",

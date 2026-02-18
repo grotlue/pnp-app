@@ -100,6 +100,7 @@ mkdir -p ~/.codex/skills
 cp -R skills/pnp-orchestrator ~/.codex/skills/
 cp -R skills/pnp-feature-delivery ~/.codex/skills/
 cp -R skills/pnp-db-migration-guardrails ~/.codex/skills/
+cp -R skills/pnp-quality-gatekeeper ~/.codex/skills/
 cp -R skills/pnp-pr-readiness ~/.codex/skills/
 cp -R skills/pnp-pr-review ~/.codex/skills/
 cp -R skills/pnp-docs-maintainer ~/.codex/skills/

@@ -66,7 +66,7 @@ export function analyzePrompt(prompt, options = {}) {
 }
 
 function buildRequiredSkills(primaryProfile, signal) {
-  const required = new Set(["pnp-orchestrator"]);
+  const required = new Set(["pnp-orchestrator", "pnp-quality-gatekeeper"]);
 
   if (primaryProfile === "pr-review") {
     required.add("pnp-pr-review");

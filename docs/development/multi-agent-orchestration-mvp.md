@@ -39,6 +39,8 @@ Auto mode uses prompt intent + profile override.
 
 Skill policy and mandatory routing rules are defined in [Agent Rules](../../AGENTS.md).
 
+Each auto profile now includes a mandatory `pnp-quality-gatekeeper` stage before PR-readiness handoff.
+
 ## Safety Defaults
 
 Orchestrator safety model:

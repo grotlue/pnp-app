@@ -267,6 +267,18 @@ Code reviews should prioritize:
 - Query performance and cache invalidation correctness.
 - Test adequacy for changed behavior.
 
+### 15.1) Universal Quality Contract (Tech-Agnostic, Mandatory)
+
+For every substantial change, enforce these dimensions before completion:
+
+- Correctness: behavior and acceptance criteria are met without regressions.
+- Security: trust boundaries, authz, input handling, and secret hygiene remain safe.
+- Performance: no obvious avoidable latency, N+1, or heavy hot-path regressions.
+- Testing: changed behavior has adequate tests and required checks pass.
+- Operability: risk notes, rollback path, and required docs/ADR updates exist.
+
+If evidence is missing for any dimension, treat the task as not done.
+
 ## 16) Skill Orchestration
 
 Use the local skill set in `skills/*` as a boss-agent orchestration layer.
@@ -276,6 +288,7 @@ Available project skills:
 - `pnp-orchestrator` -> top-level routing across specialized skills
 - `pnp-feature-delivery` -> implementation/refactor/test delivery
 - `pnp-db-migration-guardrails` -> migration/RLS/index/performance safety
+- `pnp-quality-gatekeeper` -> final universal quality gate (correctness/security/performance/tests/operability)
 - `pnp-pr-readiness` -> pre-PR completeness and compliance checks
 - `pnp-pr-review` -> findings-first PR review (bugs/regressions/security/perf/tests)
 - `pnp-docs-maintainer` -> lean README/docs/AGENTS maintenance
@@ -289,7 +302,8 @@ For each incoming task:
 3. Route to `pnp-db-migration-guardrails` when SQL, migrations, RLS, or DB runtime behavior changes.
 4. Route to `pnp-docs-maintainer` for README/docs/AGENTS changes.
 5. Route to `pnp-pr-review` when user asks for a review.
-6. Route to `pnp-pr-readiness` before opening/updating PRs.
+6. Route to `pnp-quality-gatekeeper` as mandatory final gate before handoff/PR readiness.
+7. Route to `pnp-pr-readiness` before opening/updating PRs.
 
 ### 16.2) `pr-review` vs `pr-readiness`
 
@@ -309,8 +323,9 @@ Prefer the local auto orchestration wrapper for day-to-day execution:
 Auto mode routing defaults:
 
 - prompts with `review` + `PR` -> `pr-review` (+ `pnp-pr-readiness`)
-- feature/fix/refactor prompts -> `pnp-feature-delivery` (+ `pnp-pr-readiness`)
-- docs/README prompts -> `pnp-docs-maintainer` (+ `pnp-pr-readiness`)
+- feature/fix/refactor prompts -> `pnp-feature-delivery` (+ `pnp-quality-gatekeeper` + `pnp-pr-readiness`)
+- docs/README prompts -> `pnp-docs-maintainer` (+ `pnp-quality-gatekeeper` + `pnp-pr-readiness`)
+- review prompts -> `pnp-pr-review` (+ `pnp-quality-gatekeeper` + `pnp-pr-readiness`)
 - migration/RLS/SQL indicators -> also include `pnp-db-migration-guardrails`
 
 Manual JSON contracts remain supported for advanced custom workflows via `yarn orchestrator:run`.
