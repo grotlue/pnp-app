@@ -1,20 +1,13 @@
 name: Feature
-description: Propose a user-facing or system feature with clear flow and acceptance criteria.
+description: Propose a user-visible feature.
 title: "feat: "
 labels:
   - type:feature
 body:
-  - type: markdown
-    attributes:
-      value: |
-        ## Feature request
-        Use this template to define a feature clearly enough that planning and implementation can start immediately.
-
   - type: textarea
     id: problem-statement
     attributes:
       label: Problem statement
-      description: What user or business problem are we solving?
       placeholder: |
         Users cannot ...
         This causes ...
@@ -22,54 +15,12 @@ body:
       required: true
 
   - type: textarea
-    id: target-users
-    attributes:
-      label: Target users and context
-      description: Who is affected and in which situation?
-      placeholder: |
-        Primary users:
-        Context of use:
-        Frequency:
-    validations:
-      required: true
-
-  - type: textarea
-    id: current-behavior
-    attributes:
-      label: Current behavior
-      description: Describe the current user flow and current system behavior.
-      placeholder: |
-        1. User goes to ...
-        2. User clicks ...
-        3. System currently ...
-    validations:
-      required: true
-
-  - type: textarea
     id: desired-behavior
     attributes:
       label: Desired behavior
-      description: Describe the intended user-visible behavior.
       placeholder: |
-        1. User goes to ...
-        2. User clicks ...
-        3. System should ...
-    validations:
-      required: true
-
-  - type: textarea
-    id: end-to-end-user-flow
-    attributes:
-      label: End-to-end user flow
-      description: Provide the complete happy path and key alternate/error paths.
-      placeholder: |
-        Happy path:
-        1. ...
-        2. ...
-
-        Alternate/error paths:
-        - If ..., then ...
-        - If ..., then ...
+        1. User ...
+        2. System ...
     validations:
       required: true
 
@@ -77,9 +28,7 @@ body:
     id: acceptance-criteria
     attributes:
       label: Acceptance criteria
-      description: List testable criteria. Prefer Given/When/Then format.
       placeholder: |
-        - Given ..., when ..., then ...
         - Given ..., when ..., then ...
     validations:
       required: true
@@ -88,41 +37,15 @@ body:
     id: e2e-happy-paths
     attributes:
       label: E2E happy paths (critical only)
-      description: List the critical user-visible happy paths that must be covered by E2E tests.
       placeholder: |
-        - FLOW-auth-login-entry: logged-out user reaches login form
-        - FLOW-campaign-create: GM creates a campaign and sees it in list
+        - FLOW-domain-slug
     validations:
       required: true
-
-  - type: textarea
-    id: e2e-out-of-scope
-    attributes:
-      label: E2E out of scope (covered by feature/API tests)
-      description: List alternate/error/edge paths that are intentionally not covered by E2E.
-      placeholder: |
-        - invalid email format variants -> feature tests
-        - API error permutations -> route tests
-    validations:
-      required: true
-
-  - type: checkboxes
-    id: non-functional-requirements
-    attributes:
-      label: Non-functional requirements
-      description: Select all that apply.
-      options:
-        - label: Security or authorization impact
-        - label: Performance impact
-        - label: Accessibility impact
-        - label: Analytics/observability impact
-        - label: Data model or migration impact
 
   - type: textarea
     id: scope
     attributes:
       label: Scope boundaries
-      description: Explicitly define in-scope vs out-of-scope.
       placeholder: |
         In scope:
         - ...
@@ -136,30 +59,16 @@ body:
     id: dependencies-risks
     attributes:
       label: Dependencies and risks
-      description: Upstream dependencies, blockers, rollout risks, or unknowns.
       placeholder: |
         Dependencies:
         Risks:
-        Unknowns:
 
   - type: textarea
     id: test-plan
     attributes:
       label: Verification plan
-      description: How this should be validated (manual + automated).
       placeholder: |
         Automated tests:
-        Manual steps:
-        Edge cases:
+        Manual checks:
     validations:
       required: true
-
-  - type: textarea
-    id: rollout-plan
-    attributes:
-      label: Rollout and monitoring plan
-      description: Release strategy, fallback, and success metrics.
-      placeholder: |
-        Rollout:
-        Monitoring signals:
-        Fallback:
