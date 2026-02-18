@@ -19,6 +19,8 @@
     "supabase:push": "supabase db push --linked",
     "supabase:types": "supabase gen types typescript --linked --schema public > src/types/database.ts",
     "supabase:env:local": "./scripts/update-local-supabase-env.sh",
+    "orchestrator:run": "node scripts/multi-agent-orchestrator/supervisor.mjs",
+    "orchestrator:example": "node scripts/multi-agent-orchestrator/supervisor.mjs --task scripts/multi-agent-orchestrator/examples/task.mvp.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:run": "vitest run",

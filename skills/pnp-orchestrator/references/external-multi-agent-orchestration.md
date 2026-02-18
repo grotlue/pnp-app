@@ -4,6 +4,11 @@ This runtime is effectively a single execution agent with tool parallelism, not 
 
 Use this staged model for true multi-agent orchestration outside the runtime:
 
+Practical MVP in this repo:
+
+- `scripts/multi-agent-orchestrator/supervisor.mjs`
+- `docs/development/multi-agent-orchestration-mvp.md`
+
 ## Stage 1: Orchestrator + Specialist Workers
 
 - One orchestrator service receives task input.
