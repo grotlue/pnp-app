@@ -72,6 +72,14 @@ body:
       required: true
 
   - type: textarea
+    id: workaround
+    attributes:
+      label: Temporary workaround
+      description: "Optional: any known user workaround."
+      placeholder: |
+        Users can temporarily ...
+
+  - type: textarea
     id: acceptance-criteria-fix
     attributes:
       label: Acceptance criteria for fix
