@@ -11,13 +11,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { setSession } from "@/lib/client/session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { getBrowserSupabaseClient } from "@/lib/supabase/browser-client";
 import { textLinkClassName } from "@/lib/utils/link";
-import {
-  exchangeAuthCode,
-  verifyAuthToken,
-} from "@/features/users/queries/users-auth.query";
 import {
   getAuthParamsFromUrl,
   getSessionTokensFromUrl,
@@ -37,9 +33,17 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
 
     async function run() {
       try {
+        const supabase = getBrowserSupabaseClient();
         const tokenSession = getSessionTokensFromUrl(window.location);
         if (tokenSession) {
-          setSession(tokenSession);
+          const { error } = await supabase.auth.setSession({
+            access_token: tokenSession.accessToken,
+            refresh_token: tokenSession.refreshToken,
+          });
+          if (error) {
+            throw error;
+          }
+
           window.history.replaceState({}, "", window.location.pathname);
           if (!cancelled) {
             router.replace("/");
@@ -49,12 +53,13 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
 
         const params = getAuthParamsFromUrl(window.location);
         if (params.code) {
-          const response = await exchangeAuthCode({ code: params.code });
-          setSession({
-            accessToken: response.accessToken,
-            refreshToken: response.refreshToken,
-            expiresAt: response.expiresAt,
-          });
+          const { error } = await supabase.auth.exchangeCodeForSession(
+            params.code,
+          );
+          if (error) {
+            throw error;
+          }
+
           window.history.replaceState({}, "", window.location.pathname);
           if (!cancelled) {
             router.replace("/");
@@ -63,17 +68,12 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
         }
 
         if (params.tokenHash && params.type) {
-          const response = await verifyAuthToken({
-            tokenHash: params.tokenHash,
+          const { error } = await supabase.auth.verifyOtp({
+            token_hash: params.tokenHash,
             type: params.type,
           });
-
-          if (response.accessToken && response.refreshToken) {
-            setSession({
-              accessToken: response.accessToken,
-              refreshToken: response.refreshToken,
-              expiresAt: response.expiresAt,
-            });
+          if (error) {
+            throw error;
           }
 
           window.history.replaceState({}, "", window.location.pathname);

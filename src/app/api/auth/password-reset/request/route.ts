@@ -39,7 +39,10 @@ export async function POST(request: Request) {
   }
 
   const client = createServerSupabaseClient();
-  const redirectTo = resolveSafeRedirectUrl(request, "/auth/reset-password");
+  const redirectTo = resolveSafeRedirectUrl(
+    request,
+    "/auth/confirm?next=/auth/reset-password",
+  );
 
   const { error } = await client.auth.resetPasswordForEmail(email, {
     redirectTo,

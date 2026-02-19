@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   }
 
   const client = createServerSupabaseClient();
-  const redirectTo = resolveSafeRedirectUrl(request, "/auth/callback");
+  const redirectTo = resolveSafeRedirectUrl(request, "/auth/confirm?next=/");
 
   const { error } = await client.auth.resend({
     type: "signup",

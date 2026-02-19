@@ -110,7 +110,7 @@ describe("POST /api/auth/register", () => {
       email: "x@example.com",
       password: "SecretPass123",
       options: {
-        emailRedirectTo: "https://app.example.com/auth/callback",
+        emailRedirectTo: "https://app.example.com/auth/confirm?next=/",
         data: {
           username: "x",
           locale: "en",

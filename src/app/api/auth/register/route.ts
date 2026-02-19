@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     detectLocaleFromAcceptLanguage(request.headers.get("accept-language"));
 
   const client = createServerSupabaseClient();
-  const redirectTo = resolveSafeRedirectUrl(request, "/auth/callback");
+  const redirectTo = resolveSafeRedirectUrl(request, "/auth/confirm?next=/");
 
   const { data, error } = await client.auth.signUp({
     email,
