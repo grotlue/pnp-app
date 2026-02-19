@@ -46,6 +46,11 @@ export type PasswordResetConfirmResponse = {
   expiresAt?: number;
 };
 
+export type PasswordResetRequestResponse = {
+  requested: boolean;
+  previewRecoveryLink?: string;
+};
+
 export type AdminMfaFactor = {
   id: string;
   friendlyName: string | null;

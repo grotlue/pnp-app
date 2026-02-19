@@ -1,11 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { isFeatureEnabledMock, createServerSupabaseClientMock } = vi.hoisted(
-  () => ({
-    isFeatureEnabledMock: vi.fn(),
-    createServerSupabaseClientMock: vi.fn(),
-  }),
-);
+const {
+  isFeatureEnabledMock,
+  createServerSupabaseClientMock,
+  createServiceRoleSupabaseClientMock,
+} = vi.hoisted(() => ({
+  isFeatureEnabledMock: vi.fn(),
+  createServerSupabaseClientMock: vi.fn(),
+  createServiceRoleSupabaseClientMock: vi.fn(),
+}));
 
 vi.mock("@/lib/features/feature-flags", async () => {
   const actual = await vi.importActual<
@@ -22,10 +25,16 @@ vi.mock("@/server/supabase/server-client", () => ({
   createServerSupabaseClient: createServerSupabaseClientMock,
 }));
 
+vi.mock("@/server/supabase/service-role-client", () => ({
+  createServiceRoleSupabaseClient: createServiceRoleSupabaseClientMock,
+}));
+
 import { POST } from "../route";
 
 beforeEach(() => {
   vi.clearAllMocks();
+  delete process.env.APP_ENV;
+  delete process.env.PREVIEW_AUTH_EMAILS_DISABLED;
   isFeatureEnabledMock.mockReturnValue(true);
 });
 
@@ -224,5 +233,72 @@ describe("POST /api/auth/register", () => {
         email: "mixedcase@example.com",
       }),
     );
+  });
+
+  it("uses preview no-email registration fallback when enabled", async () => {
+    process.env.APP_ENV = "preview";
+
+    const createUserMock = vi.fn().mockResolvedValue({
+      data: { user: { id: "u-preview" } },
+      error: null,
+    });
+    const signInWithPasswordMock = vi.fn().mockResolvedValue({
+      data: {
+        user: { id: "u-preview" },
+        session: {
+          access_token: "at-preview",
+          refresh_token: "rt-preview",
+          expires_at: 123,
+        },
+      },
+      error: null,
+    });
+
+    createServiceRoleSupabaseClientMock.mockReturnValue({
+      auth: { admin: { createUser: createUserMock } },
+    });
+    createServerSupabaseClientMock.mockReturnValue({
+      auth: { signInWithPassword: signInWithPasswordMock },
+    });
+
+    const request = new Request("http://localhost/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({
+        email: "preview@example.com",
+        password: "SecretPass123",
+        username: "preview-user",
+        locale: "en",
+      }),
+    });
+
+    const response = await POST(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(createUserMock).toHaveBeenCalledWith({
+      email: "preview@example.com",
+      password: "SecretPass123",
+      email_confirm: true,
+      user_metadata: {
+        username: "preview-user",
+        locale: "en",
+      },
+    });
+    expect(signInWithPasswordMock).toHaveBeenCalledWith({
+      email: "preview@example.com",
+      password: "SecretPass123",
+    });
+    expect(body).toEqual({
+      data: {
+        user: { id: "u-preview" },
+        session: {
+          access_token: "at-preview",
+          refresh_token: "rt-preview",
+          expires_at: 123,
+        },
+        emailVerificationRequired: false,
+      },
+    });
+    expect(response.headers.get("set-cookie")).toContain("pnp_access_token");
   });
 });

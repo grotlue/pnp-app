@@ -245,6 +245,29 @@ describe("users auth/profile/settings queries", () => {
     );
   });
 
+  it("requestPasswordReset returns preview recovery link when provided", async () => {
+    const response = {
+      data: {
+        requested: true,
+        previewRecoveryLink: "https://preview.example.com/recovery-link",
+      },
+      error: null,
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
+
+    await expect(
+      requestPasswordReset({ email: "x@example.com" }),
+    ).resolves.toEqual({
+      requested: true,
+      previewRecoveryLink: "https://preview.example.com/recovery-link",
+    });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Password reset request failed",
+    );
+  });
+
   it("logoutUser posts logout request with session context", async () => {
     const response = {
       data: { success: true },

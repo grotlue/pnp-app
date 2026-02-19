@@ -5,6 +5,7 @@ import type {
   AuthVerifyResponse,
   LoginResponse,
   PasswordResetConfirmResponse,
+  PasswordResetRequestResponse,
   RegisterResponse,
 } from "../types";
 
@@ -37,8 +38,8 @@ export async function registerUser(input: {
 export async function requestPasswordReset(input: {
   email: string;
   captchaToken?: string;
-}): Promise<{ requested: boolean }> {
-  const response = await apiRequest<{ requested: boolean }>(
+}): Promise<PasswordResetRequestResponse> {
+  const response = await apiRequest<PasswordResetRequestResponse>(
     "/api/auth/password-reset/request",
     {
       method: "POST",
