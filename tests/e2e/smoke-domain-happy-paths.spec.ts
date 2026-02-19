@@ -19,7 +19,8 @@ test("FLOW-CAMPAIGNS-CREATE @smoke @campaigns creates a new campaign from the ca
 
   const campaignTitle = uniqueSmokeName("Smoke Campaign");
   const campaignDescription = "Smoke flow campaign description";
-  const modal = page.locator(".fixed.inset-0").first();
+  const modal = page.getByRole("dialog").first();
+  await expect(modal).toBeVisible();
 
   await modal.getByPlaceholder("Campaign title").fill(campaignTitle);
   await modal
@@ -42,7 +43,8 @@ test("FLOW-CHARACTERS-CREATE-EDIT @smoke @characters creates and edits a charact
 
   const characterName = uniqueSmokeName("Smoke Character");
   const updatedCharacterName = `${characterName} Updated`;
-  const modal = page.locator(".fixed.inset-0").first();
+  const modal = page.getByRole("dialog").first();
+  await expect(modal).toBeVisible();
 
   await modal.getByPlaceholder("Character name").fill(characterName);
   await modal.getByRole("button", { name: "Create" }).click();
