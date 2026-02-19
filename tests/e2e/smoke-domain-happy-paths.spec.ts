@@ -63,7 +63,7 @@ test("FLOW-CHARACTERS-CREATE-EDIT @smoke @characters creates and edits a charact
   await page.getByRole("link", { name: characterName }).first().click();
 
   await expect(page).toHaveURL(/\/characters\/[0-9a-f-]+$/);
-  await page.getByRole("link", { name: "Edit" }).first().click();
+  await page.getByRole("button", { name: "Edit" }).first().click();
   await expect(page).toHaveURL(/\/characters\/[0-9a-f-]+\/edit$/);
 
   await page.getByPlaceholder("Character name").fill(updatedCharacterName);
