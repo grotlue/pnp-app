@@ -24,7 +24,6 @@ concurrency:
 
 jobs:
   preview_label_gate:
-    if: ${{ github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     outputs:
       required_checks_ready: ${{ steps.evaluate.outputs.required_checks_ready }}
