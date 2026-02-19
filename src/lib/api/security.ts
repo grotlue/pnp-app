@@ -31,17 +31,30 @@ export function resolveSafeRedirectUrl(
   request: Request,
   path: string,
 ): string | undefined {
-  const origin = request.headers.get("origin");
-  if (!isAllowedOrigin(origin)) {
-    return undefined;
-  }
+  const headerOrigin = request.headers.get("origin");
+  const requestOrigin = (() => {
+    try {
+      return new URL(request.url).origin;
+    } catch {
+      return null;
+    }
+  })();
 
+  const originCandidates = [headerOrigin, requestOrigin].filter(
+    (value): value is string => Boolean(value),
+  );
+  const origin = originCandidates.find((candidate) =>
+    isAllowedOrigin(candidate),
+  );
   if (!origin) {
     return undefined;
   }
 
   try {
     const url = new URL(path, origin);
+    if (url.origin !== origin) {
+      return undefined;
+    }
     return url.toString();
   } catch {
     return undefined;

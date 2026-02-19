@@ -5,7 +5,10 @@ import {
 } from "@/lib/api/auth-validation";
 import { resolveSafeRedirectUrl } from "@/lib/api/security";
 import { hasRequiredFields } from "@/lib/api/validation";
-import { isCaptchaRequiredForAuth } from "@/server/auth/auth-hardening";
+import {
+  isCaptchaRequiredForAuth,
+  isPreviewAuthEmailDeliveryDisabled,
+} from "@/server/auth/auth-hardening";
 import { enforceRateLimit } from "@/server/rate-limit/enforce-rate-limit";
 import { createServerSupabaseClient } from "@/server/supabase/server-client";
 
@@ -39,7 +42,11 @@ export async function POST(request: Request) {
   }
 
   const client = createServerSupabaseClient();
-  const redirectTo = resolveSafeRedirectUrl(request, "/auth/callback");
+  const redirectTo = resolveSafeRedirectUrl(request, "/auth/confirm?next=/");
+
+  if (isPreviewAuthEmailDeliveryDisabled()) {
+    return jsonOk({ sent: true });
+  }
 
   const { error } = await client.auth.resend({
     type: "signup",

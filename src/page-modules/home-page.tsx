@@ -59,7 +59,10 @@ import { getMe } from "@/features/users/queries/users-profile.query";
 import type { LoginResponse, MeResponse } from "@/features/users/types";
 import { queryKeys } from "@/lib/client/query-keys";
 import { setLocaleCookie } from "@/lib/client/locale-cookie";
-import { clearSession, setSession } from "@/lib/client/session";
+import {
+  clearSession,
+  setSession as persistSession,
+} from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { resolveAuthCaptchaClientConfig } from "@/lib/features/auth-captcha";
 import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
@@ -186,13 +189,10 @@ export function HomePageView({
         refreshToken: response.refreshToken,
         expiresAt: response.expiresAt,
       };
-
-      setSession(nextSession);
-      if (response.locale) {
-        setLocaleCookie(resolveLocale(response.locale));
-      }
+      persistSession(nextSession);
 
       const me = await getMe(nextSession);
+      setLocaleCookie(resolveLocale(me.profile.locale));
       queryClient.setQueryData(queryKeys.me(nextSession.accessToken), me);
 
       if (me.profile.role === "admin") {

@@ -14,6 +14,7 @@ on:
 
 permissions:
   actions: write
+  checks: read
   contents: read
   statuses: write
 
@@ -22,7 +23,102 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  preview_label_gate:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    outputs:
+      required_checks_ready: ${{ steps.evaluate.outputs.required_checks_ready }}
+      skip_heavy_jobs: ${{ steps.evaluate.outputs.skip_heavy_jobs }}
+    steps:
+      - name: Evaluate preview-deploy label gate
+        id: evaluate
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const requiredChecks = ["quality", "e2e_smoke", "db_schema_guardrails"];
+            const isPreviewDeployLabelEvent =
+              context.eventName === "pull_request" &&
+              context.payload.action === "labeled" &&
+              context.payload.label?.name === "preview-deploy";
+
+            if (!isPreviewDeployLabelEvent) {
+              core.setOutput("required_checks_ready", "false");
+              core.setOutput("skip_heavy_jobs", "false");
+              return;
+            }
+
+            const headSha = context.payload.pull_request.head.sha;
+            const currentRunId = Number(process.env.GITHUB_RUN_ID || "0");
+
+            const checkRuns = await github.paginate(
+              github.rest.checks.listForRef,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: headSha,
+                per_page: 100,
+              },
+              (response) => response.data.check_runs,
+            );
+
+            const newestByName = new Map();
+            for (const run of checkRuns) {
+              if (!requiredChecks.includes(run.name)) {
+                continue;
+              }
+
+              const runIdMatch = /\/actions\/runs\/(\d+)/.exec(run.details_url || "");
+              const detailsRunId = runIdMatch ? Number(runIdMatch[1]) : null;
+              if (detailsRunId === currentRunId) {
+                continue;
+              }
+
+              const existing = newestByName.get(run.name);
+              if (!existing) {
+                newestByName.set(run.name, run);
+                continue;
+              }
+
+              const existingCompletedAt = existing.completed_at
+                ? Date.parse(existing.completed_at)
+                : 0;
+              const currentCompletedAt = run.completed_at ? Date.parse(run.completed_at) : 0;
+              if (currentCompletedAt >= existingCompletedAt) {
+                newestByName.set(run.name, run);
+              }
+            }
+
+            const readiness = requiredChecks.map((name) => ({
+              name,
+              status: newestByName.get(name)?.status ?? null,
+              conclusion: newestByName.get(name)?.conclusion ?? null,
+              detailsUrl: newestByName.get(name)?.details_url ?? null,
+            }));
+
+            const allRequiredChecksGreen = readiness.every(
+              (entry) => entry.conclusion === "success",
+            );
+
+            core.info(`preview-deploy gate readiness: ${JSON.stringify(readiness)}`);
+            core.setOutput(
+              "required_checks_ready",
+              allRequiredChecksGreen ? "true" : "false",
+            );
+            core.setOutput(
+              "skip_heavy_jobs",
+              allRequiredChecksGreen ? "true" : "false",
+            );
+
   quality:
+    needs:
+      - preview_label_gate
+    if: >-
+      ${{
+        github.event_name != 'pull_request' ||
+        github.event.action != 'labeled' ||
+        github.event.label.name != 'preview-deploy' ||
+        needs.preview_label_gate.outputs.skip_heavy_jobs != 'true'
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -88,8 +184,17 @@ jobs:
         run: yarn build
 
   e2e_smoke:
-    if: ${{ github.event_name == 'pull_request' }}
+    if: >-
+      ${{
+        github.event_name == 'pull_request' &&
+        (
+          github.event.action != 'labeled' ||
+          github.event.label.name != 'preview-deploy' ||
+          needs.preview_label_gate.outputs.skip_heavy_jobs != 'true'
+        )
+      }}
     needs:
+      - preview_label_gate
       - quality
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -249,6 +354,15 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
   db_schema_guardrails:
+    needs:
+      - preview_label_gate
+    if: >-
+      ${{
+        github.event_name != 'pull_request' ||
+        github.event.action != 'labeled' ||
+        github.event.label.name != 'preview-deploy' ||
+        needs.preview_label_gate.outputs.skip_heavy_jobs != 'true'
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -310,20 +424,31 @@ jobs:
 
   dispatch_deploy_pr_preview:
     needs:
+      - preview_label_gate
       - quality
       - e2e_smoke
       - db_schema_guardrails
     if: >-
       ${{
+        always() &&
         github.event_name == 'pull_request' &&
         github.event.pull_request.base.ref == 'main' &&
         github.event.pull_request.head.repo.full_name == github.repository &&
+        !startsWith(github.event.pull_request.head.ref, 'pr-screenshot-preview') &&
         (
           github.event.action == 'synchronize' ||
           (github.event.action == 'labeled' && github.event.label.name == 'preview-deploy') ||
           (github.event.action == 'reopened' && contains(github.event.pull_request.labels.*.name, 'preview-deploy'))
         ) &&
-        contains(github.event.pull_request.labels.*.name, 'preview-deploy')
+        contains(github.event.pull_request.labels.*.name, 'preview-deploy') &&
+        (
+          needs.preview_label_gate.outputs.required_checks_ready == 'true' ||
+          (
+            needs.quality.result == 'success' &&
+            needs.e2e_smoke.result == 'success' &&
+            needs.db_schema_guardrails.result == 'success'
+          )
+        )
       }}
     runs-on: ubuntu-latest
     steps:

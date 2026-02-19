@@ -254,12 +254,16 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
     );
   }
 
-  if (admin.meQuery.isLoading || meRole !== "admin") {
+  if (admin.meQuery.isLoading) {
     return (
       <AppPageMain maxWidth="7xl">
         <PageLoadingState label={t("ui.loading.page")} density="section" />
       </AppPageMain>
     );
+  }
+
+  if (meRole !== "admin") {
+    return <PageViewport />;
   }
 
   return (

@@ -6,9 +6,9 @@ Credentials for the fixture accounts in `supabase/seed.sql`.
 
 - Admin user:
   - Email: `admin@pnp.test`
-  - Password: `admin`
+  - Password: `AdminSecure123`
 - All other fixture users:
-  - Password: `DevPass123!`
+  - Password: `PlayerSecure123`
 
 ## Users
 

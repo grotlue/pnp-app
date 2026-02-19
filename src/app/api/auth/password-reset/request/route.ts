@@ -5,8 +5,12 @@ import {
 } from "@/lib/api/auth-validation";
 import { resolveSafeRedirectUrl } from "@/lib/api/security";
 import { hasRequiredFields } from "@/lib/api/validation";
-import { isCaptchaRequiredForAuth } from "@/server/auth/auth-hardening";
+import {
+  isCaptchaRequiredForAuth,
+  isPreviewAuthEmailDeliveryDisabled,
+} from "@/server/auth/auth-hardening";
 import { enforceRateLimit } from "@/server/rate-limit/enforce-rate-limit";
+import { createServiceRoleSupabaseClient } from "@/server/supabase/service-role-client";
 import { createServerSupabaseClient } from "@/server/supabase/server-client";
 
 type PasswordResetRequestBody = {
@@ -40,6 +44,26 @@ export async function POST(request: Request) {
 
   const client = createServerSupabaseClient();
   const redirectTo = resolveSafeRedirectUrl(request, "/auth/reset-password");
+
+  if (isPreviewAuthEmailDeliveryDisabled()) {
+    const serviceClient = createServiceRoleSupabaseClient();
+    const { data, error } = await serviceClient.auth.admin.generateLink({
+      type: "recovery",
+      email,
+      options: {
+        redirectTo,
+      },
+    });
+
+    if (error) {
+      return jsonError(400, "password_reset_request_failed", error.message);
+    }
+
+    return jsonOk({
+      requested: true,
+      previewRecoveryLink: data.properties.action_link,
+    });
+  }
 
   const { error } = await client.auth.resetPasswordForEmail(email, {
     redirectTo,

@@ -1,38 +1,102 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { Session } from "@supabase/supabase-js";
 import {
+  type ClientSession,
   getSession,
   getSessionEventName,
-  type ClientSession,
 } from "@/lib/client/session";
+import { getBrowserSupabaseClient } from "@/lib/supabase/browser-client";
+
+function toClientSession(session: Session | null): ClientSession | null {
+  if (!session) {
+    return null;
+  }
+
+  return {
+    accessToken: session.access_token,
+    refreshToken: session.refresh_token,
+    expiresAt: session.expires_at,
+  };
+}
 
 export function useClientSession() {
-  const [session, setSession] = useState<ClientSession | null>(null);
+  const [session, setSessionState] = useState<ClientSession | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const syncSession = () => {
-      setSession(getSession());
+    let cancelled = false;
+    const sessionEventName = getSessionEventName();
+
+    const syncLocalFallbackSession = () => {
+      if (cancelled) {
+        return;
+      }
+      setSessionState(getSession());
       setReady(true);
     };
 
-    const timeoutId = window.setTimeout(syncSession, 0);
-    const sessionEvent = getSessionEventName();
+    window.addEventListener(sessionEventName, syncLocalFallbackSession);
 
-    window.addEventListener(sessionEvent, syncSession);
-    window.addEventListener("storage", syncSession);
+    async function init() {
+      try {
+        const supabase = getBrowserSupabaseClient();
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          throw error;
+        }
 
+        if (!cancelled) {
+          setSessionState(toClientSession(data.session) ?? getSession());
+          setReady(true);
+        }
+
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+          if (cancelled) {
+            return;
+          }
+          setSessionState(toClientSession(nextSession) ?? getSession());
+          setReady(true);
+        });
+
+        return () => {
+          window.removeEventListener(
+            sessionEventName,
+            syncLocalFallbackSession,
+          );
+          subscription.unsubscribe();
+        };
+      } catch {
+        if (!cancelled) {
+          setSessionState(getSession());
+          setReady(true);
+        }
+        return () => {
+          window.removeEventListener(
+            sessionEventName,
+            syncLocalFallbackSession,
+          );
+        };
+      }
+    }
+
+    let cleanup: (() => void) | undefined;
+    void init().then((fn) => {
+      cleanup = fn;
+    });
     return () => {
-      window.clearTimeout(timeoutId);
-      window.removeEventListener(sessionEvent, syncSession);
-      window.removeEventListener("storage", syncSession);
+      cancelled = true;
+      cleanup?.();
+      window.removeEventListener(sessionEventName, syncLocalFallbackSession);
     };
   }, []);
 
   return {
     session,
-    setSession,
+    setSession: setSessionState,
     ready,
   };
 }

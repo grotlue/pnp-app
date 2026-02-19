@@ -92,6 +92,15 @@ export function isCaptchaRequiredForAuth(): boolean {
   return resolveAuthCaptchaMode() === AUTH_CAPTCHA_MODES.required;
 }
 
+export function isPreviewAuthEmailDeliveryDisabled(): boolean {
+  const override = parseBooleanEnv(process.env.PREVIEW_AUTH_EMAILS_DISABLED);
+  if (override !== null) {
+    return override;
+  }
+
+  return resolveRuntimeEnvironment() === "preview";
+}
+
 export function hasAal2AuthLevel(accessToken: string): boolean {
   const payload = decodeAccessTokenPayload(accessToken);
   if (!payload) {

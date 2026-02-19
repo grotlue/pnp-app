@@ -71,10 +71,14 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
     setBusy(true);
     setMessage("");
     try {
-      await requestPasswordReset({
+      const response = await requestPasswordReset({
         email,
         ...(captchaToken ? { captchaToken } : {}),
       });
+      if (response.previewRecoveryLink) {
+        window.location.assign(response.previewRecoveryLink);
+        return;
+      }
       setMessage(t("ui.feedback.passwordResetSent"));
     } catch (error) {
       setMessage(

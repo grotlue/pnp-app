@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   hasAal2AuthLevel,
   isAdminMfaRequired,
+  isPreviewAuthEmailDeliveryDisabled,
   resolveAuthCaptchaMode,
 } from "../auth-hardening";
 
@@ -16,6 +17,7 @@ function buildJwt(payload: Record<string, unknown>): string {
 function clearEnv() {
   delete process.env.REQUIRE_ADMIN_MFA;
   delete process.env.AUTH_CAPTCHA_MODE;
+  delete process.env.PREVIEW_AUTH_EMAILS_DISABLED;
   delete process.env.APP_ENV;
   delete process.env.VERCEL_ENV;
 }
@@ -59,6 +61,22 @@ describe("auth hardening", () => {
   it("accepts quoted auth captcha mode", () => {
     process.env.AUTH_CAPTCHA_MODE = '"off"';
     expect(resolveAuthCaptchaMode()).toBe("off");
+  });
+
+  it("disables auth email delivery by default in preview", () => {
+    process.env.APP_ENV = "preview";
+    expect(isPreviewAuthEmailDeliveryDisabled()).toBe(true);
+  });
+
+  it("keeps auth email delivery enabled by default outside preview", () => {
+    process.env.APP_ENV = "production";
+    expect(isPreviewAuthEmailDeliveryDisabled()).toBe(false);
+  });
+
+  it("respects explicit preview auth email delivery override", () => {
+    process.env.APP_ENV = "preview";
+    process.env.PREVIEW_AUTH_EMAILS_DISABLED = "false";
+    expect(isPreviewAuthEmailDeliveryDisabled()).toBe(false);
   });
 
   it("detects aal2 from access token claim", () => {

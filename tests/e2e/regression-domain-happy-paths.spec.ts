@@ -28,7 +28,7 @@ test("FLOW-RELATIONSHIPS-CREATE-EDIT-VIEW @regression @relationships creates, up
   const updatedDescription = uniqueSmokeName(
     "Updated relationship description",
   );
-  const createModal = page.locator(".fixed.inset-0").first();
+  const createModal = page.locator("[data-slot='modal-popup']").first();
 
   await createModal.getByRole("button", { name: "External name" }).click();
   await createModal
@@ -44,28 +44,26 @@ test("FLOW-RELATIONSHIPS-CREATE-EDIT-VIEW @regression @relationships creates, up
 
   await expect(page.getByText("Created successfully.").first()).toBeVisible();
 
-  const relationshipRow = page
-    .locator("div")
-    .filter({
-      hasText: relationshipTargetName,
-      has: page.getByRole("button", { name: "Edit" }),
+  const relationshipDetailButton = page
+    .getByRole("button", {
+      name: new RegExp(`^${relationshipTargetName}`),
     })
     .first();
-  await expect(relationshipRow).toBeVisible();
+  await expect(relationshipDetailButton).toBeVisible();
 
-  await relationshipRow.getByRole("button", { name: "Edit" }).click();
-  const editModal = page.locator(".fixed.inset-0").first();
+  const relationshipEditButton = relationshipDetailButton.locator(
+    "xpath=following::button[@aria-label='Edit'][1]",
+  );
+  await relationshipEditButton.click();
+  const editModal = page.locator("[data-slot='modal-popup']").first();
   await expect(editModal.getByText("Edit relationship")).toBeVisible();
   await editModal.getByPlaceholder("Description").fill(updatedDescription);
   await editModal.getByRole("button", { name: "Save" }).click();
 
   await expect(page.getByText("Saved successfully.").first()).toBeVisible();
 
-  await relationshipRow
-    .getByRole("button")
-    .filter({ hasText: relationshipTargetName })
-    .click();
-  const detailModal = page.locator(".fixed.inset-0").first();
+  await relationshipDetailButton.click();
+  const detailModal = page.locator("[data-slot='modal-popup']").first();
   await expect(detailModal.getByText("Relationship detail")).toBeVisible();
   await expect(detailModal.getByText(updatedDescription)).toBeVisible();
   await detailModal.getByRole("button", { name: "Close" }).click();
@@ -84,10 +82,13 @@ test("FLOW-CAMPAIGNS-REQUEST-JOIN @regression @campaigns requests to join a camp
     .click();
   await expect(page).toHaveURL(/\/campaigns\/[0-9a-f-]+$/);
 
+  const mainContent = page.getByRole("main");
   const requestJoinButton = page.getByRole("button", {
     name: "Request to join",
   });
-  const joinPendingMessage = page.getByText("Your join request is pending.");
+  const joinPendingMessage = mainContent.getByText(
+    "Your join request is pending.",
+  );
 
   await expect
     .poll(async () => {
@@ -99,7 +100,7 @@ test("FLOW-CAMPAIGNS-REQUEST-JOIN @regression @campaigns requests to join a camp
 
   if ((await requestJoinButton.count()) > 0) {
     await requestJoinButton.first().click();
-    const joinModal = page.locator(".fixed.inset-0").first();
+    const joinModal = page.locator("[data-slot='modal-popup']").first();
     await joinModal.getByRole("button", { name: "Confirm" }).click();
     await expect(page.getByText("Sent successfully.").first()).toBeVisible();
   }

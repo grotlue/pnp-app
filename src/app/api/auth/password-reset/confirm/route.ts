@@ -2,6 +2,7 @@ import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
 import { validatePasswordStrength } from "@/lib/api/auth-validation";
 import { setSessionCookies } from "@/server/auth/session-cookie";
 import { enforceRateLimit } from "@/server/rate-limit/enforce-rate-limit";
+import { createServiceRoleSupabaseClient } from "@/server/supabase/service-role-client";
 import { createServerSupabaseClient } from "@/server/supabase/server-client";
 
 type PasswordResetConfirmBody = {
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
       refresh_token: body.refreshToken,
     });
 
-  if (sessionError || !sessionData.session) {
+  if (sessionError || !sessionData.session || !sessionData.user) {
     return jsonError(
       400,
       "invalid_reset_session",
@@ -49,12 +50,29 @@ export async function POST(request: Request) {
     );
   }
 
-  const { error } = await client.auth.updateUser({
-    password: body.newPassword,
-  });
+  let passwordResetError: string | null = null;
+  try {
+    const service = createServiceRoleSupabaseClient();
+    const { error } = await service.auth.admin.updateUserById(
+      sessionData.user.id,
+      {
+        password: body.newPassword,
+      },
+    );
+    if (error) {
+      passwordResetError = error.message;
+    }
+  } catch {
+    const { error } = await client.auth.updateUser({
+      password: body.newPassword,
+    });
+    if (error) {
+      passwordResetError = error.message;
+    }
+  }
 
-  if (error) {
-    return jsonError(400, "password_reset_confirm_failed", error.message);
+  if (passwordResetError) {
+    return jsonError(400, "password_reset_confirm_failed", passwordResetError);
   }
 
   return setSessionCookies(
