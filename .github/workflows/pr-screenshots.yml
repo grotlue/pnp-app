@@ -159,7 +159,18 @@ jobs:
             mkdir -p "${dest_dir}"
             cp -f "${GITHUB_WORKSPACE}/${SCREENSHOT_DIR}"/*.png "${dest_dir}/"
 
-            git add "${dest_dir}"
+            cat > vercel.json <<'EOF'
+            {
+              "$schema": "https://openapi.vercel.sh/vercel.json",
+              "git": {
+                "deploymentEnabled": {
+                  "**": false
+                }
+              }
+            }
+            EOF
+
+            git add "${dest_dir}" vercel.json
             if ! git diff --cached --quiet; then
               git commit -m "chore(screenshots): update PR ${PR_NUMBER} previews (${GITHUB_SHA})"
               git push origin "${PREVIEW_BRANCH}"
