@@ -1,30 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const {
-  apiRequestMock,
-  unwrapApiResponseMock,
-  getBrowserSupabaseClientMock,
-  signInWithPasswordMock,
-  signUpMock,
-  resetPasswordForEmailMock,
-  signOutMock,
-} = vi.hoisted(() => ({
+const { apiRequestMock, unwrapApiResponseMock } = vi.hoisted(() => ({
   apiRequestMock: vi.fn(),
   unwrapApiResponseMock: vi.fn(),
-  getBrowserSupabaseClientMock: vi.fn(),
-  signInWithPasswordMock: vi.fn(),
-  signUpMock: vi.fn(),
-  resetPasswordForEmailMock: vi.fn(),
-  signOutMock: vi.fn(),
 }));
 
 vi.mock("@/lib/client/api", () => ({
   apiRequest: apiRequestMock,
   unwrapApiResponse: unwrapApiResponseMock,
-}));
-
-vi.mock("@/lib/supabase/browser-client", () => ({
-  getBrowserSupabaseClient: getBrowserSupabaseClientMock,
 }));
 
 import {
@@ -63,28 +46,20 @@ beforeEach(() => {
   unwrapApiResponseMock.mockImplementation(
     (response: { data: unknown }) => response.data,
   );
-  getBrowserSupabaseClientMock.mockReturnValue({
-    auth: {
-      signInWithPassword: signInWithPasswordMock,
-      signUp: signUpMock,
-      resetPasswordForEmail: resetPasswordForEmailMock,
-      signOut: signOutMock,
-    },
-  });
 });
 
 describe("users auth/profile/settings queries", () => {
-  it("loginUser signs in via Supabase password auth", async () => {
-    signInWithPasswordMock.mockResolvedValueOnce({
+  it("loginUser posts credentials to auth login endpoint", async () => {
+    const response = {
       data: {
-        session: {
-          access_token: "a1",
-          refresh_token: "r1",
-          expires_at: 123456,
-        },
+        accessToken: "a1",
+        refreshToken: "r1",
+        expiresAt: 123456,
       },
       error: null,
-    });
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
 
     await expect(
       loginUser({ email: "x@example.com", password: "secret" }),
@@ -93,26 +68,27 @@ describe("users auth/profile/settings queries", () => {
       refreshToken: "r1",
       expiresAt: 123456,
     });
-    expect(signInWithPasswordMock).toHaveBeenCalledWith({
-      email: "x@example.com",
-      password: "secret",
-      options: undefined,
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/login", {
+      method: "POST",
+      body: { email: "x@example.com", password: "secret" },
     });
-    expect(apiRequestMock).not.toHaveBeenCalled();
-    expect(unwrapApiResponseMock).not.toHaveBeenCalled();
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Login failed",
+    );
   });
 
-  it("loginUser forwards captcha token to Supabase", async () => {
-    signInWithPasswordMock.mockResolvedValueOnce({
+  it("loginUser forwards captcha token to auth login endpoint", async () => {
+    const response = {
       data: {
-        session: {
-          access_token: "a1",
-          refresh_token: "r1",
-          expires_at: 123456,
-        },
+        accessToken: "a1",
+        refreshToken: "r1",
+        expiresAt: 123456,
       },
       error: null,
-    });
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
 
     await expect(
       loginUser({
@@ -125,95 +101,125 @@ describe("users auth/profile/settings queries", () => {
       refreshToken: "r1",
       expiresAt: 123456,
     });
-    expect(signInWithPasswordMock).toHaveBeenCalledWith({
-      email: "x@example.com",
-      password: "secret",
-      options: {
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/login", {
+      method: "POST",
+      body: {
+        email: "x@example.com",
+        password: "secret",
         captchaToken: "captcha-1",
       },
     });
-    expect(apiRequestMock).not.toHaveBeenCalled();
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Login failed",
+    );
   });
 
-  it("registerUser signs up via Supabase", async () => {
-    signUpMock.mockResolvedValueOnce({
-      data: { session: null },
+  it("registerUser posts signup payload to auth register endpoint", async () => {
+    const response = {
+      data: {
+        user: { id: "u1" },
+        session: null,
+        emailVerificationRequired: true,
+      },
       error: null,
-    });
+      status: 201,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
 
     await expect(
       registerUser({
         username: "user1",
         email: "u@example.com",
-        password: "secret",
+        password: "SecretPass123",
         locale: "de",
       }),
-    ).resolves.toEqual({ emailVerificationRequired: true });
-    expect(signUpMock).toHaveBeenCalledWith({
-      email: "u@example.com",
-      password: "secret",
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/confirm?next=/`,
-        data: {
-          username: "user1",
-          locale: "de",
-        },
+    ).resolves.toEqual(response.data);
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/register", {
+      method: "POST",
+      body: {
+        username: "user1",
+        email: "u@example.com",
+        password: "SecretPass123",
+        locale: "de",
       },
     });
-    expect(apiRequestMock).not.toHaveBeenCalled();
-    expect(unwrapApiResponseMock).not.toHaveBeenCalled();
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Registration failed",
+    );
   });
 
-  it("registerUser forwards captcha token to Supabase", async () => {
-    signUpMock.mockResolvedValueOnce({
-      data: { session: null },
+  it("registerUser forwards captcha token to auth register endpoint", async () => {
+    const response = {
+      data: {
+        user: { id: "u1" },
+        session: null,
+        emailVerificationRequired: true,
+      },
       error: null,
-    });
+      status: 201,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
 
     await expect(
       registerUser({
         username: "user1",
         email: "u@example.com",
-        password: "secret",
+        password: "SecretPass123",
         locale: "de",
         captchaToken: "captcha-2",
       }),
-    ).resolves.toEqual({ emailVerificationRequired: true });
-    expect(signUpMock).toHaveBeenCalledWith({
-      email: "u@example.com",
-      password: "secret",
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/confirm?next=/`,
+    ).resolves.toEqual(response.data);
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/register", {
+      method: "POST",
+      body: {
+        username: "user1",
+        email: "u@example.com",
+        password: "SecretPass123",
+        locale: "de",
         captchaToken: "captcha-2",
-        data: {
-          username: "user1",
-          locale: "de",
-        },
       },
     });
-    expect(apiRequestMock).not.toHaveBeenCalled();
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Registration failed",
+    );
   });
 
-  it("requestPasswordReset calls Supabase password reset", async () => {
-    resetPasswordForEmailMock.mockResolvedValueOnce({
+  it("requestPasswordReset posts request payload", async () => {
+    const response = {
+      data: { requested: true },
       error: null,
-    });
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
 
     await expect(
       requestPasswordReset({ email: "x@example.com" }),
     ).resolves.toEqual({
       requested: true,
     });
-    expect(resetPasswordForEmailMock).toHaveBeenCalledWith("x@example.com", {
-      redirectTo: `${window.location.origin}/auth/confirm?next=/auth/reset-password`,
-    });
-    expect(apiRequestMock).not.toHaveBeenCalled();
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/auth/password-reset/request",
+      {
+        method: "POST",
+        body: { email: "x@example.com" },
+      },
+    );
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Password reset request failed",
+    );
   });
 
-  it("requestPasswordReset forwards captcha token to Supabase", async () => {
-    resetPasswordForEmailMock.mockResolvedValueOnce({
+  it("requestPasswordReset forwards captcha token", async () => {
+    const response = {
+      data: { requested: true },
       error: null,
-    });
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
 
     await expect(
       requestPasswordReset({
@@ -223,20 +229,39 @@ describe("users auth/profile/settings queries", () => {
     ).resolves.toEqual({
       requested: true,
     });
-    expect(resetPasswordForEmailMock).toHaveBeenCalledWith("x@example.com", {
-      redirectTo: `${window.location.origin}/auth/confirm?next=/auth/reset-password`,
-      captchaToken: "captcha-3",
-    });
-    expect(apiRequestMock).not.toHaveBeenCalled();
+    expect(apiRequestMock).toHaveBeenCalledWith(
+      "/api/auth/password-reset/request",
+      {
+        method: "POST",
+        body: {
+          email: "x@example.com",
+          captchaToken: "captcha-3",
+        },
+      },
+    );
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Password reset request failed",
+    );
   });
 
-  it("logoutUser signs out via Supabase", async () => {
-    signOutMock.mockResolvedValueOnce({ error: null });
+  it("logoutUser posts logout request with session context", async () => {
+    const response = {
+      data: { success: true },
+      error: null,
+      status: 200,
+    };
+    apiRequestMock.mockResolvedValueOnce(response);
 
     await expect(logoutUser(session)).resolves.toEqual({ success: true });
-    expect(signOutMock).toHaveBeenCalledWith();
-    expect(apiRequestMock).not.toHaveBeenCalled();
-    expect(unwrapApiResponseMock).not.toHaveBeenCalled();
+    expect(apiRequestMock).toHaveBeenCalledWith("/api/auth/logout", {
+      method: "POST",
+      session,
+    });
+    expect(unwrapApiResponseMock).toHaveBeenCalledWith(
+      response,
+      "Logout failed",
+    );
   });
 
   it("exchangeAuthCode posts callback code", async () => {

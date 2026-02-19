@@ -1,9 +1,15 @@
 "use client";
 
-import Link from "next/link";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AuthCardPageContent,
+  AuthCardPageMain,
+} from "@/components/ui/page-shell";
+import { TextLink } from "@/components/ui/text-link";
+
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FeedbackMessage } from "@/components/common/feedback-message";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
   Card,
   CardContent,
@@ -11,9 +17,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { setSession } from "@/lib/client/session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
-import { getBrowserSupabaseClient } from "@/lib/supabase/browser-client";
-import { textLinkClassName } from "@/lib/utils/link";
+import {
+  exchangeAuthCode,
+  verifyAuthToken,
+} from "@/features/users/queries/users-auth.query";
 import {
   getAuthParamsFromUrl,
   getSessionTokensFromUrl,
@@ -33,17 +42,9 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
 
     async function run() {
       try {
-        const supabase = getBrowserSupabaseClient();
         const tokenSession = getSessionTokensFromUrl(window.location);
         if (tokenSession) {
-          const { error } = await supabase.auth.setSession({
-            access_token: tokenSession.accessToken,
-            refresh_token: tokenSession.refreshToken,
-          });
-          if (error) {
-            throw error;
-          }
-
+          setSession(tokenSession);
           window.history.replaceState({}, "", window.location.pathname);
           if (!cancelled) {
             router.replace("/");
@@ -53,13 +54,12 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
 
         const params = getAuthParamsFromUrl(window.location);
         if (params.code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(
-            params.code,
-          );
-          if (error) {
-            throw error;
-          }
-
+          const response = await exchangeAuthCode({ code: params.code });
+          setSession({
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+            expiresAt: response.expiresAt,
+          });
           window.history.replaceState({}, "", window.location.pathname);
           if (!cancelled) {
             router.replace("/");
@@ -68,12 +68,17 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
         }
 
         if (params.tokenHash && params.type) {
-          const { error } = await supabase.auth.verifyOtp({
-            token_hash: params.tokenHash,
+          const response = await verifyAuthToken({
+            tokenHash: params.tokenHash,
             type: params.type,
           });
-          if (error) {
-            throw error;
+
+          if (response.accessToken && response.refreshToken) {
+            setSession({
+              accessToken: response.accessToken,
+              refreshToken: response.refreshToken,
+              expiresAt: response.expiresAt,
+            });
           }
 
           window.history.replaceState({}, "", window.location.pathname);
@@ -105,29 +110,27 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
   }, [router, t]);
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))] px-4 py-12">
-      <div className="mx-auto w-full max-w-md">
+    <AuthCardPageMain>
+      <AuthCardPageContent>
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.authCallback.title")}</CardTitle>
             <CardDescription>{t("ui.authCallback.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm">
+          <CardContent stack={2} textStyle="sm">
             {errorMessage ? (
               <FeedbackMessage message={errorMessage} />
             ) : (
-              <div className="text-muted-foreground">
-                {t("ui.authCallback.processing")}
-              </div>
+              <UiDiv textStyle="muted">{t("ui.authCallback.processing")}</UiDiv>
             )}
             {errorMessage ? (
-              <Link href="/" className={`text-xs ${textLinkClassName}`}>
+              <TextLink href="/" size="xs">
                 {t("ui.nav.backToLogin")}
-              </Link>
+              </TextLink>
             ) : null}
           </CardContent>
         </Card>
-      </div>
-    </main>
+      </AuthCardPageContent>
+    </AuthCardPageMain>
   );
 }

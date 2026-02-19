@@ -1,11 +1,14 @@
 "use client";
 
+import { UiDiv } from "@/components/ui/html-elements";
+import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
+
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { EmptyState } from "@/components/common/empty-state";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { ListItemRow } from "@/components/common/list-item-row";
-import { StatusBadge } from "@/components/common/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { ListItemRow } from "@/components/ui/list-item-row";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -129,7 +132,7 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
   }
 
   if (!ready || !session) {
-    return <main className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   const queryError =
@@ -139,155 +142,151 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
   const feedback = message || queryError;
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-5xl px-4 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("ui.notifications.title")}</CardTitle>
-            <CardDescription>{t("ui.notifications.subtitle")}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
-              <StatusBadge
-                label={t("ui.notifications.unread", "Unread")}
-                tone="violet"
-              />
-              <span>{unreadCount}</span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={anyPending || unreadCount === 0}
-                onClick={async () => {
-                  setMessage("");
-                  try {
-                    await markAllReadMutation.mutateAsync();
-                    setMessage(t("ui.feedback.saved"));
-                  } catch (error) {
-                    setMessage(
-                      error instanceof Error
-                        ? error.message
-                        : t("ui.feedback.requestFailed"),
-                    );
-                  }
-                }}
-              >
-                {t("ui.notifications.markAllRead")}
-              </Button>
-            </div>
-
-            <FeedbackMessage message={feedback} />
-
-            {notificationsQuery.isLoading ? (
-              <div className="border-border bg-background/70 text-muted-foreground rounded-lg border p-3 text-xs">
-                {t("ui.loading.section")}
-              </div>
-            ) : notifications.length === 0 ? (
-              <EmptyState label={t("ui.feedback.empty")} />
-            ) : (
-              <div className="space-y-2">
-                {notifications.map((notification) => {
-                  const viewPath = getNotificationViewPath(notification);
-                  const canDecideMembership =
-                    notification.event_type === "campaign_invite" ||
-                    notification.event_type === "campaign_join_request";
-                  const eventLabel = getNotificationEventLabel(notification, t);
-                  const title = getNotificationDisplayTitle(notification, t);
-
-                  return (
-                    <ListItemRow
-                      key={notification.id}
-                      className={notification.is_read ? "opacity-80" : ""}
-                      actions={
-                        <>
-                          {canDecideMembership ? (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={anyPending}
-                              onClick={() =>
-                                void onDecide(notification, "accepted")
-                              }
-                            >
-                              {t("ui.actions.accept")}
-                            </Button>
-                          ) : null}
-                          {canDecideMembership ? (
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              disabled={anyPending}
-                              onClick={() =>
-                                void onDecide(notification, "rejected")
-                              }
-                            >
-                              {t("ui.actions.reject")}
-                            </Button>
-                          ) : null}
-                          {viewPath ? (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={anyPending}
-                              onClick={() => void onView(notification)}
-                            >
-                              {t("ui.actions.view")}
-                            </Button>
-                          ) : null}
-                          {!notification.is_read ? (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              disabled={anyPending}
-                              onClick={() =>
-                                void (async () => {
-                                  setMessage("");
-                                  try {
-                                    await markAsRead(notification);
-                                  } catch (error) {
-                                    setMessage(
-                                      error instanceof Error
-                                        ? error.message
-                                        : t("ui.feedback.requestFailed"),
-                                    );
-                                  }
-                                })()
-                              }
-                            >
-                              {t("ui.notifications.markRead")}
-                            </Button>
-                          ) : null}
-                        </>
-                      }
-                    >
-                      <div className="space-y-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <div className="text-sm font-medium">{title}</div>
-                          <StatusBadge
-                            label={eventLabel}
-                            tone={notificationTone(notification)}
-                          />
-                          {!notification.is_read ? (
-                            <StatusBadge
-                              label={t("ui.notifications.unread")}
-                              tone="violet"
-                            />
-                          ) : null}
-                        </div>
-                        <div className="text-muted-foreground text-xs">
-                          {formatNotificationTimestamp(
-                            notification.created_at,
-                            locale,
-                          )}
-                        </div>
-                      </div>
-                    </ListItemRow>
+    <AppPageMain maxWidth="5xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("ui.notifications.title")}</CardTitle>
+          <CardDescription>{t("ui.notifications.subtitle")}</CardDescription>
+        </CardHeader>
+        <CardContent stack={4}>
+          <UiDiv textStyle="muted-xs" wrapGap={2} contentAlign="center">
+            <StatusBadge
+              label={t("ui.notifications.unread", "Unread")}
+              tone="violet"
+            />
+            <span>{unreadCount}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={anyPending || unreadCount === 0}
+              onClick={async () => {
+                setMessage("");
+                try {
+                  await markAllReadMutation.mutateAsync();
+                  setMessage(t("ui.feedback.saved"));
+                } catch (error) {
+                  setMessage(
+                    error instanceof Error
+                      ? error.message
+                      : t("ui.feedback.requestFailed"),
                   );
-                })}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+                }
+              }}
+            >
+              {t("ui.notifications.markAllRead")}
+            </Button>
+          </UiDiv>
+
+          <FeedbackMessage message={feedback} />
+
+          {notificationsQuery.isLoading ? (
+            <UiDiv surface="info-box">{t("ui.loading.section")}</UiDiv>
+          ) : notifications.length === 0 ? (
+            <EmptyState label={t("ui.feedback.empty")} />
+          ) : (
+            <UiDiv stack={2}>
+              {notifications.map((notification) => {
+                const viewPath = getNotificationViewPath(notification);
+                const canDecideMembership =
+                  notification.event_type === "campaign_invite" ||
+                  notification.event_type === "campaign_join_request";
+                const eventLabel = getNotificationEventLabel(notification, t);
+                const title = getNotificationDisplayTitle(notification, t);
+
+                return (
+                  <ListItemRow
+                    key={notification.id}
+                    dimmed={notification.is_read}
+                    actions={
+                      <>
+                        {canDecideMembership ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={anyPending}
+                            onClick={() =>
+                              void onDecide(notification, "accepted")
+                            }
+                          >
+                            {t("ui.actions.accept")}
+                          </Button>
+                        ) : null}
+                        {canDecideMembership ? (
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            disabled={anyPending}
+                            onClick={() =>
+                              void onDecide(notification, "rejected")
+                            }
+                          >
+                            {t("ui.actions.reject")}
+                          </Button>
+                        ) : null}
+                        {viewPath ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={anyPending}
+                            onClick={() => void onView(notification)}
+                          >
+                            {t("ui.actions.view")}
+                          </Button>
+                        ) : null}
+                        {!notification.is_read ? (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={anyPending}
+                            onClick={() =>
+                              void (async () => {
+                                setMessage("");
+                                try {
+                                  await markAsRead(notification);
+                                } catch (error) {
+                                  setMessage(
+                                    error instanceof Error
+                                      ? error.message
+                                      : t("ui.feedback.requestFailed"),
+                                  );
+                                }
+                              })()
+                            }
+                          >
+                            {t("ui.notifications.markRead")}
+                          </Button>
+                        ) : null}
+                      </>
+                    }
+                  >
+                    <UiDiv stack={1}>
+                      <UiDiv wrapGap={2} contentAlign="center">
+                        <UiDiv textStyle="sm-medium">{title}</UiDiv>
+                        <StatusBadge
+                          label={eventLabel}
+                          tone={notificationTone(notification)}
+                        />
+                        {!notification.is_read ? (
+                          <StatusBadge
+                            label={t("ui.notifications.unread")}
+                            tone="violet"
+                          />
+                        ) : null}
+                      </UiDiv>
+                      <UiDiv textStyle="muted-xs">
+                        {formatNotificationTimestamp(
+                          notification.created_at,
+                          locale,
+                        )}
+                      </UiDiv>
+                    </UiDiv>
+                  </ListItemRow>
+                );
+              })}
+            </UiDiv>
+          )}
+        </CardContent>
+      </Card>
+    </AppPageMain>
   );
 }

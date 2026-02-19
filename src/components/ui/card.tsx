@@ -2,6 +2,18 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils/cn";
 
+type CardContentProps = React.ComponentProps<"div"> & {
+  stack?: number;
+  textStyle?: string;
+  paddingTop?: number;
+  paddingY?: number;
+  paddingX?: number;
+};
+
+type CardFooterProps = React.ComponentProps<"div"> & {
+  layout?: string;
+};
+
 function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
@@ -61,7 +73,20 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+function CardContent({
+  className,
+  stack: _stack,
+  textStyle: _textStyle,
+  paddingTop: _paddingTop,
+  paddingY: _paddingY,
+  paddingX: _paddingX,
+  ...props
+}: CardContentProps) {
+  void _stack;
+  void _textStyle;
+  void _paddingTop;
+  void _paddingY;
+  void _paddingX;
   return (
     <div
       data-slot="card-content"
@@ -71,7 +96,8 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   );
 }
 
-function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+function CardFooter({ className, layout: _layout, ...props }: CardFooterProps) {
+  void _layout;
   return (
     <div
       data-slot="card-footer"

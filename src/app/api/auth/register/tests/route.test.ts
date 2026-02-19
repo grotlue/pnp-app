@@ -188,7 +188,7 @@ describe("POST /api/auth/register", () => {
       email: "z@example.com",
       password: "SecretPass123",
       options: {
-        emailRedirectTo: undefined,
+        emailRedirectTo: "http://localhost/auth/confirm?next=/",
         data: {
           username: "z",
           locale: "de",

@@ -3,8 +3,9 @@ import {
   FormLabel,
   FormSelect,
   FormTextarea,
-} from "@/components/common/form-controls";
-import { VisibilityToggle } from "@/components/common/visibility-toggle";
+} from "@/components/ui/form-controls";
+import { VisibilityToggle } from "@/components/ui/visibility-toggle";
+import { UiDiv } from "@/components/ui/html-elements";
 
 type Translator = (key: string) => string;
 
@@ -59,7 +60,7 @@ export function UserFormFields({
   onChange,
 }: UserFormFieldsProps) {
   return (
-    <div className="grid gap-2">
+    <UiDiv gridGap={2}>
       <FormInput
         placeholder={t("ui.fields.email")}
         value={values.email}
@@ -80,7 +81,7 @@ export function UserFormFields({
         }
       />
       <FormTextarea
-        className="min-h-20"
+        size="md"
         placeholder={t("ui.fields.description")}
         value={values.description}
         onChange={(event) =>
@@ -96,7 +97,7 @@ export function UserFormFields({
         <option value="en">en</option>
         <option value="de">de</option>
       </FormSelect>
-    </div>
+    </UiDiv>
   );
 }
 
@@ -114,7 +115,7 @@ export function CampaignFormFields({
   onChange,
 }: CampaignFormFieldsProps) {
   return (
-    <div className="grid gap-2">
+    <UiDiv gridGap={2}>
       <FormLabel>{t("ui.admin.ownerLabel")}</FormLabel>
       <FormSelect
         value={values.ownerUserId}
@@ -134,7 +135,7 @@ export function CampaignFormFields({
         onChange={(event) => onChange({ ...values, title: event.target.value })}
       />
       <FormTextarea
-        className="min-h-20"
+        size="md"
         placeholder={t("ui.fields.campaignDescription")}
         value={values.description}
         onChange={(event) =>
@@ -148,7 +149,7 @@ export function CampaignFormFields({
         offLabel={t("ui.actions.off")}
         onToggle={() => onChange({ ...values, isPrivate: !values.isPrivate })}
       />
-    </div>
+    </UiDiv>
   );
 }
 
@@ -168,7 +169,7 @@ export function CharacterFormFields({
   onChange,
 }: CharacterFormFieldsProps) {
   return (
-    <div className="grid gap-2">
+    <UiDiv gridGap={2}>
       <FormLabel>{t("ui.admin.ownerLabel")}</FormLabel>
       <FormSelect
         value={values.ownerUserId}
@@ -228,7 +229,7 @@ export function CharacterFormFields({
         }
       />
       <FormTextarea
-        className="min-h-20"
+        size="md"
         placeholder={t("ui.fields.description")}
         value={values.description}
         onChange={(event) =>
@@ -242,6 +243,6 @@ export function CharacterFormFields({
         offLabel={t("ui.actions.off")}
         onToggle={() => onChange({ ...values, isPrivate: !values.isPrivate })}
       />
-    </div>
+    </UiDiv>
   );
 }

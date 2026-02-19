@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
-import { type ClientSession, getSession } from "@/lib/client/session";
+import {
+  type ClientSession,
+  getSession,
+  getSessionEventName,
+} from "@/lib/client/session";
 import { getBrowserSupabaseClient } from "@/lib/supabase/browser-client";
 
 function toClientSession(session: Session | null): ClientSession | null {
@@ -23,6 +27,17 @@ export function useClientSession() {
 
   useEffect(() => {
     let cancelled = false;
+    const sessionEventName = getSessionEventName();
+
+    const syncLocalFallbackSession = () => {
+      if (cancelled) {
+        return;
+      }
+      setSessionState(getSession());
+      setReady(true);
+    };
+
+    window.addEventListener(sessionEventName, syncLocalFallbackSession);
 
     async function init() {
       try {
@@ -33,7 +48,7 @@ export function useClientSession() {
         }
 
         if (!cancelled) {
-          setSessionState(toClientSession(data.session));
+          setSessionState(toClientSession(data.session) ?? getSession());
           setReady(true);
         }
 
@@ -43,11 +58,15 @@ export function useClientSession() {
           if (cancelled) {
             return;
           }
-          setSessionState(toClientSession(nextSession));
+          setSessionState(toClientSession(nextSession) ?? getSession());
           setReady(true);
         });
 
         return () => {
+          window.removeEventListener(
+            sessionEventName,
+            syncLocalFallbackSession,
+          );
           subscription.unsubscribe();
         };
       } catch {
@@ -55,7 +74,12 @@ export function useClientSession() {
           setSessionState(getSession());
           setReady(true);
         }
-        return () => {};
+        return () => {
+          window.removeEventListener(
+            sessionEventName,
+            syncLocalFallbackSession,
+          );
+        };
       }
     }
 
@@ -66,6 +90,7 @@ export function useClientSession() {
     return () => {
       cancelled = true;
       cleanup?.();
+      window.removeEventListener(sessionEventName, syncLocalFallbackSession);
     };
   }, []);
 

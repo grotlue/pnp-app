@@ -1,16 +1,21 @@
 "use client";
 
-import Image from "next/image";
+import { UiDiv } from "@/components/ui/html-elements";
+import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
+import { TextLink } from "@/components/ui/text-link";
+
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
-import { EmptyState } from "@/components/common/empty-state";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { IconActionButton } from "@/components/common/icon-action-button";
-import { ListItemRow } from "@/components/common/list-item-row";
-import { PageLoadingState } from "@/components/common/page-loading-state";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { IconActionButton } from "@/components/ui/icon-action-button";
+import { ListItemRow } from "@/components/ui/list-item-row";
+import { PageLoadingState } from "@/components/ui/page-loading-state";
 import { Button } from "@/components/ui/button";
+import { AvatarImage } from "@/components/ui/avatar-image";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   Card,
   CardContent,
@@ -29,7 +34,7 @@ import {
   type RelationshipTargetMode,
   UnassignCampaignModal,
 } from "@/page-modules/character-detail-modals";
-import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
+import { TitleWithPrivacy } from "@/components/ui/title-with-privacy";
 import { CharacterTypeBadge } from "@/features/characters/components/character-type-badge";
 import { useCharacterDetailScreen } from "@/features/characters/hooks/use-character-detail-screen";
 import { canManageCharacter, isAdmin } from "@/features/users/logic/role.logic";
@@ -39,7 +44,6 @@ import type {
 } from "@/features/relationships/types";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import { useClientSession } from "@/lib/client/use-client-session";
-import { textLinkClassName } from "@/lib/utils/link";
 
 type CharacterDetailScreenProps = {
   locale: AppLocale;
@@ -114,16 +118,14 @@ export function CharacterDetailPageView({
   }, [ready, router, session]);
 
   if (!ready || !session) {
-    return <main className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   if (detailQuery.isLoading || !detailQuery.data) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <main className="mx-auto w-full max-w-7xl px-4 py-8">
-          <PageLoadingState label={t("ui.loading.page")} />
-        </main>
-      </div>
+      <AppPageMain maxWidth="7xl">
+        <PageLoadingState label={t("ui.loading.page")} />
+      </AppPageMain>
     );
   }
 
@@ -228,8 +230,8 @@ export function CharacterDetailPageView({
     : relationshipTargetOptions;
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-7xl px-4 py-8">
+    <>
+      <AppPageMain maxWidth="7xl">
         <Card>
           <CardHeader>
             <CardTitle>
@@ -243,75 +245,65 @@ export function CharacterDetailPageView({
               {t("ui.characterDetail.subtitle")}
             </CardDescription>
             {isForeignAdminView ? (
-              <div className="border-destructive/40 bg-destructive/10 text-destructive inline-flex w-fit rounded-md border px-2 py-1 text-xs font-medium">
+              <UiDiv surface="danger-chip">
                 {t("ui.admin.foreignItemLabel")}
-              </div>
+              </UiDiv>
             ) : null}
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-[200px_1fr]">
-              <div className="border-border bg-muted/30 overflow-hidden rounded-lg border">
+          <CardContent stack={4}>
+            <UiDiv gridPreset="character-detail">
+              <UiDiv surface="avatar-frame">
                 {avatarUrl ? (
-                  <Image
-                    src={avatarUrl}
-                    alt={character.name}
-                    width={200}
-                    height={200}
-                    className="h-[200px] w-full object-cover"
-                  />
+                  <AvatarImage src={avatarUrl} alt={character.name} />
                 ) : (
-                  <div className="text-muted-foreground flex h-[200px] items-center justify-center text-xs">
-                    {t("ui.characterDetail.noImage")}
-                  </div>
+                  <AspectRatio ratio={1}>
+                    <UiDiv surface="avatar-fallback">
+                      {t("ui.characterDetail.noImage")}
+                    </UiDiv>
+                  </AspectRatio>
                 )}
-              </div>
-              <div className="space-y-2 text-sm">
-                <div>
+              </UiDiv>
+              <UiDiv stack={2} textStyle="sm">
+                <UiDiv>
                   <strong>{t("ui.fields.characterName")}</strong>:{" "}
                   {character.name}
-                </div>
-                <div>
+                </UiDiv>
+                <UiDiv>
                   <strong>{t("ui.fields.characterAge")}</strong>:{" "}
                   {character.age ?? "-"}
-                </div>
-                <div>
+                </UiDiv>
+                <UiDiv>
                   <strong>{t("ui.fields.type")}</strong>:{" "}
                   <CharacterTypeBadge type={character.type} t={t} />
-                </div>
-                <div>
+                </UiDiv>
+                <UiDiv>
                   <strong>{t("ui.admin.ownerLabel")}</strong>:{" "}
                   {ownerUser?.role === "admin" ? (
                     <span>{ownerUser.username ?? character.owner_user_id}</span>
                   ) : (
-                    <Link
-                      href={`/users/${character.owner_user_id}`}
-                      className={textLinkClassName}
-                    >
+                    <TextLink href={`/users/${character.owner_user_id}`}>
                       {ownerUser?.username ?? character.owner_user_id}
-                    </Link>
+                    </TextLink>
                   )}
-                </div>
-                <div>
+                </UiDiv>
+                <UiDiv>
                   <strong>{t("ui.characterDetail.assignedCampaign")}</strong>:{" "}
                   {assignedCampaign ? (
-                    <Link
-                      href={`/campaigns/${assignedCampaign.id}`}
-                      className={textLinkClassName}
-                    >
+                    <TextLink href={`/campaigns/${assignedCampaign.id}`}>
                       {assignedCampaign.title}
-                    </Link>
+                    </TextLink>
                   ) : (
                     "-"
                   )}
-                </div>
-                <div>
+                </UiDiv>
+                <UiDiv>
                   <strong>{t("ui.fields.description")}</strong>:{" "}
                   {character.description || "-"}
-                </div>
-              </div>
-            </div>
+                </UiDiv>
+              </UiDiv>
+            </UiDiv>
 
-            <div className="flex flex-wrap gap-2">
+            <UiDiv wrapGap={2}>
               {canManage && !character.campaign_id ? (
                 <Button variant="outline" onClick={() => setAssignOpen(true)}>
                   {t("ui.characterDetail.assignCampaign")}
@@ -337,14 +329,14 @@ export function CharacterDetailPageView({
                   {t("ui.characterDetail.addRelationship")}
                 </Button>
               ) : null}
-            </div>
+            </UiDiv>
 
             <FeedbackMessage message={feedback} />
 
-            <div className="space-y-2">
-              <div className="text-sm font-medium">
+            <UiDiv stack={2}>
+              <UiDiv textStyle="sm-medium">
                 {t("ui.characterDetail.relationships")}
-              </div>
+              </UiDiv>
               {mergedRelations.map((entry, index) => (
                 <ListItemRow
                   key={`${entry.other_character_id ?? `external-${index}`}`}
@@ -377,8 +369,8 @@ export function CharacterDetailPageView({
                     ) : null
                   }
                 >
-                  <button
-                    className="text-left"
+                  <Button
+                    variant="ghost-row"
                     onClick={async () => {
                       setMessage("");
                       try {
@@ -398,27 +390,24 @@ export function CharacterDetailPageView({
                       }
                     }}
                   >
-                    <div className="font-medium">
+                    <UiDiv textStyle="medium">
                       {entry.other_character_name}
-                    </div>
-                    <div className="text-muted-foreground text-xs">
+                    </UiDiv>
+                    <UiDiv textStyle="muted-xs">
                       {entry.other_character_deleted
                         ? t("ui.characterDetail.externalOneWay")
                         : ""}
-                    </div>
-                  </button>
+                    </UiDiv>
+                  </Button>
                 </ListItemRow>
               ))}
               {mergedRelations.length === 0 ? (
-                <EmptyState
-                  label={t("ui.feedback.empty")}
-                  className="bg-background p-3"
-                />
+                <EmptyState label={t("ui.feedback.empty")} variant="panel" />
               ) : null}
-            </div>
+            </UiDiv>
           </CardContent>
         </Card>
-      </main>
+      </AppPageMain>
 
       <AssignCampaignModal
         t={t}
@@ -603,6 +592,6 @@ export function CharacterDetailPageView({
           setDetailContent(null);
         }}
       />
-    </div>
+    </>
   );
 }

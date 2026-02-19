@@ -11,6 +11,7 @@ type IconActionButtonProps = {
   icon: LucideIcon;
   variant?: ButtonVariant;
   size?: ButtonSize;
+  dataTestId?: string;
   disabled?: boolean;
   onClick?: () => void;
 };
@@ -29,6 +30,7 @@ export function IconActionButton({
   icon: Icon,
   variant = "outline",
   size = "icon-sm",
+  dataTestId,
   disabled,
   onClick,
 }: IconActionButtonProps) {
@@ -38,11 +40,12 @@ export function IconActionButton({
       size={size}
       aria-label={label}
       title={label}
+      data-testid={dataTestId}
       disabled={disabled}
       onClick={onClick}
     >
       <Icon />
-      <span className="sr-only">{label}</span>
+      <span>{label}</span>
     </Button>
   );
 }
@@ -59,21 +62,11 @@ export function IconActionLinkButton({
   const badgeLabel = badgeCount > 99 ? "99+" : String(badgeCount);
 
   return (
-    <Button
-      asChild
-      variant={variant}
-      size={size}
-      title={label}
-      className="relative"
-    >
+    <Button asChild variant={variant} size={size} title={label}>
       <Link href={href} aria-label={label}>
         <Icon />
-        {showBadge ? (
-          <span className="border-background bg-destructive absolute -top-2 -right-2 inline-flex min-w-5 items-center justify-center rounded-full border px-1.5 text-[10px] leading-none font-semibold text-white">
-            {badgeLabel}
-          </span>
-        ) : null}
-        <span className="sr-only">{label}</span>
+        {showBadge ? <span>{badgeLabel}</span> : null}
+        <span>{label}</span>
       </Link>
     </Button>
   );

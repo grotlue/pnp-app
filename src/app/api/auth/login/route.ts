@@ -4,6 +4,7 @@ import {
   normalizeCaptchaToken,
 } from "@/lib/api/auth-validation";
 import { hasRequiredFields } from "@/lib/api/validation";
+import { resolveRuntimeEnvironment } from "@/lib/features/feature-flags";
 import { isCaptchaRequiredForAuth } from "@/server/auth/auth-hardening";
 import { setSessionCookies } from "@/server/auth/session-cookie";
 import { enforceRateLimit } from "@/server/rate-limit/enforce-rate-limit";
@@ -16,10 +17,16 @@ type LoginBody = {
 };
 
 export async function POST(request: Request) {
+  const runtimeEnvironment = resolveRuntimeEnvironment();
+  const loginRateLimit =
+    runtimeEnvironment === "preview" || runtimeEnvironment === "production"
+      ? 10
+      : 50;
+
   const rateLimited = await enforceRateLimit({
     request,
     route: "auth:login",
-    limit: 10,
+    limit: loginRateLimit,
     windowMs: 5 * 60_000,
   });
   if (rateLimited) {

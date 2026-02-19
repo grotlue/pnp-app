@@ -1,5 +1,11 @@
-import { FormInput, FormSelect } from "@/components/common/form-controls";
-import { Button } from "@/components/ui/button";
+import { SearchIcon } from "lucide-react";
+import { FormSelect } from "@/components/ui/form-controls";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 type ListControlOption = {
   value: string;
@@ -34,16 +40,21 @@ export function ListControls({
   filterOptions = [],
 }: ListControlsProps) {
   return (
-    <div className="border-border bg-background/70 space-y-3 rounded-lg border p-3">
-      <div className="grid gap-2 md:grid-cols-[1fr_220px]">
-        <FormInput
-          value={searchValue}
-          onChange={(event) => onSearchChange(event.target.value)}
-          placeholder={searchPlaceholder}
-          aria-label={searchPlaceholder}
-        />
-        <div className="grid gap-1">
-          <label className="text-muted-foreground text-xs">{sortLabel}</label>
+    <div>
+      <div>
+        <InputGroup>
+          <InputGroupAddon align="inline-start">
+            <SearchIcon />
+          </InputGroupAddon>
+          <InputGroupInput
+            value={searchValue}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder={searchPlaceholder}
+            aria-label={searchPlaceholder}
+          />
+        </InputGroup>
+        <div>
+          <label>{sortLabel}</label>
           <FormSelect
             value={sortValue}
             onChange={(event) => onSortChange(event.target.value)}
@@ -62,21 +73,25 @@ export function ListControls({
       filterLabel &&
       filterValue &&
       onFilterChange ? (
-        <div className="space-y-1">
-          <div className="text-muted-foreground text-xs">{filterLabel}</div>
-          <div className="flex flex-wrap gap-2">
+        <div>
+          <div>{filterLabel}</div>
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            size="sm"
+            value={filterValue}
+            onValueChange={(value) => {
+              if (value) {
+                onFilterChange(value);
+              }
+            }}
+          >
             {filterOptions.map((option) => (
-              <Button
-                key={option.value}
-                type="button"
-                variant={option.value === filterValue ? "default" : "outline"}
-                size="sm"
-                onClick={() => onFilterChange(option.value)}
-              >
+              <ToggleGroupItem key={option.value} value={option.value}>
                 {option.label}
-              </Button>
+              </ToggleGroupItem>
             ))}
-          </div>
+          </ToggleGroup>
         </div>
       ) : null}
     </div>

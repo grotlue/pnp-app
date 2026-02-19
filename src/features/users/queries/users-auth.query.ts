@@ -1,6 +1,5 @@
 import { apiRequest, unwrapApiResponse } from "@/lib/client/api";
 import type { ClientSession } from "@/lib/client/session";
-import { getBrowserSupabaseClient } from "@/lib/supabase/browser-client";
 import type {
   AuthCodeExchangeResponse,
   AuthVerifyResponse,
@@ -9,37 +8,16 @@ import type {
   RegisterResponse,
 } from "../types";
 
-function getBrowserOrigin(): string {
-  if (typeof window === "undefined") {
-    throw new Error("Auth actions must run in the browser.");
-  }
-
-  return window.location.origin;
-}
-
 export async function loginUser(input: {
   email: string;
   password: string;
   captchaToken?: string;
 }): Promise<LoginResponse> {
-  const supabase = getBrowserSupabaseClient();
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: input.email,
-    password: input.password,
-    options: input.captchaToken
-      ? { captchaToken: input.captchaToken }
-      : undefined,
+  const response = await apiRequest<LoginResponse>("/api/auth/login", {
+    method: "POST",
+    body: input,
   });
-
-  if (error || !data.session) {
-    throw new Error(error?.message ?? "Login failed");
-  }
-
-  return {
-    accessToken: data.session.access_token,
-    refreshToken: data.session.refresh_token,
-    expiresAt: data.session.expires_at,
-  };
+  return unwrapApiResponse(response, "Login failed");
 }
 
 export async function registerUser(input: {
@@ -49,58 +27,35 @@ export async function registerUser(input: {
   locale: "en" | "de";
   captchaToken?: string;
 }): Promise<RegisterResponse> {
-  const supabase = getBrowserSupabaseClient();
-  const redirectTo = `${getBrowserOrigin()}/auth/confirm?next=/`;
-  const { data, error } = await supabase.auth.signUp({
-    email: input.email,
-    password: input.password,
-    options: {
-      emailRedirectTo: redirectTo,
-      ...(input.captchaToken ? { captchaToken: input.captchaToken } : {}),
-      data: {
-        username: input.username,
-        locale: input.locale,
-      },
-    },
+  const response = await apiRequest<RegisterResponse>("/api/auth/register", {
+    method: "POST",
+    body: input,
   });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return {
-    emailVerificationRequired: data.session === null,
-  };
+  return unwrapApiResponse(response, "Registration failed");
 }
 
 export async function requestPasswordReset(input: {
   email: string;
   captchaToken?: string;
 }): Promise<{ requested: boolean }> {
-  const supabase = getBrowserSupabaseClient();
-  const redirectTo = `${getBrowserOrigin()}/auth/confirm?next=/auth/reset-password`;
-  const { error } = await supabase.auth.resetPasswordForEmail(input.email, {
-    redirectTo,
-    ...(input.captchaToken ? { captchaToken: input.captchaToken } : {}),
-  });
-
-  if (error) {
-    throw new Error(error.message);
-  }
-
-  return { requested: true };
+  const response = await apiRequest<{ requested: boolean }>(
+    "/api/auth/password-reset/request",
+    {
+      method: "POST",
+      body: input,
+    },
+  );
+  return unwrapApiResponse(response, "Password reset request failed");
 }
 
 export async function logoutUser(
   session: ClientSession,
 ): Promise<{ success: boolean }> {
-  void session;
-  const supabase = getBrowserSupabaseClient();
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    throw new Error(error.message);
-  }
-  return { success: true };
+  const response = await apiRequest<{ success: boolean }>("/api/auth/logout", {
+    method: "POST",
+    session,
+  });
+  return unwrapApiResponse(response, "Logout failed");
 }
 
 export async function exchangeAuthCode(input: {

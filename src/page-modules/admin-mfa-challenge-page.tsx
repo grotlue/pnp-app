@@ -1,12 +1,16 @@
 "use client";
 
+import { UiDiv } from "@/components/ui/html-elements";
+import { AppPageMain } from "@/components/ui/page-shell";
+import { TextLink } from "@/components/ui/text-link";
+
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { FormInput } from "@/components/common/form-controls";
-import { PageLoadingState } from "@/components/common/page-loading-state";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { FormInput } from "@/components/ui/form-controls";
+import { PageLoadingState } from "@/components/ui/page-loading-state";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,7 +33,6 @@ import { queryKeys } from "@/lib/client/query-keys";
 import { setSession as persistSession } from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n";
-import { textLinkClassName } from "@/lib/utils/link";
 
 type AdminMfaChallengePageProps = {
   locale: AppLocale;
@@ -155,72 +158,68 @@ export function AdminMfaChallengePageView({
     (isAdminUser && adminMfaQuery.isLoading)
   ) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <main className="mx-auto w-full max-w-4xl px-4 py-8">
-          <PageLoadingState label={t("ui.loading.page")} className="py-6" />
-        </main>
-      </div>
+      <AppPageMain maxWidth="4xl">
+        <PageLoadingState label={t("ui.loading.page")} density="section" />
+      </AppPageMain>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-md px-4 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("ui.settings.mfaTitle")}</CardTitle>
-            <CardDescription>
-              {t("ui.settings.mfaStepUpRequired")}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {decision.kind === "setup" ? (
-              <>
-                <FeedbackMessage message={t("ui.settings.mfaRequired")} />
-                <div className="flex items-center gap-2">
-                  <Link href={appRoutes.settings}>
-                    <Button>{t("ui.menu.settings")}</Button>
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    onClick={() => void adminMfaQuery.refetch()}
-                  >
-                    {t("ui.actions.reload")}
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <>
-                <FormInput
-                  value={code}
-                  placeholder={t("ui.fields.mfaCode")}
-                  onChange={(event) => setCode(event.target.value)}
-                />
+    <AppPageMain maxWidth="md">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("ui.settings.mfaTitle")}</CardTitle>
+          <CardDescription>
+            {t("ui.settings.mfaStepUpRequired")}
+          </CardDescription>
+        </CardHeader>
+        <CardContent stack={3}>
+          {decision.kind === "setup" ? (
+            <>
+              <FeedbackMessage message={t("ui.settings.mfaRequired")} />
+              <UiDiv inlineGap={2} contentAlign="center">
+                <Link href={appRoutes.settings}>
+                  <Button>{t("ui.menu.settings")}</Button>
+                </Link>
                 <Button
-                  disabled={busy || !code || decision.kind !== "challenge"}
-                  onClick={() => void onVerify()}
+                  variant="ghost"
+                  onClick={() => void adminMfaQuery.refetch()}
                 >
-                  {t("ui.actions.verifyMfa")}
+                  {t("ui.actions.reload")}
                 </Button>
-                <div className="text-xs">
-                  <Link href={appRoutes.home} className={textLinkClassName}>
-                    {t("ui.nav.backToLogin")}
-                  </Link>
-                </div>
-              </>
-            )}
+              </UiDiv>
+            </>
+          ) : (
+            <>
+              <FormInput
+                value={code}
+                placeholder={t("ui.fields.mfaCode")}
+                onChange={(event) => setCode(event.target.value)}
+              />
+              <Button
+                disabled={busy || !code || decision.kind !== "challenge"}
+                onClick={() => void onVerify()}
+              >
+                {t("ui.actions.verifyMfa")}
+              </Button>
+              <UiDiv textStyle="xs">
+                <TextLink href={appRoutes.home}>
+                  {t("ui.nav.backToLogin")}
+                </TextLink>
+              </UiDiv>
+            </>
+          )}
 
-            <FeedbackMessage
-              message={
-                message ||
-                (adminMfaQuery.error instanceof Error
-                  ? adminMfaQuery.error.message
-                  : "")
-              }
-            />
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+          <FeedbackMessage
+            message={
+              message ||
+              (adminMfaQuery.error instanceof Error
+                ? adminMfaQuery.error.message
+                : "")
+            }
+          />
+        </CardContent>
+      </Card>
+    </AppPageMain>
   );
 }

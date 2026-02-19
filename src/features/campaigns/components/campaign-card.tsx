@@ -1,11 +1,11 @@
-import Link from "next/link";
 import { Pencil, Trash2 } from "lucide-react";
-import { IconActionButton } from "@/components/common/icon-action-button";
-import { ListItemRow } from "@/components/common/list-item-row";
-import { StatusBadge } from "@/components/common/status-badge";
-import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
-import { textLinkClassName } from "@/lib/utils/link";
+import { IconActionButton } from "@/components/ui/icon-action-button";
+import { ListItemRow } from "@/components/ui/list-item-row";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { TitleWithPrivacy } from "@/components/ui/title-with-privacy";
 import type { Campaign } from "../types";
+import { UiMutedText } from "@/components/ui/html-elements";
+import { TextLink } from "@/components/ui/text-link";
 
 type CampaignCardProps = {
   campaign: Campaign;
@@ -50,21 +50,19 @@ export function CampaignCard({
         ) : null
       }
     >
-      <Link href={`/campaigns/${campaign.id}`} className={textLinkClassName}>
+      <TextLink href={`/campaigns/${campaign.id}`}>
         <TitleWithPrivacy
           title={campaign.title}
           isPrivate={campaign.is_private}
-          className="font-medium"
+          weight="medium"
         />
-        <div className="text-muted-foreground text-xs">
-          {campaign.description || "-"}
-        </div>
+        <UiMutedText size="xs">{campaign.description || "-"}</UiMutedText>
         <StatusBadge
           label={isOwner ? ownerLabel : roleLabel}
           tone={isOwner ? "green" : "violet"}
-          className="mt-1"
+          withTopSpacing
         />
-      </Link>
+      </TextLink>
     </ListItemRow>
   );
 }

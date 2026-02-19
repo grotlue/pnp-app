@@ -1,6 +1,7 @@
 import { requireAuth } from "@/server/auth/require-auth";
 import { normalizeAndValidateEmail } from "@/lib/api/auth-validation";
 import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/config";
 
 type UpdateEmailBody = {
   newEmail?: string;
@@ -21,13 +22,33 @@ export async function PATCH(request: Request) {
     return jsonError(400, "invalid_payload", "valid newEmail is required");
   }
 
-  const { data, error } = await auth.context.authClient.auth.updateUser({
-    email,
+  const response = await fetch(`${getSupabaseUrl()}/auth/v1/user`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      apikey: getSupabaseAnonKey(),
+      Authorization: `Bearer ${auth.context.accessToken}`,
+    },
+    body: JSON.stringify({ email }),
   });
 
-  if (error) {
-    return jsonError(400, "email_update_failed", error.message);
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => null)) as {
+      msg?: string;
+      error?: string;
+      error_description?: string;
+    } | null;
+
+    return jsonError(
+      400,
+      "email_update_failed",
+      payload?.msg ??
+        payload?.error_description ??
+        payload?.error ??
+        "Failed to update email",
+    );
   }
 
-  return jsonOk({ user: data.user });
+  const user = await response.json().catch(() => null);
+  return jsonOk({ user });
 }
