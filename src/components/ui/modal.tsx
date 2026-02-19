@@ -23,16 +23,32 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
       }}
     >
       <Dialog.Portal>
-        <Dialog.Backdrop data-slot="modal-backdrop" />
-        <Dialog.Viewport data-slot="modal-viewport">
-          <Dialog.Popup data-slot="modal-popup">
-            <div>
-              <Dialog.Title>{title}</Dialog.Title>
-              <Dialog.Close nativeButton>×</Dialog.Close>
+        <Dialog.Backdrop
+          data-slot="modal-backdrop"
+          className="fixed inset-0 z-50 bg-black/50"
+        />
+        <Dialog.Viewport
+          data-slot="modal-viewport"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
+          <Dialog.Popup
+            data-slot="modal-popup"
+            className="border-border bg-background pointer-events-auto w-full max-w-2xl rounded-xl border p-4 shadow-xl"
+          >
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <Dialog.Title className="text-lg font-semibold">
+                {title}
+              </Dialog.Title>
+              <Dialog.Close
+                nativeButton
+                className="border-input bg-background hover:bg-accent inline-flex h-8 w-8 items-center justify-center rounded-md border text-sm leading-none"
+              >
+                ×
+              </Dialog.Close>
             </div>
-            <div>{children}</div>
+            <div className="space-y-4">{children}</div>
             {footer ? (
-              <div>
+              <div className="mt-4">
                 <ButtonGroup>{footer}</ButtonGroup>
               </div>
             ) : null}
