@@ -1,12 +1,16 @@
 "use client";
 
+import { UiDiv } from "@/components/ui/html-elements";
+import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
+
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { ListControls } from "@/components/common/list-controls";
-import { Modal } from "@/components/common/modal";
-import { PageLoadingState } from "@/components/common/page-loading-state";
-import { PaginationControls } from "@/components/common/pagination-controls";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { ListControls } from "@/components/ui/list-controls";
+import { ConfirmAlertDialog } from "@/components/ui/confirm-alert-dialog";
+import { Modal } from "@/components/ui/modal";
+import { PageLoadingState } from "@/components/ui/page-loading-state";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -102,23 +106,23 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
   ];
 
   if (!ready || !session) {
-    return <main className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-7xl px-4 py-8">
+    <>
+      <AppPageMain maxWidth="7xl">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.campaigns.title")}</CardTitle>
             <CardDescription>{t("ui.campaigns.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
+          <CardContent stack={4}>
+            <UiDiv wrapGap={2}>
               <Button onClick={() => setCreateOpen(true)}>
                 {t("ui.campaigns.create")}
               </Button>
-            </div>
+            </UiDiv>
 
             <FeedbackMessage message={feedback} />
 
@@ -135,7 +139,7 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
             {campaignsQuery.isLoading ? (
               <PageLoadingState
                 label={t("ui.loading.section")}
-                className="py-3 text-xs"
+                density="compact"
               />
             ) : (
               <>
@@ -175,7 +179,7 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
             )}
           </CardContent>
         </Card>
-      </main>
+      </AppPageMain>
 
       <Modal
         open={createOpen}
@@ -269,44 +273,37 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
         />
       </Modal>
 
-      <Modal
+      <ConfirmAlertDialog
         open={deleteCampaign !== null}
         title={t("ui.campaigns.deleteTitle")}
-        onClose={() => setDeleteCampaign(null)}
-        footer={
-          <>
-            <Button variant="outline" onClick={() => setDeleteCampaign(null)}>
-              {t("ui.actions.close")}
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={anyPending || !deleteCampaign}
-              onClick={async () => {
-                if (!deleteCampaign) {
-                  return;
-                }
+        description={t("ui.campaigns.deleteConfirm")}
+        cancelLabel={t("ui.actions.close")}
+        confirmLabel={t("ui.actions.confirmDelete")}
+        confirmDisabled={anyPending || !deleteCampaign}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteCampaign(null);
+          }
+        }}
+        onConfirm={async () => {
+          if (!deleteCampaign) {
+            return;
+          }
 
-                setMessage("");
-                try {
-                  await deleteMutation.mutateAsync(deleteCampaign.id);
-                  setDeleteCampaign(null);
-                  setMessage(t("ui.feedback.deleted"));
-                } catch (error) {
-                  setMessage(
-                    error instanceof Error
-                      ? error.message
-                      : t("ui.feedback.requestFailed"),
-                  );
-                }
-              }}
-            >
-              {t("ui.actions.confirmDelete")}
-            </Button>
-          </>
-        }
-      >
-        <div className="text-sm">{t("ui.campaigns.deleteConfirm")}</div>
-      </Modal>
-    </div>
+          setMessage("");
+          try {
+            await deleteMutation.mutateAsync(deleteCampaign.id);
+            setDeleteCampaign(null);
+            setMessage(t("ui.feedback.deleted"));
+          } catch (error) {
+            setMessage(
+              error instanceof Error
+                ? error.message
+                : t("ui.feedback.requestFailed"),
+            );
+          }
+        }}
+      />
+    </>
   );
 }

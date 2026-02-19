@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
-import { cn } from "@/lib/utils/cn";
 
 type SectionBoxProps = {
   title?: string;
   children: ReactNode;
   className?: string;
   titleClassName?: string;
+  stack?: 1 | 2 | 3 | 4;
+  textStyle?: "sm";
 };
 
 export function SectionBox({
@@ -13,19 +14,14 @@ export function SectionBox({
   children,
   className,
   titleClassName,
+  stack: _stack,
+  textStyle: _textStyle,
 }: SectionBoxProps) {
+  void _stack;
+  void _textStyle;
   return (
-    <div
-      className={cn(
-        "border-border bg-background/70 rounded-lg border p-3",
-        className,
-      )}
-    >
-      {title ? (
-        <div className={cn("mb-2 text-sm font-medium", titleClassName)}>
-          {title}
-        </div>
-      ) : null}
+    <div className={className}>
+      {title ? <div className={titleClassName}>{title}</div> : null}
       {children}
     </div>
   );

@@ -1,4 +1,4 @@
-import { StatusBadge } from "@/components/common/status-badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 type Translator = (key: string, fallback?: string) => string;
 

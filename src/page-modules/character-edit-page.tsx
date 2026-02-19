@@ -1,16 +1,19 @@
 "use client";
 
+import { UiDiv } from "@/components/ui/html-elements";
+import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FeedbackMessage } from "@/components/common/feedback-message";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
   FormInput,
   FormSelect,
   FormTextarea,
-} from "@/components/common/form-controls";
+} from "@/components/ui/form-controls";
 import { ImageUploadField } from "@/components/common/image-upload-field";
-import { Modal } from "@/components/common/modal";
-import { VisibilityToggle } from "@/components/common/visibility-toggle";
+import { Modal } from "@/components/ui/modal";
+import { VisibilityToggle } from "@/components/ui/visibility-toggle";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -104,7 +107,7 @@ export function CharacterEditPageView({
   );
 
   if (!ready || !session || !editQuery.data) {
-    return <main className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   const character = editQuery.data.character;
@@ -127,35 +130,33 @@ export function CharacterEditPageView({
     isAdmin(editQuery.data.me.profile.role) && !isOwner;
   if (!canManage) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <main className="mx-auto w-full max-w-4xl px-4 py-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("ui.feedback.requestFailed")}</CardTitle>
-              <CardDescription>
-                {t("ui.characterEdit.noPermission")}
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </main>
-      </div>
+      <AppPageMain maxWidth="4xl">
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("ui.feedback.requestFailed")}</CardTitle>
+            <CardDescription>
+              {t("ui.characterEdit.noPermission")}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </AppPageMain>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-4xl px-4 py-8">
+    <>
+      <AppPageMain maxWidth="4xl">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.characterEdit.title")}</CardTitle>
             <CardDescription>{t("ui.characterEdit.subtitle")}</CardDescription>
             {isForeignAdminView ? (
-              <div className="border-destructive/40 bg-destructive/10 text-destructive inline-flex w-fit rounded-md border px-2 py-1 text-xs font-medium">
+              <UiDiv surface="danger-chip">
                 {t("ui.admin.foreignItemLabel")}
-              </div>
+              </UiDiv>
             ) : null}
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent stack={3}>
             <FormInput
               value={form.name}
               placeholder={t("ui.fields.characterName")}
@@ -205,7 +206,7 @@ export function CharacterEditPageView({
               onResolvePreviewUrl={resolveCharacterImagePreview}
             />
             <FormTextarea
-              className="min-h-24"
+              size="lg"
               value={form.description}
               placeholder={t("ui.fields.description")}
               onChange={(event) =>
@@ -228,7 +229,7 @@ export function CharacterEditPageView({
               }
             />
 
-            <div className="flex flex-wrap gap-2">
+            <UiDiv wrapGap={2}>
               <Button
                 disabled={anyPending}
                 onClick={() =>
@@ -267,12 +268,12 @@ export function CharacterEditPageView({
               <Button variant="destructive" onClick={() => setDeleteOpen(true)}>
                 {t("ui.actions.delete")}
               </Button>
-            </div>
+            </UiDiv>
 
             <FeedbackMessage message={message} />
           </CardContent>
         </Card>
-      </main>
+      </AppPageMain>
 
       <Modal
         open={deleteOpen}
@@ -307,8 +308,8 @@ export function CharacterEditPageView({
           </>
         }
       >
-        <div className="text-sm">{t("ui.characters.deleteConfirm")}</div>
+        <UiDiv textStyle="sm">{t("ui.characters.deleteConfirm")}</UiDiv>
       </Modal>
-    </div>
+    </>
   );
 }

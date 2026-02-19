@@ -264,6 +264,8 @@
       "setupMfa": "MFA-Setup starten",
       "verifyMfa": "MFA-Code prüfen",
       "deleteAccount": "Konto löschen",
+      "toggleThemeToDark": "Auf Dunkelmodus wechseln",
+      "toggleThemeToLight": "Auf Hellmodus wechseln",
       "on": "an",
       "off": "aus"
     },

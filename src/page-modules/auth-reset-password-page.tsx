@@ -1,10 +1,17 @@
 "use client";
 
-import Link from "next/link";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AuthCardPageContent,
+  AuthCardPageMain,
+} from "@/components/ui/page-shell";
+import { TextLink } from "@/components/ui/text-link";
+
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { FormInput } from "@/components/common/form-controls";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { FormInput } from "@/components/ui/form-controls";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,7 +23,6 @@ import {
 } from "@/components/ui/card";
 import { setSession } from "@/lib/client/session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
-import { textLinkClassName } from "@/lib/utils/link";
 import {
   confirmPasswordReset,
   exchangeAuthCode,
@@ -161,18 +167,16 @@ export function AuthResetPasswordPageView({
   }
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))] px-4 py-12">
-      <div className="mx-auto w-full max-w-md">
+    <AuthCardPageMain>
+      <AuthCardPageContent>
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.authReset.title")}</CardTitle>
             <CardDescription>{t("ui.authReset.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent stack={3}>
             {resolving ? (
-              <div className="text-muted-foreground text-sm">
-                {t("ui.authReset.processing")}
-              </div>
+              <UiDiv textStyle="muted-sm">{t("ui.authReset.processing")}</UiDiv>
             ) : sessionTokens ? (
               <FormInput
                 type="password"
@@ -188,7 +192,7 @@ export function AuthResetPasswordPageView({
 
             <FeedbackMessage message={message} />
           </CardContent>
-          <CardFooter className="flex-col items-stretch gap-2">
+          <CardFooter layout="column-stretch">
             {sessionTokens ? (
               <Button
                 disabled={busy || !newPassword}
@@ -198,19 +202,15 @@ export function AuthResetPasswordPageView({
               </Button>
             ) : (
               <Button asChild variant="outline">
-                <Link href="/password-reset" className={textLinkClassName}>
-                  {t("ui.nav.passwordReset")}
-                </Link>
+                <Link href="/password-reset">{t("ui.nav.passwordReset")}</Link>
               </Button>
             )}
-            <div className="text-xs">
-              <Link className={textLinkClassName} href="/">
-                {t("ui.nav.backToLogin")}
-              </Link>
-            </div>
+            <UiDiv textStyle="xs">
+              <TextLink href="/">{t("ui.nav.backToLogin")}</TextLink>
+            </UiDiv>
           </CardFooter>
         </Card>
-      </div>
-    </main>
+      </AuthCardPageContent>
+    </AuthCardPageMain>
   );
 }

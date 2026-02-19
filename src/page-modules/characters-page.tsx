@@ -1,28 +1,32 @@
 "use client";
 
+import { UiDiv } from "@/components/ui/html-elements";
+import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
+import { TextLink } from "@/components/ui/text-link";
+
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil, Trash2 } from "lucide-react";
-import { EmptyState } from "@/components/common/empty-state";
-import { FeedbackMessage } from "@/components/common/feedback-message";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { ConfirmAlertDialog } from "@/components/ui/confirm-alert-dialog";
 import {
   FormInput,
   FormSelect,
   FormTextarea,
-} from "@/components/common/form-controls";
+} from "@/components/ui/form-controls";
 import {
   IconActionButton,
   IconActionLinkButton,
-} from "@/components/common/icon-action-button";
-import { ListControls } from "@/components/common/list-controls";
-import { ListItemRow } from "@/components/common/list-item-row";
-import { Modal } from "@/components/common/modal";
-import { PageLoadingState } from "@/components/common/page-loading-state";
-import { PaginationControls } from "@/components/common/pagination-controls";
-import { TitleWithPrivacy } from "@/components/common/title-with-privacy";
-import { VisibilityToggle } from "@/components/common/visibility-toggle";
+} from "@/components/ui/icon-action-button";
+import { ListControls } from "@/components/ui/list-controls";
+import { ListItemRow } from "@/components/ui/list-item-row";
+import { Modal } from "@/components/ui/modal";
+import { PageLoadingState } from "@/components/ui/page-loading-state";
+import { PaginationControls } from "@/components/ui/pagination-controls";
+import { TitleWithPrivacy } from "@/components/ui/title-with-privacy";
+import { VisibilityToggle } from "@/components/ui/visibility-toggle";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -44,7 +48,6 @@ import { useMeQuery } from "@/features/users/hooks/use-me-query";
 import { queryKeys } from "@/lib/client/query-keys";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
-import { textLinkClassName } from "@/lib/utils/link";
 import {
   clampListPage,
   DEFAULT_LIST_PAGE_SIZE,
@@ -141,33 +144,31 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
   ];
 
   if (!ready || !session) {
-    return <main className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   if (meQuery.isLoading) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-        <main className="mx-auto w-full max-w-7xl px-4 py-8">
-          <PageLoadingState label={t("ui.loading.page")} />
-        </main>
-      </div>
+      <AppPageMain maxWidth="7xl">
+        <PageLoadingState label={t("ui.loading.page")} />
+      </AppPageMain>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-7xl px-4 py-8">
+    <>
+      <AppPageMain maxWidth="7xl">
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.characters.title")}</CardTitle>
             <CardDescription>{t("ui.characters.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-2">
+          <CardContent stack={4}>
+            <UiDiv wrapGap={2}>
               <Button onClick={() => setCreateOpen(true)}>
                 {t("ui.characters.create")}
               </Button>
-            </div>
+            </UiDiv>
 
             <FeedbackMessage message={feedback} />
 
@@ -181,7 +182,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
               sortOptions={sortOptions}
             />
 
-            <div className="space-y-2">
+            <UiDiv stack={2}>
               {pagedCharacters.map((character) => {
                 const campaign = character.campaign_id
                   ? (campaignsById.get(character.campaign_id) ?? null)
@@ -206,36 +207,33 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
                       </>
                     }
                   >
-                    <div className="space-y-1">
-                      <Link
-                        className={textLinkClassName}
-                        href={`/characters/${character.id}`}
-                      >
+                    <UiDiv stack={1}>
+                      <TextLink href={`/characters/${character.id}`}>
                         <TitleWithPrivacy
                           title={character.name}
                           isPrivate={character.is_private}
-                          className="font-medium"
+                          weight="medium"
                         />
-                      </Link>
-                      <div className="flex flex-wrap items-center gap-2">
+                      </TextLink>
+                      <UiDiv wrapGap={2} contentAlign="center">
                         <CharacterTypeBadge type={character.type} t={t} />
                         {campaign ? (
-                          <Link
+                          <TextLink
                             href={`/campaigns/${campaign.id}`}
-                            className={`${textLinkClassName} text-xs`}
+                            size="xs"
                           >
                             {campaign.title}
-                          </Link>
+                          </TextLink>
                         ) : null}
-                      </div>
-                    </div>
+                      </UiDiv>
+                    </UiDiv>
                   </ListItemRow>
                 );
               })}
               {sortedAndFilteredCharacters.length === 0 ? (
                 <EmptyState label={t("ui.feedback.empty")} />
               ) : null}
-            </div>
+            </UiDiv>
 
             <PaginationControls
               page={safePage}
@@ -248,7 +246,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
             />
           </CardContent>
         </Card>
-      </main>
+      </AppPageMain>
 
       <Modal
         open={createOpen}
@@ -296,7 +294,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
           </>
         }
       >
-        <div className="grid gap-2">
+        <UiDiv gridGap={2}>
           <FormSelect
             value={createForm.type}
             onChange={(event) =>
@@ -323,7 +321,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
             }
           />
           <FormTextarea
-            className="min-h-24"
+            size="lg"
             placeholder={t("ui.fields.description")}
             value={createForm.description}
             onChange={(event) =>
@@ -342,48 +340,39 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
               setCreateForm((prev) => ({ ...prev, isPrivate: !prev.isPrivate }))
             }
           />
-        </div>
+        </UiDiv>
       </Modal>
 
-      <Modal
+      <ConfirmAlertDialog
         open={deleteTarget !== null}
         title={t("ui.characters.deleteTitle")}
-        onClose={() => setDeleteTarget(null)}
-        footer={
-          <>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-              {t("ui.actions.close")}
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={anyPending || !deleteTarget}
-              onClick={() =>
-                void (async () => {
-                  if (!deleteTarget) {
-                    return;
-                  }
+        description={t("ui.characters.deleteConfirm")}
+        cancelLabel={t("ui.actions.close")}
+        confirmLabel={t("ui.actions.confirmDelete")}
+        confirmDisabled={anyPending || !deleteTarget}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTarget(null);
+          }
+        }}
+        onConfirm={async () => {
+          if (!deleteTarget) {
+            return;
+          }
 
-                  try {
-                    await deleteMutation.mutateAsync(deleteTarget.id);
-                    setDeleteTarget(null);
-                    setMessage(t("ui.feedback.deleted"));
-                  } catch (error) {
-                    setMessage(
-                      error instanceof Error
-                        ? error.message
-                        : t("ui.feedback.requestFailed"),
-                    );
-                  }
-                })()
-              }
-            >
-              {t("ui.actions.confirmDelete")}
-            </Button>
-          </>
-        }
-      >
-        <div className="text-sm">{t("ui.characters.deleteConfirm")}</div>
-      </Modal>
-    </div>
+          try {
+            await deleteMutation.mutateAsync(deleteTarget.id);
+            setDeleteTarget(null);
+            setMessage(t("ui.feedback.deleted"));
+          } catch (error) {
+            setMessage(
+              error instanceof Error
+                ? error.message
+                : t("ui.feedback.requestFailed"),
+            );
+          }
+        }}
+      />
+    </>
   );
 }

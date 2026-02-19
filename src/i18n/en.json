@@ -264,6 +264,8 @@
       "setupMfa": "Start MFA setup",
       "verifyMfa": "Verify MFA code",
       "deleteAccount": "Delete account",
+      "toggleThemeToDark": "Switch to dark mode",
+      "toggleThemeToLight": "Switch to light mode",
       "on": "on",
       "off": "off"
     },
