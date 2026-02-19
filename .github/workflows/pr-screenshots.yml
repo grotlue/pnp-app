@@ -159,16 +159,15 @@ jobs:
             mkdir -p "${dest_dir}"
             cp -f "${GITHUB_WORKSPACE}/${SCREENSHOT_DIR}"/*.png "${dest_dir}/"
 
-            cat > vercel.json <<'EOF'
-            {
-              "$schema": "https://openapi.vercel.sh/vercel.json",
-              "git": {
-                "deploymentEnabled": {
-                  "**": false
-                }
-              }
-            }
-            EOF
+            printf '%s\n' \
+              '{' \
+              '  "$schema": "https://openapi.vercel.sh/vercel.json",' \
+              '  "git": {' \
+              '    "deploymentEnabled": {' \
+              '      "**": false' \
+              '    }' \
+              '  }' \
+              '}' > vercel.json
 
             git add "${dest_dir}" vercel.json
             if ! git diff --cached --quiet; then
