@@ -50,11 +50,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
+
+      - name: Setup Yarn 4.12.0
+        if: ${{ steps.targets.outputs.has_targets == 'true' }}
+        run: |
+          corepack enable
+          corepack prepare yarn@4.12.0 --activate
+          yarn --version
 
       - name: Install dependencies
         if: ${{ steps.targets.outputs.has_targets == 'true' }}
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
 
       - name: Setup Supabase CLI (E2E fixture backend)
         if: ${{ steps.targets.outputs.has_targets == 'true' }}
