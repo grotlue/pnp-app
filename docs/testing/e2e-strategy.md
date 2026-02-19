@@ -25,6 +25,24 @@ yarn supabase:env:local
 yarn test:e2e --grep @smoke
 ```
 
+## Mailpit for Auth Flows
+
+Password-reset and verification-flow E2E scenarios read links from local Mailpit.
+
+- No separate setup is required when using local Supabase.
+- Start command: `yarn supabase:start`
+- Default Mailpit base URL: `http://127.0.0.1:54324`
+- Tests use Mailpit HTTP API under `/api/v1/*`.
+- Optional override for non-default setups:
+  - `E2E_MAILPIT_BASE_URL=http://<host>:<port>`
+
+If Mailpit is not reachable, restart the local stack:
+
+```bash
+yarn supabase:stop
+yarn supabase:start
+```
+
 ## PR Requirement
 
 Flow-impacting PRs must fill the E2E Coverage Matrix in the [PR template](../../.github/pull_request_template.md).

@@ -58,6 +58,11 @@ yarn supabase:start
 yarn supabase:env:local
 ```
 
+The local Supabase stack also starts Mailpit for auth emails.
+
+- Mailpit UI/API base URL: `http://127.0.0.1:54324`
+- Used by E2E auth flows to read confirmation/reset links.
+
 3. Run app:
 
 ```bash

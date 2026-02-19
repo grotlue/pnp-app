@@ -19,6 +19,10 @@ E2E tests verify critical user-visible happy paths end-to-end (UI + API + auth/s
   - `yarn supabase:start`
   - `yarn supabase:db:reset`
   - `yarn supabase:env:local`
+- Auth email flows (register confirmation/password reset) use local Mailpit:
+  - Mailpit runs as part of `yarn supabase:start` (no separate setup step).
+  - Default URL/API base: `http://127.0.0.1:54324`
+  - Optional override: `E2E_MAILPIT_BASE_URL=http://<host>:<port>`
 
 ## Scenario ID Contract
 
