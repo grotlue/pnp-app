@@ -318,6 +318,7 @@ jobs:
         github.event_name == 'pull_request' &&
         github.event.pull_request.base.ref == 'main' &&
         github.event.pull_request.head.repo.full_name == github.repository &&
+        !startsWith(github.event.pull_request.head.ref, 'pr-screenshot-preview') &&
         (
           github.event.action == 'synchronize' ||
           (github.event.action == 'labeled' && github.event.label.name == 'preview-deploy') ||
@@ -336,4 +337,4 @@ jobs:
             --url "https://api.github.com/repos/${{ github.repository }}/actions/workflows/deploy-pr-preview.yml/dispatches" \
             --header "Accept: application/vnd.github+json" \
             --header "Authorization: Bearer $GITHUB_TOKEN" \
-            --data '{"ref":"main","inputs":{"checkout_ref":"${{ github.event.pull_request.head.sha }}","pr_number":"${{ github.event.pull_request.number }}","pr_head_sha":"${{ github.event.pull_request.head.sha }}"}}'
+            --data '{"ref":"main","inputs":{"checkout_ref":"${{ github.event.pull_request.head.sha }}","pr_number":"${{ github.event.pull_request.number }}","pr_head_sha":"${{ github.event.pull_request.head.sha }}","pr_head_ref":"${{ github.event.pull_request.head.ref }}"}}'

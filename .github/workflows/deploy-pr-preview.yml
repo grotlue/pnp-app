@@ -15,6 +15,10 @@ on:
         description: Pull request head SHA.
         required: true
         type: string
+      pr_head_ref:
+        description: Pull request head branch name.
+        required: true
+        type: string
 
 permissions:
   actions: read
@@ -28,6 +32,7 @@ concurrency:
 
 jobs:
   deploy_preview:
+    if: ${{ !startsWith(github.event.inputs.pr_head_ref, 'pr-screenshot-preview') }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: preview
