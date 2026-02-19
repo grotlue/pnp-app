@@ -28,7 +28,12 @@ test("FLOW-CAMPAIGNS-CREATE @smoke @campaigns creates a new campaign from the ca
     .fill(campaignDescription);
   await modal.getByRole("button", { name: "Create" }).click({ force: true });
 
-  await expect(page.getByText("Created successfully.")).toBeVisible();
+  await expect(
+    page
+      .getByRole("main")
+      .getByText("Created successfully.", { exact: true })
+      .first(),
+  ).toBeVisible();
   await expect(page.getByRole("link", { name: campaignTitle })).toBeVisible();
 });
 
@@ -49,7 +54,12 @@ test("FLOW-CHARACTERS-CREATE-EDIT @smoke @characters creates and edits a charact
   await modal.getByPlaceholder("Character name").fill(characterName);
   await modal.getByRole("button", { name: "Create" }).click({ force: true });
 
-  await expect(page.getByText("Created successfully.")).toBeVisible();
+  await expect(
+    page
+      .getByRole("main")
+      .getByText("Created successfully.", { exact: true })
+      .first(),
+  ).toBeVisible();
   await page.getByRole("link", { name: characterName }).first().click();
 
   await expect(page).toHaveURL(/\/characters\/[0-9a-f-]+$/);
