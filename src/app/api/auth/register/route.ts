@@ -8,9 +8,13 @@ import { resolveSafeRedirectUrl } from "@/lib/api/security";
 import { hasRequiredFields } from "@/lib/api/validation";
 import { isFeatureEnabled } from "@/lib/features/feature-flags";
 import { detectLocaleFromAcceptLanguage } from "@/lib/i18n";
-import { isCaptchaRequiredForAuth } from "@/server/auth/auth-hardening";
+import {
+  isCaptchaRequiredForAuth,
+  isPreviewAuthEmailDeliveryDisabled,
+} from "@/server/auth/auth-hardening";
 import { setSessionCookies } from "@/server/auth/session-cookie";
 import { enforceRateLimit } from "@/server/rate-limit/enforce-rate-limit";
+import { createServiceRoleSupabaseClient } from "@/server/supabase/service-role-client";
 import { createServerSupabaseClient } from "@/server/supabase/server-client";
 
 type RegisterBody = {
@@ -57,8 +61,52 @@ export async function POST(request: Request) {
     body.locale ??
     detectLocaleFromAcceptLanguage(request.headers.get("accept-language"));
 
+  if (isPreviewAuthEmailDeliveryDisabled()) {
+    const serviceClient = createServiceRoleSupabaseClient();
+    const { error: createError } = await serviceClient.auth.admin.createUser({
+      email,
+      password: body.password,
+      email_confirm: true,
+      user_metadata: {
+        username: body.username,
+        locale: signupLocale,
+      },
+    });
+    if (createError) {
+      return jsonError(400, "register_failed", createError.message);
+    }
+
+    const client = createServerSupabaseClient();
+    const { data, error } = await client.auth.signInWithPassword({
+      email,
+      password: body.password,
+    });
+    if (error || !data.session) {
+      return jsonError(
+        400,
+        "register_failed",
+        error?.message ?? "Sign-in failed",
+      );
+    }
+
+    const response = jsonOk(
+      {
+        user: data.user,
+        session: data.session,
+        emailVerificationRequired: false,
+      },
+      201,
+    );
+
+    return setSessionCookies(response, {
+      accessToken: data.session.access_token,
+      refreshToken: data.session.refresh_token,
+      expiresAt: data.session.expires_at,
+    });
+  }
+
   const client = createServerSupabaseClient();
-  const redirectTo = resolveSafeRedirectUrl(request, "/auth/callback");
+  const redirectTo = resolveSafeRedirectUrl(request, "/auth/confirm?next=/");
 
   const { data, error } = await client.auth.signUp({
     email,

@@ -43,6 +43,12 @@ Optional hardening flags (recommended in preview/production):
 - `NEXT_PUBLIC_AUTH_CAPTCHA_MODE`
 - `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
 
+Preview-only auth email control:
+
+- `PREVIEW_AUTH_EMAILS_DISABLED`
+  - Default behavior in `APP_ENV=preview`: `true` (app does not trigger outgoing auth emails).
+  - Set to `false` if preview should use normal Supabase auth email delivery again.
+
 ## Release Checklist
 
 1. Merge validated PR into `production`.

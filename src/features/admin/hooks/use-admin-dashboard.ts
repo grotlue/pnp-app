@@ -35,6 +35,7 @@ export function useAdminDashboard(session: ClientSession | null) {
     queryKey: queryKeys.adminBootstrap(tokenKey),
     enabled: Boolean(session),
     staleTime: 30_000,
+    retry: false,
     queryFn: async () => {
       if (!session) {
         throw new Error("Missing session");

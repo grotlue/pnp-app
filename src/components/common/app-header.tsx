@@ -3,11 +3,17 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, LogOut, Settings, Shield, User } from "lucide-react";
+import { Bell, LogOut, Moon, Settings, Shield, Sun, User } from "lucide-react";
 import {
   IconActionButton,
   IconActionLinkButton,
-} from "@/components/common/icon-action-button";
+} from "@/components/ui/icon-action-button";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from "@/components/ui/navigation-menu";
 import {
   clearLocaleCookie,
   readLocaleCookie,
@@ -20,6 +26,7 @@ import { logoutUser } from "@/features/users/queries/users-auth.query";
 import { useNotificationsUnreadCount } from "@/features/notifications/hooks/use-notifications-unread-count";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
 import { appNavigationRoutes, appRoutes } from "@/app/router";
+import { useThemePreference } from "@/lib/client/theme-provider";
 
 type AppHeaderProps = {
   locale: AppLocale;
@@ -39,6 +46,7 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
   const notificationsUnreadCountQuery = useNotificationsUnreadCount(session);
   const unreadNotifications =
     notificationsUnreadCountQuery.data?.unreadCount ?? 0;
+  const { themeMode, toggleThemePreference } = useThemePreference();
 
   useEffect(() => {
     if (!profileLocale) {
@@ -78,27 +86,37 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
         <Link href={appRoutes.home} className="mr-2 font-semibold">
           pnp-app
         </Link>
-        <nav className="flex flex-wrap items-center gap-2">
-          {appNavigationRoutes.map((item) => {
-            const active =
-              currentPath === item.href ||
-              currentPath.startsWith(`${item.href}/`);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`rounded-md px-3 py-1.5 text-sm ${
-                  active
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-foreground"
-                }`}
-              >
-                {t(item.key)}
-              </Link>
-            );
-          })}
-        </nav>
+        <NavigationMenu
+          viewport={false}
+          className="max-w-full flex-1 justify-start"
+        >
+          <NavigationMenuList className="flex-wrap justify-start gap-2">
+            {appNavigationRoutes.map((item) => {
+              const active =
+                currentPath === item.href ||
+                currentPath.startsWith(`${item.href}/`);
+              return (
+                <NavigationMenuItem key={item.href}>
+                  <NavigationMenuLink asChild active={active}>
+                    <Link href={item.href}>{t(item.key)}</Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              );
+            })}
+          </NavigationMenuList>
+        </NavigationMenu>
         <div className="ml-auto flex items-center gap-1">
+          <IconActionButton
+            label={
+              themeMode === "dark"
+                ? t("ui.actions.toggleThemeToLight")
+                : t("ui.actions.toggleThemeToDark")
+            }
+            icon={themeMode === "dark" ? Sun : Moon}
+            variant="ghost"
+            dataTestId="theme-toggle"
+            onClick={toggleThemePreference}
+          />
           <IconActionLinkButton
             label={t("ui.menu.notifications")}
             icon={Bell}

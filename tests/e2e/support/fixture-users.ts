@@ -1,15 +1,15 @@
 export const E2E_USERS = {
   admin: {
     email: "admin@pnp.test",
-    password: "admin",
+    password: "AdminSecure123",
   },
   smokePlayer: {
     email: "solo1.local@pnp.test",
-    password: "DevPass123!",
+    password: "PlayerSecure123",
   },
   playerOne: {
     email: "player1.local@pnp.test",
-    password: "DevPass123!",
+    password: "PlayerSecure123",
   },
 } as const;
 

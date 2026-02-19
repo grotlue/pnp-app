@@ -1,13 +1,16 @@
 "use client";
 
+import { UiDiv } from "@/components/ui/html-elements";
+import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FeedbackMessage } from "@/components/common/feedback-message";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
   FormInput,
   FormSelect,
   FormTextarea,
-} from "@/components/common/form-controls";
+} from "@/components/ui/form-controls";
 import { ImageUploadField } from "@/components/common/image-upload-field";
 import { Button } from "@/components/ui/button";
 import {
@@ -146,77 +149,75 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
   }
 
   if (!ready || !session) {
-    return <main className="min-h-screen" />;
+    return <PageViewport />;
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))]">
-      <main className="mx-auto w-full max-w-4xl px-4 py-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("ui.profile.title")}</CardTitle>
-            <CardDescription>{t("ui.profile.subtitle")}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <ImageUploadField
-              value={form.avatarPath}
-              label={t("ui.fields.profileImage")}
-              previewAlt={t("ui.fields.profileImage")}
-              hint={t("ui.imageUpload.hint")}
-              emptyLabel={t("ui.imageUpload.empty")}
-              uploadLabel={t("ui.imageUpload.upload")}
-              replaceLabel={t("ui.imageUpload.replace")}
-              removeLabel={t("ui.imageUpload.remove")}
-              uploadingLabel={t("ui.imageUpload.uploading")}
-              invalidTypeLabel={t("ui.imageUpload.invalidType")}
-              invalidDimensionsLabel={t("ui.imageUpload.invalidDimensions")}
-              invalidFileSizeLabel={t("ui.imageUpload.invalidFileSize")}
-              disabled={busy}
-              onChange={(avatarPath) =>
-                setForm((prev) => ({ ...prev, avatarPath }))
-              }
-              onUpload={uploadProfileImage}
-              onResolvePreviewUrl={resolveProfileImagePreview}
-            />
-            <FormInput
-              value={form.username}
-              placeholder={t("ui.fields.username")}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, username: event.target.value }))
-              }
-            />
-            <FormSelect
-              value={form.locale}
-              onChange={(event) =>
-                setForm((prev) => ({
-                  ...prev,
-                  locale: event.target.value as "en" | "de",
-                }))
-              }
-            >
-              <option value="en">English</option>
-              <option value="de">Deutsch</option>
-            </FormSelect>
-            <FormTextarea
-              className="min-h-24"
-              value={form.description}
-              placeholder={t("ui.fields.description")}
-              onChange={(event) =>
-                setForm((prev) => ({
-                  ...prev,
-                  description: event.target.value,
-                }))
-              }
-            />
-            <div className="flex gap-2">
-              <Button disabled={busy} onClick={save}>
-                {t("ui.actions.save")}
-              </Button>
-            </div>
-            <FeedbackMessage message={message} />
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+    <AppPageMain maxWidth="4xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("ui.profile.title")}</CardTitle>
+          <CardDescription>{t("ui.profile.subtitle")}</CardDescription>
+        </CardHeader>
+        <CardContent stack={3}>
+          <ImageUploadField
+            value={form.avatarPath}
+            label={t("ui.fields.profileImage")}
+            previewAlt={t("ui.fields.profileImage")}
+            hint={t("ui.imageUpload.hint")}
+            emptyLabel={t("ui.imageUpload.empty")}
+            uploadLabel={t("ui.imageUpload.upload")}
+            replaceLabel={t("ui.imageUpload.replace")}
+            removeLabel={t("ui.imageUpload.remove")}
+            uploadingLabel={t("ui.imageUpload.uploading")}
+            invalidTypeLabel={t("ui.imageUpload.invalidType")}
+            invalidDimensionsLabel={t("ui.imageUpload.invalidDimensions")}
+            invalidFileSizeLabel={t("ui.imageUpload.invalidFileSize")}
+            disabled={busy}
+            onChange={(avatarPath) =>
+              setForm((prev) => ({ ...prev, avatarPath }))
+            }
+            onUpload={uploadProfileImage}
+            onResolvePreviewUrl={resolveProfileImagePreview}
+          />
+          <FormInput
+            value={form.username}
+            placeholder={t("ui.fields.username")}
+            onChange={(event) =>
+              setForm((prev) => ({ ...prev, username: event.target.value }))
+            }
+          />
+          <FormSelect
+            value={form.locale}
+            onChange={(event) =>
+              setForm((prev) => ({
+                ...prev,
+                locale: event.target.value as "en" | "de",
+              }))
+            }
+          >
+            <option value="en">English</option>
+            <option value="de">Deutsch</option>
+          </FormSelect>
+          <FormTextarea
+            size="lg"
+            value={form.description}
+            placeholder={t("ui.fields.description")}
+            onChange={(event) =>
+              setForm((prev) => ({
+                ...prev,
+                description: event.target.value,
+              }))
+            }
+          />
+          <UiDiv inlineGap={2}>
+            <Button disabled={busy} onClick={save}>
+              {t("ui.actions.save")}
+            </Button>
+          </UiDiv>
+          <FeedbackMessage message={message} />
+        </CardContent>
+      </Card>
+    </AppPageMain>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { VercelToolbar } from "@vercel/toolbar/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { RootBody } from "@/components/ui/root-body";
 import { resolveSpeedInsightsEnabled } from "@/lib/features/performance-observability";
 import { resolveVercelToolbarEnabled } from "@/lib/features/vercel-toolbar";
 import { getTranslator } from "@/lib/i18n/index";
@@ -39,13 +40,11 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 
   return (
     <html lang={locale}>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <RootBody fontVariables={[geistSans.variable, geistMono.variable]}>
         {children}
         {enableToolbar ? <VercelToolbar /> : null}
         {enableSpeedInsights ? <SpeedInsights /> : null}
-      </body>
+      </RootBody>
     </html>
   );
 }

@@ -9,7 +9,7 @@ on:
       - ready_for_review
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 concurrency:
@@ -50,11 +50,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
+
+      - name: Setup Yarn 4.12.0
+        if: ${{ steps.targets.outputs.has_targets == 'true' }}
+        run: |
+          corepack enable
+          corepack prepare yarn@4.12.0 --activate
+          yarn --version
 
       - name: Install dependencies
         if: ${{ steps.targets.outputs.has_targets == 'true' }}
-        run: yarn install --frozen-lockfile
+        run: yarn install --immutable
 
       - name: Setup Supabase CLI (E2E fixture backend)
         if: ${{ steps.targets.outputs.has_targets == 'true' }}
@@ -109,7 +115,84 @@ jobs:
           path: artifacts/pr-screenshots
           if-no-files-found: ignore
 
-      - name: Comment screenshot artifact on PR
+      - name: Publish inline screenshot previews
+        if: ${{ always() && steps.targets.outputs.has_targets == 'true' }}
+        id: inline_previews
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PREVIEW_BRANCH: pr-screenshot-previews
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SCREENSHOT_DIR: artifacts/pr-screenshots
+        run: |
+          set -euo pipefail
+
+          if ! compgen -G "${SCREENSHOT_DIR}/*.png" > /dev/null; then
+            {
+              echo "images_markdown<<__EOF__"
+              echo "- none (no screenshots were captured)"
+              echo "__EOF__"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          tmp_dir="$(mktemp -d)"
+          remote_url="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          if git ls-remote --exit-code --heads "${remote_url}" "${PREVIEW_BRANCH}" >/dev/null 2>&1; then
+            git clone --depth=1 --branch "${PREVIEW_BRANCH}" "${remote_url}" "${tmp_dir}"
+          else
+            git clone --depth=1 "${remote_url}" "${tmp_dir}"
+            (
+              cd "${tmp_dir}"
+              git checkout --orphan "${PREVIEW_BRANCH}"
+              git rm -rf . >/dev/null 2>&1 || true
+            )
+          fi
+
+          (
+            cd "${tmp_dir}"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+            dest_dir="pr-${PR_NUMBER}"
+            rm -rf "${dest_dir}"
+            mkdir -p "${dest_dir}"
+            cp -f "${GITHUB_WORKSPACE}/${SCREENSHOT_DIR}"/*.png "${dest_dir}/"
+
+            printf '%s\n' \
+              '{' \
+              '  "$schema": "https://openapi.vercel.sh/vercel.json",' \
+              '  "git": {' \
+              '    "deploymentEnabled": {' \
+              '      "**": false' \
+              '    }' \
+              '  }' \
+              '}' > vercel.json
+
+            git add "${dest_dir}" vercel.json
+            if ! git diff --cached --quiet; then
+              git commit -m "chore(screenshots): update PR ${PR_NUMBER} previews (${GITHUB_SHA})"
+              git push origin "${PREVIEW_BRANCH}"
+            fi
+
+            images_markdown="- none"
+            if compgen -G "${dest_dir}/*.png" > /dev/null; then
+              images_markdown="$(
+                for file in $(find "${dest_dir}" -maxdepth 1 -type f -name '*.png' -exec basename {} \; | sort); do
+                  image_url="https://github.com/${GITHUB_REPOSITORY}/raw/${PREVIEW_BRANCH}/${dest_dir}/${file}"
+                  printf -- "- \`%s\`\n\n![%s](%s)\n\n" "${file}" "${file}" "${image_url}"
+                done
+              )"
+            fi
+
+            {
+              echo "images_markdown<<__EOF__"
+              echo "${images_markdown}"
+              echo "__EOF__"
+            } >> "${GITHUB_OUTPUT}"
+          )
+
+      - name: Comment inline screenshots on PR
         if: ${{ always() }}
         uses: actions/github-script@v7
         env:
@@ -121,14 +204,12 @@ jobs:
           CHANGED_FILES_MD: ${{ steps.targets.outputs.changed_files_markdown }}
           HAS_UNMAPPED_FILES: ${{ steps.targets.outputs.has_unmapped_files }}
           UNMAPPED_FILES_MD: ${{ steps.targets.outputs.unmapped_files_markdown }}
-          ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
+          INLINE_IMAGES_MD: ${{ steps.inline_previews.outputs.images_markdown }}
         with:
           script: |
             const marker = '<!-- pr-screenshots -->';
             const issue_number = context.issue.number;
             const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const artifactId = process.env.ARTIFACT_ID;
-            const artifactUrl = artifactId ? `${runUrl}/artifacts/${artifactId}` : null;
             const status = process.env.JOB_STATUS ?? 'unknown';
             const hasTargets = process.env.HAS_TARGETS === 'true';
             const targetsMd = process.env.TARGETS_MD ?? '- none';
@@ -137,22 +218,21 @@ jobs:
             const changedFilesMd = process.env.CHANGED_FILES_MD ?? '- none';
             const hasUnmappedFiles = process.env.HAS_UNMAPPED_FILES === 'true';
             const unmappedFilesMd = process.env.UNMAPPED_FILES_MD ?? '- none';
+            const inlineImagesMd = process.env.INLINE_IMAGES_MD ?? '- none';
 
             const lines = [
               marker,
               `PR screenshots status: \`${status}\``,
               `Workflow run: ${runUrl}`,
-              hasTargets
-                ? artifactUrl
-                  ? `Artifact: [pr-screenshots](${artifactUrl})`
-                  : 'Artifact: not available (check workflow logs).'
-                : 'Artifact: skipped (no relevant UI targets changed).',
               '',
               'Detected target groups:',
               targetsMd,
               '',
               'Detected extra routes:',
               extraRoutesMd,
+              '',
+              'Inline screenshots:',
+              hasTargets ? inlineImagesMd : '- skipped (no relevant UI targets changed).',
               '',
               'Expected screenshots:',
               expectedFilesMd,

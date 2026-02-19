@@ -1,14 +1,14 @@
 import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
 import { resolveVercelToolbarEnabled } from "@/lib/features/vercel-toolbar";
+import { updateSession } from "@/lib/supabase/middleware";
 import { buildContentSecurityPolicy } from "@/server/security/csp";
 import {
   SECURITY_HEADERS,
   SECURITY_HEADER_VALUES,
 } from "@/server/security/constants";
 
-export function proxy(request: NextRequest) {
-  const response = NextResponse.next();
+export async function proxy(request: NextRequest) {
+  const response = await updateSession(request);
   const toolbarEnabled = resolveVercelToolbarEnabled();
 
   response.headers.set(

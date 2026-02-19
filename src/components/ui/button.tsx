@@ -1,6 +1,6 @@
 import * as React from "react";
+import { Button as BaseButton } from "@base-ui/react/button";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Slot } from "radix-ui";
 
 import { cn } from "@/lib/utils/cn";
 
@@ -17,6 +17,8 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
+          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+        "ghost-row":
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
       },
@@ -38,27 +40,61 @@ const buttonVariants = cva(
   },
 );
 
+type ButtonProps = Omit<
+  React.ComponentProps<typeof BaseButton>,
+  "className" | "render"
+> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+    className?: string;
+    children?: React.ReactNode;
+  };
+
 function Button({
   className,
   variant = "default",
   size = "default",
   asChild = false,
+  children,
+  nativeButton,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
-  const Comp = asChild ? Slot.Root : "button";
+}: ButtonProps) {
+  const classNames = cn(buttonVariants({ variant, size, className }));
+
+  if (asChild) {
+    const child = React.Children.only(children);
+    if (!React.isValidElement(child)) {
+      throw new Error(
+        "Button with asChild expects a single valid React element",
+      );
+    }
+
+    return (
+      <BaseButton
+        data-slot="button"
+        data-variant={variant}
+        data-size={size}
+        className={classNames}
+        nativeButton={nativeButton ?? false}
+        render={child}
+        {...props}
+      />
+    );
+  }
 
   return (
-    <Comp
+    <BaseButton
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={classNames}
+      nativeButton={nativeButton ?? true}
       {...props}
-    />
+    >
+      {children}
+    </BaseButton>
   );
 }
 
 export { Button, buttonVariants };
+export type { ButtonProps };

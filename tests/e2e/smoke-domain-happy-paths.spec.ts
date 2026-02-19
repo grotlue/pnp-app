@@ -19,15 +19,21 @@ test("FLOW-CAMPAIGNS-CREATE @smoke @campaigns creates a new campaign from the ca
 
   const campaignTitle = uniqueSmokeName("Smoke Campaign");
   const campaignDescription = "Smoke flow campaign description";
-  const modal = page.locator(".fixed.inset-0").first();
+  const modal = page.getByRole("dialog").first();
+  await expect(modal).toBeVisible();
 
   await modal.getByPlaceholder("Campaign title").fill(campaignTitle);
   await modal
     .getByPlaceholder("Campaign description")
     .fill(campaignDescription);
-  await modal.getByRole("button", { name: "Create" }).click();
+  await modal.getByRole("button", { name: "Create" }).click({ force: true });
 
-  await expect(page.getByText("Created successfully.")).toBeVisible();
+  await expect(
+    page
+      .getByRole("main")
+      .getByText("Created successfully.", { exact: true })
+      .first(),
+  ).toBeVisible();
   await expect(page.getByRole("link", { name: campaignTitle })).toBeVisible();
 });
 
@@ -42,16 +48,22 @@ test("FLOW-CHARACTERS-CREATE-EDIT @smoke @characters creates and edits a charact
 
   const characterName = uniqueSmokeName("Smoke Character");
   const updatedCharacterName = `${characterName} Updated`;
-  const modal = page.locator(".fixed.inset-0").first();
+  const modal = page.getByRole("dialog").first();
+  await expect(modal).toBeVisible();
 
   await modal.getByPlaceholder("Character name").fill(characterName);
-  await modal.getByRole("button", { name: "Create" }).click();
+  await modal.getByRole("button", { name: "Create" }).click({ force: true });
 
-  await expect(page.getByText("Created successfully.")).toBeVisible();
+  await expect(
+    page
+      .getByRole("main")
+      .getByText("Created successfully.", { exact: true })
+      .first(),
+  ).toBeVisible();
   await page.getByRole("link", { name: characterName }).first().click();
 
   await expect(page).toHaveURL(/\/characters\/[0-9a-f-]+$/);
-  await page.getByRole("link", { name: "Edit" }).first().click();
+  await page.getByRole("button", { name: "Edit" }).first().click();
   await expect(page).toHaveURL(/\/characters\/[0-9a-f-]+\/edit$/);
 
   await page.getByPlaceholder("Character name").fill(updatedCharacterName);

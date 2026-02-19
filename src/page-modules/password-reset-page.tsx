@@ -1,9 +1,15 @@
 "use client";
 
-import Link from "next/link";
+import { UiDiv } from "@/components/ui/html-elements";
+import {
+  AuthCardPageContent,
+  AuthCardPageMain,
+} from "@/components/ui/page-shell";
+import { TextLink } from "@/components/ui/text-link";
+
 import { useMemo, useState } from "react";
-import { FeedbackMessage } from "@/components/common/feedback-message";
-import { FormInput } from "@/components/common/form-controls";
+import { FeedbackMessage } from "@/components/ui/feedback-message";
+import { FormInput } from "@/components/ui/form-controls";
 import {
   TurnstileWidget,
   type TurnstileErrorReason,
@@ -19,7 +25,6 @@ import {
 } from "@/components/ui/card";
 import { resolveAuthCaptchaClientConfig } from "@/lib/features/auth-captcha";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
-import { textLinkClassName } from "@/lib/utils/link";
 import { requestPasswordReset } from "@/features/users/queries/users-auth.query";
 
 type PasswordResetScreenProps = {
@@ -66,10 +71,14 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
     setBusy(true);
     setMessage("");
     try {
-      await requestPasswordReset({
+      const response = await requestPasswordReset({
         email,
         ...(captchaToken ? { captchaToken } : {}),
       });
+      if (response.previewRecoveryLink) {
+        window.location.assign(response.previewRecoveryLink);
+        return;
+      }
       setMessage(t("ui.feedback.passwordResetSent"));
     } catch (error) {
       setMessage(
@@ -86,14 +95,14 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
   }
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(130deg,oklch(0.96_0.04_76),oklch(0.98_0.01_180)_40%,oklch(0.95_0.05_138))] px-4 py-12">
-      <div className="mx-auto w-full max-w-md">
+    <AuthCardPageMain>
+      <AuthCardPageContent>
         <Card>
           <CardHeader>
             <CardTitle>{t("ui.passwordReset.title")}</CardTitle>
             <CardDescription>{t("ui.passwordReset.subtitle")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent stack={3}>
             <FormInput
               type="email"
               placeholder={t("ui.fields.email")}
@@ -116,18 +125,16 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
             ) : null}
             <FeedbackMessage message={message} />
           </CardContent>
-          <CardFooter className="flex-col items-stretch gap-2">
+          <CardFooter layout="column-stretch">
             <Button disabled={busy} onClick={onSubmit}>
               {t("ui.actions.sendReset")}
             </Button>
-            <div className="text-xs">
-              <Link className={textLinkClassName} href="/">
-                {t("ui.nav.backToLogin")}
-              </Link>
-            </div>
+            <UiDiv textStyle="xs">
+              <TextLink href="/">{t("ui.nav.backToLogin")}</TextLink>
+            </UiDiv>
           </CardFooter>
         </Card>
-      </div>
-    </main>
+      </AuthCardPageContent>
+    </AuthCardPageMain>
   );
 }

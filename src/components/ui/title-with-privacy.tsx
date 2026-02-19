@@ -1,21 +1,23 @@
 import { Lock } from "lucide-react";
-import { cn } from "@/lib/utils/cn";
 
 type TitleWithPrivacyProps = {
   title: string;
   isPrivate?: boolean;
   className?: string;
   iconClassName?: string;
+  weight?: "normal" | "medium";
 };
 
 export function TitleWithPrivacy({
   title,
   isPrivate = false,
   className,
-  iconClassName = "size-3",
+  iconClassName,
+  weight: _weight = "normal",
 }: TitleWithPrivacyProps) {
+  void _weight;
   return (
-    <span className={cn("inline-flex items-center gap-1", className)}>
+    <span className={className}>
       <span>{title}</span>
       {isPrivate ? <Lock className={iconClassName} /> : null}
     </span>

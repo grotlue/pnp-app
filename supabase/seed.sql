@@ -60,8 +60,8 @@ select
   u.email,
   crypt(
     case
-      when u.role = 'admin' then 'admin'
-      else 'DevPass123!'
+      when u.role = 'admin' then 'AdminSecure123'
+      else 'PlayerSecure123'
     end,
     gen_salt('bf')
   ),
