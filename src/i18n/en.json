@@ -7,6 +7,7 @@
     "menu": {
       "characters": "Characters",
       "campaigns": "Campaigns",
+      "avatars": "Avatars",
       "notifications": "Notifications",
       "profile": "Profile",
       "settings": "Settings",
@@ -62,6 +63,11 @@
     "userProfile": {
       "title": "User profile",
       "subtitle": "Public profile details."
+    },
+    "usersAvatars": {
+      "title": "User avatars",
+      "subtitle": "All available user profile images.",
+      "fallback": "No avatar"
     },
     "settings": {
       "title": "Settings",

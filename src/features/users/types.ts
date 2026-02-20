@@ -96,3 +96,10 @@ export type UserListEntry = {
   username: string;
   role?: "user" | "admin";
 };
+
+export type UserAvatarListEntry = {
+  id: string;
+  username: string;
+  avatarPath: string | null;
+  avatarUrl: string | null;
+};

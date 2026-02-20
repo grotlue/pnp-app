@@ -24,6 +24,7 @@ export const queryKeys = {
     ["notifications", "list", token, limit] as const,
   notificationsUnreadCount: (token: string) =>
     ["notifications", "unread-count", token] as const,
+  usersAvatarList: (token: string) => ["users", "avatars", token] as const,
   usersPublicProfile: (userId: string, token: string) =>
     ["users", "public-profile", userId, token] as const,
 };
