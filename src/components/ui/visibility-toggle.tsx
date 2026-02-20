@@ -8,13 +8,13 @@ type VisibilityToggleProps = {
   onToggle: () => void;
 };
 
-export function VisibilityToggle({
+const VisibilityToggle = ({
   isPrivate,
   label,
   onLabel,
   offLabel,
   onToggle,
-}: VisibilityToggleProps) {
+}: VisibilityToggleProps) => {
   return (
     <div>
       <span>
@@ -27,4 +27,6 @@ export function VisibilityToggle({
       />
     </div>
   );
-}
+};
+
+export { VisibilityToggle as default, VisibilityToggle };

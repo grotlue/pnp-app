@@ -11,11 +11,11 @@ type ToggleTabsProps<T extends string> = {
   onChange: (value: T) => void;
 };
 
-export function ToggleTabs<T extends string>({
+const ToggleTabs = <T extends string>({
   value,
   options,
   onChange,
-}: ToggleTabsProps<T>) {
+}: ToggleTabsProps<T>) => {
   return (
     <Tabs value={value} onValueChange={(next) => onChange(next as T)}>
       <TabsList variant="line">
@@ -27,4 +27,6 @@ export function ToggleTabs<T extends string>({
       </TabsList>
     </Tabs>
   );
-}
+};
+
+export { ToggleTabs as default, ToggleTabs };

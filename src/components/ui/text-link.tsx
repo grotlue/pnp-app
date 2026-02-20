@@ -11,13 +11,13 @@ type TextLinkProps = LinkProps &
     size?: TextLinkSize;
   };
 
-export function TextLink({
+const TextLink = ({
   className,
   display: _display,
   size: _size,
   children,
   ...props
-}: TextLinkProps) {
+}: TextLinkProps) => {
   void _display;
   void _size;
   return (
@@ -25,4 +25,6 @@ export function TextLink({
       {children}
     </Link>
   );
-}
+};
+
+export { TextLink as default, TextLink };

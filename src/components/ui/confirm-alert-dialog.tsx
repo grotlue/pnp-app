@@ -22,7 +22,7 @@ type ConfirmAlertDialogProps = {
   onConfirm: () => void | Promise<void>;
 };
 
-export function ConfirmAlertDialog({
+const ConfirmAlertDialog = ({
   open,
   title,
   description,
@@ -31,7 +31,7 @@ export function ConfirmAlertDialog({
   confirmDisabled = false,
   onOpenChange,
   onConfirm,
-}: ConfirmAlertDialogProps) {
+}: ConfirmAlertDialogProps) => {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent size="sm">
@@ -54,4 +54,6 @@ export function ConfirmAlertDialog({
       </AlertDialogContent>
     </AlertDialog>
   );
-}
+};
+
+export { ConfirmAlertDialog as default, ConfirmAlertDialog };

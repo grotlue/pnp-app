@@ -12,7 +12,7 @@ type ModalProps = {
   footer?: ReactNode;
 };
 
-export function Modal({ open, title, onClose, children, footer }: ModalProps) {
+const Modal = ({ open, title, onClose, children, footer }: ModalProps) => {
   return (
     <Dialog.Root
       open={open}
@@ -57,4 +57,6 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
       </Dialog.Portal>
     </Dialog.Root>
   );
-}
+};
+
+export { Modal as default, Modal };

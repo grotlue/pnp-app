@@ -8,13 +8,13 @@ type TitleWithPrivacyProps = {
   weight?: "normal" | "medium";
 };
 
-export function TitleWithPrivacy({
+const TitleWithPrivacy = ({
   title,
   isPrivate = false,
   className,
   iconClassName,
   weight: _weight = "normal",
-}: TitleWithPrivacyProps) {
+}: TitleWithPrivacyProps) => {
   void _weight;
   return (
     <span className={className}>
@@ -22,4 +22,6 @@ export function TitleWithPrivacy({
       {isPrivate ? <Lock className={iconClassName} /> : null}
     </span>
   );
-}
+};
+
+export { TitleWithPrivacy as default, TitleWithPrivacy };

@@ -36,4 +36,4 @@ const AppProviders = ({ children }: AppProvidersProps) => {
   );
 };
 
-export default AppProviders;
+export { AppProviders as default, AppProviders };

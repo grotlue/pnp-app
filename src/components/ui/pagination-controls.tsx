@@ -16,7 +16,7 @@ type PaginationControlsProps = {
   onPageChange: (page: number) => void;
 };
 
-export function PaginationControls({
+const PaginationControls = ({
   page,
   pageSize,
   totalItems,
@@ -24,7 +24,7 @@ export function PaginationControls({
   nextLabel,
   pageLabel,
   onPageChange,
-}: PaginationControlsProps) {
+}: PaginationControlsProps) => {
   if (totalItems <= pageSize) {
     return null;
   }
@@ -65,4 +65,6 @@ export function PaginationControls({
       </Pagination>
     </div>
   );
-}
+};
+
+export { PaginationControls as default, PaginationControls };

@@ -13,7 +13,7 @@ const successPattern =
 const errorPattern =
   /\b(error|failed|invalid|required|denied|forbidden|missing|not found)\b/i;
 
-export function FeedbackMessage({ message, className }: FeedbackMessageProps) {
+const FeedbackMessage = ({ message, className }: FeedbackMessageProps) => {
   const previousMessageRef = useRef<string>("");
 
   useEffect(() => {
@@ -41,4 +41,6 @@ export function FeedbackMessage({ message, className }: FeedbackMessageProps) {
   }
 
   return <div className={className}>{message}</div>;
-}
+};
+
+export { FeedbackMessage as default, FeedbackMessage };

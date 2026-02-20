@@ -10,7 +10,7 @@ type OwnershipBadgeProps = {
   className?: string;
 };
 
-export function OwnershipBadge({ mode, t, className }: OwnershipBadgeProps) {
+const OwnershipBadge = ({ mode, t, className }: OwnershipBadgeProps) => {
   return (
     <StatusBadge
       label={t(`ui.labels.ownership.${mode}`)}
@@ -18,4 +18,6 @@ export function OwnershipBadge({ mode, t, className }: OwnershipBadgeProps) {
       className={className}
     />
   );
-}
+};
+
+export { OwnershipBadge as default, OwnershipBadge };

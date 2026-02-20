@@ -9,12 +9,12 @@ type StatusBadgeProps = {
   withTopSpacing?: boolean;
 };
 
-export function StatusBadge({
+const StatusBadge = ({
   label,
   tone: _tone = "slate",
   className,
   withTopSpacing: _withTopSpacing = false,
-}: StatusBadgeProps) {
+}: StatusBadgeProps) => {
   void _tone;
   void _withTopSpacing;
   return (
@@ -22,4 +22,6 @@ export function StatusBadge({
       {label}
     </Badge>
   );
-}
+};
+
+export { StatusBadge as default, StatusBadge };
