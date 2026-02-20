@@ -1,7 +1,7 @@
-export type CampaignListScope = "all" | "public" | "member";
-export type CampaignRole = "owner" | "player";
+type CampaignListScope = "all" | "public" | "member";
+type CampaignRole = "owner" | "player";
 
-export type Campaign = {
+type Campaign = {
   id: string;
   owner_user_id: string;
   owner_username?: string | null;
@@ -16,7 +16,7 @@ export type Campaign = {
   is_private?: boolean;
 };
 
-export type CampaignRpcRow = {
+type CampaignRpcRow = {
   id: string;
   owner_user_id: string;
   title: string;
@@ -31,25 +31,25 @@ export type CampaignRpcRow = {
   role_for_user: CampaignRole | null;
 };
 
-export type CampaignMembership = {
+type CampaignMembership = {
   id: string;
   user_id: string;
   state: "pending" | "accepted" | "rejected";
   source: "invite" | "request";
 };
 
-export type CampaignDetail = {
+type CampaignDetail = {
   campaign: Campaign;
   memberships: CampaignMembership[];
 };
 
-export type UserEntry = {
+type UserEntry = {
   id: string;
   username: string;
   role?: "user" | "admin";
 };
 
-export type MeResponse = {
+type MeResponse = {
   user: {
     id: string;
   };
@@ -58,8 +58,20 @@ export type MeResponse = {
   };
 };
 
-export type CampaignFormValues = {
+type CampaignFormValues = {
   title: string;
   description: string;
   isPrivate?: boolean;
+};
+
+export type {
+  Campaign,
+  CampaignDetail,
+  CampaignFormValues,
+  CampaignListScope,
+  CampaignMembership,
+  CampaignRole,
+  CampaignRpcRow,
+  MeResponse,
+  UserEntry,
 };

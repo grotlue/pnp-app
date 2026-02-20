@@ -1,18 +1,18 @@
 import { SECURITY_ORIGINS } from "@/lib/security/constants";
 
-export const CSP_KEYWORDS = {
+const CSP_KEYWORDS = {
   self: "'self'",
   unsafeInline: "'unsafe-inline'",
   none: "'none'",
 } as const;
 
-export const CSP_SCRIPT_SRC_BASE = [
+const CSP_SCRIPT_SRC_BASE = [
   CSP_KEYWORDS.self,
   CSP_KEYWORDS.unsafeInline,
   SECURITY_ORIGINS.cloudflareChallenges,
 ] as const;
 
-export const CSP_CONNECT_SRC_BASE = [
+const CSP_CONNECT_SRC_BASE = [
   CSP_KEYWORDS.self,
   SECURITY_ORIGINS.supabaseCoHttpsWildcard,
   SECURITY_ORIGINS.supabaseInHttpsWildcard,
@@ -20,14 +20,14 @@ export const CSP_CONNECT_SRC_BASE = [
   SECURITY_ORIGINS.cloudflareChallenges,
 ] as const;
 
-export const CSP_FRAME_SRC_BASE = [
+const CSP_FRAME_SRC_BASE = [
   CSP_KEYWORDS.self,
   SECURITY_ORIGINS.cloudflareChallenges,
 ] as const;
 
-export const CSP_TOOLBAR_ORIGIN = SECURITY_ORIGINS.vercelLive;
+const CSP_TOOLBAR_ORIGIN = SECURITY_ORIGINS.vercelLive;
 
-export const SECURITY_HEADERS = {
+const SECURITY_HEADERS = {
   contentSecurityPolicy: "Content-Security-Policy",
   referrerPolicy: "Referrer-Policy",
   contentTypeOptions: "X-Content-Type-Options",
@@ -36,7 +36,7 @@ export const SECURITY_HEADERS = {
   cacheControl: "Cache-Control",
 } as const;
 
-export const SECURITY_HEADER_VALUES = {
+const SECURITY_HEADER_VALUES = {
   defaultSrc: `${CSP_KEYWORDS.self}`,
   styleSrc: `${CSP_KEYWORDS.self} ${CSP_KEYWORDS.unsafeInline}`,
   imgSrc: `${CSP_KEYWORDS.self} data: blob: https:`,
@@ -50,3 +50,13 @@ export const SECURITY_HEADER_VALUES = {
   permissionsPolicy: "camera=(), microphone=(), geolocation=()",
   noStore: "no-store",
 } as const;
+
+export {
+  CSP_CONNECT_SRC_BASE,
+  CSP_FRAME_SRC_BASE,
+  CSP_KEYWORDS,
+  CSP_SCRIPT_SRC_BASE,
+  CSP_TOOLBAR_ORIGIN,
+  SECURITY_HEADERS,
+  SECURITY_HEADER_VALUES,
+};

@@ -1,14 +1,14 @@
-export type ThemeMode = "light" | "dark";
+type ThemeMode = "light" | "dark";
 
 const THEME_STORAGE_KEY = "pnp.theme.mode";
 const THEME_EVENT = "pnp-theme-changed";
 const DEFAULT_THEME_MODE: ThemeMode = "light";
 
-function isThemeMode(value: string): value is ThemeMode {
+const isThemeMode = (value: string): value is ThemeMode => {
   return value === "light" || value === "dark";
-}
+};
 
-export function getThemeMode(): ThemeMode {
+const getThemeMode = (): ThemeMode => {
   if (typeof window === "undefined") {
     return DEFAULT_THEME_MODE;
   }
@@ -23,9 +23,9 @@ export function getThemeMode(): ThemeMode {
   }
 
   return DEFAULT_THEME_MODE;
-}
+};
 
-export function applyThemeMode(mode: ThemeMode) {
+const applyThemeMode = (mode: ThemeMode) => {
   if (typeof document === "undefined") {
     return;
   }
@@ -33,13 +33,13 @@ export function applyThemeMode(mode: ThemeMode) {
   const root = document.documentElement;
   root.classList.toggle("dark", mode === "dark");
   root.dataset.theme = mode;
-}
+};
 
-export function initializeThemeMode() {
+const initializeThemeMode = () => {
   applyThemeMode(getThemeMode());
-}
+};
 
-export function setThemeMode(mode: ThemeMode) {
+const setThemeMode = (mode: ThemeMode) => {
   if (typeof window !== "undefined") {
     try {
       window.localStorage.setItem(THEME_STORAGE_KEY, mode);
@@ -53,8 +53,17 @@ export function setThemeMode(mode: ThemeMode) {
   if (typeof window !== "undefined") {
     window.dispatchEvent(new Event(THEME_EVENT));
   }
-}
+};
 
-export function getThemeEventName() {
+const getThemeEventName = () => {
   return THEME_EVENT;
-}
+};
+
+export type { ThemeMode };
+export {
+  applyThemeMode,
+  getThemeEventName,
+  getThemeMode,
+  initializeThemeMode,
+  setThemeMode,
+};

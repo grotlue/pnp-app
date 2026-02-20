@@ -9,36 +9,36 @@ import type {
   RegisterResponse,
 } from "../types";
 
-export async function loginUser(input: {
+const loginUser = async (input: {
   email: string;
   password: string;
   captchaToken?: string;
-}): Promise<LoginResponse> {
+}): Promise<LoginResponse> => {
   const response = await apiRequest<LoginResponse>("/api/auth/login", {
     method: "POST",
     body: input,
   });
   return unwrapApiResponse(response, "Login failed");
-}
+};
 
-export async function registerUser(input: {
+const registerUser = async (input: {
   username: string;
   email: string;
   password: string;
   locale: "en" | "de";
   captchaToken?: string;
-}): Promise<RegisterResponse> {
+}): Promise<RegisterResponse> => {
   const response = await apiRequest<RegisterResponse>("/api/auth/register", {
     method: "POST",
     body: input,
   });
   return unwrapApiResponse(response, "Registration failed");
-}
+};
 
-export async function requestPasswordReset(input: {
+const requestPasswordReset = async (input: {
   email: string;
   captchaToken?: string;
-}): Promise<PasswordResetRequestResponse> {
+}): Promise<PasswordResetRequestResponse> => {
   const response = await apiRequest<PasswordResetRequestResponse>(
     "/api/auth/password-reset/request",
     {
@@ -47,21 +47,21 @@ export async function requestPasswordReset(input: {
     },
   );
   return unwrapApiResponse(response, "Password reset request failed");
-}
+};
 
-export async function logoutUser(
+const logoutUser = async (
   session: ClientSession,
-): Promise<{ success: boolean }> {
+): Promise<{ success: boolean }> => {
   const response = await apiRequest<{ success: boolean }>("/api/auth/logout", {
     method: "POST",
     session,
   });
   return unwrapApiResponse(response, "Logout failed");
-}
+};
 
-export async function exchangeAuthCode(input: {
+const exchangeAuthCode = async (input: {
   code: string;
-}): Promise<AuthCodeExchangeResponse> {
+}): Promise<AuthCodeExchangeResponse> => {
   const response = await apiRequest<AuthCodeExchangeResponse>(
     "/api/auth/callback/exchange",
     {
@@ -70,12 +70,12 @@ export async function exchangeAuthCode(input: {
     },
   );
   return unwrapApiResponse(response, "Auth code exchange failed");
-}
+};
 
-export async function verifyAuthToken(input: {
+const verifyAuthToken = async (input: {
   tokenHash: string;
   type: "signup" | "recovery" | "email" | "email_change";
-}): Promise<AuthVerifyResponse> {
+}): Promise<AuthVerifyResponse> => {
   const response = await apiRequest<AuthVerifyResponse>(
     "/api/auth/callback/verify",
     {
@@ -84,13 +84,13 @@ export async function verifyAuthToken(input: {
     },
   );
   return unwrapApiResponse(response, "Token verification failed");
-}
+};
 
-export async function confirmPasswordReset(input: {
+const confirmPasswordReset = async (input: {
   accessToken: string;
   refreshToken: string;
   newPassword: string;
-}): Promise<PasswordResetConfirmResponse> {
+}): Promise<PasswordResetConfirmResponse> => {
   const response = await apiRequest<PasswordResetConfirmResponse>(
     "/api/auth/password-reset/confirm",
     {
@@ -99,4 +99,14 @@ export async function confirmPasswordReset(input: {
     },
   );
   return unwrapApiResponse(response, "Password reset confirm failed");
-}
+};
+
+export {
+  confirmPasswordReset,
+  exchangeAuthCode,
+  loginUser,
+  logoutUser,
+  registerUser,
+  requestPasswordReset,
+  verifyAuthToken,
+};

@@ -2,16 +2,16 @@ import { resolveRuntimeEnvironment } from "@/lib/features/feature-flags";
 import {
   AUTH_CAPTCHA_MODE_LIST,
   AUTH_CAPTCHA_MODES,
+  type AuthCaptchaMode,
   BOOLEAN_ENV_VALUES,
   PRODUCTION_RUNTIME_ENVIRONMENTS,
-  type AuthCaptchaMode,
 } from "@/lib/features/constants";
 
-export type { AuthCaptchaMode };
+type CaptchaMode = AuthCaptchaMode;
 
-const KNOWN_CAPTCHA_MODES = new Set<AuthCaptchaMode>(AUTH_CAPTCHA_MODE_LIST);
+const KNOWN_CAPTCHA_MODES = new Set<CaptchaMode>(AUTH_CAPTCHA_MODE_LIST);
 
-function normalizeEnvValue(value?: string): string | null {
+const normalizeEnvValue = (value?: string): string | null => {
   if (!value) {
     return null;
   }
@@ -28,9 +28,9 @@ function normalizeEnvValue(value?: string): string | null {
       : trimmed;
 
   return unquoted ? unquoted.toLowerCase() : null;
-}
+};
 
-function parseBooleanEnv(value?: string): boolean | null {
+const parseBooleanEnv = (value?: string): boolean | null => {
   const normalized = normalizeEnvValue(value);
   if (!normalized) {
     return null;
@@ -43,11 +43,11 @@ function parseBooleanEnv(value?: string): boolean | null {
     return false;
   }
   return null;
-}
+};
 
-function decodeAccessTokenPayload(
+const decodeAccessTokenPayload = (
   accessToken: string,
-): Record<string, unknown> | null {
+): Record<string, unknown> | null => {
   const parts = accessToken.split(".");
   if (parts.length < 2) {
     return null;
@@ -62,9 +62,9 @@ function decodeAccessTokenPayload(
   } catch {
     return null;
   }
-}
+};
 
-export function isAdminMfaRequired(): boolean {
+const isAdminMfaRequired = (): boolean => {
   const override = parseBooleanEnv(process.env.REQUIRE_ADMIN_MFA);
   if (override !== null) {
     return override;
@@ -72,12 +72,12 @@ export function isAdminMfaRequired(): boolean {
 
   const environment = resolveRuntimeEnvironment();
   return environment === "preview" || environment === "production";
-}
+};
 
-export function resolveAuthCaptchaMode(): AuthCaptchaMode {
+const resolveAuthCaptchaMode = (): CaptchaMode => {
   const rawMode = normalizeEnvValue(process.env.AUTH_CAPTCHA_MODE);
-  if (rawMode && KNOWN_CAPTCHA_MODES.has(rawMode as AuthCaptchaMode)) {
-    return rawMode as AuthCaptchaMode;
+  if (rawMode && KNOWN_CAPTCHA_MODES.has(rawMode as CaptchaMode)) {
+    return rawMode as CaptchaMode;
   }
 
   const environment = resolveRuntimeEnvironment();
@@ -86,26 +86,35 @@ export function resolveAuthCaptchaMode(): AuthCaptchaMode {
   }
 
   return AUTH_CAPTCHA_MODES.off;
-}
+};
 
-export function isCaptchaRequiredForAuth(): boolean {
+const isCaptchaRequiredForAuth = (): boolean => {
   return resolveAuthCaptchaMode() === AUTH_CAPTCHA_MODES.required;
-}
+};
 
-export function isPreviewAuthEmailDeliveryDisabled(): boolean {
+const isPreviewAuthEmailDeliveryDisabled = (): boolean => {
   const override = parseBooleanEnv(process.env.PREVIEW_AUTH_EMAILS_DISABLED);
   if (override !== null) {
     return override;
   }
 
   return resolveRuntimeEnvironment() === "preview";
-}
+};
 
-export function hasAal2AuthLevel(accessToken: string): boolean {
+const hasAal2AuthLevel = (accessToken: string): boolean => {
   const payload = decodeAccessTokenPayload(accessToken);
   if (!payload) {
     return false;
   }
 
   return payload.aal === "aal2";
-}
+};
+
+export type { CaptchaMode as AuthCaptchaMode };
+export {
+  hasAal2AuthLevel,
+  isAdminMfaRequired,
+  isCaptchaRequiredForAuth,
+  isPreviewAuthEmailDeliveryDisabled,
+  resolveAuthCaptchaMode,
+};

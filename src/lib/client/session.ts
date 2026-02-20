@@ -1,6 +1,6 @@
 import { getBrowserSupabaseClient } from "@/lib/supabase/browser-client";
 
-export type ClientSession = {
+type ClientSession = {
   accessToken: string;
   refreshToken?: string;
   expiresAt?: number;
@@ -9,11 +9,11 @@ export type ClientSession = {
 const STORAGE_KEY = "pnp.session";
 const SESSION_EVENT = "pnp-session-changed";
 
-function emitSessionChangedEvent() {
+const emitSessionChangedEvent = () => {
   window.dispatchEvent(new Event(SESSION_EVENT));
-}
+};
 
-async function applySupabaseSession(session: ClientSession) {
+const applySupabaseSession = async (session: ClientSession) => {
   if (!session.refreshToken) {
     return;
   }
@@ -27,23 +27,23 @@ async function applySupabaseSession(session: ClientSession) {
   } catch {
     // Keep local fallback session as best-effort if Supabase sync is unavailable.
   }
-}
+};
 
-async function clearSupabaseSession() {
+const clearSupabaseSession = async () => {
   try {
     const supabase = getBrowserSupabaseClient();
     await supabase.auth.signOut();
   } catch {
     // Keep local cleanup behavior even if remote sign-out fails.
   }
-}
+};
 
-function toExpiryMilliseconds(expiresAt: number): number {
+const toExpiryMilliseconds = (expiresAt: number): number => {
   // Supabase returns epoch seconds for expires_at; keep ms-compatible input safe.
   return expiresAt > 10_000_000_000 ? expiresAt : expiresAt * 1000;
-}
+};
 
-function getExpiryFromAccessToken(accessToken: string): number | null {
+const getExpiryFromAccessToken = (accessToken: string): number | null => {
   const [, payload] = accessToken.split(".");
   if (!payload) {
     return null;
@@ -63,9 +63,9 @@ function getExpiryFromAccessToken(accessToken: string): number | null {
   } catch {
     return null;
   }
-}
+};
 
-function isSessionExpired(session: ClientSession): boolean {
+const isSessionExpired = (session: ClientSession): boolean => {
   const expiresAt =
     session.expiresAt ?? getExpiryFromAccessToken(session.accessToken);
   if (!expiresAt) {
@@ -73,9 +73,9 @@ function isSessionExpired(session: ClientSession): boolean {
   }
 
   return toExpiryMilliseconds(expiresAt) <= Date.now();
-}
+};
 
-export function getSession(): ClientSession | null {
+const getSession = (): ClientSession | null => {
   if (typeof window === "undefined") {
     return null;
   }
@@ -100,9 +100,9 @@ export function getSession(): ClientSession | null {
   } catch {
     return null;
   }
-}
+};
 
-export function setSession(session: ClientSession) {
+const setSession = (session: ClientSession) => {
   if (typeof window === "undefined") {
     return;
   }
@@ -110,9 +110,9 @@ export function setSession(session: ClientSession) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
   emitSessionChangedEvent();
   void applySupabaseSession(session);
-}
+};
 
-export function clearSession() {
+const clearSession = () => {
   if (typeof window === "undefined") {
     return;
   }
@@ -120,8 +120,11 @@ export function clearSession() {
   window.localStorage.removeItem(STORAGE_KEY);
   emitSessionChangedEvent();
   void clearSupabaseSession();
-}
+};
 
-export function getSessionEventName() {
+const getSessionEventName = () => {
   return SESSION_EVENT;
-}
+};
+
+export type { ClientSession };
+export { clearSession, getSession, getSessionEventName, setSession };
