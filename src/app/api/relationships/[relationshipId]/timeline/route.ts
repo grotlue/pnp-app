@@ -1,5 +1,5 @@
 import { requireAuth } from "@/server/auth/require-auth";
-import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
 
 type Params = {
   params: Promise<{ relationshipId: string }>;
@@ -10,7 +10,7 @@ type CreateTimelineEntryBody = {
   content?: string;
 };
 
-export async function GET(request: Request, { params }: Params) {
+const GET = async (request: Request, { params }: Params) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -30,9 +30,9 @@ export async function GET(request: Request, { params }: Params) {
   }
 
   return jsonOk(data ?? []);
-}
+};
 
-export async function POST(request: Request, { params }: Params) {
+const POST = async (request: Request, { params }: Params) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -59,4 +59,6 @@ export async function POST(request: Request, { params }: Params) {
   }
 
   return jsonOk({ timelineEntryId: data }, 201);
-}
+};
+
+export { GET, POST };
