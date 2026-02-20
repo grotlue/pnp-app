@@ -13,7 +13,7 @@ type CreateCharacterBody = {
   isPrivate?: boolean;
 };
 
-export async function GET(request: Request) {
+const GET = async (request: Request) => {
   const admin = await requireAdmin(request);
   if ("response" in admin) {
     return admin.response;
@@ -39,9 +39,9 @@ export async function GET(request: Request) {
   }
 
   return jsonOk(data ?? []);
-}
+};
 
-export async function POST(request: Request) {
+const POST = async (request: Request) => {
   const admin = await requireAdmin(request);
   if ("response" in admin) {
     return admin.response;
@@ -85,4 +85,6 @@ export async function POST(request: Request) {
   }
 
   return jsonOk(data, 201);
-}
+};
+
+export { GET, POST };
