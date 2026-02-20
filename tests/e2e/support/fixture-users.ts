@@ -1,4 +1,4 @@
-export const E2E_USERS = {
+const E2E_USERS = {
   admin: {
     email: "admin@pnp.test",
     password: "AdminSecure123",
@@ -13,18 +13,26 @@ export const E2E_USERS = {
   },
 } as const;
 
-export const E2E_NOTIFICATIONS = {
+const E2E_NOTIFICATIONS = {
   smokeRelationshipTitle: "Aldric Sternklinge -> Yara Nebelblick",
 } as const;
 
-export const E2E_CAMPAIGNS = {
+const E2E_CAMPAIGNS = {
   fixtureCampaignTitle: "Schatten ueber Talheim",
 } as const;
 
-export const E2E_CHARACTERS = {
+const E2E_CHARACTERS = {
   playerOneCampaignCharacter: "Aldric Sternklinge",
 } as const;
 
-export function uniqueSmokeName(prefix: string): string {
+const uniqueSmokeName = (prefix: string): string => {
   return `${prefix} ${Date.now()}`;
-}
+};
+
+export {
+  E2E_CAMPAIGNS,
+  E2E_CHARACTERS,
+  E2E_NOTIFICATIONS,
+  E2E_USERS,
+  uniqueSmokeName,
+};
