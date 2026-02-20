@@ -3,11 +3,11 @@ import type { ClientSession } from "@/lib/client/session";
 import type { Character, CharacterUpdateInput } from "../types";
 import type { MeResponse } from "@/features/users/types";
 
-export async function getCharacterEditContext(
+const getCharacterEditContext = async (
   session: ClientSession,
   characterId: string,
   me: MeResponse,
-): Promise<{ me: MeResponse; character: Character }> {
+): Promise<{ me: MeResponse; character: Character }> => {
   const [characterResponse] = await Promise.all([
     apiRequest<Character>(`/api/characters/${characterId}`, { session }),
   ]);
@@ -16,13 +16,13 @@ export async function getCharacterEditContext(
     me,
     character: unwrapApiResponse(characterResponse, "Failed to load character"),
   };
-}
+};
 
-export async function updateCharacter(
+const updateCharacter = async (
   session: ClientSession,
   characterId: string,
   input: CharacterUpdateInput,
-): Promise<Character> {
+): Promise<Character> => {
   const response = await apiRequest<Character>(
     `/api/characters/${characterId}`,
     {
@@ -32,12 +32,12 @@ export async function updateCharacter(
     },
   );
   return unwrapApiResponse(response, "Failed to update character");
-}
+};
 
-export async function deleteCharacterFromEdit(
+const deleteCharacterFromEdit = async (
   session: ClientSession,
   characterId: string,
-): Promise<{ deleted: boolean }> {
+): Promise<{ deleted: boolean }> => {
   const response = await apiRequest<{ deleted: boolean }>(
     `/api/characters/${characterId}`,
     {
@@ -46,9 +46,9 @@ export async function deleteCharacterFromEdit(
     },
   );
   return unwrapApiResponse(response, "Failed to delete character");
-}
+};
 
-export async function createCharacterAvatarSignedUpload(
+const createCharacterAvatarSignedUpload = async (
   session: ClientSession,
   characterId: string,
   input: {
@@ -57,7 +57,7 @@ export async function createCharacterAvatarSignedUpload(
     height: number;
     fileSize: number;
   },
-): Promise<{ token: string; signedUrl: string; path: string }> {
+): Promise<{ token: string; signedUrl: string; path: string }> => {
   const response = await apiRequest<{
     token: string;
     signedUrl: string;
@@ -74,4 +74,11 @@ export async function createCharacterAvatarSignedUpload(
     response,
     "Failed to prepare character image upload",
   );
-}
+};
+
+export {
+  createCharacterAvatarSignedUpload,
+  deleteCharacterFromEdit,
+  getCharacterEditContext,
+  updateCharacter,
+};
