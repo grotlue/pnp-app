@@ -1,4 +1,4 @@
-import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
 import { validatePasswordStrength } from "@/lib/api/auth-validation";
 import { setSessionCookies } from "@/server/auth/session-cookie";
 import { enforceRateLimit } from "@/server/rate-limit/enforce-rate-limit";
@@ -11,7 +11,7 @@ type PasswordResetConfirmBody = {
   newPassword?: string;
 };
 
-export async function POST(request: Request) {
+const POST = async (request: Request) => {
   const rateLimited = await enforceRateLimit({
     request,
     route: "auth:password-reset:confirm",
@@ -88,4 +88,6 @@ export async function POST(request: Request) {
       expiresAt: sessionData.session.expires_at,
     },
   );
-}
+};
+
+export { POST };

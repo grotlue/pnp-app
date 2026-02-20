@@ -1,5 +1,5 @@
 import { requireAuth } from "@/server/auth/require-auth";
-import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
 
 type UpdateProfileBody = {
   username?: string;
@@ -8,7 +8,7 @@ type UpdateProfileBody = {
   locale?: "en" | "de";
 };
 
-export async function PATCH(request: Request) {
+const PATCH = async (request: Request) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -47,4 +47,6 @@ export async function PATCH(request: Request) {
   }
 
   return jsonOk(data);
-}
+};
+
+export { PATCH };

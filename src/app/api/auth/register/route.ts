@@ -1,4 +1,4 @@
-import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
 import {
   normalizeAndValidateEmail,
   normalizeCaptchaToken,
@@ -25,7 +25,7 @@ type RegisterBody = {
   captchaToken?: string;
 };
 
-export async function POST(request: Request) {
+const POST = async (request: Request) => {
   const rateLimited = await enforceRateLimit({
     request,
     route: "auth:register",
@@ -143,4 +143,6 @@ export async function POST(request: Request) {
     refreshToken: data.session.refresh_token,
     expiresAt: data.session.expires_at,
   });
-}
+};
+
+export { POST };
