@@ -3,7 +3,7 @@
 import { UiDiv } from "@/components/ui/html-elements";
 import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -27,22 +27,22 @@ import {
 } from "@/features/notifications/logic/notification-list.logic";
 import type { NotificationEntry } from "@/features/notifications/types";
 import { useClientSession } from "@/lib/client/use-client-session";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 
 type NotificationsPageViewProps = {
   locale: AppLocale;
 };
 
-function formatNotificationTimestamp(value: string, locale: AppLocale) {
+const formatNotificationTimestamp = (value: string, locale: AppLocale) => {
   const date = new Date(value);
   const localeTag = locale === "de" ? "de-DE" : "en-US";
   return new Intl.DateTimeFormat(localeTag, {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
-}
+};
 
-function notificationTone(notification: NotificationEntry) {
+const notificationTone = (notification: NotificationEntry) => {
   if (notification.event_type === "campaign_invite") {
     return "blue" as const;
   }
@@ -53,10 +53,10 @@ function notificationTone(notification: NotificationEntry) {
     return "green" as const;
   }
   return "teal" as const;
-}
+};
 
-export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
+const NotificationsPageView = ({ locale }: NotificationsPageViewProps) => {
+  const t = getTranslator(locale);
   const router = useRouter();
   const { session, ready } = useClientSession();
 
@@ -81,14 +81,14 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
   const notifications = notificationsQuery.data ?? [];
   const unreadCount = getNotificationUnreadCount(notifications);
 
-  async function markAsRead(notification: NotificationEntry) {
+  const markAsRead = async (notification: NotificationEntry) => {
     if (notification.is_read) {
       return;
     }
     await markReadMutation.mutateAsync(notification.id);
-  }
+  };
 
-  async function onView(notification: NotificationEntry) {
+  const onView = async (notification: NotificationEntry) => {
     const path = getNotificationViewPath(notification);
     if (!path) {
       return;
@@ -103,12 +103,12 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
         error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
       );
     }
-  }
+  };
 
-  async function onDecide(
+  const onDecide = async (
     notification: NotificationEntry,
     state: "accepted" | "rejected",
-  ) {
+  ) => {
     const target = getNotificationMembershipTarget(notification);
     if (!target) {
       setMessage(t("ui.feedback.requestFailed"));
@@ -129,7 +129,30 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
         error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
       );
     }
-  }
+  };
+
+  const handleMarkAllRead = async () => {
+    setMessage("");
+    try {
+      await markAllReadMutation.mutateAsync();
+      setMessage(t("ui.feedback.saved"));
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
+    }
+  };
+
+  const handleMarkRead = async (notification: NotificationEntry) => {
+    setMessage("");
+    try {
+      await markAsRead(notification);
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
+    }
+  };
 
   if (!ready || !session) {
     return <PageViewport />;
@@ -159,19 +182,7 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
               variant="outline"
               size="sm"
               disabled={anyPending || unreadCount === 0}
-              onClick={async () => {
-                setMessage("");
-                try {
-                  await markAllReadMutation.mutateAsync();
-                  setMessage(t("ui.feedback.saved"));
-                } catch (error) {
-                  setMessage(
-                    error instanceof Error
-                      ? error.message
-                      : t("ui.feedback.requestFailed"),
-                  );
-                }
-              }}
+              onClick={() => void handleMarkAllRead()}
             >
               {t("ui.notifications.markAllRead")}
             </Button>
@@ -238,20 +249,7 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
                             size="sm"
                             variant="ghost"
                             disabled={anyPending}
-                            onClick={() =>
-                              void (async () => {
-                                setMessage("");
-                                try {
-                                  await markAsRead(notification);
-                                } catch (error) {
-                                  setMessage(
-                                    error instanceof Error
-                                      ? error.message
-                                      : t("ui.feedback.requestFailed"),
-                                  );
-                                }
-                              })()
-                            }
+                            onClick={() => void handleMarkRead(notification)}
                           >
                             {t("ui.notifications.markRead")}
                           </Button>
@@ -289,4 +287,6 @@ export function NotificationsPageView({ locale }: NotificationsPageViewProps) {
       </Card>
     </AppPageMain>
   );
-}
+};
+
+export default NotificationsPageView;

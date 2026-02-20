@@ -1,4 +1,4 @@
-import { HomePageView } from "@/page-modules/home-page";
+import HomePageView from "@/page-modules/home-page";
 import { isFeatureEnabled } from "@/lib/features/feature-flags";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
