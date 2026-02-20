@@ -24,6 +24,33 @@ const nativeClassNameRestriction = {
     "Use reusable UI components instead of className on native JSX elements outside src/components/ui.",
 };
 
+const reactCompilerMemoizationRestrictions = [
+  {
+    selector:
+      "ImportDeclaration[source.value='react'] ImportSpecifier[imported.name='useMemo']",
+    message:
+      "React Compiler (opt-out mode) handles most memoization. Prefer plain values over useMemo unless profiling proves a need.",
+  },
+  {
+    selector:
+      "ImportDeclaration[source.value='react'] ImportSpecifier[imported.name='useCallback']",
+    message:
+      "React Compiler (opt-out mode) handles most memoization. Prefer plain functions over useCallback unless profiling proves a need.",
+  },
+  {
+    selector:
+      "ImportDeclaration[source.value='react'] ImportSpecifier[imported.name='memo']",
+    message:
+      "React Compiler (opt-out mode) handles most component memoization. Prefer plain components over React.memo unless profiling proves a need.",
+  },
+  {
+    selector:
+      "MemberExpression[object.name='React'][property.name=/^(useMemo|useCallback|memo)$/]",
+    message:
+      "React Compiler (opt-out mode) handles most manual memoization patterns. Prefer compiler optimization and only keep manual memoization with evidence.",
+  },
+];
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -68,7 +95,11 @@ const eslintConfig = defineConfig([
           ignoreDOMComponents: false,
         },
       ],
-      "no-restricted-syntax": ["warn", ...globalSyntaxRestrictions],
+      "no-restricted-syntax": [
+        "warn",
+        ...globalSyntaxRestrictions,
+        ...reactCompilerMemoizationRestrictions,
+      ],
     },
   },
   {
@@ -107,6 +138,7 @@ const eslintConfig = defineConfig([
       "no-restricted-syntax": [
         "warn",
         ...globalSyntaxRestrictions,
+        ...reactCompilerMemoizationRestrictions,
         nativeClassNameRestriction,
       ],
     },
