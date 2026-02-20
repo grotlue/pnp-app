@@ -15,6 +15,10 @@ const VisibilityToggle = ({
   offLabel,
   onToggle,
 }: VisibilityToggleProps) => {
+  const handleCheckedChange = () => {
+    onToggle();
+  };
+
   return (
     <div>
       <span>
@@ -23,7 +27,7 @@ const VisibilityToggle = ({
       <Switch
         checked={isPrivate}
         aria-label={`${label}: ${isPrivate ? onLabel : offLabel}`}
-        onCheckedChange={() => onToggle()}
+        onCheckedChange={handleCheckedChange}
       />
     </div>
   );

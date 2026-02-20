@@ -113,8 +113,8 @@ const eslintConfig = defineConfig([
       "react/jsx-no-bind": [
         "warn",
         {
-          allowArrowFunctions: false,
-          allowFunctions: false,
+          allowArrowFunctions: true,
+          allowFunctions: true,
           allowBind: false,
           ignoreRefs: true,
           ignoreDOMComponents: false,
@@ -124,7 +124,18 @@ const eslintConfig = defineConfig([
         "warn",
         ...globalSyntaxRestrictions,
         ...reactCompilerMemoizationRestrictions,
+        {
+          selector: "JSXAttribute > JSXExpressionContainer > ArrowFunctionExpression",
+          message:
+            "Do not use inline arrow logic in JSX props. Move it to a named handler variable/function first.",
+        },
       ],
+    },
+  },
+  {
+    files: ["src/app/**/route.ts"],
+    rules: {
+      "import/prefer-default-export": "off",
     },
   },
   {

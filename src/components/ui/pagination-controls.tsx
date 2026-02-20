@@ -31,6 +31,12 @@ const PaginationControls = ({
 
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safePage = Math.min(Math.max(page, 1), totalPages);
+  const handlePreviousPageClick = () => {
+    onPageChange(safePage - 1);
+  };
+  const handleNextPageClick = () => {
+    onPageChange(safePage + 1);
+  };
 
   return (
     <div>
@@ -46,7 +52,7 @@ const PaginationControls = ({
                 size="sm"
                 variant="outline"
                 disabled={safePage <= 1}
-                onClick={() => onPageChange(safePage - 1)}
+                onClick={handlePreviousPageClick}
               >
                 {previousLabel}
               </Button>
@@ -55,7 +61,7 @@ const PaginationControls = ({
                 size="sm"
                 variant="outline"
                 disabled={safePage >= totalPages}
-                onClick={() => onPageChange(safePage + 1)}
+                onClick={handleNextPageClick}
               >
                 {nextLabel}
               </Button>

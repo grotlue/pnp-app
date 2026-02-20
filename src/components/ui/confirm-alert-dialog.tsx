@@ -32,6 +32,10 @@ const ConfirmAlertDialog = ({
   onOpenChange,
   onConfirm,
 }: ConfirmAlertDialogProps) => {
+  const handleConfirmClick = () => {
+    void onConfirm();
+  };
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent size="sm">
@@ -44,9 +48,7 @@ const ConfirmAlertDialog = ({
           <AlertDialogAction
             variant="destructive"
             disabled={confirmDisabled}
-            onClick={() => {
-              void onConfirm();
-            }}
+            onClick={handleConfirmClick}
           >
             {confirmLabel}
           </AlertDialogAction>

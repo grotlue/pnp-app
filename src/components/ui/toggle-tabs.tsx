@@ -16,8 +16,12 @@ const ToggleTabs = <T extends string>({
   options,
   onChange,
 }: ToggleTabsProps<T>) => {
+  const handleValueChange = (nextValue: string) => {
+    onChange(nextValue as T);
+  };
+
   return (
-    <Tabs value={value} onValueChange={(next) => onChange(next as T)}>
+    <Tabs value={value} onValueChange={handleValueChange}>
       <TabsList variant="line">
         {options.map((option) => (
           <TabsTrigger key={option.value} value={option.value}>
