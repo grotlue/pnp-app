@@ -5,7 +5,6 @@ import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { FormInput } from "@/components/ui/form-controls";
 import { Modal } from "@/components/ui/modal";
@@ -17,17 +16,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { queryKeys } from "@/lib/client/query-keys";
 import {
   clearSession,
   setSession as persistSession,
 } from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { useAdminMfaStatusQuery } from "@/features/users/hooks/use-admin-mfa-status-query";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
 import {
   enrollAdminTotp,
-  getAdminMfaStatus,
   verifyAdminTotp,
 } from "@/features/users/queries/users-mfa.query";
 import {
@@ -57,18 +55,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
     useState<AdminMfaEnrollResponse | null>(null);
   const meQuery = useMeQuery(session);
   const isAdminUser = meQuery.data?.profile.role === "admin";
-  const adminMfaQuery = useQuery({
-    queryKey: queryKeys.adminMfaStatus(session?.accessToken ?? "no-session"),
-    enabled: Boolean(session) && isAdminUser,
-    staleTime: 30_000,
-    queryFn: async () => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
-
-      return getAdminMfaStatus(session);
-    },
-  });
+  const adminMfaQuery = useAdminMfaStatusQuery(session, isAdminUser);
   const adminNeedsMfaStepUp =
     isAdminUser &&
     adminMfaQuery.data?.mfaRequired === true &&

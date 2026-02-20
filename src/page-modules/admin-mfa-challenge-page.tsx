@@ -7,7 +7,7 @@ import { TextLink } from "@/components/ui/text-link";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { FormInput } from "@/components/ui/form-controls";
 import { PageLoadingState } from "@/components/ui/page-loading-state";
@@ -20,15 +20,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { appRoutes } from "@/app/router";
+import { useAdminMfaStatusQuery } from "@/features/users/hooks/use-admin-mfa-status-query";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
 import {
   resolveAdminMfaStepUpDecision,
   sanitizeReturnToPath,
 } from "@/features/users/logic/admin-mfa-step-up.logic";
-import {
-  getAdminMfaStatus,
-  verifyAdminTotp,
-} from "@/features/users/queries/users-mfa.query";
+import { verifyAdminTotp } from "@/features/users/queries/users-mfa.query";
 import { queryKeys } from "@/lib/client/query-keys";
 import { setSession as persistSession } from "@/lib/client/session";
 import { useClientSession } from "@/lib/client/use-client-session";
@@ -61,17 +59,7 @@ export function AdminMfaChallengePageView({
   const role = meQuery.data?.profile.role;
   const isAdminUser = role === "admin";
 
-  const adminMfaQuery = useQuery({
-    queryKey: queryKeys.adminMfaStatus(session?.accessToken ?? "no-session"),
-    enabled: Boolean(session) && isAdminUser,
-    staleTime: 30_000,
-    queryFn: async () => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
-      return getAdminMfaStatus(session);
-    },
-  });
+  const adminMfaQuery = useAdminMfaStatusQuery(session, isAdminUser);
 
   const decision = useMemo(() => {
     if (!isAdminUser || !adminMfaQuery.data) {

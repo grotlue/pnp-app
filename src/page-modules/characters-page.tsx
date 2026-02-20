@@ -6,7 +6,6 @@ import { TextLink } from "@/components/ui/text-link";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { Pencil, Trash2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -36,6 +35,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CharacterTypeBadge } from "@/features/characters/components/character-type-badge";
+import { useCampaignsQuery } from "@/features/campaigns/hooks/use-campaigns-query";
 import {
   type CharacterListSort,
   searchCharacters,
@@ -43,9 +43,7 @@ import {
 } from "@/features/characters/logic/character-list.logic";
 import type { Character } from "@/features/characters/types";
 import { useCharactersScreen } from "@/features/characters/hooks/use-characters-screen";
-import { getCampaignsQuery } from "@/features/campaigns/queries/get-campaigns.query";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
-import { queryKeys } from "@/lib/client/query-keys";
 import { useClientSession } from "@/lib/client/use-client-session";
 import { getTranslator, type AppLocale } from "@/lib/i18n/index";
 import {
@@ -91,18 +89,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
     useCharactersScreen(session);
 
   const meQuery = useMeQuery(session);
-
-  const campaignsQuery = useQuery({
-    queryKey: queryKeys.campaignsScreen(session?.accessToken ?? "no-session"),
-    enabled: Boolean(session),
-    queryFn: async () => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
-
-      return getCampaignsQuery(session, { scope: "member" });
-    },
-  });
+  const campaignsQuery = useCampaignsQuery(session);
 
   const characters = charactersQuery.data ?? [];
   const visibleCharacters = characters;
@@ -124,7 +111,10 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
   const campaignsById = useMemo(
     () =>
       new Map(
-        (campaignsQuery.data ?? []).map((campaign) => [campaign.id, campaign]),
+        (campaignsQuery.data?.campaigns ?? []).map((campaign) => [
+          campaign.id,
+          campaign,
+        ]),
       ),
     [campaignsQuery.data],
   );

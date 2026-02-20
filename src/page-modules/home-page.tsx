@@ -12,7 +12,7 @@ import { TextLink } from "@/components/ui/text-link";
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { FormInput } from "@/components/ui/form-controls";
@@ -43,7 +43,6 @@ import {
   searchCampaigns,
   sortCampaigns,
 } from "@/features/campaigns/logic/campaign-list.logic";
-import { getCampaignsQuery } from "@/features/campaigns/queries/get-campaigns.query";
 import {
   type CharacterListSort,
   type CharacterOwnershipFilter,
@@ -51,7 +50,7 @@ import {
   searchCharacters,
   sortCharacters,
 } from "@/features/characters/logic/character-list.logic";
-import { getCharacters } from "@/features/characters/queries/characters-screen.query";
+import { useHomeLoggedInQuery } from "@/features/users/hooks/use-home-logged-in-query";
 import { loginUser } from "@/features/users/queries/users-auth.query";
 import { resolveAdminMfaStepUpDecision } from "@/features/users/logic/admin-mfa-step-up.logic";
 import { getAdminMfaStatus } from "@/features/users/queries/users-mfa.query";
@@ -139,32 +138,7 @@ export function HomePageView({
     useState<CampaignListSort>("updated_desc");
   const [campaignPage, setCampaignPage] = useState(1);
 
-  const loggedInQuery = useQuery({
-    queryKey: queryKeys.homeLoggedIn(session?.accessToken ?? "no-session"),
-    enabled: Boolean(session),
-    queryFn: async () => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
-
-      const token = session.accessToken;
-      const [me, campaigns, characters] = await Promise.all([
-        queryClient.ensureQueryData({
-          queryKey: queryKeys.me(token),
-          staleTime: 60_000,
-          queryFn: async () => getMe(session),
-        }),
-        getCampaignsQuery(session, { scope: "public" }),
-        getCharacters(session, { scope: "public" }),
-      ]);
-
-      return {
-        me,
-        campaigns,
-        characters,
-      };
-    },
-  });
+  const loggedInQuery = useHomeLoggedInQuery(session);
 
   async function onLogin() {
     if (authCaptchaConfig.required && !authCaptchaConfig.enabled) {
