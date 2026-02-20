@@ -11,7 +11,7 @@ import {
   FormSelect,
   FormTextarea,
 } from "@/components/ui/form-controls";
-import { ImageUploadField } from "@/components/common/image-upload-field";
+import ImageUploadField from "@/components/common/image-upload-field";
 import { Modal } from "@/components/ui/modal";
 import { VisibilityToggle } from "@/components/ui/visibility-toggle";
 import { Button } from "@/components/ui/button";

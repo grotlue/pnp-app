@@ -44,16 +44,18 @@ type ImageUploadFieldProps = {
   onResolvePreviewUrl: (path: string) => Promise<string>;
 };
 
-async function readFileAsDataUrl(file: File): Promise<string> {
+const readFileAsDataUrl = async (file: File): Promise<string> => {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
     reader.onerror = () => reject(new Error("Failed to read image file"));
     reader.readAsDataURL(file);
   });
-}
+};
 
-async function readImageDimensions(dataUrl: string): Promise<ImageDimensions> {
+const readImageDimensions = async (
+  dataUrl: string,
+): Promise<ImageDimensions> => {
   return new Promise<ImageDimensions>((resolve, reject) => {
     const image = new window.Image();
     image.onload = () => {
@@ -65,9 +67,9 @@ async function readImageDimensions(dataUrl: string): Promise<ImageDimensions> {
     image.onerror = () => reject(new Error("Failed to load image dimensions"));
     image.src = dataUrl;
   });
-}
+};
 
-export function ImageUploadField({
+const ImageUploadField = ({
   value,
   label,
   previewAlt,
@@ -86,7 +88,7 @@ export function ImageUploadField({
   onChange,
   onUpload,
   onResolvePreviewUrl,
-}: ImageUploadFieldProps) {
+}: ImageUploadFieldProps) => {
   const inputId = useId();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -135,7 +137,7 @@ export function ImageUploadField({
     };
   }, [onResolvePreviewUrl, resolvedPath, value]);
 
-  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
       return;
@@ -182,9 +184,9 @@ export function ImageUploadField({
       }
       setIsUploading(false);
     }
-  }
+  };
 
-  function removeImage() {
+  const handleRemoveImage = () => {
     onChange("");
     setPreviewUrl(null);
     setResolvedPath("");
@@ -192,7 +194,11 @@ export function ImageUploadField({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-  }
+  };
+
+  const handleOpenFilePicker = () => {
+    fileInputRef.current?.click();
+  };
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -239,7 +245,7 @@ export function ImageUploadField({
               type="button"
               variant="outline"
               disabled={disabled || isUploading}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handleOpenFilePicker}
             >
               {value ? replaceLabel : uploadLabel}
             </Button>
@@ -247,7 +253,7 @@ export function ImageUploadField({
               type="button"
               variant="outline"
               disabled={disabled || isUploading || !value}
-              onClick={removeImage}
+              onClick={handleRemoveImage}
             >
               {removeLabel}
             </Button>
@@ -266,4 +272,6 @@ export function ImageUploadField({
       </div>
     </div>
   );
-}
+};
+
+export default ImageUploadField;

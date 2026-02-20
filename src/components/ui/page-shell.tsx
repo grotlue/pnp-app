@@ -29,14 +29,14 @@ type AuthCardPageContentProps = ComponentPropsWithoutRef<"div">;
 type AuthRadialPageMainProps = ComponentPropsWithoutRef<"main">;
 type CompactPageViewportProps = ComponentPropsWithoutRef<"main">;
 
-export function AppPageMain({
+const AppPageMain = ({
   children,
   className,
   viewportClassName,
   maxWidth: _maxWidth = "7xl",
   layout: _layout = "default",
   ...props
-}: AppPageMainProps) {
+}: AppPageMainProps) => {
   void _maxWidth;
   void _layout;
   return (
@@ -44,14 +44,14 @@ export function AppPageMain({
       <UiDiv className={className}>{children}</UiDiv>
     </UiMain>
   );
-}
+};
 
-export function AppPageShell({
+const AppPageShell = ({
   children,
   maxWidth = "7xl",
   className,
   contentClassName,
-}: AppPageShellProps) {
+}: AppPageShellProps) => {
   return (
     <AppPageMain
       maxWidth={maxWidth}
@@ -61,24 +61,24 @@ export function AppPageShell({
       {children}
     </AppPageMain>
   );
-}
+};
 
-export function PageViewport({ className, ...props }: PageViewportProps) {
+const PageViewport = ({ className, ...props }: PageViewportProps) => {
   return <UiMain className={className} {...props} />;
-}
+};
 
-export function CompactPageViewport({
+const CompactPageViewport = ({
   className,
   ...props
-}: CompactPageViewportProps) {
+}: CompactPageViewportProps) => {
   return <UiMain className={className} {...props} />;
-}
+};
 
-export function AuthCardPageShell({
+const AuthCardPageShell = ({
   children,
   className,
   contentClassName,
-}: AuthCardPageShellProps) {
+}: AuthCardPageShellProps) => {
   return (
     <AuthCardPageMain className={className}>
       <AuthCardPageContent className={contentClassName}>
@@ -86,25 +86,33 @@ export function AuthCardPageShell({
       </AuthCardPageContent>
     </AuthCardPageMain>
   );
-}
+};
 
-export function AuthCardPageMain({
-  className,
-  ...props
-}: AuthCardPageMainProps) {
+const AuthCardPageMain = ({ className, ...props }: AuthCardPageMainProps) => {
   return <UiMain className={className} {...props} />;
-}
+};
 
-export function AuthRadialPageMain({
+const AuthRadialPageMain = ({
   className,
   ...props
-}: AuthRadialPageMainProps) {
+}: AuthRadialPageMainProps) => {
   return <UiMain className={className} {...props} />;
-}
+};
 
-export function AuthCardPageContent({
+const AuthCardPageContent = ({
   className,
   ...props
-}: AuthCardPageContentProps) {
+}: AuthCardPageContentProps) => {
   return <UiDiv className={className} {...props} />;
-}
+};
+
+export {
+  AppPageMain,
+  AppPageShell,
+  AuthCardPageContent,
+  AuthCardPageMain,
+  AuthCardPageShell,
+  AuthRadialPageMain,
+  CompactPageViewport,
+  PageViewport,
+};

@@ -11,7 +11,7 @@ import {
   FormSelect,
   FormTextarea,
 } from "@/components/ui/form-controls";
-import { ImageUploadField } from "@/components/common/image-upload-field";
+import ImageUploadField from "@/components/common/image-upload-field";
 import { Button } from "@/components/ui/button";
 import {
   Card,
