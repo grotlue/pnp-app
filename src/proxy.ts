@@ -7,7 +7,7 @@ import {
   SECURITY_HEADER_VALUES,
 } from "@/server/security/constants";
 
-export async function proxy(request: NextRequest) {
+const proxy = async (request: NextRequest) => {
   const response = await updateSession(request);
   const toolbarEnabled = resolveVercelToolbarEnabled();
 
@@ -41,10 +41,12 @@ export async function proxy(request: NextRequest) {
   }
 
   return response;
-}
+};
 
-export const config = {
+const config = {
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
   ],
 };
+
+export { config, proxy };

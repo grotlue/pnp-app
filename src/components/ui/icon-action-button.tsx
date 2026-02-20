@@ -25,7 +25,7 @@ type IconActionLinkButtonProps = {
   badgeCount?: number;
 };
 
-export function IconActionButton({
+const IconActionButton = ({
   label,
   icon: Icon,
   variant = "outline",
@@ -33,7 +33,7 @@ export function IconActionButton({
   dataTestId,
   disabled,
   onClick,
-}: IconActionButtonProps) {
+}: IconActionButtonProps) => {
   return (
     <Button
       variant={variant}
@@ -48,16 +48,16 @@ export function IconActionButton({
       <span>{label}</span>
     </Button>
   );
-}
+};
 
-export function IconActionLinkButton({
+const IconActionLinkButton = ({
   label,
   icon: Icon,
   href,
   variant = "outline",
   size = "icon-sm",
   badgeCount = 0,
-}: IconActionLinkButtonProps) {
+}: IconActionLinkButtonProps) => {
   const showBadge = badgeCount > 0;
   const badgeLabel = badgeCount > 99 ? "99+" : String(badgeCount);
 
@@ -70,4 +70,6 @@ export function IconActionLinkButton({
       </Link>
     </Button>
   );
-}
+};
+
+export { IconActionButton, IconActionLinkButton };
