@@ -18,10 +18,10 @@ import {
   updateRelationship,
 } from "../queries/character-detail.query";
 
-export function useCharacterDetailScreen(
+const useCharacterDetailScreen = (
   session: ClientSession | null,
   characterId: string,
-) {
+) => {
   const queryClient = useQueryClient();
   const token = session?.accessToken ?? "no-session";
   const detailQueryKey = queryKeys.characterDetail(characterId, token);
@@ -59,13 +59,13 @@ export function useCharacterDetailScreen(
     },
   });
 
-  async function invalidateCharacterData() {
+  const invalidateCharacterData = async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: detailQueryKey }),
       queryClient.invalidateQueries({ queryKey: queryKeys.characters() }),
       queryClient.invalidateQueries({ queryKey: queryKeys.campaigns() }),
     ]);
-  }
+  };
 
   const assignMutation = useMutation({
     mutationFn: async (campaignId: string) => {
@@ -211,4 +211,6 @@ export function useCharacterDetailScreen(
       updateRelationshipMutation.isPending ||
       deleteRelationshipMutation.isPending,
   };
-}
+};
+
+export { useCharacterDetailScreen as default, useCharacterDetailScreen };

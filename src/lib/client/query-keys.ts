@@ -2,7 +2,7 @@ const campaignsRoot = ["campaigns"] as const;
 const charactersRoot = ["characters"] as const;
 const notificationsRoot = ["notifications"] as const;
 
-export const queryKeys = {
+const queryKeys = {
   me: (token: string) => ["me", token] as const,
   homeLoggedIn: (token: string) => ["home", "logged-in", token] as const,
   adminMfaStatus: (token: string) => ["admin", "mfa", "status", token] as const,
@@ -27,3 +27,5 @@ export const queryKeys = {
   usersPublicProfile: (userId: string, token: string) =>
     ["users", "public-profile", userId, token] as const,
 };
+
+export { queryKeys as default, queryKeys };

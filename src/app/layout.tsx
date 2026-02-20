@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export async function generateMetadata(): Promise<Metadata> {
+const generateMetadata = async (): Promise<Metadata> => {
   const locale = await getRequestLocale();
   const t = getTranslator(locale);
 
@@ -27,13 +27,13 @@ export async function generateMetadata(): Promise<Metadata> {
     title: t("app.title"),
     description: t("app.description"),
   };
-}
+};
 
 type RootLayoutProps = Readonly<{
   children: React.ReactNode;
 }>;
 
-export default async function RootLayout({ children }: RootLayoutProps) {
+const RootLayout = async ({ children }: RootLayoutProps) => {
   const locale = await getRequestLocale();
   const enableToolbar = resolveVercelToolbarEnabled();
   const enableSpeedInsights = resolveSpeedInsightsEnabled();
@@ -47,4 +47,6 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       </RootBody>
     </html>
   );
-}
+};
+
+export { RootLayout as default, generateMetadata };

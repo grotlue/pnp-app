@@ -28,7 +28,7 @@ import {
   updateAdminUser,
 } from "../queries/admin-users.query";
 
-export function useAdminDashboard(session: ClientSession | null) {
+const useAdminDashboard = (session: ClientSession | null) => {
   const queryClient = useQueryClient();
   const tokenKey = session?.accessToken ?? "no-session";
   const bootstrapQuery = useQuery({
@@ -44,11 +44,11 @@ export function useAdminDashboard(session: ClientSession | null) {
     },
   });
 
-  async function invalidateBootstrap() {
+  const invalidateBootstrap = async () => {
     await queryClient.invalidateQueries({
       queryKey: queryKeys.adminBootstrap(tokenKey),
     });
-  }
+  };
 
   const createUserMutation = useMutation({
     mutationFn: async (input: AdminCreateUserInput) => {
@@ -198,4 +198,6 @@ export function useAdminDashboard(session: ClientSession | null) {
       updateCharacterMutation.isPending ||
       deleteCharacterMutation.isPending,
   };
-}
+};
+
+export { useAdminDashboard as default, useAdminDashboard };

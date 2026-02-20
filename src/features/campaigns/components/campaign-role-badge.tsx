@@ -2,7 +2,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 
 type Translator = (key: string, fallback?: string) => string;
 
-export type CampaignUserRole = "owner" | "player";
+type CampaignUserRole = "owner" | "player";
 
 type CampaignRoleBadgeProps = {
   role: CampaignUserRole;
@@ -10,11 +10,11 @@ type CampaignRoleBadgeProps = {
   withTopSpacing?: boolean;
 };
 
-export function CampaignRoleBadge({
+const CampaignRoleBadge = ({
   role,
   t,
   withTopSpacing = false,
-}: CampaignRoleBadgeProps) {
+}: CampaignRoleBadgeProps) => {
   return (
     <StatusBadge
       label={t(`ui.labels.campaignRole.${role}`)}
@@ -22,4 +22,7 @@ export function CampaignRoleBadge({
       withTopSpacing={withTopSpacing}
     />
   );
-}
+};
+
+export { CampaignRoleBadge as default, CampaignRoleBadge };
+export type { CampaignUserRole };

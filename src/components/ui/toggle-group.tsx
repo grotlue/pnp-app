@@ -42,7 +42,7 @@ type ToggleGroupMultipleProps = BaseToggleGroupProps & {
 
 type ToggleGroupProps = ToggleGroupSingleProps | ToggleGroupMultipleProps;
 
-function ToggleGroup({
+const ToggleGroup = ({
   className,
   variant,
   size,
@@ -53,7 +53,7 @@ function ToggleGroup({
   defaultValue,
   onValueChange,
   ...props
-}: ToggleGroupProps) {
+}: ToggleGroupProps) => {
   const primitiveValue =
     value === undefined
       ? undefined
@@ -102,15 +102,15 @@ function ToggleGroup({
       </ToggleGroupContext.Provider>
     </ToggleGroupPrimitive>
   );
-}
+};
 
-function ToggleGroupItem({
+const ToggleGroupItem = ({
   className,
   variant,
   size,
   ...props
 }: Omit<React.ComponentProps<typeof Toggle>, "variant" | "size"> &
-  VariantProps<typeof toggleVariants>) {
+  VariantProps<typeof toggleVariants>) => {
   const context = React.useContext(ToggleGroupContext);
 
   return (
@@ -129,6 +129,6 @@ function ToggleGroupItem({
       {...props}
     />
   );
-}
+};
 
 export { ToggleGroup, ToggleGroupItem };

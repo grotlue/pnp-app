@@ -11,23 +11,23 @@ import {
   updateCharacter,
 } from "../queries/character-edit.query";
 
-export function useCharacterEditScreen(
+const useCharacterEditScreen = (
   session: ClientSession | null,
   characterId: string,
-) {
+) => {
   const queryClient = useQueryClient();
   const token = session?.accessToken ?? "no-session";
   const editQueryKey = queryKeys.characterEdit(characterId, token);
   const detailQueryKey = queryKeys.characterDetail(characterId, token);
   const charactersScreenQueryKey = queryKeys.charactersScreen(token);
 
-  async function invalidateCharacterData() {
+  const invalidateCharacterData = async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: editQueryKey }),
       queryClient.invalidateQueries({ queryKey: detailQueryKey }),
       queryClient.invalidateQueries({ queryKey: charactersScreenQueryKey }),
     ]);
-  }
+  };
 
   const editQuery = useQuery({
     queryKey: editQueryKey,
@@ -71,4 +71,6 @@ export function useCharacterEditScreen(
     deleteMutation,
     anyPending: updateMutation.isPending || deleteMutation.isPending,
   };
-}
+};
+
+export { useCharacterEditScreen as default, useCharacterEditScreen };
