@@ -4,6 +4,25 @@ import nextTs from "eslint-config-next/typescript";
 import prettierRecommended from "eslint-plugin-prettier/recommended";
 import tailwindcss from "eslint-plugin-tailwindcss";
 
+const lintScopeFiles = [
+  "src/**/*.{js,cjs,mjs,jsx,ts,tsx}",
+  "tests/**/*.{js,cjs,mjs,jsx,ts,tsx}",
+];
+
+const scopeToLintFiles = (config) => {
+  const configKeys = Object.keys(config);
+  const hasOnlyIgnores = configKeys.length === 1 && configKeys[0] === "ignores";
+
+  if (hasOnlyIgnores) {
+    return config;
+  }
+
+  return {
+    ...config,
+    files: lintScopeFiles,
+  };
+};
+
 const globalSyntaxRestrictions = [
   {
     selector: "ExportNamedDeclaration[declaration!=null]",
@@ -52,10 +71,11 @@ const reactCompilerMemoizationRestrictions = [
 ];
 
 const eslintConfig = defineConfig([
-  ...nextVitals,
-  ...nextTs,
-  ...tailwindcss.configs["flat/recommended"],
+  ...nextVitals.map(scopeToLintFiles),
+  ...nextTs.map(scopeToLintFiles),
+  ...tailwindcss.configs["flat/recommended"].map(scopeToLintFiles),
   {
+    files: lintScopeFiles,
     settings: {
       tailwindcss: {
         // Tailwind v4 projects without tailwind.config.* need an explicit value.
@@ -69,13 +89,18 @@ const eslintConfig = defineConfig([
       "tailwindcss/no-custom-classname": "off",
     },
   },
-  prettierRecommended,
   {
+    ...prettierRecommended,
+    files: lintScopeFiles,
+  },
+  {
+    files: lintScopeFiles,
     rules: {
       "prettier/prettier": "error",
     },
   },
   {
+    files: lintScopeFiles,
     rules: {
       "func-style": ["warn", "expression", { allowArrowFunctions: true }],
       "import/prefer-default-export": "warn",
