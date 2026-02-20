@@ -13,10 +13,10 @@ type ProfileCampaignEntry = {
   role: "owner" | "player";
 };
 
-export function useUserProfileScreenQuery(
+const useUserProfileScreenQuery = (
   session: ClientSession | null,
   userId: string,
-) {
+) => {
   const token = session?.accessToken ?? "no-session";
 
   return useQuery({
@@ -52,4 +52,6 @@ export function useUserProfileScreenQuery(
       };
     },
   });
-}
+};
+
+export { useUserProfileScreenQuery as default, useUserProfileScreenQuery };

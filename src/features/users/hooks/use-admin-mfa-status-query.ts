@@ -9,11 +9,11 @@ type UseAdminMfaStatusQueryOptions = {
   enabled?: boolean;
 };
 
-export function useAdminMfaStatusQuery(
+const useAdminMfaStatusQuery = (
   session: ClientSession | null,
   isAdminUser: boolean,
   options?: UseAdminMfaStatusQueryOptions,
-) {
+) => {
   const token = session?.accessToken ?? "no-session";
   const enabled = options?.enabled ?? true;
 
@@ -29,4 +29,6 @@ export function useAdminMfaStatusQuery(
       return getAdminMfaStatus(session);
     },
   });
-}
+};
+
+export { useAdminMfaStatusQuery as default, useAdminMfaStatusQuery };

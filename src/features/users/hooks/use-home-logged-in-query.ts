@@ -7,7 +7,7 @@ import { getCampaignsQuery } from "@/features/campaigns/queries/get-campaigns.qu
 import { getCharacters } from "@/features/characters/queries/characters-screen.query";
 import { getMe } from "@/features/users/queries/users-profile.query";
 
-export function useHomeLoggedInQuery(session: ClientSession | null) {
+const useHomeLoggedInQuery = (session: ClientSession | null) => {
   const queryClient = useQueryClient();
   const token = session?.accessToken ?? "no-session";
 
@@ -36,4 +36,6 @@ export function useHomeLoggedInQuery(session: ClientSession | null) {
       };
     },
   });
-}
+};
+
+export { useHomeLoggedInQuery as default, useHomeLoggedInQuery };
