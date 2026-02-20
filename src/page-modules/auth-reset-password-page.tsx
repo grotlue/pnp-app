@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
-import { useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -22,7 +22,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { setSession } from "@/lib/client/session";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import {
   confirmPasswordReset,
   exchangeAuthCode,
@@ -38,10 +38,10 @@ type AuthResetPasswordPageViewProps = {
   locale: AppLocale;
 };
 
-export function AuthResetPasswordPageView({
+const AuthResetPasswordPageView = ({
   locale,
-}: AuthResetPasswordPageViewProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
+}: AuthResetPasswordPageViewProps) => {
+  const t = getTranslator(locale);
   const router = useRouter();
 
   const [sessionTokens, setSessionTokens] = useState<SessionTokens | null>(
@@ -56,7 +56,7 @@ export function AuthResetPasswordPageView({
   useEffect(() => {
     let cancelled = false;
 
-    async function resolveTokens() {
+    const resolveTokens = async () => {
       try {
         const directTokens = getSessionTokensFromUrl(window.location);
         if (directTokens) {
@@ -126,7 +126,7 @@ export function AuthResetPasswordPageView({
           setResolving(false);
         }
       }
-    }
+    };
 
     void resolveTokens();
     return () => {
@@ -134,7 +134,7 @@ export function AuthResetPasswordPageView({
     };
   }, [t]);
 
-  async function onSubmit() {
+  const onSubmit = async () => {
     if (!sessionTokens) {
       return;
     }
@@ -164,7 +164,15 @@ export function AuthResetPasswordPageView({
     } finally {
       setBusy(false);
     }
-  }
+  };
+
+  const handleNewPasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setNewPassword(event.target.value);
+  };
+
+  const handleSubmitClick = () => {
+    void onSubmit();
+  };
 
   return (
     <AuthCardPageMain>
@@ -182,7 +190,7 @@ export function AuthResetPasswordPageView({
                 type="password"
                 placeholder={t("ui.fields.newPassword")}
                 value={newPassword}
-                onChange={(event) => setNewPassword(event.target.value)}
+                onChange={handleNewPasswordChange}
               />
             ) : (
               <FeedbackMessage
@@ -196,7 +204,7 @@ export function AuthResetPasswordPageView({
             {sessionTokens ? (
               <Button
                 disabled={busy || !newPassword}
-                onClick={() => void onSubmit()}
+                onClick={handleSubmitClick}
               >
                 {t("ui.authReset.submit")}
               </Button>
@@ -213,4 +221,6 @@ export function AuthResetPasswordPageView({
       </AuthCardPageContent>
     </AuthCardPageMain>
   );
-}
+};
+
+export default AuthResetPasswordPageView;

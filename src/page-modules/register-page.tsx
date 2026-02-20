@@ -7,13 +7,13 @@ import {
 } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
-import { useMemo, useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { FormInput } from "@/components/ui/form-controls";
 import {
-  TurnstileWidget,
   type TurnstileErrorReason,
+  TurnstileWidget,
 } from "@/components/common/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import { resolveAuthCaptchaClientConfig } from "@/lib/features/auth-captcha";
 import { registerUser } from "@/features/users/queries/users-auth.query";
 
@@ -32,10 +32,10 @@ type RegisterScreenProps = {
   locale: AppLocale;
 };
 
-function getCaptchaFailureMessage(
+const getCaptchaFailureMessage = (
   t: ReturnType<typeof getTranslator>,
   reason: TurnstileErrorReason | null,
-): string {
+): string => {
   if (!reason) {
     return t("ui.feedback.captchaRequired");
   }
@@ -45,11 +45,11 @@ function getCaptchaFailureMessage(
   }
 
   return t("ui.feedback.captchaUnavailable");
-}
+};
 
-export function RegisterPageView({ locale }: RegisterScreenProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
-  const authCaptchaConfig = useMemo(() => resolveAuthCaptchaClientConfig(), []);
+const RegisterPageView = ({ locale }: RegisterScreenProps) => {
+  const t = getTranslator(locale);
+  const authCaptchaConfig = resolveAuthCaptchaClientConfig();
   const router = useRouter();
 
   const [busy, setBusy] = useState(false);
@@ -64,7 +64,7 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
     password: "",
   });
 
-  async function onSubmit() {
+  const onSubmit = async () => {
     if (authCaptchaConfig.required && !authCaptchaConfig.enabled) {
       setMessage(t("ui.feedback.captchaMisconfigured"));
       return;
@@ -96,7 +96,26 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
       }
       setBusy(false);
     }
-  }
+  };
+
+  const handleUsernameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setForm((prev) => ({ ...prev, username: event.target.value }));
+  };
+
+  const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setForm((prev) => ({ ...prev, email: event.target.value }));
+  };
+
+  const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setForm((prev) => ({ ...prev, password: event.target.value }));
+  };
+
+  const handleCaptchaTokenChange = (token: string | null) => {
+    if (token) {
+      setCaptchaErrorReason(null);
+    }
+    setCaptchaToken(token);
+  };
 
   return (
     <AuthCardPageMain>
@@ -110,37 +129,26 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
             <FormInput
               placeholder={t("ui.fields.username")}
               value={form.username}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, username: event.target.value }))
-              }
+              onChange={handleUsernameChange}
             />
             <FormInput
               type="email"
               placeholder={t("ui.fields.email")}
               value={form.email}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, email: event.target.value }))
-              }
+              onChange={handleEmailChange}
             />
             <FormInput
               type="password"
               placeholder={t("ui.fields.password")}
               value={form.password}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, password: event.target.value }))
-              }
+              onChange={handlePasswordChange}
             />
             {authCaptchaConfig.enabled && authCaptchaConfig.siteKey ? (
               <TurnstileWidget
                 siteKey={authCaptchaConfig.siteKey}
                 resetKey={captchaResetKey}
                 loadErrorMessage={t("ui.feedback.captchaUnavailable")}
-                onTokenChange={(token) => {
-                  if (token) {
-                    setCaptchaErrorReason(null);
-                  }
-                  setCaptchaToken(token);
-                }}
+                onTokenChange={handleCaptchaTokenChange}
                 onErrorReason={setCaptchaErrorReason}
               />
             ) : null}
@@ -158,4 +166,6 @@ export function RegisterPageView({ locale }: RegisterScreenProps) {
       </AuthCardPageContent>
     </AuthCardPageMain>
   );
-}
+};
+
+export default RegisterPageView;

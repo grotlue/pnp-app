@@ -1,5 +1,5 @@
 import { getRequestLocale } from "@/lib/i18n/request-locale";
-import { UserProfilePageView } from "@/page-modules/user-profile-page";
+import UserProfilePageView from "@/page-modules/user-profile-page";
 
 type UserProfilePageProps = {
   params: Promise<{ userId: string }>;

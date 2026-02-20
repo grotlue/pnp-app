@@ -4,7 +4,7 @@ import { UiDiv } from "@/components/ui/html-elements";
 import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -26,7 +26,7 @@ import { sortCampaigns } from "@/features/campaigns/logic/campaign-list.logic";
 import { sortCharacters } from "@/features/characters/logic/character-list.logic";
 import { useUserProfileScreenQuery } from "@/features/users/hooks/use-user-profile-screen-query";
 import { useClientSession } from "@/lib/client/use-client-session";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import { hasItems } from "@/lib/logic/collections";
 import {
   clampListPage,
@@ -39,11 +39,8 @@ type UserProfilePageViewProps = {
   userId: string;
 };
 
-export function UserProfilePageView({
-  locale,
-  userId,
-}: UserProfilePageViewProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
+const UserProfilePageView = ({ locale, userId }: UserProfilePageViewProps) => {
+  const t = getTranslator(locale);
   const router = useRouter();
   const { session, ready } = useClientSession();
   const [characterTab, setCharacterTab] = useState<"player" | "npc">("player");
@@ -224,4 +221,6 @@ export function UserProfilePageView({
       </Card>
     </AppPageMain>
   );
-}
+};
+
+export default UserProfilePageView;

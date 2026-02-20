@@ -1,26 +1,26 @@
-export type SessionTokens = {
+type SessionTokens = {
   accessToken: string;
   refreshToken: string;
   expiresAt?: number;
 };
 
-export type AuthUrlParams = {
+type AuthUrlParams = {
   code?: string;
   tokenHash?: string;
   type?: "signup" | "recovery" | "email" | "email_change";
 };
 
-function parseExpiresAt(raw: string | null): number | undefined {
+const parseExpiresAt = (raw: string | null): number | undefined => {
   if (!raw) {
     return undefined;
   }
   const value = Number(raw);
   return Number.isFinite(value) ? value : undefined;
-}
+};
 
-export function getSessionTokensFromUrl(
+const getSessionTokensFromUrl = (
   windowLocation: Location,
-): SessionTokens | null {
+): SessionTokens | null => {
   const hashRaw = windowLocation.hash.startsWith("#")
     ? windowLocation.hash.slice(1)
     : windowLocation.hash;
@@ -37,9 +37,9 @@ export function getSessionTokensFromUrl(
     refreshToken,
     expiresAt: parseExpiresAt(hash.get("expires_at")),
   };
-}
+};
 
-export function getAuthParamsFromUrl(windowLocation: Location): AuthUrlParams {
+const getAuthParamsFromUrl = (windowLocation: Location): AuthUrlParams => {
   const search = new URLSearchParams(windowLocation.search);
   const type = search.get("type");
 
@@ -54,4 +54,7 @@ export function getAuthParamsFromUrl(windowLocation: Location): AuthUrlParams {
         ? type
         : undefined,
   };
-}
+};
+
+export type { AuthUrlParams, SessionTokens };
+export { getAuthParamsFromUrl, getSessionTokensFromUrl };

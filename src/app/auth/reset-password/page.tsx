@@ -1,4 +1,4 @@
-import { AuthResetPasswordPageView } from "@/page-modules/auth-reset-password-page";
+import AuthResetPasswordPageView from "@/page-modules/auth-reset-password-page";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 export default async function AuthResetPasswordPage() {
