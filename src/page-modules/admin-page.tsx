@@ -5,7 +5,7 @@ import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -42,7 +42,7 @@ import type {
   AdminUser,
 } from "@/features/admin/types";
 import { useClientSession } from "@/lib/client/use-client-session";
-import { getTranslator, type AppLocale } from "@/lib/i18n";
+import { type AppLocale, getTranslator } from "@/lib/i18n";
 import { hasItems } from "@/lib/logic/collections";
 
 type AdminPageViewProps = {
@@ -102,20 +102,20 @@ const defaultEditCharacterForm: AdminCharacterFormValues = {
   isPrivate: false,
 };
 
-function parseNumberOrNull(value: string): number | null {
+const parseNumberOrNull = (value: string): number | null => {
   if (!value.trim()) {
     return null;
   }
   const numeric = Number(value);
   return Number.isFinite(numeric) ? numeric : null;
-}
+};
 
-function isProtectedAdminUser(user: AdminUser): boolean {
+const isProtectedAdminUser = (user: AdminUser): boolean => {
   return user.role === "admin";
-}
+};
 
-export function AdminPageView({ locale, section }: AdminPageViewProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
+const AdminPageView = ({ locale, section }: AdminPageViewProps) => {
+  const t = getTranslator(locale);
   const router = useRouter();
   const { session, ready } = useClientSession();
   const admin = useAdminDashboard(session);
@@ -174,22 +174,10 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
     }
   }, [ready, session, admin.meQuery.isLoading, meRole, router]);
 
-  const users = useMemo(
-    () => admin.usersQuery.data ?? [],
-    [admin.usersQuery.data],
-  );
-  const campaigns = useMemo(
-    () => admin.campaignsQuery.data ?? [],
-    [admin.campaignsQuery.data],
-  );
-  const characters = useMemo(
-    () => admin.charactersQuery.data ?? [],
-    [admin.charactersQuery.data],
-  );
-  const userById = useMemo(
-    () => new Map(users.map((user) => [user.id, user])),
-    [users],
-  );
+  const users = admin.usersQuery.data ?? [];
+  const campaigns = admin.campaignsQuery.data ?? [];
+  const characters = admin.charactersQuery.data ?? [];
+  const userById = new Map(users.map((user) => [user.id, user]));
   const firstUserId = users[0]?.id ?? "";
 
   const queryErrors = [
@@ -944,4 +932,6 @@ export function AdminPageView({ locale, section }: AdminPageViewProps) {
       </Modal>
     </>
   );
-}
+};
+
+export default AdminPageView;
