@@ -6,10 +6,10 @@ type GetCharactersOptions = {
   scope?: "mine" | "public";
 };
 
-export async function getCharacters(
+const getCharacters = async (
   session: ClientSession,
   options?: GetCharactersOptions,
-): Promise<Character[]> {
+): Promise<Character[]> => {
   const searchParams = new URLSearchParams();
   if (options?.scope) {
     searchParams.set("scope", options.scope);
@@ -21,24 +21,24 @@ export async function getCharacters(
 
   const response = await apiRequest<Character[]>(path, { session });
   return unwrapApiResponse(response, "Failed to load characters");
-}
+};
 
-export async function createCharacter(
+const createCharacter = async (
   session: ClientSession,
   input: CharacterCreateInput,
-): Promise<Character> {
+): Promise<Character> => {
   const response = await apiRequest<Character>("/api/characters", {
     method: "POST",
     session,
     body: input,
   });
   return unwrapApiResponse(response, "Failed to create character");
-}
+};
 
-export async function deleteCharacter(
+const deleteCharacter = async (
   session: ClientSession,
   characterId: string,
-): Promise<{ deleted: boolean }> {
+): Promise<{ deleted: boolean }> => {
   const response = await apiRequest<{ deleted: boolean }>(
     `/api/characters/${characterId}`,
     {
@@ -47,4 +47,6 @@ export async function deleteCharacter(
     },
   );
   return unwrapApiResponse(response, "Failed to delete character");
-}
+};
+
+export { createCharacter, deleteCharacter, getCharacters };

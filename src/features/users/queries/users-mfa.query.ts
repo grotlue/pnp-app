@@ -6,20 +6,20 @@ import type {
   AdminMfaVerifyResponse,
 } from "@/features/users/types";
 
-export async function getAdminMfaStatus(
+const getAdminMfaStatus = async (
   session: ClientSession,
-): Promise<AdminMfaStatusResponse> {
+): Promise<AdminMfaStatusResponse> => {
   const response = await apiRequest<AdminMfaStatusResponse>(
     "/api/auth/mfa/totp",
     { session },
   );
   return unwrapApiResponse(response, "Failed to load MFA status");
-}
+};
 
-export async function enrollAdminTotp(
+const enrollAdminTotp = async (
   session: ClientSession,
   input?: { friendlyName?: string },
-): Promise<AdminMfaEnrollResponse> {
+): Promise<AdminMfaEnrollResponse> => {
   const response = await apiRequest<AdminMfaEnrollResponse>(
     "/api/auth/mfa/totp",
     {
@@ -29,12 +29,12 @@ export async function enrollAdminTotp(
     },
   );
   return unwrapApiResponse(response, "Failed to start MFA setup");
-}
+};
 
-export async function verifyAdminTotp(
+const verifyAdminTotp = async (
   session: ClientSession,
   input: { factorId: string; code: string },
-): Promise<AdminMfaVerifyResponse> {
+): Promise<AdminMfaVerifyResponse> => {
   const response = await apiRequest<AdminMfaVerifyResponse>(
     "/api/auth/mfa/totp",
     {
@@ -44,4 +44,6 @@ export async function verifyAdminTotp(
     },
   );
   return unwrapApiResponse(response, "Failed to verify MFA code");
-}
+};
+
+export { enrollAdminTotp, getAdminMfaStatus, verifyAdminTotp };

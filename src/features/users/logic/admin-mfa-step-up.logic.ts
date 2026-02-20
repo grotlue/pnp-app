@@ -1,6 +1,6 @@
 import type { AdminMfaStatusResponse } from "@/features/users/types";
 
-export type AdminMfaStepUpDecision =
+type AdminMfaStepUpDecision =
   | { kind: "none" }
   | { kind: "setup" }
   | { kind: "challenge"; factorId: string };
@@ -10,9 +10,9 @@ type ResolveAdminMfaStepUpDecisionInput = {
   mfaStatus: AdminMfaStatusResponse | null;
 };
 
-export function resolveAdminMfaStepUpDecision(
+const resolveAdminMfaStepUpDecision = (
   input: ResolveAdminMfaStepUpDecisionInput,
-): AdminMfaStepUpDecision {
+): AdminMfaStepUpDecision => {
   if (input.role !== "admin") {
     return { kind: "none" };
   }
@@ -36,12 +36,12 @@ export function resolveAdminMfaStepUpDecision(
     kind: "challenge",
     factorId: verifiedFactor.id,
   };
-}
+};
 
-export function sanitizeReturnToPath(
+const sanitizeReturnToPath = (
   path: string | undefined,
   fallback: string,
-) {
+): string => {
   if (!path) {
     return fallback;
   }
@@ -51,4 +51,10 @@ export function sanitizeReturnToPath(
   }
 
   return path;
-}
+};
+
+export {
+  resolveAdminMfaStepUpDecision,
+  sanitizeReturnToPath,
+  type AdminMfaStepUpDecision,
+};

@@ -1,10 +1,10 @@
 import { apiRequest, unwrapApiResponse } from "@/lib/client/api";
 import type { ClientSession } from "@/lib/client/session";
 
-export async function updateMyEmail(
+const updateMyEmail = async (
   session: ClientSession,
   input: { newEmail: string },
-): Promise<{ user: unknown }> {
+): Promise<{ user: unknown }> => {
   const response = await apiRequest<{ user: unknown }>(
     "/api/me/settings/email",
     {
@@ -14,12 +14,12 @@ export async function updateMyEmail(
     },
   );
   return unwrapApiResponse(response, "Failed to update email");
-}
+};
 
-export async function updateMyPassword(
+const updateMyPassword = async (
   session: ClientSession,
   input: { newPassword: string },
-): Promise<{ user: unknown }> {
+): Promise<{ user: unknown }> => {
   const response = await apiRequest<{ user: unknown }>(
     "/api/me/settings/password",
     {
@@ -29,14 +29,16 @@ export async function updateMyPassword(
     },
   );
   return unwrapApiResponse(response, "Failed to update password");
-}
+};
 
-export async function deleteMyAccount(
+const deleteMyAccount = async (
   session: ClientSession,
-): Promise<{ deleted: boolean }> {
+): Promise<{ deleted: boolean }> => {
   const response = await apiRequest<{ deleted: boolean }>("/api/me", {
     method: "DELETE",
     session,
   });
   return unwrapApiResponse(response, "Failed to delete account");
-}
+};
+
+export { deleteMyAccount, updateMyEmail, updateMyPassword };
