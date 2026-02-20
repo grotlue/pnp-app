@@ -1,6 +1,6 @@
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import {
   KNOWN_TARGETS,
   PUBLIC_ROUTES,
@@ -17,7 +17,7 @@ type ResolvedTarget = {
   requiresAuth: boolean;
 };
 
-function parseCsvEnv(envValue: string | undefined): string[] {
+const parseCsvEnv = (envValue: string | undefined): string[] => {
   if (!envValue) {
     return [];
   }
@@ -26,9 +26,9 @@ function parseCsvEnv(envValue: string | undefined): string[] {
     .split(",")
     .map((value) => value.trim())
     .filter((value) => value.length > 0);
-}
+};
 
-function resolveTargets(): ResolvedTarget[] {
+const resolveTargets = (): ResolvedTarget[] => {
   const knownTargetsEnv = process.env.PR_SCREENSHOT_TARGETS;
   const requestedKnownTargets = parseCsvEnv(knownTargetsEnv);
   const extraRoutes = parseCsvEnv(process.env.PR_SCREENSHOT_EXTRA_ROUTES);
@@ -47,7 +47,7 @@ function resolveTargets(): ResolvedTarget[] {
   }));
 
   return [...knownTargets, ...extraTargets];
-}
+};
 
 const resolvedTargets = resolveTargets();
 const publicTargets = resolvedTargets.filter((target) => !target.requiresAuth);
@@ -55,19 +55,19 @@ const authenticatedTargets = resolvedTargets.filter(
   (target) => target.requiresAuth,
 );
 
-function screenshotPath(fileName: string): string {
+const screenshotPath = (fileName: string): string => {
   return join(screenshotDir, fileName);
-}
+};
 
-async function captureRouteScreenshot(
+const captureRouteScreenshot = async (
   page: Page,
   route: string,
   fileName: string,
-) {
+): Promise<void> => {
   await page.goto(route);
   await expect(page.locator("main").first()).toBeVisible();
   await page.screenshot({ path: screenshotPath(fileName), fullPage: true });
-}
+};
 
 test.beforeAll(() => {
   mkdirSync(screenshotDir, { recursive: true });
