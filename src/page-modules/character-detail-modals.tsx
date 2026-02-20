@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from "react";
+import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import {
@@ -15,9 +15,9 @@ import { UiDiv, UiPre } from "@/components/ui/html-elements";
 
 type Translator = (key: string) => string;
 
-export type RelationshipTargetMode = "existing" | "external";
+type RelationshipTargetMode = "existing" | "external";
 
-export type RelationshipAddFormValues = {
+type RelationshipAddFormValues = {
   targetCharacterId: string;
   targetSnapshotName: string;
   categoryId: string;
@@ -27,7 +27,7 @@ export type RelationshipAddFormValues = {
   firstTimelineEntry: string;
 };
 
-export type RelationshipEditFormValues = {
+type RelationshipEditFormValues = {
   targetCharacterId: string;
   targetSnapshotName: string;
   categoryId: string;
@@ -62,7 +62,7 @@ type RelationshipFormFieldsProps<TForm extends RelationshipBaseFormValues> = {
   labelPresetValue: string;
 };
 
-function RelationshipFormFields<TForm extends RelationshipBaseFormValues>({
+const RelationshipFormFields = <TForm extends RelationshipBaseFormValues>({
   t,
   mode,
   onModeChange,
@@ -72,21 +72,71 @@ function RelationshipFormFields<TForm extends RelationshipBaseFormValues>({
   onFormChange,
   categoryValue,
   labelPresetValue,
-}: RelationshipFormFieldsProps<TForm>) {
+}: RelationshipFormFieldsProps<TForm>) => {
+  const handleExistingMode = () => {
+    onModeChange("existing");
+  };
+
+  const handleExternalMode = () => {
+    onModeChange("external");
+  };
+
+  const handleTargetCharacterIdChange = (
+    event: ChangeEvent<HTMLSelectElement>,
+  ) => {
+    onFormChange((prev) => ({
+      ...prev,
+      targetCharacterId: event.target.value,
+    }));
+  };
+
+  const handleTargetSnapshotNameChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    onFormChange((prev) => ({
+      ...prev,
+      targetSnapshotName: event.target.value,
+    }));
+  };
+
+  const handleCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    onFormChange((prev) => ({ ...prev, categoryId: event.target.value }));
+  };
+
+  const handleLabelPresetIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    onFormChange((prev) => ({
+      ...prev,
+      labelPresetId: event.target.value,
+      labelCustom: "",
+    }));
+  };
+
+  const handleLabelCustomChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onFormChange((prev) => ({
+      ...prev,
+      labelCustom: event.target.value,
+      labelPresetId: "",
+    }));
+  };
+
+  const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    onFormChange((prev) => ({ ...prev, description: event.target.value }));
+  };
+
   return (
     <UiDiv gridGap={2}>
       <UiDiv inlineGap={2}>
         <Button
           size="sm"
           variant={mode === "existing" ? "default" : "outline"}
-          onClick={() => onModeChange("existing")}
+          onClick={handleExistingMode}
         >
           {t("ui.characterDetail.targetExisting")}
         </Button>
         <Button
           size="sm"
           variant={mode === "external" ? "default" : "outline"}
-          onClick={() => onModeChange("external")}
+          onClick={handleExternalMode}
         >
           {t("ui.characterDetail.targetExternal")}
         </Button>
@@ -95,12 +145,7 @@ function RelationshipFormFields<TForm extends RelationshipBaseFormValues>({
       {mode === "existing" ? (
         <FormSelect
           value={form.targetCharacterId}
-          onChange={(event) =>
-            onFormChange((prev) => ({
-              ...prev,
-              targetCharacterId: event.target.value,
-            }))
-          }
+          onChange={handleTargetCharacterIdChange}
         >
           <option value="">
             {t("ui.characterDetail.selectRelationshipTarget")}
@@ -115,21 +160,11 @@ function RelationshipFormFields<TForm extends RelationshipBaseFormValues>({
         <FormInput
           value={form.targetSnapshotName}
           placeholder={t("ui.characterDetail.externalName")}
-          onChange={(event) =>
-            onFormChange((prev) => ({
-              ...prev,
-              targetSnapshotName: event.target.value,
-            }))
-          }
+          onChange={handleTargetSnapshotNameChange}
         />
       )}
 
-      <FormSelect
-        value={categoryValue}
-        onChange={(event) =>
-          onFormChange((prev) => ({ ...prev, categoryId: event.target.value }))
-        }
-      >
+      <FormSelect value={categoryValue} onChange={handleCategoryIdChange}>
         <option value="">{t("ui.characterDetail.category")}</option>
         {catalog.categories.map((entry) => (
           <option key={entry.id} value={String(entry.id)}>
@@ -138,16 +173,7 @@ function RelationshipFormFields<TForm extends RelationshipBaseFormValues>({
         ))}
       </FormSelect>
 
-      <FormSelect
-        value={labelPresetValue}
-        onChange={(event) =>
-          onFormChange((prev) => ({
-            ...prev,
-            labelPresetId: event.target.value,
-            labelCustom: "",
-          }))
-        }
-      >
+      <FormSelect value={labelPresetValue} onChange={handleLabelPresetIdChange}>
         <option value="">{t("ui.characterDetail.label")}</option>
         {catalog.labels.map((entry) => (
           <option key={entry.id} value={String(entry.id)}>
@@ -159,26 +185,18 @@ function RelationshipFormFields<TForm extends RelationshipBaseFormValues>({
       <FormInput
         value={form.labelCustom}
         placeholder={t("ui.characterDetail.customLabel")}
-        onChange={(event) =>
-          onFormChange((prev) => ({
-            ...prev,
-            labelCustom: event.target.value,
-            labelPresetId: "",
-          }))
-        }
+        onChange={handleLabelCustomChange}
       />
 
       <FormTextarea
         size="md"
         value={form.description}
         placeholder={t("ui.fields.description")}
-        onChange={(event) =>
-          onFormChange((prev) => ({ ...prev, description: event.target.value }))
-        }
+        onChange={handleDescriptionChange}
       />
     </UiDiv>
   );
-}
+};
 
 type AssignCampaignModalProps = {
   t: Translator;
@@ -191,7 +209,7 @@ type AssignCampaignModalProps = {
   onAssign: () => void | Promise<void>;
 };
 
-export function AssignCampaignModal({
+const AssignCampaignModal = ({
   t,
   open,
   anyPending,
@@ -200,7 +218,13 @@ export function AssignCampaignModal({
   onClose,
   onSelectedCampaignIdChange,
   onAssign,
-}: AssignCampaignModalProps) {
+}: AssignCampaignModalProps) => {
+  const handleSelectedCampaignIdChange = (
+    event: ChangeEvent<HTMLSelectElement>,
+  ) => {
+    onSelectedCampaignIdChange(event.target.value);
+  };
+
   return (
     <Modal
       open={open}
@@ -222,7 +246,7 @@ export function AssignCampaignModal({
     >
       <FormSelect
         value={selectedCampaignId}
-        onChange={(event) => onSelectedCampaignIdChange(event.target.value)}
+        onChange={handleSelectedCampaignIdChange}
       >
         <option value="">{t("ui.characterDetail.selectCampaign")}</option>
         {campaigns.map((entry) => (
@@ -233,7 +257,7 @@ export function AssignCampaignModal({
       </FormSelect>
     </Modal>
   );
-}
+};
 
 type UnassignCampaignModalProps = {
   t: Translator;
@@ -243,13 +267,13 @@ type UnassignCampaignModalProps = {
   onConfirm: () => void | Promise<void>;
 };
 
-export function UnassignCampaignModal({
+const UnassignCampaignModal = ({
   t,
   open,
   anyPending,
   onClose,
   onConfirm,
-}: UnassignCampaignModalProps) {
+}: UnassignCampaignModalProps) => {
   return (
     <Modal
       open={open}
@@ -278,7 +302,7 @@ export function UnassignCampaignModal({
       </UiDiv>
     </Modal>
   );
-}
+};
 
 type AddRelationshipModalProps = {
   t: Translator;
@@ -296,7 +320,7 @@ type AddRelationshipModalProps = {
   onCreate: () => void | Promise<void>;
 };
 
-export function AddRelationshipModal({
+const AddRelationshipModal = ({
   t,
   open,
   anyPending,
@@ -310,7 +334,16 @@ export function AddRelationshipModal({
   onModeChange,
   onFormChange,
   onCreate,
-}: AddRelationshipModalProps) {
+}: AddRelationshipModalProps) => {
+  const handleFirstTimelineEntryChange = (
+    event: ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    onFormChange((prev) => ({
+      ...prev,
+      firstTimelineEntry: event.target.value,
+    }));
+  };
+
   return (
     <Modal
       open={open}
@@ -343,17 +376,12 @@ export function AddRelationshipModal({
           size="md"
           placeholder={t("ui.characterDetail.firstTimelineEntry")}
           value={form.firstTimelineEntry}
-          onChange={(event) =>
-            onFormChange((prev) => ({
-              ...prev,
-              firstTimelineEntry: event.target.value,
-            }))
-          }
+          onChange={handleFirstTimelineEntryChange}
         />
       </UiDiv>
     </Modal>
   );
-}
+};
 
 type EditRelationshipModalProps = {
   t: Translator;
@@ -370,7 +398,7 @@ type EditRelationshipModalProps = {
   onSave: () => void | Promise<void>;
 };
 
-export function EditRelationshipModal({
+const EditRelationshipModal = ({
   t,
   open,
   anyPending,
@@ -383,7 +411,7 @@ export function EditRelationshipModal({
   onModeChange,
   onFormChange,
   onSave,
-}: EditRelationshipModalProps) {
+}: EditRelationshipModalProps) => {
   return (
     <Modal
       open={open}
@@ -413,7 +441,7 @@ export function EditRelationshipModal({
       />
     </Modal>
   );
-}
+};
 
 type DeleteRelationshipModalProps = {
   t: Translator;
@@ -424,14 +452,14 @@ type DeleteRelationshipModalProps = {
   onDelete: () => void | Promise<void>;
 };
 
-export function DeleteRelationshipModal({
+const DeleteRelationshipModal = ({
   t,
   open,
   anyPending,
   hasRelation,
   onClose,
   onDelete,
-}: DeleteRelationshipModalProps) {
+}: DeleteRelationshipModalProps) => {
   return (
     <Modal
       open={open}
@@ -457,7 +485,7 @@ export function DeleteRelationshipModal({
       </UiDiv>
     </Modal>
   );
-}
+};
 
 type RelationshipDetailModalProps = {
   t: Translator;
@@ -466,12 +494,12 @@ type RelationshipDetailModalProps = {
   onClose: () => void;
 };
 
-export function RelationshipDetailModal({
+const RelationshipDetailModal = ({
   t,
   open,
   detail,
   onClose,
-}: RelationshipDetailModalProps) {
+}: RelationshipDetailModalProps) => {
   return (
     <Modal
       open={open}
@@ -511,4 +539,18 @@ export function RelationshipDetailModal({
       ) : null}
     </Modal>
   );
-}
+};
+
+export type {
+  RelationshipAddFormValues,
+  RelationshipEditFormValues,
+  RelationshipTargetMode,
+};
+export {
+  AddRelationshipModal,
+  AssignCampaignModal,
+  DeleteRelationshipModal,
+  EditRelationshipModal,
+  RelationshipDetailModal,
+  UnassignCampaignModal,
+};
