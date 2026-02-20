@@ -4,6 +4,8 @@ import Image from "next/image";
 import { type ChangeEvent, useEffect, useId, useRef, useState } from "react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
+import { FormLabel } from "@/components/ui/form-controls";
+import { UiDiv } from "@/components/ui/html-elements";
 import { Input } from "@/components/ui/input";
 import { MAX_IMAGE_UPLOAD_SIZE_BYTES } from "@/lib/storage/image-upload";
 import { cn } from "@/lib/utils/cn";
@@ -201,12 +203,12 @@ const ImageUploadField = ({
   };
 
   return (
-    <div className={cn("space-y-2", className)}>
-      <label htmlFor={inputId} className="text-muted-foreground text-xs">
+    <UiDiv className={cn("space-y-2", className)}>
+      <FormLabel htmlFor={inputId} className="text-muted-foreground text-xs">
         {label}
-      </label>
-      <div className="grid gap-3 md:grid-cols-[200px_1fr]">
-        <div className="border-border bg-muted/30 w-full max-w-[200px] overflow-hidden rounded-lg border">
+      </FormLabel>
+      <UiDiv className="grid gap-3 md:grid-cols-[200px_1fr]">
+        <UiDiv className="border-border bg-muted/30 w-full max-w-[200px] overflow-hidden rounded-lg border">
           <AspectRatio ratio={1}>
             {previewUrl ? (
               <Image
@@ -218,13 +220,13 @@ const ImageUploadField = ({
                 unoptimized
               />
             ) : (
-              <div className="text-muted-foreground flex h-full items-center justify-center px-3 text-center text-xs">
+              <UiDiv className="text-muted-foreground flex h-full items-center justify-center px-3 text-center text-xs">
                 {emptyLabel}
-              </div>
+              </UiDiv>
             )}
           </AspectRatio>
-        </div>
-        <div className="space-y-2">
+        </UiDiv>
+        <UiDiv className="space-y-2">
           <Input
             id={inputId}
             ref={fileInputRef}
@@ -234,13 +236,13 @@ const ImageUploadField = ({
             disabled={disabled || isUploading}
             onChange={handleFileChange}
           />
-          <div className="text-muted-foreground text-xs">{hint}</div>
+          <UiDiv className="text-muted-foreground text-xs">{hint}</UiDiv>
           {value ? (
-            <div className="border-border bg-background rounded-md border px-2 py-1 font-mono text-xs break-all">
+            <UiDiv className="border-border bg-background rounded-md border px-2 py-1 font-mono text-xs break-all">
               {value}
-            </div>
+            </UiDiv>
           ) : null}
-          <div className="flex flex-wrap gap-2">
+          <UiDiv className="flex flex-wrap gap-2">
             <Button
               type="button"
               variant="outline"
@@ -257,20 +259,20 @@ const ImageUploadField = ({
             >
               {removeLabel}
             </Button>
-          </div>
+          </UiDiv>
           {isUploading ? (
-            <div className="text-muted-foreground text-xs">
+            <UiDiv className="text-muted-foreground text-xs">
               {uploadingLabel}
-            </div>
+            </UiDiv>
           ) : null}
           {fieldMessage ? (
-            <div className="border-border bg-background rounded-md border p-2 text-xs">
+            <UiDiv className="border-border bg-background rounded-md border p-2 text-xs">
               {fieldMessage}
-            </div>
+            </UiDiv>
           ) : null}
-        </div>
-      </div>
-    </div>
+        </UiDiv>
+      </UiDiv>
+    </UiDiv>
   );
 };
 
