@@ -3,9 +3,7 @@ import type {
   NotificationRpcRow,
 } from "@/features/notifications/types";
 
-export function mapNotificationRpcRow(
-  row: NotificationRpcRow,
-): NotificationEntry {
+const mapNotificationRpcRow = (row: NotificationRpcRow): NotificationEntry => {
   return {
     id: row.id,
     recipient_user_id: row.recipient_user_id,
@@ -17,4 +15,6 @@ export function mapNotificationRpcRow(
     created_at: row.created_at,
     read_at: row.read_at,
   };
-}
+};
+
+export { mapNotificationRpcRow as default, mapNotificationRpcRow };

@@ -1,10 +1,10 @@
 import { apiRequest, unwrapApiResponse } from "@/lib/client/api";
 import type { ClientSession } from "@/lib/client/session";
 
-export async function markNotificationReadMutation(
+const markNotificationReadMutation = async (
   session: ClientSession,
   notificationId: string,
-): Promise<{ read: true }> {
+): Promise<{ read: true }> => {
   const response = await apiRequest<{ read: true }>(
     `/api/notifications/${notificationId}/read`,
     {
@@ -13,4 +13,9 @@ export async function markNotificationReadMutation(
     },
   );
   return unwrapApiResponse(response, "Failed to mark notification as read");
-}
+};
+
+export {
+  markNotificationReadMutation as default,
+  markNotificationReadMutation,
+};

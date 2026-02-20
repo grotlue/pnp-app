@@ -8,11 +8,11 @@ import { markNotificationReadMutation } from "@/features/notifications/queries/m
 import { markAllNotificationsReadMutation } from "@/features/notifications/queries/mark-all-notifications-read.mutation";
 import { decideNotificationMembershipMutation } from "@/features/notifications/queries/decide-notification-membership.mutation";
 
-export function useNotificationsScreen(session: ClientSession | null) {
+const useNotificationsScreen = (session: ClientSession | null) => {
   const queryClient = useQueryClient();
   const notificationsQuery = useNotificationsQuery(session);
 
-  async function invalidateNotifications() {
+  const invalidateNotifications = async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications() }),
       queryClient.invalidateQueries({
@@ -21,7 +21,7 @@ export function useNotificationsScreen(session: ClientSession | null) {
         ),
       }),
     ]);
-  }
+  };
 
   const markReadMutation = useMutation({
     mutationFn: async (notificationId: string) => {
@@ -67,4 +67,6 @@ export function useNotificationsScreen(session: ClientSession | null) {
       markAllReadMutation.isPending ||
       decideMembershipMutation.isPending,
   };
-}
+};
+
+export { useNotificationsScreen as default, useNotificationsScreen };

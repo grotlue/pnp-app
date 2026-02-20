@@ -5,7 +5,7 @@ import type { ClientSession } from "@/lib/client/session";
 import { queryKeys } from "@/lib/client/query-keys";
 import { getNotificationsUnreadCountQuery } from "@/features/notifications/queries/get-notifications-unread-count.query";
 
-export function useNotificationsUnreadCount(session: ClientSession | null) {
+const useNotificationsUnreadCount = (session: ClientSession | null) => {
   const token = session?.accessToken ?? "no-session";
 
   return useQuery({
@@ -21,4 +21,6 @@ export function useNotificationsUnreadCount(session: ClientSession | null) {
     },
     refetchInterval: 30_000,
   });
-}
+};
+
+export { useNotificationsUnreadCount as default, useNotificationsUnreadCount };

@@ -5,9 +5,9 @@ type NotificationCountRpcClient = {
   }>;
 };
 
-export async function countUnreadNotificationsRpcQuery(
+const countUnreadNotificationsRpcQuery = async (
   client: NotificationCountRpcClient,
-): Promise<number> {
+): Promise<number> => {
   const { data, error } = await client.rpc(
     "rpc_count_unread_notifications_for_user",
   );
@@ -22,4 +22,9 @@ export async function countUnreadNotificationsRpcQuery(
 
   const parsed = Number(data ?? 0);
   return Number.isFinite(parsed) ? parsed : 0;
-}
+};
+
+export {
+  countUnreadNotificationsRpcQuery as default,
+  countUnreadNotificationsRpcQuery,
+};

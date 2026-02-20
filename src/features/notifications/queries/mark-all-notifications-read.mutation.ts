@@ -6,9 +6,9 @@ type MarkAllNotificationsReadResponse = {
   updated: number;
 };
 
-export async function markAllNotificationsReadMutation(
+const markAllNotificationsReadMutation = async (
   session: ClientSession,
-): Promise<MarkAllNotificationsReadResponse> {
+): Promise<MarkAllNotificationsReadResponse> => {
   const response = await apiRequest<MarkAllNotificationsReadResponse>(
     "/api/notifications/read-all",
     {
@@ -20,4 +20,9 @@ export async function markAllNotificationsReadMutation(
     response,
     "Failed to mark all notifications as read",
   );
-}
+};
+
+export {
+  markAllNotificationsReadMutation as default,
+  markAllNotificationsReadMutation,
+};

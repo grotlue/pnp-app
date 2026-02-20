@@ -9,10 +9,10 @@ type UseNotificationsQueryOptions = {
   limit?: number;
 };
 
-export function useNotificationsQuery(
+const useNotificationsQuery = (
   session: ClientSession | null,
   options?: UseNotificationsQueryOptions,
-) {
+) => {
   const limit = options?.limit ?? 100;
   const token = session?.accessToken ?? "no-session";
 
@@ -26,4 +26,6 @@ export function useNotificationsQuery(
       return getNotificationsQuery(session, { limit });
     },
   });
-}
+};
+
+export { useNotificationsQuery as default, useNotificationsQuery };
