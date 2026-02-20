@@ -1,6 +1,6 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import createSupabaseServerClient from "@/lib/supabase/server";
 
 const resolveSafeNextPath = (input: string | null): string => {
   if (!input || !input.startsWith("/") || input.startsWith("//")) {

@@ -1,14 +1,14 @@
 import type { AuthContext } from "@/server/auth/require-auth";
 import { createServiceRoleSupabaseClient } from "@/server/supabase/service-role-client";
 
-export type AppUserRole = "admin" | "user" | null;
+type AppUserRole = "admin" | "user" | null;
 
 type RoleLookupClient = Pick<AuthContext["client"], "from">;
 
-async function readUserRole(
+const readUserRole = async (
   client: RoleLookupClient,
   userId: string,
-): Promise<{ role: AppUserRole; errorMessage?: string }> {
+): Promise<{ role: AppUserRole; errorMessage?: string }> => {
   const { data, error } = await client
     .from("profiles")
     .select("role")
@@ -24,11 +24,11 @@ async function readUserRole(
   }
 
   return { role: null };
-}
+};
 
-export async function getUserRole(
+const getUserRole = async (
   context: Pick<AuthContext, "client" | "user">,
-): Promise<{ role: AppUserRole; errorMessage?: string }> {
+): Promise<{ role: AppUserRole; errorMessage?: string }> => {
   const profileRole = await readUserRole(context.client, context.user.id);
   if (!profileRole.errorMessage) {
     return profileRole;
@@ -45,4 +45,6 @@ export async function getUserRole(
   }
 
   return profileRole;
-}
+};
+
+export { getUserRole, type AppUserRole };

@@ -1,10 +1,10 @@
 import type { NextRequest } from "next/server";
 import { resolveVercelToolbarEnabled } from "@/lib/features/vercel-toolbar";
-import { updateSession } from "@/lib/supabase/middleware";
+import updateSession from "@/lib/supabase/middleware";
 import { buildContentSecurityPolicy } from "@/server/security/csp";
 import {
-  SECURITY_HEADERS,
   SECURITY_HEADER_VALUES,
+  SECURITY_HEADERS,
 } from "@/server/security/constants";
 
 const proxy = async (request: NextRequest) => {
