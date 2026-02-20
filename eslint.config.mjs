@@ -4,6 +4,26 @@ import nextTs from "eslint-config-next/typescript";
 import prettierRecommended from "eslint-plugin-prettier/recommended";
 import tailwindcss from "eslint-plugin-tailwindcss";
 
+const globalSyntaxRestrictions = [
+  {
+    selector: "ExportNamedDeclaration[declaration!=null]",
+    message:
+      "Do not export declarations inline. Declare first, then export at the bottom of the file.",
+  },
+  {
+    selector: "FunctionExpression",
+    message:
+      "Use arrow function expressions (`const fn = () => {}`) instead of `function` expressions.",
+  },
+];
+
+const nativeClassNameRestriction = {
+  selector:
+    "JSXOpeningElement[name.type='JSXIdentifier'][name.name=/^[a-z]/] > JSXAttribute[name.name='className']",
+  message:
+    "Use reusable UI components instead of className on native JSX elements outside src/components/ui.",
+};
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -26,20 +46,63 @@ const eslintConfig = defineConfig([
   {
     rules: {
       "prettier/prettier": "error",
-      "func-style": ["error", "declaration", { allowArrowFunctions: true }],
     },
   },
   {
-    files: ["src/page-modules/**/*.{ts,tsx}", "src/features/**/*.{ts,tsx}"],
     rules: {
-      "no-restricted-syntax": [
+      "func-style": ["warn", "expression", { allowArrowFunctions: true }],
+      "import/exports-last": "warn",
+      "import/group-exports": "warn",
+      "react/jsx-no-bind": [
+        "warn",
+        {
+          allowArrowFunctions: false,
+          allowFunctions: false,
+          allowBind: false,
+          ignoreRefs: true,
+          ignoreDOMComponents: false,
+        },
+      ],
+      "no-restricted-syntax": ["warn", ...globalSyntaxRestrictions],
+    },
+  },
+  {
+    files: [
+      "src/page-modules/**/*.{ts,tsx}",
+      "src/components/**/*.{ts,tsx}",
+      "src/features/**/components/**/*.{ts,tsx}",
+    ],
+    rules: {
+      "no-restricted-imports": [
         "error",
         {
-          selector:
-            "JSXOpeningElement[name.type='JSXIdentifier'][name.name=/^[a-z]/] > JSXAttribute[name.name='className']",
-          message:
-            "Use reusable UI components instead of className on native JSX elements in page/features modules.",
+          paths: [
+            {
+              name: "@tanstack/react-query",
+              importNames: [
+                "useQuery",
+                "useMutation",
+                "useInfiniteQuery",
+                "useQueries",
+                "useSuspenseQuery",
+                "useSuspenseInfiniteQuery",
+              ],
+              message:
+                "Do not use React Query hooks directly in components/page modules. Move data fetching/mutations into a domain hook under hooks/.",
+            },
+          ],
         },
+      ],
+    },
+  },
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/components/ui/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-syntax": [
+        "warn",
+        ...globalSyntaxRestrictions,
+        nativeClassNameRestriction,
       ],
     },
   },
