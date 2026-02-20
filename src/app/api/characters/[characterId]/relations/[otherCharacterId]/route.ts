@@ -8,7 +8,7 @@ type Params = {
   }>;
 };
 
-export async function GET(request: Request, { params }: Params) {
+const GET = async (request: Request, { params }: Params) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -28,4 +28,6 @@ export async function GET(request: Request, { params }: Params) {
   }
 
   return jsonOk(data);
-}
+};
+
+export { GET };

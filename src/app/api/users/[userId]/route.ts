@@ -5,7 +5,7 @@ type Params = {
   params: Promise<{ userId: string }>;
 };
 
-export async function GET(request: Request, { params }: Params) {
+const GET = async (request: Request, { params }: Params) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -33,4 +33,6 @@ export async function GET(request: Request, { params }: Params) {
     avatar_path: data.avatar_path,
     locale: data.locale,
   });
-}
+};
+
+export { GET };

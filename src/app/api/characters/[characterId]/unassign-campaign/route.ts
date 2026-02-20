@@ -5,7 +5,7 @@ type Params = {
   params: Promise<{ characterId: string }>;
 };
 
-export async function POST(request: Request, { params }: Params) {
+const POST = async (request: Request, { params }: Params) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -25,4 +25,6 @@ export async function POST(request: Request, { params }: Params) {
   }
 
   return jsonOk({ unassigned: true });
-}
+};
+
+export { POST };

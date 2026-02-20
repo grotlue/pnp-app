@@ -19,7 +19,7 @@ type RelationshipRow = {
   updated_at: string;
 };
 
-export async function GET(request: Request, { params }: Params) {
+const GET = async (request: Request, { params }: Params) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -80,4 +80,6 @@ export async function GET(request: Request, { params }: Params) {
       is_external_target: row.target_character_id === null,
     })),
   );
-}
+};
+
+export { GET };

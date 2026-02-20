@@ -1,9 +1,9 @@
 import { randomUUID } from "crypto";
 import { canManageCharacter } from "@/features/users/logic/role.logic";
-import { requireAuth } from "@/server/auth/require-auth";
-import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
-import { isWithinImageUploadSizeLimit } from "@/lib/storage/image-upload";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
 import { isSquare, sanitizeFileName } from "@/lib/storage/files";
+import { isWithinImageUploadSizeLimit } from "@/lib/storage/image-upload";
+import { requireAuth } from "@/server/auth/require-auth";
 import { getUserRole } from "@/server/auth/get-user-role";
 import { enforceRateLimit } from "@/server/rate-limit/enforce-rate-limit";
 
@@ -15,7 +15,7 @@ type Body = {
   fileSize?: number;
 };
 
-export async function POST(request: Request) {
+const POST = async (request: Request) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -92,4 +92,6 @@ export async function POST(request: Request) {
   }
 
   return jsonOk({ ...data, path });
-}
+};
+
+export { POST };

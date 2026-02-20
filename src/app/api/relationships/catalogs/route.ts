@@ -1,7 +1,7 @@
 import { requireAuth } from "@/server/auth/require-auth";
 import { jsonError, jsonOk } from "@/lib/api/http";
 
-export async function GET(request: Request) {
+const GET = async (request: Request) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -43,4 +43,6 @@ export async function GET(request: Request) {
     categories: categories ?? [],
     labels: labels ?? [],
   });
-}
+};
+
+export { GET };
