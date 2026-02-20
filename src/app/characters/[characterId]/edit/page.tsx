@@ -1,4 +1,4 @@
-import { CharacterEditPageView } from "@/page-modules/character-edit-page";
+import CharacterEditPageView from "@/page-modules/character-edit-page";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 type Params = {
