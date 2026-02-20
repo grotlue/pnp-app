@@ -8,6 +8,7 @@ export const appRoutes = {
   authResetPassword: "/auth/reset-password",
   characters: "/characters",
   campaigns: "/campaigns",
+  usersAvatars: "/users/avatars",
   notifications: "/notifications",
   profile: "/profile",
   settings: "/settings",
@@ -22,6 +23,7 @@ export const appRoutes = {
 export const appNavigationRoutes = [
   { href: appRoutes.characters, key: "ui.menu.characters" },
   { href: appRoutes.campaigns, key: "ui.menu.campaigns" },
+  { href: appRoutes.usersAvatars, key: "ui.menu.avatars" },
 ] as const;
 
 type AppRouterProps = {

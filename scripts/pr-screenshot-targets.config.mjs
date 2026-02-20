@@ -48,6 +48,12 @@ export const KNOWN_TARGETS = [
     fileName: "09-settings.png",
     requiresAuth: true,
   },
+  {
+    id: "users-avatars",
+    route: "/users/avatars",
+    fileName: "10-users-avatars.png",
+    requiresAuth: true,
+  },
 ];
 
 export const KNOWN_TARGET_IDS = new Set(
@@ -161,6 +167,15 @@ export const TARGET_RULES = [
       /^src\/page-modules\/settings-page\.tsx$/,
       /^src\/features\/users\/queries\/users-settings\.query\.ts$/,
       /^src\/app\/api\/me\/settings\//,
+    ],
+  },
+  {
+    targetId: "users-avatars",
+    patterns: [
+      /^src\/app\/users\/avatars\/page\.tsx$/,
+      /^src\/page-modules\/users-avatars-page\.tsx$/,
+      /^src\/app\/api\/users\/avatars\//,
+      /^src\/features\/users\/queries\/users-avatar-list\.query\.ts$/,
     ],
   },
 ];
