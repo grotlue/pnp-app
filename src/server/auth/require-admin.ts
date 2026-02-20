@@ -4,11 +4,11 @@ import {
   isAdminMfaRequired,
 } from "@/server/auth/auth-hardening";
 import { getUserRole } from "@/server/auth/get-user-role";
-import { requireAuth, type AuthContext } from "@/server/auth/require-auth";
+import { type AuthContext, requireAuth } from "@/server/auth/require-auth";
 
-export async function requireAdmin(
+const requireAdmin = async (
   request: Request,
-): Promise<{ context: AuthContext } | { response: Response }> {
+): Promise<{ context: AuthContext } | { response: Response }> => {
   try {
     const auth = await requireAuth(request);
     if ("response" in auth) {
@@ -41,4 +41,6 @@ export async function requireAdmin(
       response: jsonError(500, "admin_check_failed", "Admin check failed"),
     };
   }
-}
+};
+
+export { requireAdmin as default, requireAdmin };

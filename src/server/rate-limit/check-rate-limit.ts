@@ -1,16 +1,16 @@
 import { createServiceRoleSupabaseClient } from "@/server/supabase/service-role-client";
 
-export type RateLimitResult = {
+type RateLimitResult = {
   allowed: boolean;
   remaining: number;
   retryAfterSeconds: number;
 };
 
-export async function checkRateLimit(input: {
+const checkRateLimit = async (input: {
   key: string;
   limit: number;
   windowMs: number;
-}): Promise<RateLimitResult> {
+}): Promise<RateLimitResult> => {
   try {
     const client = createServiceRoleSupabaseClient();
     const windowSeconds = Math.max(1, Math.ceil(input.windowMs / 1000));
@@ -47,4 +47,7 @@ export async function checkRateLimit(input: {
       retryAfterSeconds: 0,
     };
   }
-}
+};
+
+export { checkRateLimit as default, checkRateLimit };
+export type { RateLimitResult };

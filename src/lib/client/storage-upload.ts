@@ -9,12 +9,12 @@ type SignedImageUploadInput = {
   file: File;
 };
 
-export async function uploadImageToSignedPath({
+const uploadImageToSignedPath = async ({
   bucket,
   path,
   token,
   file,
-}: SignedImageUploadInput): Promise<void> {
+}: SignedImageUploadInput): Promise<void> => {
   const supabase = getBrowserSupabaseClient();
   const { error } = await supabase.storage
     .from(bucket)
@@ -23,4 +23,6 @@ export async function uploadImageToSignedPath({
   if (error) {
     throw new Error(error.message);
   }
-}
+};
+
+export { uploadImageToSignedPath as default, uploadImageToSignedPath };

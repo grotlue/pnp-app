@@ -3,13 +3,13 @@ import { getClientIp } from "@/lib/api/security";
 import { buildRateLimitKey } from "@/server/rate-limit/rate-limit-key";
 import { checkRateLimit } from "@/server/rate-limit/check-rate-limit";
 
-export async function enforceRateLimit(input: {
+const enforceRateLimit = async (input: {
   request: Request;
   route: string;
   limit: number;
   windowMs: number;
   userId?: string | null;
-}): Promise<Response | null> {
+}): Promise<Response | null> => {
   const key = buildRateLimitKey({
     route: input.route,
     ip: getClientIp(input.request),
@@ -36,4 +36,6 @@ export async function enforceRateLimit(input: {
     String(Math.max(0, result.remaining)),
   );
   return response;
-}
+};
+
+export { enforceRateLimit as default, enforceRateLimit };
