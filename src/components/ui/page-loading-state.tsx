@@ -9,11 +9,11 @@ type PageLoadingStateProps = {
   density?: "default" | "section" | "compact";
 };
 
-export function PageLoadingState({
+const PageLoadingState = ({
   label,
   className = "",
   density = "default",
-}: PageLoadingStateProps) {
+}: PageLoadingStateProps) => {
   const skeletonRows =
     density === "default" ? [1, 2, 3] : density === "section" ? [1, 2] : [1];
 
@@ -34,4 +34,6 @@ export function PageLoadingState({
       </CardContent>
     </Card>
   );
-}
+};
+
+export { PageLoadingState as default, PageLoadingState };

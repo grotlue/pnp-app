@@ -18,10 +18,10 @@ type ListNotificationsRpcQueryParams = {
   onlyUnread?: boolean;
 };
 
-export async function listNotificationsRpcQuery(
+const listNotificationsRpcQuery = async (
   client: NotificationRpcClient,
   params: ListNotificationsRpcQueryParams,
-): Promise<NotificationRpcRow[]> {
+): Promise<NotificationRpcRow[]> => {
   const { data, error } = await client.rpc("rpc_list_notifications_for_user", {
     p_limit: params.limit,
     p_only_unread: Boolean(params.onlyUnread),
@@ -32,4 +32,6 @@ export async function listNotificationsRpcQuery(
   }
 
   return data ?? [];
-}
+};
+
+export { listNotificationsRpcQuery as default, listNotificationsRpcQuery };

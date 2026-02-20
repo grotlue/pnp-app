@@ -9,14 +9,14 @@ type SectionBoxProps = {
   textStyle?: "sm";
 };
 
-export function SectionBox({
+const SectionBox = ({
   title,
   children,
   className,
   titleClassName,
   stack: _stack,
   textStyle: _textStyle,
-}: SectionBoxProps) {
+}: SectionBoxProps) => {
   void _stack;
   void _textStyle;
   return (
@@ -25,4 +25,6 @@ export function SectionBox({
       {children}
     </div>
   );
-}
+};
+
+export { SectionBox as default, SectionBox };

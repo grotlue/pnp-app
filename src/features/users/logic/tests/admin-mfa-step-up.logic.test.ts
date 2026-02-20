@@ -5,9 +5,9 @@ import {
 } from "../admin-mfa-step-up.logic";
 import type { AdminMfaStatusResponse } from "@/features/users/types";
 
-function buildMfaStatus(
+const buildMfaStatus = (
   overrides?: Partial<AdminMfaStatusResponse>,
-): AdminMfaStatusResponse {
+): AdminMfaStatusResponse => {
   return {
     isAdmin: true,
     mfaRequired: true,
@@ -25,7 +25,7 @@ function buildMfaStatus(
     ],
     ...overrides,
   };
-}
+};
 
 describe("resolveAdminMfaStepUpDecision", () => {
   it("returns none for non-admin users", () => {

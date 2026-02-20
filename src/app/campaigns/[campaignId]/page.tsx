@@ -1,4 +1,4 @@
-import { CampaignDetailPageView } from "@/page-modules/campaign-detail-page";
+import CampaignDetailPageView from "@/page-modules/campaign-detail-page";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 type Params = {

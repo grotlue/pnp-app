@@ -1,11 +1,13 @@
 import type { Campaign } from "../types";
 
-export function isCampaignOwner(
+const isCampaignOwner = (
   campaign: Campaign,
   userId?: string | null,
-): boolean {
+): boolean => {
   if (!userId) {
     return false;
   }
   return campaign.owner_user_id === userId;
-}
+};
+
+export { isCampaignOwner as default, isCampaignOwner };

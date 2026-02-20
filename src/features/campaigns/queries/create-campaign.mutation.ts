@@ -6,10 +6,10 @@ type CreateCampaignResponse = {
   campaignId: string;
 };
 
-export async function createCampaignMutation(
+const createCampaignMutation = async (
   session: ClientSession,
   input: CampaignFormValues,
-): Promise<CreateCampaignResponse> {
+): Promise<CreateCampaignResponse> => {
   const response = await apiRequest<CreateCampaignResponse>("/api/campaigns", {
     method: "POST",
     session,
@@ -21,4 +21,6 @@ export async function createCampaignMutation(
   }
 
   return response.data;
-}
+};
+
+export { createCampaignMutation as default, createCampaignMutation };

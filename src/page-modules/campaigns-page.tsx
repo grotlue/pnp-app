@@ -3,10 +3,10 @@
 import { UiDiv } from "@/components/ui/html-elements";
 import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
-import { ListControls } from "@/components/ui/list-controls";
+import ListControls from "@/components/ui/list-controls";
 import { ConfirmAlertDialog } from "@/components/ui/confirm-alert-dialog";
 import { Modal } from "@/components/ui/modal";
 import { PageLoadingState } from "@/components/ui/page-loading-state";
@@ -19,11 +19,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useClientSession } from "@/lib/client/use-client-session";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import useClientSession from "@/lib/client/use-client-session";
+import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import {
-  DEFAULT_LIST_PAGE_SIZE,
   clampListPage,
+  DEFAULT_LIST_PAGE_SIZE,
   paginateListItems,
 } from "@/lib/utils/list";
 import {
@@ -48,8 +48,8 @@ const defaultFormValues: CampaignFormValues = {
   isPrivate: false,
 };
 
-export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
+const CampaignsPageView = ({ locale }: CampaignsPageViewProps) => {
+  const t = getTranslator(locale);
   const router = useRouter();
   const { session, ready } = useClientSession();
 
@@ -104,6 +104,93 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
     { value: "created_desc", label: t("ui.list.sortCreated") },
     { value: "name_asc", label: t("ui.list.sortName") },
   ];
+  const isAdmin = campaignsQuery.data?.me.profile?.role === "admin";
+
+  const handleOpenCreate = () => {
+    setCreateOpen(true);
+  };
+
+  const handleCloseCreate = () => {
+    setCreateOpen(false);
+  };
+
+  const handleCloseEdit = () => {
+    setEditCampaign(null);
+  };
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value as CampaignListSort);
+  };
+
+  const handleCanManageCampaign = (campaign: Campaign, userId?: string) => {
+    return isCampaignOwner(campaign, userId) || isAdmin;
+  };
+
+  const handleEditCampaign = (campaign: Campaign) => {
+    setEditCampaign(campaign);
+    setEditForm({
+      title: campaign.title,
+      description: campaign.description,
+      isPrivate: campaign.is_private ?? false,
+    });
+  };
+
+  const handleCreateCampaign = async () => {
+    setMessage("");
+    try {
+      await createMutation.mutateAsync(createForm);
+      setCreateOpen(false);
+      setCreateForm(defaultFormValues);
+      setMessage(t("ui.feedback.created"));
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
+    }
+  };
+
+  const handleUpdateCampaign = async () => {
+    if (!editCampaign) {
+      return;
+    }
+
+    setMessage("");
+    try {
+      await updateMutation.mutateAsync({
+        campaignId: editCampaign.id,
+        values: editForm,
+      });
+      setEditCampaign(null);
+      setMessage(t("ui.feedback.saved"));
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
+    }
+  };
+
+  const handleDeleteDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setDeleteCampaign(null);
+    }
+  };
+
+  const handleDeleteCampaign = async () => {
+    if (!deleteCampaign) {
+      return;
+    }
+
+    setMessage("");
+    try {
+      await deleteMutation.mutateAsync(deleteCampaign.id);
+      setDeleteCampaign(null);
+      setMessage(t("ui.feedback.deleted"));
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
+    }
+  };
 
   if (!ready || !session) {
     return <PageViewport />;
@@ -119,7 +206,7 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
           </CardHeader>
           <CardContent stack={4}>
             <UiDiv wrapGap={2}>
-              <Button onClick={() => setCreateOpen(true)}>
+              <Button onClick={handleOpenCreate}>
                 {t("ui.campaigns.create")}
               </Button>
             </UiDiv>
@@ -131,7 +218,7 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
               onSearchChange={setSearchQuery}
               searchPlaceholder={t("ui.list.searchCampaigns")}
               sortValue={sortBy}
-              onSortChange={(value) => setSortBy(value as CampaignListSort)}
+              onSortChange={handleSortChange}
               sortLabel={t("ui.list.sortBy")}
               sortOptions={sortOptions}
             />
@@ -152,18 +239,8 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
                   deleteLabel={t("ui.actions.delete")}
                   emptyLabel={t("ui.feedback.empty")}
                   isOwner={isCampaignOwner}
-                  canManage={(campaign, userId) =>
-                    isCampaignOwner(campaign, userId) ||
-                    campaignsQuery.data?.me.profile?.role === "admin"
-                  }
-                  onEdit={(campaign) => {
-                    setEditCampaign(campaign);
-                    setEditForm({
-                      title: campaign.title,
-                      description: campaign.description,
-                      isPrivate: campaign.is_private ?? false,
-                    });
-                  }}
+                  canManage={handleCanManageCampaign}
+                  onEdit={handleEditCampaign}
                   onDelete={setDeleteCampaign}
                 />
                 <PaginationControls
@@ -184,30 +261,13 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
       <Modal
         open={createOpen}
         title={t("ui.campaigns.create")}
-        onClose={() => setCreateOpen(false)}
+        onClose={handleCloseCreate}
         footer={
           <>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>
+            <Button variant="outline" onClick={handleCloseCreate}>
               {t("ui.actions.close")}
             </Button>
-            <Button
-              disabled={anyPending}
-              onClick={async () => {
-                setMessage("");
-                try {
-                  await createMutation.mutateAsync(createForm);
-                  setCreateOpen(false);
-                  setCreateForm(defaultFormValues);
-                  setMessage(t("ui.feedback.created"));
-                } catch (error) {
-                  setMessage(
-                    error instanceof Error
-                      ? error.message
-                      : t("ui.feedback.requestFailed"),
-                  );
-                }
-              }}
-            >
+            <Button disabled={anyPending} onClick={handleCreateCampaign}>
               {t("ui.actions.create")}
             </Button>
           </>
@@ -227,35 +287,15 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
       <Modal
         open={editCampaign !== null}
         title={t("ui.campaigns.edit")}
-        onClose={() => setEditCampaign(null)}
+        onClose={handleCloseEdit}
         footer={
           <>
-            <Button variant="outline" onClick={() => setEditCampaign(null)}>
+            <Button variant="outline" onClick={handleCloseEdit}>
               {t("ui.actions.close")}
             </Button>
             <Button
               disabled={anyPending || !editCampaign}
-              onClick={async () => {
-                if (!editCampaign) {
-                  return;
-                }
-
-                setMessage("");
-                try {
-                  await updateMutation.mutateAsync({
-                    campaignId: editCampaign.id,
-                    values: editForm,
-                  });
-                  setEditCampaign(null);
-                  setMessage(t("ui.feedback.saved"));
-                } catch (error) {
-                  setMessage(
-                    error instanceof Error
-                      ? error.message
-                      : t("ui.feedback.requestFailed"),
-                  );
-                }
-              }}
+              onClick={handleUpdateCampaign}
             >
               {t("ui.actions.save")}
             </Button>
@@ -280,30 +320,11 @@ export function CampaignsPageView({ locale }: CampaignsPageViewProps) {
         cancelLabel={t("ui.actions.close")}
         confirmLabel={t("ui.actions.confirmDelete")}
         confirmDisabled={anyPending || !deleteCampaign}
-        onOpenChange={(open) => {
-          if (!open) {
-            setDeleteCampaign(null);
-          }
-        }}
-        onConfirm={async () => {
-          if (!deleteCampaign) {
-            return;
-          }
-
-          setMessage("");
-          try {
-            await deleteMutation.mutateAsync(deleteCampaign.id);
-            setDeleteCampaign(null);
-            setMessage(t("ui.feedback.deleted"));
-          } catch (error) {
-            setMessage(
-              error instanceof Error
-                ? error.message
-                : t("ui.feedback.requestFailed"),
-            );
-          }
-        }}
+        onOpenChange={handleDeleteDialogOpenChange}
+        onConfirm={handleDeleteCampaign}
       />
     </>
   );
-}
+};
+
+export default CampaignsPageView;

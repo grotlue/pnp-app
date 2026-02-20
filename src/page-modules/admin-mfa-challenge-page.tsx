@@ -5,9 +5,9 @@ import { AppPageMain } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { FormInput } from "@/components/ui/form-controls";
 import { PageLoadingState } from "@/components/ui/page-loading-state";
@@ -20,30 +20,28 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { appRoutes } from "@/app/router";
+import { useAdminMfaStatusQuery } from "@/features/users/hooks/use-admin-mfa-status-query";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
 import {
   resolveAdminMfaStepUpDecision,
   sanitizeReturnToPath,
 } from "@/features/users/logic/admin-mfa-step-up.logic";
-import {
-  getAdminMfaStatus,
-  verifyAdminTotp,
-} from "@/features/users/queries/users-mfa.query";
+import { verifyAdminTotp } from "@/features/users/queries/users-mfa.query";
 import { queryKeys } from "@/lib/client/query-keys";
 import { setSession as persistSession } from "@/lib/client/session";
-import { useClientSession } from "@/lib/client/use-client-session";
-import { getTranslator, type AppLocale } from "@/lib/i18n";
+import useClientSession from "@/lib/client/use-client-session";
+import { type AppLocale, getTranslator } from "@/lib/i18n";
 
 type AdminMfaChallengePageProps = {
   locale: AppLocale;
   returnTo?: string;
 };
 
-export function AdminMfaChallengePageView({
+const AdminMfaChallengePageView = ({
   locale,
   returnTo,
-}: AdminMfaChallengePageProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
+}: AdminMfaChallengePageProps) => {
+  const t = getTranslator(locale);
   const router = useRouter();
   const queryClient = useQueryClient();
   const { ready, session } = useClientSession();
@@ -52,28 +50,15 @@ export function AdminMfaChallengePageView({
   const [message, setMessage] = useState("");
   const [code, setCode] = useState("");
 
-  const safeReturnTo = useMemo(
-    () => sanitizeReturnToPath(returnTo, appRoutes.adminUsers),
-    [returnTo],
-  );
+  const safeReturnTo = sanitizeReturnToPath(returnTo, appRoutes.adminUsers);
 
   const meQuery = useMeQuery(session);
   const role = meQuery.data?.profile.role;
   const isAdminUser = role === "admin";
 
-  const adminMfaQuery = useQuery({
-    queryKey: queryKeys.adminMfaStatus(session?.accessToken ?? "no-session"),
-    enabled: Boolean(session) && isAdminUser,
-    staleTime: 30_000,
-    queryFn: async () => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
-      return getAdminMfaStatus(session);
-    },
-  });
+  const adminMfaQuery = useAdminMfaStatusQuery(session, isAdminUser);
 
-  const decision = useMemo(() => {
+  const decision = (() => {
     if (!isAdminUser || !adminMfaQuery.data) {
       return { kind: "none" } as const;
     }
@@ -82,7 +67,7 @@ export function AdminMfaChallengePageView({
       role,
       mfaStatus: adminMfaQuery.data,
     });
-  }, [adminMfaQuery.data, isAdminUser, role]);
+  })();
 
   useEffect(() => {
     if (!ready) {
@@ -114,7 +99,7 @@ export function AdminMfaChallengePageView({
     session,
   ]);
 
-  async function onVerify() {
+  const onVerify = async () => {
     if (!session || decision.kind !== "challenge") {
       return;
     }
@@ -149,7 +134,19 @@ export function AdminMfaChallengePageView({
     } finally {
       setBusy(false);
     }
-  }
+  };
+
+  const handleRefreshStatus = () => {
+    void adminMfaQuery.refetch();
+  };
+
+  const handleCodeChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setCode(event.target.value);
+  };
+
+  const handleVerifyClick = () => {
+    void onVerify();
+  };
 
   if (
     !ready ||
@@ -181,10 +178,7 @@ export function AdminMfaChallengePageView({
                 <Link href={appRoutes.settings}>
                   <Button>{t("ui.menu.settings")}</Button>
                 </Link>
-                <Button
-                  variant="ghost"
-                  onClick={() => void adminMfaQuery.refetch()}
-                >
+                <Button variant="ghost" onClick={handleRefreshStatus}>
                   {t("ui.actions.reload")}
                 </Button>
               </UiDiv>
@@ -194,11 +188,11 @@ export function AdminMfaChallengePageView({
               <FormInput
                 value={code}
                 placeholder={t("ui.fields.mfaCode")}
-                onChange={(event) => setCode(event.target.value)}
+                onChange={handleCodeChange}
               />
               <Button
                 disabled={busy || !code || decision.kind !== "challenge"}
-                onClick={() => void onVerify()}
+                onClick={handleVerifyClick}
               >
                 {t("ui.actions.verifyMfa")}
               </Button>
@@ -222,4 +216,6 @@ export function AdminMfaChallengePageView({
       </Card>
     </AppPageMain>
   );
-}
+};
+
+export default AdminMfaChallengePageView;

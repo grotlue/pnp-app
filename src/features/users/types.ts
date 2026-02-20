@@ -1,6 +1,6 @@
-export type UserId = string;
+type UserId = string;
 
-export type MeResponse = {
+type MeResponse = {
   user: {
     id: string;
     email?: string;
@@ -14,44 +14,44 @@ export type MeResponse = {
   };
 };
 
-export type LoginResponse = {
+type LoginResponse = {
   accessToken: string;
   refreshToken?: string;
   expiresAt?: number;
   locale?: "en" | "de";
 };
 
-export type RegisterResponse = {
+type RegisterResponse = {
   emailVerificationRequired: boolean;
 };
 
-export type AuthCodeExchangeResponse = LoginResponse & {
+type AuthCodeExchangeResponse = LoginResponse & {
   user?: {
     id: string;
     email?: string;
   };
 };
 
-export type AuthVerifyResponse = {
+type AuthVerifyResponse = {
   verified: boolean;
   accessToken?: string;
   refreshToken?: string;
   expiresAt?: number;
 };
 
-export type PasswordResetConfirmResponse = {
+type PasswordResetConfirmResponse = {
   updated: boolean;
   accessToken?: string;
   refreshToken?: string;
   expiresAt?: number;
 };
 
-export type PasswordResetRequestResponse = {
+type PasswordResetRequestResponse = {
   requested: boolean;
   previewRecoveryLink?: string;
 };
 
-export type AdminMfaFactor = {
+type AdminMfaFactor = {
   id: string;
   friendlyName: string | null;
   status: "verified" | "unverified";
@@ -59,7 +59,7 @@ export type AdminMfaFactor = {
   lastChallengedAt: string | null;
 };
 
-export type AdminMfaStatusResponse = {
+type AdminMfaStatusResponse = {
   isAdmin: boolean;
   mfaRequired: boolean;
   currentLevel: "aal1" | "aal2" | null;
@@ -68,7 +68,7 @@ export type AdminMfaStatusResponse = {
   factors: AdminMfaFactor[];
 };
 
-export type AdminMfaEnrollResponse = {
+type AdminMfaEnrollResponse = {
   factorId: string;
   friendlyName: string | null;
   qrCode: string;
@@ -76,14 +76,14 @@ export type AdminMfaEnrollResponse = {
   uri: string;
 };
 
-export type AdminMfaVerifyResponse = {
+type AdminMfaVerifyResponse = {
   verified: boolean;
   accessToken: string;
   refreshToken?: string;
   expiresAt?: number;
 };
 
-export type PublicUserProfile = {
+type PublicUserProfile = {
   id: string;
   username: string;
   description: string;
@@ -91,8 +91,25 @@ export type PublicUserProfile = {
   locale: "en" | "de";
 };
 
-export type UserListEntry = {
+type UserListEntry = {
   id: string;
   username: string;
   role?: "user" | "admin";
+};
+
+export type {
+  AdminMfaEnrollResponse,
+  AdminMfaFactor,
+  AdminMfaStatusResponse,
+  AdminMfaVerifyResponse,
+  AuthCodeExchangeResponse,
+  AuthVerifyResponse,
+  LoginResponse,
+  MeResponse,
+  PasswordResetConfirmResponse,
+  PasswordResetRequestResponse,
+  PublicUserProfile,
+  RegisterResponse,
+  UserId,
+  UserListEntry,
 };

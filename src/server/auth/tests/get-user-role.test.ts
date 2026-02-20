@@ -10,10 +10,10 @@ vi.mock("@/server/supabase/service-role-client", () => ({
 
 import { getUserRole } from "../get-user-role";
 
-function createRoleClient(result: {
+const createRoleClient = (result: {
   data: { role: string } | null;
   error: { message: string } | null;
-}) {
+}) => {
   return {
     from: vi.fn(() => ({
       select: vi.fn(() => ({
@@ -23,7 +23,7 @@ function createRoleClient(result: {
       })),
     })),
   };
-}
+};
 
 describe("getUserRole", () => {
   beforeEach(() => {

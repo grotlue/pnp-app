@@ -4,7 +4,7 @@ import type { MeResponse } from "@/features/users/types";
 import type { Character } from "@/features/characters/types";
 import type { Campaign, CampaignDetail, UserEntry } from "../types";
 
-export async function getCampaignDetailContext(
+const getCampaignDetailContext = async (
   session: ClientSession,
   campaignId: string,
   me: MeResponse,
@@ -13,7 +13,7 @@ export async function getCampaignDetailContext(
   detail: CampaignDetail;
   characters: Character[];
   users: UserEntry[];
-}> {
+}> => {
   const [detailResponse, charactersResponse, usersResponse] = await Promise.all(
     [
       apiRequest<CampaignDetail>(`/api/campaigns/${campaignId}`, { session }),
@@ -31,14 +31,14 @@ export async function getCampaignDetailContext(
     ),
     users: unwrapApiResponse(usersResponse, "Failed to load users"),
   };
-}
+};
 
-export async function decideCampaignMembership(
+const decideCampaignMembership = async (
   session: ClientSession,
   campaignId: string,
   membershipId: string,
   state: "accepted" | "rejected",
-): Promise<{ decided: boolean }> {
+): Promise<{ decided: boolean }> => {
   const response = await apiRequest<{ decided: boolean }>(
     `/api/campaigns/${campaignId}/memberships/${membershipId}/decision`,
     {
@@ -49,25 +49,25 @@ export async function decideCampaignMembership(
   );
 
   return unwrapApiResponse(response, "Failed to decide membership");
-}
+};
 
-export async function updateCampaignDetail(
+const updateCampaignDetail = async (
   session: ClientSession,
   campaignId: string,
   input: { title: string; description: string; isPrivate?: boolean },
-): Promise<Campaign> {
+): Promise<Campaign> => {
   const response = await apiRequest<Campaign>(`/api/campaigns/${campaignId}`, {
     method: "PATCH",
     session,
     body: input,
   });
   return unwrapApiResponse(response, "Failed to update campaign");
-}
+};
 
-export async function deleteCampaignDetail(
+const deleteCampaignDetail = async (
   session: ClientSession,
   campaignId: string,
-): Promise<{ deleted: boolean }> {
+): Promise<{ deleted: boolean }> => {
   const response = await apiRequest<{ deleted: boolean }>(
     `/api/campaigns/${campaignId}`,
     {
@@ -76,13 +76,13 @@ export async function deleteCampaignDetail(
     },
   );
   return unwrapApiResponse(response, "Failed to delete campaign");
-}
+};
 
-export async function inviteUserToCampaign(
+const inviteUserToCampaign = async (
   session: ClientSession,
   campaignId: string,
   userId: string,
-): Promise<{ membershipId: string }> {
+): Promise<{ membershipId: string }> => {
   const response = await apiRequest<{ membershipId: string }>(
     `/api/campaigns/${campaignId}/invitations`,
     {
@@ -92,13 +92,13 @@ export async function inviteUserToCampaign(
     },
   );
   return unwrapApiResponse(response, "Failed to invite user");
-}
+};
 
-export async function assignCharacterToCampaign(
+const assignCharacterToCampaign = async (
   session: ClientSession,
   characterId: string,
   campaignId: string,
-): Promise<{ assigned: boolean }> {
+): Promise<{ assigned: boolean }> => {
   const response = await apiRequest<{ assigned: boolean }>(
     `/api/characters/${characterId}/assign-campaign`,
     {
@@ -108,12 +108,12 @@ export async function assignCharacterToCampaign(
     },
   );
   return unwrapApiResponse(response, "Failed to assign character");
-}
+};
 
-export async function requestJoinCampaign(
+const requestJoinCampaign = async (
   session: ClientSession,
   campaignId: string,
-): Promise<{ membershipId: string }> {
+): Promise<{ membershipId: string }> => {
   const response = await apiRequest<{ membershipId: string }>(
     `/api/campaigns/${campaignId}/join-requests`,
     {
@@ -122,4 +122,14 @@ export async function requestJoinCampaign(
     },
   );
   return unwrapApiResponse(response, "Failed to request campaign join");
-}
+};
+
+export {
+  assignCharacterToCampaign,
+  decideCampaignMembership,
+  deleteCampaignDetail,
+  getCampaignDetailContext,
+  inviteUserToCampaign,
+  requestJoinCampaign,
+  updateCampaignDetail,
+};

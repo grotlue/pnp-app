@@ -1,5 +1,5 @@
 import { requireAuth } from "@/server/auth/require-auth";
-import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
 
 type Params = {
   params: Promise<{ campaignId: string }>;
@@ -9,7 +9,7 @@ type InviteBody = {
   userId?: string;
 };
 
-export async function POST(request: Request, { params }: Params) {
+const POST = async (request: Request, { params }: Params) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -35,4 +35,6 @@ export async function POST(request: Request, { params }: Params) {
   }
 
   return jsonOk({ membershipId: data }, 201);
-}
+};
+
+export { POST };

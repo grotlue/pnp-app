@@ -19,7 +19,7 @@ type UpdateCharacterBody = {
   isPrivate?: boolean;
 };
 
-export async function PATCH(request: Request, { params }: Params) {
+const PATCH = async (request: Request, { params }: Params) => {
   const admin = await requireAdmin(request);
   if ("response" in admin) {
     return admin.response;
@@ -78,9 +78,9 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 
   return jsonOk(data);
-}
+};
 
-export async function DELETE(request: Request, { params }: Params) {
+const DELETE = async (request: Request, { params }: Params) => {
   const admin = await requireAdmin(request);
   if ("response" in admin) {
     return admin.response;
@@ -104,4 +104,6 @@ export async function DELETE(request: Request, { params }: Params) {
   }
 
   return jsonOk({ deleted: true });
-}
+};
+
+export { DELETE, PATCH };

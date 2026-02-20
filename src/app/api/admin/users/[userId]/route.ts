@@ -20,10 +20,10 @@ type UpdateAdminUserBody = {
   locale?: "en" | "de";
 };
 
-async function getProfileRole(
+const getProfileRole = async (
   service: ReturnType<typeof createServiceRoleSupabaseClient>,
   userId: string,
-) {
+) => {
   const { data, error } = await service
     .from("profiles")
     .select("role")
@@ -35,9 +35,9 @@ async function getProfileRole(
   }
 
   return { ok: true as const, role: data?.role as "admin" | "user" | null };
-}
+};
 
-export async function PATCH(request: Request, { params }: Params) {
+const PATCH = async (request: Request, { params }: Params) => {
   const admin = await requireAdmin(request);
   if ("response" in admin) {
     return admin.response;
@@ -126,9 +126,9 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 
   return jsonOk({ updated: true });
-}
+};
 
-export async function DELETE(request: Request, { params }: Params) {
+const DELETE = async (request: Request, { params }: Params) => {
   const admin = await requireAdmin(request);
   if ("response" in admin) {
     return admin.response;
@@ -164,4 +164,6 @@ export async function DELETE(request: Request, { params }: Params) {
   }
 
   return jsonOk({ deleted: true });
-}
+};
+
+export { DELETE, PATCH };

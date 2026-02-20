@@ -9,7 +9,7 @@ import {
 } from "@/lib/client/session";
 import { getBrowserSupabaseClient } from "@/lib/supabase/browser-client";
 
-function toClientSession(session: Session | null): ClientSession | null {
+const toClientSession = (session: Session | null): ClientSession | null => {
   if (!session) {
     return null;
   }
@@ -19,9 +19,9 @@ function toClientSession(session: Session | null): ClientSession | null {
     refreshToken: session.refresh_token,
     expiresAt: session.expires_at,
   };
-}
+};
 
-export function useClientSession() {
+const useClientSession = () => {
   const [session, setSessionState] = useState<ClientSession | null>(null);
   const [ready, setReady] = useState(false);
 
@@ -39,7 +39,7 @@ export function useClientSession() {
 
     window.addEventListener(sessionEventName, syncLocalFallbackSession);
 
-    async function init() {
+    const init = async () => {
       try {
         const supabase = getBrowserSupabaseClient();
         const { data, error } = await supabase.auth.getSession();
@@ -81,7 +81,7 @@ export function useClientSession() {
           );
         };
       }
-    }
+    };
 
     let cleanup: (() => void) | undefined;
     void init().then((fn) => {
@@ -99,4 +99,6 @@ export function useClientSession() {
     setSession: setSessionState,
     ready,
   };
-}
+};
+
+export default useClientSession;

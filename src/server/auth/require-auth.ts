@@ -7,14 +7,14 @@ import {
   createServerSupabaseUserClient,
 } from "@/server/supabase/server-client";
 
-export type AuthContext = {
+type AuthContext = {
   accessToken: string;
   user: User;
   client: ReturnType<typeof createServerSupabaseUserClient>;
   authClient: ReturnType<typeof createServerSupabaseUserAuthClient>;
 };
 
-function extractBearerToken(request: Request): string | null {
+const extractBearerToken = (request: Request): string | null => {
   const authorization = request.headers.get("authorization");
   if (!authorization) {
     return null;
@@ -26,11 +26,11 @@ function extractBearerToken(request: Request): string | null {
   }
 
   return token;
-}
+};
 
-export async function requireAuth(
+const requireAuth = async (
   request: Request,
-): Promise<{ context: AuthContext } | { response: Response }> {
+): Promise<{ context: AuthContext } | { response: Response }> => {
   const token =
     extractBearerToken(request) ?? readAccessTokenFromCookies(request);
   if (!token) {
@@ -78,4 +78,6 @@ export async function requireAuth(
       ),
     };
   }
-}
+};
+
+export { requireAuth, type AuthContext };

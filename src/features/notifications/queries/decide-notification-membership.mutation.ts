@@ -1,14 +1,14 @@
 import { apiRequest, unwrapApiResponse } from "@/lib/client/api";
 import type { ClientSession } from "@/lib/client/session";
 
-export async function decideNotificationMembershipMutation(
+const decideNotificationMembershipMutation = async (
   session: ClientSession,
   input: {
     campaignId: string;
     membershipId: string;
     state: "accepted" | "rejected";
   },
-): Promise<{ decided: boolean }> {
+): Promise<{ decided: boolean }> => {
   const response = await apiRequest<{ decided: boolean }>(
     `/api/campaigns/${input.campaignId}/memberships/${input.membershipId}/decision`,
     {
@@ -18,4 +18,9 @@ export async function decideNotificationMembershipMutation(
     },
   );
   return unwrapApiResponse(response, "Failed to decide membership");
-}
+};
+
+export {
+  decideNotificationMembershipMutation as default,
+  decideNotificationMembershipMutation,
+};

@@ -8,13 +8,17 @@ type VisibilityToggleProps = {
   onToggle: () => void;
 };
 
-export function VisibilityToggle({
+const VisibilityToggle = ({
   isPrivate,
   label,
   onLabel,
   offLabel,
   onToggle,
-}: VisibilityToggleProps) {
+}: VisibilityToggleProps) => {
+  const handleCheckedChange = () => {
+    onToggle();
+  };
+
   return (
     <div>
       <span>
@@ -23,8 +27,10 @@ export function VisibilityToggle({
       <Switch
         checked={isPrivate}
         aria-label={`${label}: ${isPrivate ? onLabel : offLabel}`}
-        onCheckedChange={() => onToggle()}
+        onCheckedChange={handleCheckedChange}
       />
     </div>
   );
-}
+};
+
+export { VisibilityToggle as default, VisibilityToggle };

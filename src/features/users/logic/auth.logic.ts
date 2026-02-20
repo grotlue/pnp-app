@@ -1,5 +1,7 @@
 import type { ClientSession } from "@/lib/client/session";
 
-export function isLoggedIn(session: ClientSession | null | undefined): boolean {
+const isLoggedIn = (session: ClientSession | null | undefined): boolean => {
   return Boolean(session?.accessToken);
-}
+};
+
+export { isLoggedIn as default, isLoggedIn };

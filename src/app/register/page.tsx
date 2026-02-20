@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { isFeatureEnabled } from "@/lib/features/feature-flags";
-import { RegisterPageView } from "@/page-modules/register-page";
+import RegisterPageView from "@/page-modules/register-page";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 export default async function RegisterPage() {

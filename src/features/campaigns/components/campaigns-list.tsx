@@ -17,7 +17,7 @@ type CampaignsListProps = {
   onDelete: (campaign: Campaign) => void;
 };
 
-export function CampaignsList({
+const CampaignsList = ({
   campaigns,
   currentUserId,
   ownerLabel,
@@ -29,7 +29,7 @@ export function CampaignsList({
   canManage,
   onEdit,
   onDelete,
-}: CampaignsListProps) {
+}: CampaignsListProps) => {
   if (campaigns.length === 0) {
     return <EmptyState label={emptyLabel} />;
   }
@@ -52,4 +52,6 @@ export function CampaignsList({
       ))}
     </UiStack>
   );
-}
+};
+
+export { CampaignsList as default, CampaignsList };

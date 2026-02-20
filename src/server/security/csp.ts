@@ -6,7 +6,7 @@ import {
   SECURITY_HEADER_VALUES,
 } from "./constants";
 
-export function buildContentSecurityPolicy(toolbarEnabled: boolean): string {
+const buildContentSecurityPolicy = (toolbarEnabled: boolean): string => {
   const scriptSrc: string[] = [...CSP_SCRIPT_SRC_BASE];
   const connectSrc: string[] = [...CSP_CONNECT_SRC_BASE];
   const frameSrc: string[] = [...CSP_FRAME_SRC_BASE];
@@ -29,4 +29,6 @@ export function buildContentSecurityPolicy(toolbarEnabled: boolean): string {
     `base-uri ${SECURITY_HEADER_VALUES.baseUri}`,
     `form-action ${SECURITY_HEADER_VALUES.formAction}`,
   ].join("; ");
-}
+};
+
+export { buildContentSecurityPolicy as default, buildContentSecurityPolicy };

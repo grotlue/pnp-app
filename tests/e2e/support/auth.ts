@@ -17,10 +17,7 @@ type TimeoutOptions = {
   timeoutMs?: number;
 };
 
-export async function expectClientSessionSet(
-  page: Page,
-  options?: TimeoutOptions,
-) {
+const expectClientSessionSet = async (page: Page, options?: TimeoutOptions) => {
   await expect
     .poll(
       async () =>
@@ -45,9 +42,9 @@ export async function expectClientSessionSet(
       },
     )
     .toBe(true);
-}
+};
 
-export async function expectClientSessionCleared(page: Page) {
+const expectClientSessionCleared = async (page: Page) => {
   await expect
     .poll(async () =>
       page.evaluate(
@@ -56,11 +53,11 @@ export async function expectClientSessionCleared(page: Page) {
       ),
     )
     .toBeNull();
-}
+};
 
-async function readResponseMessage(
+const readResponseMessage = async (
   response: PlaywrightResponse,
-): Promise<string> {
+): Promise<string> => {
   try {
     const payload = (await response.json()) as {
       error?: { message?: string } | null;
@@ -69,9 +66,9 @@ async function readResponseMessage(
   } catch {
     return `HTTP ${response.status()}`;
   }
-}
+};
 
-async function expectApiSessionUsable(page: Page, options?: TimeoutOptions) {
+const expectApiSessionUsable = async (page: Page, options?: TimeoutOptions) => {
   await expect
     .poll(
       async () =>
@@ -103,19 +100,19 @@ async function expectApiSessionUsable(page: Page, options?: TimeoutOptions) {
       },
     )
     .toBe(true);
-}
+};
 
-async function expectLoggedInUi(page: Page, options?: TimeoutOptions) {
+const expectLoggedInUi = async (page: Page, options?: TimeoutOptions) => {
   await expect(
     page.getByRole("button", { name: /logout|abmelden/i }).first(),
   ).toBeVisible({ timeout: options?.timeoutMs ?? 15_000 });
-}
+};
 
-export async function loginAsUser(
+const loginAsUser = async (
   page: Page,
   credentials: LoginCredentials,
   options?: TimeoutOptions,
-) {
+) => {
   await page.goto("/");
 
   await page
@@ -148,20 +145,28 @@ export async function loginAsUser(
   await expectClientSessionSet(page, options);
   await expectApiSessionUsable(page, options);
   await expectLoggedInUi(page, options);
-}
+};
 
-export async function loginAsFixtureUser(
+const loginAsFixtureUser = async (
   page: Page,
   credentials: LoginCredentials = E2E_USERS.smokePlayer,
-) {
+) => {
   await loginAsUser(page, credentials);
-}
+};
 
-export async function logoutFromHeader(page: Page) {
+const logoutFromHeader = async (page: Page) => {
   await page
     .getByRole("button", { name: /logout|abmelden/i })
     .first()
     .click();
   await expect(page).toHaveURL(/\/$/);
   await expectClientSessionCleared(page);
-}
+};
+
+export {
+  expectClientSessionCleared,
+  expectClientSessionSet,
+  loginAsFixtureUser,
+  loginAsUser,
+  logoutFromHeader,
+};

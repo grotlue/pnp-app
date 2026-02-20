@@ -12,27 +12,27 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-export const formControlClass = "";
+const formControlClass = "";
 
-export function FormInput({
+const FormInput = ({
   className,
   ...props
-}: ComponentPropsWithoutRef<"input">) {
+}: ComponentPropsWithoutRef<"input">) => {
   return <Input className={className} {...props} />;
-}
+};
 
-export function FormTextarea({
+const FormTextarea = ({
   className,
   size: _size,
   ...props
 }: ComponentPropsWithoutRef<"textarea"> & {
   size?: "default" | "md" | "lg";
-}) {
+}) => {
   void _size;
   return <Textarea className={className} {...props} />;
-}
+};
 
-export function FormSelect({
+const FormSelect = ({
   children,
   className,
   value,
@@ -54,7 +54,7 @@ export function FormSelect({
   name?: string;
   id?: string;
   "aria-label"?: string;
-}) {
+}) => {
   type ParsedOption = {
     value: string;
     label: ReactNode;
@@ -79,31 +79,31 @@ export function FormSelect({
 
   const EMPTY_SENTINEL = "__form_select_empty__";
 
-  function encodeValue(rawValue: string) {
+  const encodeValue = (rawValue: string) => {
     return rawValue === "" ? EMPTY_SENTINEL : rawValue;
-  }
+  };
 
-  function decodeValue(encodedValue: string) {
+  const decodeValue = (encodedValue: string) => {
     return encodedValue === EMPTY_SENTINEL ? "" : encodedValue;
-  }
+  };
 
-  function isOptionElement(
+  const isOptionElement = (
     node: ReactNode,
-  ): node is React.ReactElement<OptionNodeProps, "option"> {
+  ): node is React.ReactElement<OptionNodeProps, "option"> => {
     return (
       React.isValidElement<OptionNodeProps>(node) && node.type === "option"
     );
-  }
+  };
 
-  function isOptGroupElement(
+  const isOptGroupElement = (
     node: ReactNode,
-  ): node is React.ReactElement<OptGroupNodeProps, "optgroup"> {
+  ): node is React.ReactElement<OptGroupNodeProps, "optgroup"> => {
     return (
       React.isValidElement<OptGroupNodeProps>(node) && node.type === "optgroup"
     );
-  }
+  };
 
-  function parseOptionNode(node: ReactNode): ParsedOption | null {
+  const parseOptionNode = (node: ReactNode): ParsedOption | null => {
     if (!isOptionElement(node)) {
       return null;
     }
@@ -119,9 +119,9 @@ export function FormSelect({
       label: node.props.children,
       disabled: Boolean(node.props.disabled),
     };
-  }
+  };
 
-  function parseGroups(nodes: React.ReactNode): ParsedGroup[] {
+  const parseGroups = (nodes: React.ReactNode): ParsedGroup[] => {
     const ungrouped: ParsedOption[] = [];
     const groups: ParsedGroup[] = [];
 
@@ -157,7 +157,7 @@ export function FormSelect({
       ...(ungrouped.length > 0 ? [{ options: ungrouped }] : []),
       ...groups,
     ];
-  }
+  };
 
   const parsedGroups = parseGroups(children);
   const placeholderOption =
@@ -169,6 +169,15 @@ export function FormSelect({
   const encodedValue = isControlled ? encodeValue(value) : undefined;
   const encodedDefaultValue =
     defaultValue !== undefined ? encodeValue(defaultValue) : undefined;
+  const handleValueChange = (nextValue: unknown) => {
+    if (!onChange) {
+      return;
+    }
+
+    onChange({
+      target: { value: decodeValue(String(nextValue ?? "")) },
+    } as ChangeEvent<HTMLSelectElement>);
+  };
 
   return (
     <Select
@@ -177,15 +186,7 @@ export function FormSelect({
       disabled={disabled}
       required={required}
       name={name}
-      onValueChange={(nextValue) => {
-        if (!onChange) {
-          return;
-        }
-
-        onChange({
-          target: { value: decodeValue(String(nextValue ?? "")) },
-        } as ChangeEvent<HTMLSelectElement>);
-      }}
+      onValueChange={handleValueChange}
     >
       <SelectTrigger id={id} aria-label={ariaLabel} className={className}>
         <SelectValue
@@ -226,11 +227,13 @@ export function FormSelect({
       </SelectContent>
     </Select>
   );
-}
+};
 
-export function FormLabel({
+const FormLabel = ({
   className,
   ...props
-}: ComponentPropsWithoutRef<"label">) {
+}: ComponentPropsWithoutRef<"label">) => {
   return <label className={className} {...props} />;
-}
+};
+
+export { FormInput, FormLabel, FormSelect, FormTextarea, formControlClass };

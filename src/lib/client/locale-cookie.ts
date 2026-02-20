@@ -1,11 +1,11 @@
 "use client";
 
-import { resolveLocale, type AppLocale } from "@/lib/i18n";
+import { type AppLocale, resolveLocale } from "@/lib/i18n";
 
 const LOCALE_COOKIE_NAME = "locale";
 const ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
 
-export function readLocaleCookie(): AppLocale | null {
+const readLocaleCookie = (): AppLocale | null => {
   if (typeof document === "undefined") {
     return null;
   }
@@ -19,20 +19,22 @@ export function readLocaleCookie(): AppLocale | null {
   }
 
   return null;
-}
+};
 
-export function setLocaleCookie(locale: AppLocale): void {
+const setLocaleCookie = (locale: AppLocale): void => {
   if (typeof document === "undefined") {
     return;
   }
 
   document.cookie = `${LOCALE_COOKIE_NAME}=${encodeURIComponent(locale)}; Path=/; Max-Age=${ONE_YEAR_IN_SECONDS}; SameSite=Lax`;
-}
+};
 
-export function clearLocaleCookie(): void {
+const clearLocaleCookie = (): void => {
   if (typeof document === "undefined") {
     return;
   }
 
   document.cookie = `${LOCALE_COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`;
-}
+};
+
+export { clearLocaleCookie, readLocaleCookie, setLocaleCookie };

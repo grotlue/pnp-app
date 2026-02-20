@@ -4,7 +4,7 @@ import { listNotificationsRpcQuery } from "@/features/notifications/queries/list
 import { mapNotificationRpcRow } from "@/features/notifications/logic/map-notification-rpc-row.logic";
 import { parseListLimitParam } from "@/server/api/validation/list-query";
 
-export async function GET(request: Request) {
+const GET = async (request: Request) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -22,4 +22,6 @@ export async function GET(request: Request) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return jsonError(400, "notifications_list_failed", message);
   }
-}
+};
+
+export { GET };

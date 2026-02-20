@@ -1,4 +1,4 @@
-import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
 import {
   normalizeAndValidateEmail,
   normalizeCaptchaToken,
@@ -16,7 +16,7 @@ type LoginBody = {
   captchaToken?: string;
 };
 
-export async function POST(request: Request) {
+const POST = async (request: Request) => {
   const runtimeEnvironment = resolveRuntimeEnvironment();
   const loginRateLimit =
     runtimeEnvironment === "preview" || runtimeEnvironment === "production"
@@ -77,4 +77,6 @@ export async function POST(request: Request) {
       expiresAt: data.session.expires_at,
     },
   );
-}
+};
+
+export { POST };

@@ -13,7 +13,7 @@ type CampaignFormProps = {
   onChange: (next: CampaignFormValues) => void;
 };
 
-export function CampaignForm({
+const CampaignForm = ({
   values,
   titlePlaceholder,
   descriptionPlaceholder,
@@ -21,7 +21,7 @@ export function CampaignForm({
   onLabel,
   offLabel,
   onChange,
-}: CampaignFormProps) {
+}: CampaignFormProps) => {
   return (
     <UiFormGrid>
       <FormInput
@@ -59,4 +59,6 @@ export function CampaignForm({
       />
     </UiFormGrid>
   );
-}
+};
+
+export { CampaignForm as default, CampaignForm };

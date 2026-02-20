@@ -4,8 +4,9 @@ import {
   FormSelect,
   FormTextarea,
 } from "@/components/ui/form-controls";
-import { VisibilityToggle } from "@/components/ui/visibility-toggle";
+import type { ChangeEvent } from "react";
 import { UiDiv } from "@/components/ui/html-elements";
+import { VisibilityToggle } from "@/components/ui/visibility-toggle";
 
 type Translator = (key: string) => string;
 
@@ -20,7 +21,7 @@ type CampaignOption = {
   title: string;
 };
 
-export type AdminUserFormValues = {
+type AdminUserFormValues = {
   email: string;
   password: string;
   username: string;
@@ -28,14 +29,14 @@ export type AdminUserFormValues = {
   locale: "en" | "de";
 };
 
-export type AdminCampaignFormValues = {
+type AdminCampaignFormValues = {
   ownerUserId: string;
   title: string;
   description: string;
   isPrivate: boolean;
 };
 
-export type AdminCharacterFormValues = {
+type AdminCharacterFormValues = {
   ownerUserId: string;
   campaignIdText: string;
   type: "player" | "npc";
@@ -53,53 +54,58 @@ type UserFormFieldsProps = {
   onChange: (next: AdminUserFormValues) => void;
 };
 
-export function UserFormFields({
+const UserFormFields = ({
   t,
   values,
   passwordPlaceholder,
   onChange,
-}: UserFormFieldsProps) {
+}: UserFormFieldsProps) => {
+  const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onChange({ ...values, email: event.target.value });
+  };
+  const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onChange({ ...values, password: event.target.value });
+  };
+  const handleUsernameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onChange({ ...values, username: event.target.value });
+  };
+  const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    onChange({ ...values, description: event.target.value });
+  };
+  const handleLocaleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    onChange({ ...values, locale: event.target.value as "en" | "de" });
+  };
+
   return (
     <UiDiv gridGap={2}>
       <FormInput
         placeholder={t("ui.fields.email")}
         value={values.email}
-        onChange={(event) => onChange({ ...values, email: event.target.value })}
+        onChange={handleEmailChange}
       />
       <FormInput
         placeholder={passwordPlaceholder}
         value={values.password}
-        onChange={(event) =>
-          onChange({ ...values, password: event.target.value })
-        }
+        onChange={handlePasswordChange}
       />
       <FormInput
         placeholder={t("ui.fields.username")}
         value={values.username}
-        onChange={(event) =>
-          onChange({ ...values, username: event.target.value })
-        }
+        onChange={handleUsernameChange}
       />
       <FormTextarea
         size="md"
         placeholder={t("ui.fields.description")}
         value={values.description}
-        onChange={(event) =>
-          onChange({ ...values, description: event.target.value })
-        }
+        onChange={handleDescriptionChange}
       />
-      <FormSelect
-        value={values.locale}
-        onChange={(event) =>
-          onChange({ ...values, locale: event.target.value as "en" | "de" })
-        }
-      >
+      <FormSelect value={values.locale} onChange={handleLocaleChange}>
         <option value="en">en</option>
         <option value="de">de</option>
       </FormSelect>
     </UiDiv>
   );
-}
+};
 
 type CampaignFormFieldsProps = {
   t: Translator;
@@ -108,21 +114,29 @@ type CampaignFormFieldsProps = {
   onChange: (next: AdminCampaignFormValues) => void;
 };
 
-export function CampaignFormFields({
+const CampaignFormFields = ({
   t,
   values,
   users,
   onChange,
-}: CampaignFormFieldsProps) {
+}: CampaignFormFieldsProps) => {
+  const handleOwnerUserIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    onChange({ ...values, ownerUserId: event.target.value });
+  };
+  const handleTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onChange({ ...values, title: event.target.value });
+  };
+  const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    onChange({ ...values, description: event.target.value });
+  };
+  const handleIsPrivateToggle = () => {
+    onChange({ ...values, isPrivate: !values.isPrivate });
+  };
+
   return (
     <UiDiv gridGap={2}>
       <FormLabel>{t("ui.admin.ownerLabel")}</FormLabel>
-      <FormSelect
-        value={values.ownerUserId}
-        onChange={(event) =>
-          onChange({ ...values, ownerUserId: event.target.value })
-        }
-      >
+      <FormSelect value={values.ownerUserId} onChange={handleOwnerUserIdChange}>
         {users.map((user) => (
           <option key={user.id} value={user.id}>
             {user.username} ({user.email})
@@ -132,26 +146,24 @@ export function CampaignFormFields({
       <FormInput
         placeholder={t("ui.fields.campaignTitle")}
         value={values.title}
-        onChange={(event) => onChange({ ...values, title: event.target.value })}
+        onChange={handleTitleChange}
       />
       <FormTextarea
         size="md"
         placeholder={t("ui.fields.campaignDescription")}
         value={values.description}
-        onChange={(event) =>
-          onChange({ ...values, description: event.target.value })
-        }
+        onChange={handleDescriptionChange}
       />
       <VisibilityToggle
         isPrivate={values.isPrivate}
         label={t("ui.fields.visibilityPrivate")}
         onLabel={t("ui.actions.on")}
         offLabel={t("ui.actions.off")}
-        onToggle={() => onChange({ ...values, isPrivate: !values.isPrivate })}
+        onToggle={handleIsPrivateToggle}
       />
     </UiDiv>
   );
-}
+};
 
 type CharacterFormFieldsProps = {
   t: Translator;
@@ -161,22 +173,44 @@ type CharacterFormFieldsProps = {
   onChange: (next: AdminCharacterFormValues) => void;
 };
 
-export function CharacterFormFields({
+const CharacterFormFields = ({
   t,
   values,
   users,
   campaigns,
   onChange,
-}: CharacterFormFieldsProps) {
+}: CharacterFormFieldsProps) => {
+  const handleOwnerUserIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    onChange({ ...values, ownerUserId: event.target.value });
+  };
+  const handleCampaignIdTextChange = (
+    event: ChangeEvent<HTMLSelectElement>,
+  ) => {
+    onChange({ ...values, campaignIdText: event.target.value });
+  };
+  const handleTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    onChange({ ...values, type: event.target.value as "player" | "npc" });
+  };
+  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onChange({ ...values, name: event.target.value });
+  };
+  const handleAgeTextChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onChange({ ...values, ageText: event.target.value });
+  };
+  const handleAvatarPathTextChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onChange({ ...values, avatarPathText: event.target.value });
+  };
+  const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    onChange({ ...values, description: event.target.value });
+  };
+  const handleIsPrivateToggle = () => {
+    onChange({ ...values, isPrivate: !values.isPrivate });
+  };
+
   return (
     <UiDiv gridGap={2}>
       <FormLabel>{t("ui.admin.ownerLabel")}</FormLabel>
-      <FormSelect
-        value={values.ownerUserId}
-        onChange={(event) =>
-          onChange({ ...values, ownerUserId: event.target.value })
-        }
-      >
+      <FormSelect value={values.ownerUserId} onChange={handleOwnerUserIdChange}>
         {users.map((user) => (
           <option key={user.id} value={user.id}>
             {user.username} ({user.email})
@@ -187,9 +221,7 @@ export function CharacterFormFields({
       <FormLabel>{t("ui.admin.campaignLabel")}</FormLabel>
       <FormSelect
         value={values.campaignIdText}
-        onChange={(event) =>
-          onChange({ ...values, campaignIdText: event.target.value })
-        }
+        onChange={handleCampaignIdTextChange}
       >
         <option value="">{t("ui.admin.noCampaign")}</option>
         {campaigns.map((campaign) => (
@@ -199,12 +231,7 @@ export function CharacterFormFields({
         ))}
       </FormSelect>
 
-      <FormSelect
-        value={values.type}
-        onChange={(event) =>
-          onChange({ ...values, type: event.target.value as "player" | "npc" })
-        }
-      >
+      <FormSelect value={values.type} onChange={handleTypeChange}>
         <option value="player">{t("ui.labels.characterType.player")}</option>
         <option value="npc">{t("ui.labels.characterType.npc")}</option>
       </FormSelect>
@@ -212,37 +239,38 @@ export function CharacterFormFields({
       <FormInput
         placeholder={t("ui.fields.characterName")}
         value={values.name}
-        onChange={(event) => onChange({ ...values, name: event.target.value })}
+        onChange={handleNameChange}
       />
       <FormInput
         placeholder={t("ui.fields.characterAge")}
         value={values.ageText}
-        onChange={(event) =>
-          onChange({ ...values, ageText: event.target.value })
-        }
+        onChange={handleAgeTextChange}
       />
       <FormInput
         placeholder={t("ui.characterEdit.avatarPath")}
         value={values.avatarPathText}
-        onChange={(event) =>
-          onChange({ ...values, avatarPathText: event.target.value })
-        }
+        onChange={handleAvatarPathTextChange}
       />
       <FormTextarea
         size="md"
         placeholder={t("ui.fields.description")}
         value={values.description}
-        onChange={(event) =>
-          onChange({ ...values, description: event.target.value })
-        }
+        onChange={handleDescriptionChange}
       />
       <VisibilityToggle
         isPrivate={values.isPrivate}
         label={t("ui.fields.visibilityPrivate")}
         onLabel={t("ui.actions.on")}
         offLabel={t("ui.actions.off")}
-        onToggle={() => onChange({ ...values, isPrivate: !values.isPrivate })}
+        onToggle={handleIsPrivateToggle}
       />
     </UiDiv>
   );
-}
+};
+
+export type {
+  AdminCampaignFormValues,
+  AdminCharacterFormValues,
+  AdminUserFormValues,
+};
+export { CampaignFormFields, CharacterFormFields, UserFormFields };

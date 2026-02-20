@@ -3,9 +3,8 @@
 import { UiDiv } from "@/components/ui/html-elements";
 import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 
-import { useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { FormInput } from "@/components/ui/form-controls";
 import { Modal } from "@/components/ui/modal";
@@ -17,17 +16,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { queryKeys } from "@/lib/client/query-keys";
 import {
   clearSession,
   setSession as persistSession,
 } from "@/lib/client/session";
-import { useClientSession } from "@/lib/client/use-client-session";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import useClientSession from "@/lib/client/use-client-session";
+import { type AppLocale, getTranslator } from "@/lib/i18n/index";
+import { useAdminMfaStatusQuery } from "@/features/users/hooks/use-admin-mfa-status-query";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
 import {
   enrollAdminTotp,
-  getAdminMfaStatus,
   verifyAdminTotp,
 } from "@/features/users/queries/users-mfa.query";
 import {
@@ -41,8 +39,8 @@ type SettingsScreenProps = {
   locale: AppLocale;
 };
 
-export function SettingsPageView({ locale }: SettingsScreenProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
+const SettingsPageView = ({ locale }: SettingsScreenProps) => {
+  const t = getTranslator(locale);
   const router = useRouter();
   const { session, ready } = useClientSession();
 
@@ -57,18 +55,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
     useState<AdminMfaEnrollResponse | null>(null);
   const meQuery = useMeQuery(session);
   const isAdminUser = meQuery.data?.profile.role === "admin";
-  const adminMfaQuery = useQuery({
-    queryKey: queryKeys.adminMfaStatus(session?.accessToken ?? "no-session"),
-    enabled: Boolean(session) && isAdminUser,
-    staleTime: 30_000,
-    queryFn: async () => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
-
-      return getAdminMfaStatus(session);
-    },
-  });
+  const adminMfaQuery = useAdminMfaStatusQuery(session, isAdminUser);
   const adminNeedsMfaStepUp =
     isAdminUser &&
     adminMfaQuery.data?.mfaRequired === true &&
@@ -98,7 +85,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
     }
   }, [ready, session, router]);
 
-  async function run(action: () => Promise<void>) {
+  const run = async (action: () => Promise<void>) => {
     if (!session) {
       return;
     }
@@ -110,7 +97,147 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
     } finally {
       setBusy(false);
     }
-  }
+  };
+
+  const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setNewEmail(event.target.value);
+  };
+
+  const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setNewPassword(event.target.value);
+  };
+
+  const handleMfaCodeChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setMfaCode(event.target.value);
+  };
+
+  const handleUpdateEmail = async () => {
+    if (!session) {
+      return;
+    }
+    await run(async () => {
+      try {
+        await updateMyEmail(session, { newEmail });
+        setMessage(t("ui.feedback.saved"));
+      } catch (error) {
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : t("ui.feedback.requestFailed"),
+        );
+      }
+    });
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!session) {
+      return;
+    }
+    await run(async () => {
+      try {
+        await updateMyPassword(session, { newPassword });
+        setMessage(t("ui.feedback.saved"));
+      } catch (error) {
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : t("ui.feedback.requestFailed"),
+        );
+      }
+    });
+  };
+
+  const handleOpenDelete = () => {
+    setDeleteOpen(true);
+  };
+
+  const handleCloseDelete = () => {
+    setDeleteOpen(false);
+  };
+
+  const handleSetupMfa = async () => {
+    if (!session) {
+      return;
+    }
+
+    await run(async () => {
+      try {
+        const enrollment = await enrollAdminTotp(session, {
+          friendlyName: "pnp-app admin",
+        });
+        setMfaEnrollment(enrollment);
+        setMessage(t("ui.settings.mfaSetupStarted"));
+      } catch (error) {
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : t("ui.feedback.requestFailed"),
+        );
+      }
+    });
+  };
+
+  const handleVerifyMfa = async () => {
+    if (!session) {
+      return;
+    }
+
+    await run(async () => {
+      if (!mfaFactorId) {
+        setMessage(t("ui.settings.mfaSetupMissing"));
+        return;
+      }
+
+      try {
+        const verified = await verifyAdminTotp(session, {
+          factorId: mfaFactorId,
+          code: mfaCode,
+        });
+        persistSession({
+          accessToken: verified.accessToken,
+          refreshToken: verified.refreshToken ?? session.refreshToken,
+          expiresAt: verified.expiresAt,
+        });
+        setMfaEnrollment(null);
+        setMfaCode("");
+        await adminMfaQuery.refetch();
+        await meQuery.refetch();
+        router.refresh();
+        setMessage(t("ui.feedback.mfaEnabled"));
+      } catch (error) {
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : t("ui.feedback.requestFailed"),
+        );
+      }
+    });
+  };
+
+  const handleRefetchMfaStatus = () => {
+    void adminMfaQuery.refetch();
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!session) {
+      return;
+    }
+
+    await run(async () => {
+      try {
+        await deleteMyAccount(session);
+        setDeleteOpen(false);
+        clearSession();
+        router.replace("/");
+      } catch (error) {
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : t("ui.feedback.requestFailed"),
+        );
+      }
+    });
+  };
 
   if (!ready) {
     return <PageViewport />;
@@ -132,25 +259,12 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
             <FormInput
               value={newEmail}
               placeholder={t("ui.fields.newEmail")}
-              onChange={(event) => setNewEmail(event.target.value)}
+              onChange={handleEmailChange}
             />
             <Button
               variant="outline"
               disabled={busy}
-              onClick={() =>
-                void run(async () => {
-                  try {
-                    await updateMyEmail(session, { newEmail });
-                    setMessage(t("ui.feedback.saved"));
-                  } catch (error) {
-                    setMessage(
-                      error instanceof Error
-                        ? error.message
-                        : t("ui.feedback.requestFailed"),
-                    );
-                  }
-                })
-              }
+              onClick={() => void handleUpdateEmail()}
             >
               {t("ui.actions.changeEmail")}
             </Button>
@@ -159,25 +273,12 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
               type="password"
               value={newPassword}
               placeholder={t("ui.fields.newPassword")}
-              onChange={(event) => setNewPassword(event.target.value)}
+              onChange={handlePasswordChange}
             />
             <Button
               variant="outline"
               disabled={busy}
-              onClick={() =>
-                void run(async () => {
-                  try {
-                    await updateMyPassword(session, { newPassword });
-                    setMessage(t("ui.feedback.saved"));
-                  } catch (error) {
-                    setMessage(
-                      error instanceof Error
-                        ? error.message
-                        : t("ui.feedback.requestFailed"),
-                    );
-                  }
-                })
-              }
+              onClick={() => void handleUpdatePassword()}
             >
               {t("ui.actions.changePassword")}
             </Button>
@@ -185,7 +286,7 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
             <Button
               variant="destructive"
               disabled={busy}
-              onClick={() => setDeleteOpen(true)}
+              onClick={handleOpenDelete}
             >
               {t("ui.actions.deleteAccount")}
             </Button>
@@ -230,75 +331,27 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
               <FormInput
                 value={mfaCode}
                 placeholder={t("ui.fields.mfaCode")}
-                onChange={(event) => setMfaCode(event.target.value)}
+                onChange={handleMfaCodeChange}
               />
 
               <UiDiv wrapGap={2}>
                 <Button
                   variant="outline"
                   disabled={busy}
-                  onClick={() =>
-                    void run(async () => {
-                      try {
-                        const enrollment = await enrollAdminTotp(session, {
-                          friendlyName: "pnp-app admin",
-                        });
-                        setMfaEnrollment(enrollment);
-                        setMessage(t("ui.settings.mfaSetupStarted"));
-                      } catch (error) {
-                        setMessage(
-                          error instanceof Error
-                            ? error.message
-                            : t("ui.feedback.requestFailed"),
-                        );
-                      }
-                    })
-                  }
+                  onClick={() => void handleSetupMfa()}
                 >
                   {t("ui.actions.setupMfa")}
                 </Button>
                 <Button
                   disabled={busy || !mfaFactorId}
-                  onClick={() =>
-                    void run(async () => {
-                      if (!mfaFactorId) {
-                        setMessage(t("ui.settings.mfaSetupMissing"));
-                        return;
-                      }
-
-                      try {
-                        const verified = await verifyAdminTotp(session, {
-                          factorId: mfaFactorId,
-                          code: mfaCode,
-                        });
-                        persistSession({
-                          accessToken: verified.accessToken,
-                          refreshToken:
-                            verified.refreshToken ?? session.refreshToken,
-                          expiresAt: verified.expiresAt,
-                        });
-                        setMfaEnrollment(null);
-                        setMfaCode("");
-                        await adminMfaQuery.refetch();
-                        await meQuery.refetch();
-                        router.refresh();
-                        setMessage(t("ui.feedback.mfaEnabled"));
-                      } catch (error) {
-                        setMessage(
-                          error instanceof Error
-                            ? error.message
-                            : t("ui.feedback.requestFailed"),
-                        );
-                      }
-                    })
-                  }
+                  onClick={() => void handleVerifyMfa()}
                 >
                   {t("ui.actions.verifyMfa")}
                 </Button>
                 <Button
                   variant="ghost"
                   disabled={busy}
-                  onClick={() => void adminMfaQuery.refetch()}
+                  onClick={handleRefetchMfaStatus}
                 >
                   {t("ui.actions.reload")}
                 </Button>
@@ -319,31 +372,16 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
       <Modal
         open={deleteOpen}
         title={t("ui.settings.deleteTitle")}
-        onClose={() => setDeleteOpen(false)}
+        onClose={handleCloseDelete}
         footer={
           <>
-            <Button variant="outline" onClick={() => setDeleteOpen(false)}>
+            <Button variant="outline" onClick={handleCloseDelete}>
               {t("ui.actions.close")}
             </Button>
             <Button
               variant="destructive"
               disabled={busy}
-              onClick={() =>
-                void run(async () => {
-                  try {
-                    await deleteMyAccount(session);
-                    setDeleteOpen(false);
-                    clearSession();
-                    router.replace("/");
-                  } catch (error) {
-                    setMessage(
-                      error instanceof Error
-                        ? error.message
-                        : t("ui.feedback.requestFailed"),
-                    );
-                  }
-                })
-              }
+              onClick={() => void handleDeleteAccount()}
             >
               {t("ui.actions.confirmDelete")}
             </Button>
@@ -354,4 +392,6 @@ export function SettingsPageView({ locale }: SettingsScreenProps) {
       </Modal>
     </>
   );
-}
+};
+
+export default SettingsPageView;

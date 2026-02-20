@@ -1,5 +1,5 @@
 import { requireAuth } from "@/server/auth/require-auth";
-import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
 
 type CreateCharacterBody = {
   type?: "player" | "npc";
@@ -11,7 +11,7 @@ type CreateCharacterBody = {
   isPrivate?: boolean;
 };
 
-export async function GET(request: Request) {
+const GET = async (request: Request) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -46,9 +46,9 @@ export async function GET(request: Request) {
   }
 
   return jsonOk(data ?? []);
-}
+};
 
-export async function POST(request: Request) {
+const POST = async (request: Request) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -94,4 +94,6 @@ export async function POST(request: Request) {
     },
     201,
   );
-}
+};
+
+export { GET, POST };

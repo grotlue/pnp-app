@@ -8,13 +8,13 @@ type AspectRatioProps = React.ComponentProps<"div"> & {
   ratio?: number;
 };
 
-function AspectRatio({
+const AspectRatio = ({
   ratio = 1,
   className,
   style,
   children,
   ...props
-}: AspectRatioProps) {
+}: AspectRatioProps) => {
   const safeRatio = ratio > 0 ? ratio : 1;
 
   return (
@@ -29,6 +29,6 @@ function AspectRatio({
       </div>
     </div>
   );
-}
+};
 
-export { AspectRatio };
+export { AspectRatio as default, AspectRatio };

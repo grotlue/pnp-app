@@ -11,7 +11,7 @@ import type {
 } from "@/features/relationships/types";
 import type { Character } from "../types";
 
-export async function getCharacterDetailContext(
+const getCharacterDetailContext = async (
   session: ClientSession,
   characterId: string,
   me: MeResponse,
@@ -24,7 +24,7 @@ export async function getCharacterDetailContext(
   catalog: RelationshipCatalog;
   summary: RelationshipSummary[];
   outgoing: OutgoingRelationship[];
-}> {
+}> => {
   const [
     characterResponse,
     campaignsResponse,
@@ -73,12 +73,12 @@ export async function getCharacterDetailContext(
       "Failed to load outgoing relationships",
     ),
   };
-}
+};
 
-export async function getCharacterAvatarSignedUrl(
+const getCharacterAvatarSignedUrl = async (
   session: ClientSession,
   path: string,
-): Promise<{ signedUrl: string }> {
+): Promise<{ signedUrl: string }> => {
   const response = await apiRequest<{ signedUrl: string }>(
     "/api/storage/character-images/signed-url",
     {
@@ -91,27 +91,27 @@ export async function getCharacterAvatarSignedUrl(
     },
   );
   return unwrapApiResponse(response, "Failed to load character image");
-}
+};
 
-export async function getCharacterRelationDetail(
+const getCharacterRelationDetail = async (
   session: ClientSession,
   characterId: string,
   otherCharacterId: string,
-): Promise<RelationshipDetail> {
+): Promise<RelationshipDetail> => {
   const response = await apiRequest<RelationshipDetail>(
     `/api/characters/${characterId}/relations/${otherCharacterId}`,
     { session },
   );
   return unwrapApiResponse(response, "Failed to load relationship detail");
-}
+};
 
-export async function getRelationshipDetailForExternalTarget(
+const getRelationshipDetailForExternalTarget = async (
   session: ClientSession,
   relationshipId: string,
 ): Promise<{
   outgoing: OutgoingRelationship;
   timeline: RelationshipTimelineEntry[];
-}> {
+}> => {
   const [relationshipResponse, timelineResponse] = await Promise.all([
     apiRequest<OutgoingRelationship>(`/api/relationships/${relationshipId}`, {
       session,
@@ -132,13 +132,13 @@ export async function getRelationshipDetailForExternalTarget(
       "Failed to load relationship timeline",
     ),
   };
-}
+};
 
-export async function assignCharacterCampaign(
+const assignCharacterCampaign = async (
   session: ClientSession,
   characterId: string,
   campaignId: string,
-): Promise<{ assigned: boolean }> {
+): Promise<{ assigned: boolean }> => {
   const response = await apiRequest<{ assigned: boolean }>(
     `/api/characters/${characterId}/assign-campaign`,
     {
@@ -148,12 +148,12 @@ export async function assignCharacterCampaign(
     },
   );
   return unwrapApiResponse(response, "Failed to assign character");
-}
+};
 
-export async function unassignCharacterCampaign(
+const unassignCharacterCampaign = async (
   session: ClientSession,
   characterId: string,
-): Promise<{ unassigned: boolean }> {
+): Promise<{ unassigned: boolean }> => {
   const response = await apiRequest<{ unassigned: boolean }>(
     `/api/characters/${characterId}/unassign-campaign`,
     {
@@ -162,9 +162,9 @@ export async function unassignCharacterCampaign(
     },
   );
   return unwrapApiResponse(response, "Failed to unassign character");
-}
+};
 
-export async function createRelationship(
+const createRelationship = async (
   session: ClientSession,
   input: {
     sourceCharacterId: string;
@@ -175,7 +175,7 @@ export async function createRelationship(
     labelCustom?: string | null;
     description: string;
   },
-): Promise<{ relationshipId: string }> {
+): Promise<{ relationshipId: string }> => {
   const response = await apiRequest<{ relationshipId: string }>(
     "/api/relationships",
     {
@@ -185,13 +185,13 @@ export async function createRelationship(
     },
   );
   return unwrapApiResponse(response, "Failed to create relationship");
-}
+};
 
-export async function addRelationshipTimelineEntry(
+const addRelationshipTimelineEntry = async (
   session: ClientSession,
   relationshipId: string,
   content: string,
-): Promise<{ timelineEntryId: string }> {
+): Promise<{ timelineEntryId: string }> => {
   const response = await apiRequest<{ timelineEntryId: string }>(
     `/api/relationships/${relationshipId}/timeline`,
     {
@@ -201,9 +201,9 @@ export async function addRelationshipTimelineEntry(
     },
   );
   return unwrapApiResponse(response, "Failed to create timeline entry");
-}
+};
 
-export async function updateRelationship(
+const updateRelationship = async (
   session: ClientSession,
   relationshipId: string,
   input: {
@@ -214,7 +214,7 @@ export async function updateRelationship(
     labelCustom?: string | null;
     description: string;
   },
-): Promise<{ updated: boolean }> {
+): Promise<{ updated: boolean }> => {
   const response = await apiRequest<{ updated: boolean }>(
     `/api/relationships/${relationshipId}`,
     {
@@ -224,12 +224,12 @@ export async function updateRelationship(
     },
   );
   return unwrapApiResponse(response, "Failed to update relationship");
-}
+};
 
-export async function deleteRelationship(
+const deleteRelationship = async (
   session: ClientSession,
   relationshipId: string,
-): Promise<{ deleted: boolean }> {
+): Promise<{ deleted: boolean }> => {
   const response = await apiRequest<{ deleted: boolean }>(
     `/api/relationships/${relationshipId}`,
     {
@@ -238,4 +238,17 @@ export async function deleteRelationship(
     },
   );
   return unwrapApiResponse(response, "Failed to delete relationship");
-}
+};
+
+export {
+  addRelationshipTimelineEntry,
+  assignCharacterCampaign,
+  createRelationship,
+  deleteRelationship,
+  getCharacterAvatarSignedUrl,
+  getCharacterDetailContext,
+  getCharacterRelationDetail,
+  getRelationshipDetailForExternalTarget,
+  unassignCharacterCampaign,
+  updateRelationship,
+};

@@ -6,7 +6,9 @@ type RootBodyProps = Omit<ComponentPropsWithoutRef<"body">, "className"> & {
 
 const ROOT_BODY_CLASSNAME = "antialiased";
 
-export function RootBody({ fontVariables, ...props }: RootBodyProps) {
+const RootBody = ({ fontVariables, ...props }: RootBodyProps) => {
   const className = [...fontVariables, ROOT_BODY_CLASSNAME].join(" ");
   return <body className={className} {...props} />;
-}
+};
+
+export { RootBody as default, RootBody };

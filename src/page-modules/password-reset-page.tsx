@@ -7,12 +7,12 @@ import {
 } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
-import { useMemo, useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { FormInput } from "@/components/ui/form-controls";
 import {
-  TurnstileWidget,
   type TurnstileErrorReason,
+  TurnstileWidget,
 } from "@/components/common/turnstile-widget";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,17 +24,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { resolveAuthCaptchaClientConfig } from "@/lib/features/auth-captcha";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import { requestPasswordReset } from "@/features/users/queries/users-auth.query";
 
 type PasswordResetScreenProps = {
   locale: AppLocale;
 };
 
-function getCaptchaFailureMessage(
+const getCaptchaFailureMessage = (
   t: ReturnType<typeof getTranslator>,
   reason: TurnstileErrorReason | null,
-): string {
+): string => {
   if (!reason) {
     return t("ui.feedback.captchaRequired");
   }
@@ -44,11 +44,11 @@ function getCaptchaFailureMessage(
   }
 
   return t("ui.feedback.captchaUnavailable");
-}
+};
 
-export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
-  const authCaptchaConfig = useMemo(() => resolveAuthCaptchaClientConfig(), []);
+const PasswordResetPageView = ({ locale }: PasswordResetScreenProps) => {
+  const t = getTranslator(locale);
+  const authCaptchaConfig = resolveAuthCaptchaClientConfig();
   const [busy, setBusy] = useState(false);
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -57,7 +57,7 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
   const [captchaErrorReason, setCaptchaErrorReason] =
     useState<TurnstileErrorReason | null>(null);
 
-  async function onSubmit() {
+  const onSubmit = async () => {
     if (authCaptchaConfig.required && !authCaptchaConfig.enabled) {
       setMessage(t("ui.feedback.captchaMisconfigured"));
       return;
@@ -92,7 +92,18 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
       }
       setBusy(false);
     }
-  }
+  };
+
+  const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setEmail(event.target.value);
+  };
+
+  const handleCaptchaTokenChange = (token: string | null) => {
+    if (token) {
+      setCaptchaErrorReason(null);
+    }
+    setCaptchaToken(token);
+  };
 
   return (
     <AuthCardPageMain>
@@ -107,19 +118,14 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
               type="email"
               placeholder={t("ui.fields.email")}
               value={email}
-              onChange={(event) => setEmail(event.target.value)}
+              onChange={handleEmailChange}
             />
             {authCaptchaConfig.enabled && authCaptchaConfig.siteKey ? (
               <TurnstileWidget
                 siteKey={authCaptchaConfig.siteKey}
                 resetKey={captchaResetKey}
                 loadErrorMessage={t("ui.feedback.captchaUnavailable")}
-                onTokenChange={(token) => {
-                  if (token) {
-                    setCaptchaErrorReason(null);
-                  }
-                  setCaptchaToken(token);
-                }}
+                onTokenChange={handleCaptchaTokenChange}
                 onErrorReason={setCaptchaErrorReason}
               />
             ) : null}
@@ -137,4 +143,6 @@ export function PasswordResetPageView({ locale }: PasswordResetScreenProps) {
       </AuthCardPageContent>
     </AuthCardPageMain>
   );
-}
+};
+
+export default PasswordResetPageView;

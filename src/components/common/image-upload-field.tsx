@@ -4,6 +4,8 @@ import Image from "next/image";
 import { type ChangeEvent, useEffect, useId, useRef, useState } from "react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
+import { FormLabel } from "@/components/ui/form-controls";
+import { UiDiv } from "@/components/ui/html-elements";
 import { Input } from "@/components/ui/input";
 import { MAX_IMAGE_UPLOAD_SIZE_BYTES } from "@/lib/storage/image-upload";
 import { cn } from "@/lib/utils/cn";
@@ -44,16 +46,18 @@ type ImageUploadFieldProps = {
   onResolvePreviewUrl: (path: string) => Promise<string>;
 };
 
-async function readFileAsDataUrl(file: File): Promise<string> {
+const readFileAsDataUrl = async (file: File): Promise<string> => {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
     reader.onerror = () => reject(new Error("Failed to read image file"));
     reader.readAsDataURL(file);
   });
-}
+};
 
-async function readImageDimensions(dataUrl: string): Promise<ImageDimensions> {
+const readImageDimensions = async (
+  dataUrl: string,
+): Promise<ImageDimensions> => {
   return new Promise<ImageDimensions>((resolve, reject) => {
     const image = new window.Image();
     image.onload = () => {
@@ -65,9 +69,9 @@ async function readImageDimensions(dataUrl: string): Promise<ImageDimensions> {
     image.onerror = () => reject(new Error("Failed to load image dimensions"));
     image.src = dataUrl;
   });
-}
+};
 
-export function ImageUploadField({
+const ImageUploadField = ({
   value,
   label,
   previewAlt,
@@ -86,7 +90,7 @@ export function ImageUploadField({
   onChange,
   onUpload,
   onResolvePreviewUrl,
-}: ImageUploadFieldProps) {
+}: ImageUploadFieldProps) => {
   const inputId = useId();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -135,7 +139,7 @@ export function ImageUploadField({
     };
   }, [onResolvePreviewUrl, resolvedPath, value]);
 
-  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
       return;
@@ -182,9 +186,9 @@ export function ImageUploadField({
       }
       setIsUploading(false);
     }
-  }
+  };
 
-  function removeImage() {
+  const handleRemoveImage = () => {
     onChange("");
     setPreviewUrl(null);
     setResolvedPath("");
@@ -192,15 +196,19 @@ export function ImageUploadField({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-  }
+  };
+
+  const handleOpenFilePicker = () => {
+    fileInputRef.current?.click();
+  };
 
   return (
-    <div className={cn("space-y-2", className)}>
-      <label htmlFor={inputId} className="text-muted-foreground text-xs">
+    <UiDiv className={cn("space-y-2", className)}>
+      <FormLabel htmlFor={inputId} className="text-muted-foreground text-xs">
         {label}
-      </label>
-      <div className="grid gap-3 md:grid-cols-[200px_1fr]">
-        <div className="border-border bg-muted/30 w-full max-w-[200px] overflow-hidden rounded-lg border">
+      </FormLabel>
+      <UiDiv className="grid gap-3 md:grid-cols-[200px_1fr]">
+        <UiDiv className="border-border bg-muted/30 w-full max-w-[200px] overflow-hidden rounded-lg border">
           <AspectRatio ratio={1}>
             {previewUrl ? (
               <Image
@@ -212,13 +220,13 @@ export function ImageUploadField({
                 unoptimized
               />
             ) : (
-              <div className="text-muted-foreground flex h-full items-center justify-center px-3 text-center text-xs">
+              <UiDiv className="text-muted-foreground flex h-full items-center justify-center px-3 text-center text-xs">
                 {emptyLabel}
-              </div>
+              </UiDiv>
             )}
           </AspectRatio>
-        </div>
-        <div className="space-y-2">
+        </UiDiv>
+        <UiDiv className="space-y-2">
           <Input
             id={inputId}
             ref={fileInputRef}
@@ -228,18 +236,18 @@ export function ImageUploadField({
             disabled={disabled || isUploading}
             onChange={handleFileChange}
           />
-          <div className="text-muted-foreground text-xs">{hint}</div>
+          <UiDiv className="text-muted-foreground text-xs">{hint}</UiDiv>
           {value ? (
-            <div className="border-border bg-background rounded-md border px-2 py-1 font-mono text-xs break-all">
+            <UiDiv className="border-border bg-background rounded-md border px-2 py-1 font-mono text-xs break-all">
               {value}
-            </div>
+            </UiDiv>
           ) : null}
-          <div className="flex flex-wrap gap-2">
+          <UiDiv className="flex flex-wrap gap-2">
             <Button
               type="button"
               variant="outline"
               disabled={disabled || isUploading}
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handleOpenFilePicker}
             >
               {value ? replaceLabel : uploadLabel}
             </Button>
@@ -247,23 +255,25 @@ export function ImageUploadField({
               type="button"
               variant="outline"
               disabled={disabled || isUploading || !value}
-              onClick={removeImage}
+              onClick={handleRemoveImage}
             >
               {removeLabel}
             </Button>
-          </div>
+          </UiDiv>
           {isUploading ? (
-            <div className="text-muted-foreground text-xs">
+            <UiDiv className="text-muted-foreground text-xs">
               {uploadingLabel}
-            </div>
+            </UiDiv>
           ) : null}
           {fieldMessage ? (
-            <div className="border-border bg-background rounded-md border p-2 text-xs">
+            <UiDiv className="border-border bg-background rounded-md border p-2 text-xs">
               {fieldMessage}
-            </div>
+            </UiDiv>
           ) : null}
-        </div>
-      </div>
-    </div>
+        </UiDiv>
+      </UiDiv>
+    </UiDiv>
   );
-}
+};
+
+export default ImageUploadField;

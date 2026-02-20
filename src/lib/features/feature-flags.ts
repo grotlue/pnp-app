@@ -1,5 +1,5 @@
 import { vercelAdapter } from "@flags-sdk/vercel";
-import { getProviderData, flag, type Flag } from "flags/next";
+import { type Flag, flag, getProviderData } from "flags/next";
 import { getProviderData as getVercelProviderData } from "@flags-sdk/vercel";
 import { mergeProviderData, type ProviderData } from "flags";
 import {
@@ -12,9 +12,9 @@ import {
   type RuntimeEnvironment as SharedRuntimeEnvironment,
 } from "./constants";
 
-export type RuntimeEnvironment = SharedRuntimeEnvironment;
-export type FeatureFlagProvider = SharedFeatureFlagProvider;
-export type FeatureFlag = "selfRegistration";
+type RuntimeEnvironment = SharedRuntimeEnvironment;
+type FeatureFlagProvider = SharedFeatureFlagProvider;
+type FeatureFlag = "selfRegistration";
 
 type FeatureRule = {
   disabledIn: RuntimeEnvironment[];
@@ -38,9 +38,9 @@ const flagOptions = [
   { label: "Enabled", value: true },
 ];
 
-function normalizeRuntimeEnvironment(
+const normalizeRuntimeEnvironment = (
   value?: string | null,
-): RuntimeEnvironment | null {
+): RuntimeEnvironment | null => {
   if (!value) {
     return null;
   }
@@ -50,9 +50,11 @@ function normalizeRuntimeEnvironment(
   }
 
   return null;
-}
+};
 
-function normalizeProvider(value?: string | null): FeatureFlagProvider | null {
+const normalizeProvider = (
+  value?: string | null,
+): FeatureFlagProvider | null => {
   if (!value) {
     return null;
   }
@@ -60,9 +62,39 @@ function normalizeProvider(value?: string | null): FeatureFlagProvider | null {
   return knownProviders.has(value as FeatureFlagProvider)
     ? (value as FeatureFlagProvider)
     : null;
-}
+};
 
-function parseFeatureOverrideList(raw?: string): Set<FeatureFlag> {
+const resolveRuntimeEnvironment = (): RuntimeEnvironment => {
+  const explicitEnvironment = normalizeRuntimeEnvironment(process.env.APP_ENV);
+  if (explicitEnvironment) {
+    return explicitEnvironment;
+  }
+
+  const vercelEnvironment = normalizeRuntimeEnvironment(process.env.VERCEL_ENV);
+  if (vercelEnvironment) {
+    return vercelEnvironment;
+  }
+
+  return RUNTIME_ENVIRONMENTS.development;
+};
+
+const resolveFeatureFlagProvider = (): FeatureFlagProvider => {
+  const explicitProvider = normalizeProvider(
+    process.env.FEATURE_FLAGS_PROVIDER,
+  );
+  if (explicitProvider) {
+    return explicitProvider;
+  }
+
+  // Vercel flags-client uses the FLAGS connection string environment variable.
+  if (process.env.FLAGS) {
+    return FEATURE_FLAG_PROVIDERS.vercel;
+  }
+
+  return FEATURE_FLAG_PROVIDERS.rules;
+};
+
+const parseFeatureOverrideList = (raw?: string): Set<FeatureFlag> => {
   if (!raw) {
     return new Set();
   }
@@ -75,16 +107,16 @@ function parseFeatureOverrideList(raw?: string): Set<FeatureFlag> {
     );
 
   return new Set(values);
-}
+};
 
-function getFeatureDefaultValue(
+const getFeatureDefaultValue = (
   feature: FeatureFlag,
   environment: RuntimeEnvironment = resolveRuntimeEnvironment(),
-): boolean {
+): boolean => {
   return !featureRules[feature].disabledIn.includes(environment);
-}
+};
 
-function getFeatureOverride(feature: FeatureFlag): boolean | null {
+const getFeatureOverride = (feature: FeatureFlag): boolean | null => {
   const forceDisabled = parseFeatureOverrideList(
     process.env.FEATURE_FLAGS_DISABLE,
   );
@@ -100,21 +132,23 @@ function getFeatureOverride(feature: FeatureFlag): boolean | null {
   }
 
   return null;
-}
+};
 
-async function evaluateWithRulesProvider(
+const evaluateWithRulesProvider = async (
   feature: FeatureFlag,
-): Promise<boolean> {
+): Promise<boolean> => {
   return rulesFeatureFlags[feature]();
-}
+};
 
-async function evaluateWithVercelAdapter(
+const evaluateWithVercelAdapter = async (
   feature: FeatureFlag,
-): Promise<boolean> {
+): Promise<boolean> => {
   return getVercelFeatureFlags()[feature]();
-}
+};
 
-function createRulesFeatureFlag(feature: FeatureFlag): Flag<boolean, unknown> {
+const createRulesFeatureFlag = (
+  feature: FeatureFlag,
+): Flag<boolean, unknown> => {
   return flag<boolean>({
     key: feature,
     description: featureRules[feature].description,
@@ -122,9 +156,11 @@ function createRulesFeatureFlag(feature: FeatureFlag): Flag<boolean, unknown> {
     options: flagOptions,
     decide: () => getFeatureDefaultValue(feature),
   });
-}
+};
 
-function createVercelFeatureFlag(feature: FeatureFlag): Flag<boolean, unknown> {
+const createVercelFeatureFlag = (
+  feature: FeatureFlag,
+): Flag<boolean, unknown> => {
   return flag<boolean>({
     key: feature,
     description: featureRules[feature].description,
@@ -132,57 +168,33 @@ function createVercelFeatureFlag(feature: FeatureFlag): Flag<boolean, unknown> {
     options: flagOptions,
     adapter: vercelAdapter<boolean, unknown>(),
   });
-}
+};
 
 const rulesFeatureFlags: Record<FeatureFlag, Flag<boolean, unknown>> = {
   selfRegistration: createRulesFeatureFlag("selfRegistration"),
 };
 
-function getVercelFeatureFlags(): Record<FeatureFlag, Flag<boolean, unknown>> {
+const getVercelFeatureFlags = (): Record<
+  FeatureFlag,
+  Flag<boolean, unknown>
+> => {
   return {
     selfRegistration: createVercelFeatureFlag("selfRegistration"),
   };
-}
+};
 
-export function resolveRuntimeEnvironment(): RuntimeEnvironment {
-  const explicitEnvironment = normalizeRuntimeEnvironment(process.env.APP_ENV);
-  if (explicitEnvironment) {
-    return explicitEnvironment;
-  }
-
-  const vercelEnvironment = normalizeRuntimeEnvironment(process.env.VERCEL_ENV);
-  if (vercelEnvironment) {
-    return vercelEnvironment;
-  }
-
-  return RUNTIME_ENVIRONMENTS.development;
-}
-
-export function resolveFeatureFlagProvider(): FeatureFlagProvider {
-  const explicitProvider = normalizeProvider(
-    process.env.FEATURE_FLAGS_PROVIDER,
-  );
-  if (explicitProvider) {
-    return explicitProvider;
-  }
-
-  // Vercel flags-client uses the FLAGS connection string environment variable.
-  if (process.env.FLAGS) {
-    return FEATURE_FLAG_PROVIDERS.vercel;
-  }
-
-  return FEATURE_FLAG_PROVIDERS.rules;
-}
-
-function getActiveFeatureFlags(): Record<FeatureFlag, Flag<boolean, unknown>> {
+const getActiveFeatureFlags = (): Record<
+  FeatureFlag,
+  Flag<boolean, unknown>
+> => {
   if (resolveFeatureFlagProvider() === "vercel" && process.env.FLAGS) {
     return getVercelFeatureFlags();
   }
 
   return rulesFeatureFlags;
-}
+};
 
-export async function getFeatureFlagsProviderData(): Promise<ProviderData> {
+const getFeatureFlagsProviderData = async (): Promise<ProviderData> => {
   const activeFlags = getActiveFeatureFlags();
   const baseProviderData = getProviderData(activeFlags);
 
@@ -200,9 +212,9 @@ export async function getFeatureFlagsProviderData(): Promise<ProviderData> {
     );
     return baseProviderData;
   }
-}
+};
 
-export async function isFeatureEnabled(feature: FeatureFlag): Promise<boolean> {
+const isFeatureEnabled = async (feature: FeatureFlag): Promise<boolean> => {
   const override = getFeatureOverride(feature);
   if (override !== null) {
     return override;
@@ -224,4 +236,12 @@ export async function isFeatureEnabled(feature: FeatureFlag): Promise<boolean> {
   }
 
   return evaluateWithRulesProvider(feature);
-}
+};
+
+export type { FeatureFlag, FeatureFlagProvider, RuntimeEnvironment };
+export {
+  getFeatureFlagsProviderData,
+  isFeatureEnabled,
+  resolveFeatureFlagProvider,
+  resolveRuntimeEnvironment,
+};

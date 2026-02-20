@@ -1,4 +1,4 @@
-import { CharacterDetailPageView } from "@/page-modules/character-detail-page";
+import CharacterDetailPageView from "@/page-modules/character-detail-page";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 
 type Params = {

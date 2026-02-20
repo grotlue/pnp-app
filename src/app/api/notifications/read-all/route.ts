@@ -1,7 +1,7 @@
 import { requireAuth } from "@/server/auth/require-auth";
 import { jsonError, jsonOk } from "@/lib/api/http";
 
-export async function POST(request: Request) {
+const POST = async (request: Request) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -26,4 +26,6 @@ export async function POST(request: Request) {
     readAll: true,
     updated: data?.length ?? 0,
   });
-}
+};
+
+export { POST };

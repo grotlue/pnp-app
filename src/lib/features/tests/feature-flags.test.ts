@@ -5,14 +5,14 @@ import {
   resolveRuntimeEnvironment,
 } from "../feature-flags";
 
-function clearFlagEnv() {
+const clearFlagEnv = () => {
   delete process.env.APP_ENV;
   delete process.env.VERCEL_ENV;
   delete process.env.FEATURE_FLAGS_PROVIDER;
   delete process.env.FEATURE_FLAGS_ENABLE;
   delete process.env.FEATURE_FLAGS_DISABLE;
   delete process.env.FLAGS;
-}
+};
 
 afterEach(() => {
   clearFlagEnv();

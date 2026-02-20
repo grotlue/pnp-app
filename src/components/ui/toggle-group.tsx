@@ -42,7 +42,7 @@ type ToggleGroupMultipleProps = BaseToggleGroupProps & {
 
 type ToggleGroupProps = ToggleGroupSingleProps | ToggleGroupMultipleProps;
 
-function ToggleGroup({
+const ToggleGroup = ({
   className,
   variant,
   size,
@@ -53,7 +53,7 @@ function ToggleGroup({
   defaultValue,
   onValueChange,
   ...props
-}: ToggleGroupProps) {
+}: ToggleGroupProps) => {
   const primitiveValue =
     value === undefined
       ? undefined
@@ -66,6 +66,18 @@ function ToggleGroup({
       : type === "single"
         ? [defaultValue as string]
         : (defaultValue as string[]);
+  const handleValueChange = (nextValues: string[]) => {
+    if (!onValueChange) {
+      return;
+    }
+
+    if (type === "multiple") {
+      (onValueChange as (value: string[]) => void)(nextValues);
+      return;
+    }
+
+    (onValueChange as (value: string) => void)(nextValues[0] ?? "");
+  };
 
   return (
     <ToggleGroupPrimitive
@@ -77,20 +89,7 @@ function ToggleGroup({
       multiple={type === "multiple"}
       value={primitiveValue}
       defaultValue={primitiveDefaultValue}
-      onValueChange={(nextValues) => {
-        if (!onValueChange) {
-          return;
-        }
-
-        if (type === "multiple") {
-          (onValueChange as (value: string[]) => void)(nextValues as string[]);
-          return;
-        }
-
-        (onValueChange as (value: string) => void)(
-          (nextValues[0] as string | undefined) ?? "",
-        );
-      }}
+      onValueChange={handleValueChange}
       className={cn(
         "group/toggle-group flex w-fit items-center gap-[--spacing(var(--gap))] rounded-md data-[spacing=default]:data-[variant=outline]:shadow-xs",
         className,
@@ -102,15 +101,15 @@ function ToggleGroup({
       </ToggleGroupContext.Provider>
     </ToggleGroupPrimitive>
   );
-}
+};
 
-function ToggleGroupItem({
+const ToggleGroupItem = ({
   className,
   variant,
   size,
   ...props
 }: Omit<React.ComponentProps<typeof Toggle>, "variant" | "size"> &
-  VariantProps<typeof toggleVariants>) {
+  VariantProps<typeof toggleVariants>) => {
   const context = React.useContext(ToggleGroupContext);
 
   return (
@@ -129,6 +128,6 @@ function ToggleGroupItem({
       {...props}
     />
   );
-}
+};
 
 export { ToggleGroup, ToggleGroupItem };

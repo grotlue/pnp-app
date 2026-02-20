@@ -6,9 +6,9 @@ import {
   type RuntimeEnvironment,
 } from "./constants";
 
-function normalizeRuntimeEnvironment(
+const normalizeRuntimeEnvironment = (
   value?: string | null,
-): RuntimeEnvironment | null {
+): RuntimeEnvironment | null => {
   if (!value) {
     return null;
   }
@@ -18,9 +18,9 @@ function normalizeRuntimeEnvironment(
   }
 
   return null;
-}
+};
 
-export function resolvePerformanceRuntimeEnvironment(): RuntimeEnvironment {
+const resolvePerformanceRuntimeEnvironment = (): RuntimeEnvironment => {
   const explicitEnvironment = normalizeRuntimeEnvironment(process.env.APP_ENV);
   if (explicitEnvironment) {
     return explicitEnvironment;
@@ -32,9 +32,9 @@ export function resolvePerformanceRuntimeEnvironment(): RuntimeEnvironment {
   }
 
   return RUNTIME_ENVIRONMENTS.development;
-}
+};
 
-export function resolveSpeedInsightsEnabled(): boolean {
+const resolveSpeedInsightsEnabled = (): boolean => {
   const explicit = process.env.ENABLE_VERCEL_SPEED_INSIGHTS;
   if (explicit === BOOLEAN_ENV_VALUES.true) {
     return true;
@@ -46,4 +46,6 @@ export function resolveSpeedInsightsEnabled(): boolean {
 
   const environment = resolvePerformanceRuntimeEnvironment();
   return PRODUCTION_RUNTIME_ENVIRONMENTS.has(environment);
-}
+};
+
+export { resolvePerformanceRuntimeEnvironment, resolveSpeedInsightsEnabled };

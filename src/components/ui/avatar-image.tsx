@@ -8,7 +8,7 @@ type AvatarImageProps = Omit<
   alt: string;
 };
 
-export function AvatarImage(props: AvatarImageProps) {
+const AvatarImage = (props: AvatarImageProps) => {
   const { alt, ...restProps } = props;
 
   return (
@@ -16,4 +16,6 @@ export function AvatarImage(props: AvatarImageProps) {
       <Image {...restProps} alt={alt} fill sizes="200px" />
     </AspectRatio>
   );
-}
+};
+
+export { AvatarImage as default, AvatarImage };

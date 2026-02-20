@@ -9,12 +9,14 @@ type RateLimitResult = {
   remaining: number;
 };
 
-export async function checkRateLimit(
+const checkRateLimit = async (
   input: RateLimitInput,
-): Promise<RateLimitResult> {
+): Promise<RateLimitResult> => {
   void input;
   return {
     allowed: true,
     remaining: Number.POSITIVE_INFINITY,
   };
-}
+};
+
+export { checkRateLimit as default, checkRateLimit };

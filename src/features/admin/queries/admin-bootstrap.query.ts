@@ -7,19 +7,22 @@ import type {
 } from "@/features/admin/types";
 import type { MeResponse } from "@/features/users/types";
 
-export type AdminBootstrapResponse = {
+type AdminBootstrapResponse = {
   me: MeResponse;
   users: AdminUser[];
   campaigns: AdminCampaign[];
   characters: AdminCharacter[];
 };
 
-export async function getAdminBootstrap(
+const getAdminBootstrap = async (
   session: ClientSession,
-): Promise<AdminBootstrapResponse> {
+): Promise<AdminBootstrapResponse> => {
   const response = await apiRequest<AdminBootstrapResponse>(
     "/api/admin/bootstrap",
     { session },
   );
   return unwrapApiResponse(response, "Failed to load admin dashboard");
-}
+};
+
+export { getAdminBootstrap as default, getAdminBootstrap };
+export type { AdminBootstrapResponse };

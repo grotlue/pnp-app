@@ -14,7 +14,7 @@ type CardFooterProps = React.ComponentProps<"div"> & {
   layout?: string;
 };
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+const Card = ({ className, ...props }: React.ComponentProps<"div">) => {
   return (
     <div
       data-slot="card"
@@ -25,9 +25,9 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
       {...props}
     />
   );
-}
+};
 
-function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
+const CardHeader = ({ className, ...props }: React.ComponentProps<"div">) => {
   return (
     <div
       data-slot="card-header"
@@ -38,9 +38,9 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
       {...props}
     />
   );
-}
+};
 
-function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+const CardTitle = ({ className, ...props }: React.ComponentProps<"div">) => {
   return (
     <div
       data-slot="card-title"
@@ -48,9 +48,12 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
       {...props}
     />
   );
-}
+};
 
-function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
+const CardDescription = ({
+  className,
+  ...props
+}: React.ComponentProps<"div">) => {
   return (
     <div
       data-slot="card-description"
@@ -58,9 +61,9 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
       {...props}
     />
   );
-}
+};
 
-function CardAction({ className, ...props }: React.ComponentProps<"div">) {
+const CardAction = ({ className, ...props }: React.ComponentProps<"div">) => {
   return (
     <div
       data-slot="card-action"
@@ -71,9 +74,9 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
       {...props}
     />
   );
-}
+};
 
-function CardContent({
+const CardContent = ({
   className,
   stack: _stack,
   textStyle: _textStyle,
@@ -81,7 +84,7 @@ function CardContent({
   paddingY: _paddingY,
   paddingX: _paddingX,
   ...props
-}: CardContentProps) {
+}: CardContentProps) => {
   void _stack;
   void _textStyle;
   void _paddingTop;
@@ -94,9 +97,13 @@ function CardContent({
       {...props}
     />
   );
-}
+};
 
-function CardFooter({ className, layout: _layout, ...props }: CardFooterProps) {
+const CardFooter = ({
+  className,
+  layout: _layout,
+  ...props
+}: CardFooterProps) => {
   void _layout;
   return (
     <div
@@ -105,7 +112,7 @@ function CardFooter({ className, layout: _layout, ...props }: CardFooterProps) {
       {...props}
     />
   );
-}
+};
 
 export {
   Card,

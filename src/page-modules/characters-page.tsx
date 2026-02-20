@@ -4,9 +4,8 @@ import { UiDiv } from "@/components/ui/html-elements";
 import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
-import { useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { Pencil, Trash2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -20,7 +19,7 @@ import {
   IconActionButton,
   IconActionLinkButton,
 } from "@/components/ui/icon-action-button";
-import { ListControls } from "@/components/ui/list-controls";
+import ListControls from "@/components/ui/list-controls";
 import { ListItemRow } from "@/components/ui/list-item-row";
 import { Modal } from "@/components/ui/modal";
 import { PageLoadingState } from "@/components/ui/page-loading-state";
@@ -36,6 +35,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CharacterTypeBadge } from "@/features/characters/components/character-type-badge";
+import { useCampaignsQuery } from "@/features/campaigns/hooks/use-campaigns-query";
 import {
   type CharacterListSort,
   searchCharacters,
@@ -43,11 +43,9 @@ import {
 } from "@/features/characters/logic/character-list.logic";
 import type { Character } from "@/features/characters/types";
 import { useCharactersScreen } from "@/features/characters/hooks/use-characters-screen";
-import { getCampaignsQuery } from "@/features/campaigns/queries/get-campaigns.query";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
-import { queryKeys } from "@/lib/client/query-keys";
-import { useClientSession } from "@/lib/client/use-client-session";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import useClientSession from "@/lib/client/use-client-session";
+import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import {
   clampListPage,
   DEFAULT_LIST_PAGE_SIZE,
@@ -58,8 +56,8 @@ type CharactersScreenProps = {
   locale: AppLocale;
 };
 
-export function CharactersPageView({ locale }: CharactersScreenProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
+const CharactersPageView = ({ locale }: CharactersScreenProps) => {
+  const t = getTranslator(locale);
   const router = useRouter();
   const { session, ready } = useClientSession();
 
@@ -91,18 +89,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
     useCharactersScreen(session);
 
   const meQuery = useMeQuery(session);
-
-  const campaignsQuery = useQuery({
-    queryKey: queryKeys.campaignsScreen(session?.accessToken ?? "no-session"),
-    enabled: Boolean(session),
-    queryFn: async () => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
-
-      return getCampaignsQuery(session, { scope: "member" });
-    },
-  });
+  const campaignsQuery = useCampaignsQuery(session);
 
   const characters = charactersQuery.data ?? [];
   const visibleCharacters = characters;
@@ -121,12 +108,11 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
     DEFAULT_LIST_PAGE_SIZE,
   );
 
-  const campaignsById = useMemo(
-    () =>
-      new Map(
-        (campaignsQuery.data ?? []).map((campaign) => [campaign.id, campaign]),
-      ),
-    [campaignsQuery.data],
+  const campaignsById = new Map(
+    (campaignsQuery.data?.campaigns ?? []).map((campaign) => [
+      campaign.id,
+      campaign,
+    ]),
   );
 
   const queryError = [
@@ -142,6 +128,94 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
     { value: "created_desc", label: t("ui.list.sortCreated") },
     { value: "name_asc", label: t("ui.list.sortName") },
   ];
+
+  const handleOpenCreate = () => {
+    setCreateOpen(true);
+  };
+
+  const handleCloseCreate = () => {
+    setCreateOpen(false);
+  };
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value as CharacterListSort);
+  };
+
+  const resetCreateForm = () => {
+    setCreateForm({
+      type: "player",
+      name: "",
+      age: "",
+      description: "",
+      isPrivate: false,
+    });
+  };
+
+  const handleCreateCharacter = async () => {
+    try {
+      await createMutation.mutateAsync({
+        type: createForm.type as "player" | "npc",
+        name: createForm.name,
+        age: createForm.age ? Number(createForm.age) : null,
+        description: createForm.description,
+        isPrivate: createForm.isPrivate,
+      });
+      setCreateOpen(false);
+      resetCreateForm();
+      setMessage(t("ui.feedback.created"));
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
+    }
+  };
+
+  const handleDeleteDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setDeleteTarget(null);
+    }
+  };
+
+  const handleDeleteCharacter = async () => {
+    if (!deleteTarget) {
+      return;
+    }
+
+    try {
+      await deleteMutation.mutateAsync(deleteTarget.id);
+      setDeleteTarget(null);
+      setMessage(t("ui.feedback.deleted"));
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
+    }
+  };
+
+  const handleCreateTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setCreateForm((prev) => ({ ...prev, type: event.target.value }));
+  };
+
+  const handleCreateNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setCreateForm((prev) => ({ ...prev, name: event.target.value }));
+  };
+
+  const handleCreateAgeChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setCreateForm((prev) => ({ ...prev, age: event.target.value }));
+  };
+
+  const handleCreateDescriptionChange = (
+    event: ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    setCreateForm((prev) => ({
+      ...prev,
+      description: event.target.value,
+    }));
+  };
+
+  const handleCreatePrivacyToggle = () => {
+    setCreateForm((prev) => ({ ...prev, isPrivate: !prev.isPrivate }));
+  };
 
   if (!ready || !session) {
     return <PageViewport />;
@@ -165,7 +239,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
           </CardHeader>
           <CardContent stack={4}>
             <UiDiv wrapGap={2}>
-              <Button onClick={() => setCreateOpen(true)}>
+              <Button onClick={handleOpenCreate}>
                 {t("ui.characters.create")}
               </Button>
             </UiDiv>
@@ -177,7 +251,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
               onSearchChange={setSearchQuery}
               searchPlaceholder={t("ui.list.searchCharacters")}
               sortValue={sortBy}
-              onSortChange={(value) => setSortBy(value as CharacterListSort)}
+              onSortChange={handleSortChange}
               sortLabel={t("ui.list.sortBy")}
               sortOptions={sortOptions}
             />
@@ -251,43 +325,15 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
       <Modal
         open={createOpen}
         title={t("ui.characters.create")}
-        onClose={() => setCreateOpen(false)}
+        onClose={handleCloseCreate}
         footer={
           <>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>
+            <Button variant="outline" onClick={handleCloseCreate}>
               {t("ui.actions.close")}
             </Button>
             <Button
               disabled={anyPending}
-              onClick={() =>
-                void (async () => {
-                  try {
-                    await createMutation.mutateAsync({
-                      type: createForm.type as "player" | "npc",
-                      name: createForm.name,
-                      age: createForm.age ? Number(createForm.age) : null,
-                      description: createForm.description,
-                      isPrivate: createForm.isPrivate,
-                    });
-                    setCreateOpen(false);
-                    setCreateForm({
-                      type: "player",
-                      name: "",
-                      age: "",
-                      description: "",
-                      isPrivate: false,
-                    });
-                    setMessage(t("ui.feedback.created"));
-                  } catch (error) {
-                    setMessage(
-                      error instanceof Error
-                        ? error.message
-                        : t("ui.feedback.requestFailed"),
-                    );
-                    return;
-                  }
-                })()
-              }
+              onClick={() => void handleCreateCharacter()}
             >
               {t("ui.actions.create")}
             </Button>
@@ -295,12 +341,7 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
         }
       >
         <UiDiv gridGap={2}>
-          <FormSelect
-            value={createForm.type}
-            onChange={(event) =>
-              setCreateForm((prev) => ({ ...prev, type: event.target.value }))
-            }
-          >
+          <FormSelect value={createForm.type} onChange={handleCreateTypeChange}>
             <option value="player">
               {t("ui.labels.characterType.player")}
             </option>
@@ -309,36 +350,25 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
           <FormInput
             placeholder={t("ui.fields.characterName")}
             value={createForm.name}
-            onChange={(event) =>
-              setCreateForm((prev) => ({ ...prev, name: event.target.value }))
-            }
+            onChange={handleCreateNameChange}
           />
           <FormInput
             placeholder={t("ui.fields.characterAge")}
             value={createForm.age}
-            onChange={(event) =>
-              setCreateForm((prev) => ({ ...prev, age: event.target.value }))
-            }
+            onChange={handleCreateAgeChange}
           />
           <FormTextarea
             size="lg"
             placeholder={t("ui.fields.description")}
             value={createForm.description}
-            onChange={(event) =>
-              setCreateForm((prev) => ({
-                ...prev,
-                description: event.target.value,
-              }))
-            }
+            onChange={handleCreateDescriptionChange}
           />
           <VisibilityToggle
             isPrivate={createForm.isPrivate}
             label={t("ui.fields.visibilityPrivate")}
             onLabel={t("ui.actions.on")}
             offLabel={t("ui.actions.off")}
-            onToggle={() =>
-              setCreateForm((prev) => ({ ...prev, isPrivate: !prev.isPrivate }))
-            }
+            onToggle={handleCreatePrivacyToggle}
           />
         </UiDiv>
       </Modal>
@@ -350,29 +380,11 @@ export function CharactersPageView({ locale }: CharactersScreenProps) {
         cancelLabel={t("ui.actions.close")}
         confirmLabel={t("ui.actions.confirmDelete")}
         confirmDisabled={anyPending || !deleteTarget}
-        onOpenChange={(open) => {
-          if (!open) {
-            setDeleteTarget(null);
-          }
-        }}
-        onConfirm={async () => {
-          if (!deleteTarget) {
-            return;
-          }
-
-          try {
-            await deleteMutation.mutateAsync(deleteTarget.id);
-            setDeleteTarget(null);
-            setMessage(t("ui.feedback.deleted"));
-          } catch (error) {
-            setMessage(
-              error instanceof Error
-                ? error.message
-                : t("ui.feedback.requestFailed"),
-            );
-          }
-        }}
+        onOpenChange={handleDeleteDialogOpenChange}
+        onConfirm={handleDeleteCharacter}
       />
     </>
   );
-}
+};
+
+export default CharactersPageView;

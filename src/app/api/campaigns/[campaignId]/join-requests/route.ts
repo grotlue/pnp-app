@@ -5,7 +5,7 @@ type Params = {
   params: Promise<{ campaignId: string }>;
 };
 
-export async function POST(request: Request, { params }: Params) {
+const POST = async (request: Request, { params }: Params) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -24,4 +24,6 @@ export async function POST(request: Request, { params }: Params) {
   }
 
   return jsonOk({ membershipId: data }, 201);
-}
+};
+
+export { POST };

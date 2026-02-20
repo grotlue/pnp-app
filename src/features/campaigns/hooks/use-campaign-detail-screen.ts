@@ -14,10 +14,10 @@ import {
   updateCampaignDetail,
 } from "../queries/campaign-detail.query";
 
-export function useCampaignDetailScreen(
+const useCampaignDetailScreen = (
   session: ClientSession | null,
   campaignId: string,
-) {
+) => {
   const queryClient = useQueryClient();
   const token = session?.accessToken ?? "no-session";
   const queryKey = queryKeys.campaignDetail(campaignId, token);
@@ -38,9 +38,9 @@ export function useCampaignDetailScreen(
     },
   });
 
-  async function invalidate() {
+  const invalidate = async () => {
     await queryClient.invalidateQueries({ queryKey });
-  }
+  };
 
   const decideMutation = useMutation({
     mutationFn: async (input: {
@@ -129,4 +129,6 @@ export function useCampaignDetailScreen(
       assignMutation.isPending ||
       joinMutation.isPending,
   };
-}
+};
+
+export { useCampaignDetailScreen as default, useCampaignDetailScreen };

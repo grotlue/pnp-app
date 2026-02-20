@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
-import { FrontendLayout } from "@/components/common/frontend-layout";
-import { AppProviders } from "./providers";
+import FrontendLayout from "@/components/common/frontend-layout";
+import AppProviders from "./providers";
 import { AppRouter } from "./router";
 
 type AppProps = {
   children: ReactNode;
 };
 
-export function App({ children }: AppProps) {
+const App = ({ children }: AppProps) => {
   return (
     <AppProviders>
       <AppRouter>
@@ -15,4 +15,6 @@ export function App({ children }: AppProps) {
       </AppRouter>
     </AppProviders>
   );
-}
+};
+
+export default App;

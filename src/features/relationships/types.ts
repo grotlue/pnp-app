@@ -1,17 +1,17 @@
-export type RelationshipId = string;
+type RelationshipId = string;
 
-export type RelationshipCatalog = {
+type RelationshipCatalog = {
   categories: Array<{ id: number; key: string; sort_order: number }>;
   labels: Array<{ id: number; key: string; sort_order: number }>;
 };
 
-export type RelationshipSummary = {
+type RelationshipSummary = {
   other_character_id: string | null;
   other_character_name: string;
   other_character_deleted: boolean;
 };
 
-export type OutgoingRelationship = {
+type OutgoingRelationship = {
   id: string;
   source_character_id: string;
   target_character_id: string | null;
@@ -24,14 +24,23 @@ export type OutgoingRelationship = {
   is_external_target: boolean;
 };
 
-export type RelationshipTimelineEntry = {
+type RelationshipTimelineEntry = {
   id: string;
   occurred_at: string;
   content: string;
 };
 
-export type RelationshipDetail = {
+type RelationshipDetail = {
   outgoing: OutgoingRelationship | null;
   incoming: OutgoingRelationship | null;
   timeline: RelationshipTimelineEntry[];
+};
+
+export type {
+  OutgoingRelationship,
+  RelationshipCatalog,
+  RelationshipDetail,
+  RelationshipId,
+  RelationshipSummary,
+  RelationshipTimelineEntry,
 };

@@ -1,14 +1,7 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import type { ReactNode } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import {
   applyThemeMode,
   getThemeEventName,
@@ -30,9 +23,9 @@ type ThemePreferenceProviderProps = {
   children: ReactNode;
 };
 
-export function ThemePreferenceProvider({
+const ThemePreferenceProvider = ({
   children,
-}: ThemePreferenceProviderProps) {
+}: ThemePreferenceProviderProps) => {
   const [themeMode, setThemeModeState] = useState<ThemeMode>(() =>
     getThemeMode(),
   );
@@ -56,33 +49,30 @@ export function ThemePreferenceProvider({
     };
   }, []);
 
-  const setThemePreference = useCallback((mode: ThemeMode) => {
+  const setThemePreference = (mode: ThemeMode) => {
     setThemeModeState(mode);
     setThemeMode(mode);
-  }, []);
+  };
 
-  const toggleThemePreference = useCallback(() => {
+  const toggleThemePreference = () => {
     const nextMode = themeMode === "dark" ? "light" : "dark";
     setThemePreference(nextMode);
-  }, [setThemePreference, themeMode]);
+  };
 
-  const value = useMemo(
-    () => ({
-      themeMode,
-      setThemePreference,
-      toggleThemePreference,
-    }),
-    [setThemePreference, themeMode, toggleThemePreference],
-  );
+  const value = {
+    themeMode,
+    setThemePreference,
+    toggleThemePreference,
+  };
 
   return (
     <ThemePreferenceContext.Provider value={value}>
       {children}
     </ThemePreferenceContext.Provider>
   );
-}
+};
 
-export function useThemePreference() {
+const useThemePreference = () => {
   const context = useContext(ThemePreferenceContext);
   if (!context) {
     throw new Error(
@@ -91,4 +81,6 @@ export function useThemePreference() {
   }
 
   return context;
-}
+};
+
+export { ThemePreferenceProvider, useThemePreference };

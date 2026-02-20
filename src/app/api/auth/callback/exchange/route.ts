@@ -1,4 +1,4 @@
-import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
 import { setSessionCookies } from "@/server/auth/session-cookie";
 import { enforceRateLimit } from "@/server/rate-limit/enforce-rate-limit";
 import { createServerSupabaseClient } from "@/server/supabase/server-client";
@@ -7,7 +7,7 @@ type ExchangeBody = {
   code?: string;
 };
 
-export async function POST(request: Request) {
+const POST = async (request: Request) => {
   const rateLimited = await enforceRateLimit({
     request,
     route: "auth:callback:exchange",
@@ -47,4 +47,6 @@ export async function POST(request: Request) {
       expiresAt: data.session.expires_at,
     },
   );
-}
+};
+
+export { POST };

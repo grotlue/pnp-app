@@ -1,6 +1,6 @@
 const DEFAULT_PUBLIC_MESSAGE = "Request failed";
 
-export function toPublicErrorMessage(code: string, fallback?: string): string {
+const toPublicErrorMessage = (code: string, fallback?: string): string => {
   if (code === "invalid_payload") {
     return fallback ?? "Invalid request payload";
   }
@@ -34,4 +34,6 @@ export function toPublicErrorMessage(code: string, fallback?: string): string {
   }
 
   return fallback ?? DEFAULT_PUBLIC_MESSAGE;
-}
+};
+
+export { toPublicErrorMessage as default, toPublicErrorMessage };

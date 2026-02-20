@@ -1,24 +1,24 @@
 import { createClient } from "@supabase/supabase-js";
 import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/config";
 
-function getBaseServerAuthOptions() {
+const getBaseServerAuthOptions = () => {
   return {
     persistSession: false,
     autoRefreshToken: false,
     detectSessionInUrl: false,
   } as const;
-}
+};
 
-export function createServerSupabaseClient() {
+const createServerSupabaseClient = () => {
   const supabaseUrl = getSupabaseUrl();
   const supabaseAnonKey = getSupabaseAnonKey();
 
   return createClient(supabaseUrl, supabaseAnonKey, {
     auth: getBaseServerAuthOptions(),
   });
-}
+};
 
-export function createServerSupabaseUserClient(accessToken: string) {
+const createServerSupabaseUserClient = (accessToken: string) => {
   const supabaseUrl = getSupabaseUrl();
   const supabaseAnonKey = getSupabaseAnonKey();
 
@@ -26,9 +26,9 @@ export function createServerSupabaseUserClient(accessToken: string) {
     accessToken: async () => accessToken,
     auth: getBaseServerAuthOptions(),
   });
-}
+};
 
-export function createServerSupabaseUserAuthClient(accessToken: string) {
+const createServerSupabaseUserAuthClient = (accessToken: string) => {
   const supabaseUrl = getSupabaseUrl();
   const supabaseAnonKey = getSupabaseAnonKey();
 
@@ -40,4 +40,10 @@ export function createServerSupabaseUserAuthClient(accessToken: string) {
       },
     },
   });
-}
+};
+
+export {
+  createServerSupabaseClient,
+  createServerSupabaseUserAuthClient,
+  createServerSupabaseUserClient,
+};

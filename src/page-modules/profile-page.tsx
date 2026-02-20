@@ -3,7 +3,7 @@
 import { UiDiv } from "@/components/ui/html-elements";
 import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
@@ -11,7 +11,7 @@ import {
   FormSelect,
   FormTextarea,
 } from "@/components/ui/form-controls";
-import { ImageUploadField } from "@/components/common/image-upload-field";
+import ImageUploadField from "@/components/common/image-upload-field";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,8 +22,8 @@ import {
 } from "@/components/ui/card";
 import { uploadImageToSignedPath } from "@/lib/client/storage-upload";
 import { setLocaleCookie } from "@/lib/client/locale-cookie";
-import { useClientSession } from "@/lib/client/use-client-session";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import useClientSession from "@/lib/client/use-client-session";
+import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import {
   createProfileAvatarSignedUpload,
   getMe,
@@ -37,8 +37,8 @@ type ProfileScreenProps = {
   locale: AppLocale;
 };
 
-export function ProfilePageView({ locale }: ProfileScreenProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
+const ProfilePageView = ({ locale }: ProfileScreenProps) => {
+  const t = getTranslator(locale);
   const router = useRouter();
   const { session, ready } = useClientSession();
 
@@ -59,71 +59,68 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
       router.replace("/");
       return;
     }
-    void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, session]);
-
-  async function load() {
-    if (!session) {
-      return;
-    }
-    try {
-      const response: MeResponse = await getMe(session);
-      if (isAdmin(response.profile.role)) {
-        router.replace("/admin/users");
+    const load = async () => {
+      if (!session) {
         return;
       }
-      setForm({
-        username: response.profile.username,
-        description: response.profile.description,
-        locale: response.profile.locale,
-        avatarPath: response.profile.avatar_path ?? "",
-      });
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
-      );
-      return;
+      try {
+        const response: MeResponse = await getMe(session);
+        if (isAdmin(response.profile.role)) {
+          router.replace("/admin/users");
+          return;
+        }
+        setForm({
+          username: response.profile.username,
+          description: response.profile.description,
+          locale: response.profile.locale,
+          avatarPath: response.profile.avatar_path ?? "",
+        });
+      } catch (error) {
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : t("ui.feedback.requestFailed"),
+        );
+      }
+    };
+
+    void load();
+  }, [ready, router, session, t]);
+
+  const uploadProfileImage = async (
+    file: File,
+    dimensions: { width: number; height: number },
+  ) => {
+    if (!session) {
+      throw new Error("Missing session");
     }
-  }
 
-  const uploadProfileImage = useCallback(
-    async (file: File, dimensions: { width: number; height: number }) => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
+    const signedUpload = await createProfileAvatarSignedUpload(session, {
+      fileName: file.name,
+      width: dimensions.width,
+      height: dimensions.height,
+      fileSize: file.size,
+    });
+    await uploadImageToSignedPath({
+      bucket: "profile-images",
+      path: signedUpload.path,
+      token: signedUpload.token,
+      file,
+    });
 
-      const signedUpload = await createProfileAvatarSignedUpload(session, {
-        fileName: file.name,
-        width: dimensions.width,
-        height: dimensions.height,
-        fileSize: file.size,
-      });
-      await uploadImageToSignedPath({
-        bucket: "profile-images",
-        path: signedUpload.path,
-        token: signedUpload.token,
-        file,
-      });
+    return { path: signedUpload.path };
+  };
 
-      return { path: signedUpload.path };
-    },
-    [session],
-  );
+  const resolveProfileImagePreview = async (path: string) => {
+    if (!session) {
+      throw new Error("Missing session");
+    }
 
-  const resolveProfileImagePreview = useCallback(
-    async (path: string) => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
+    const response = await getProfileAvatarSignedUrl(session, path);
+    return response.signedUrl;
+  };
 
-      const response = await getProfileAvatarSignedUrl(session, path);
-      return response.signedUrl;
-    },
-    [session],
-  );
-
-  async function save() {
+  const save = async () => {
     if (!session) {
       return;
     }
@@ -146,7 +143,29 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
     } finally {
       setBusy(false);
     }
-  }
+  };
+
+  const handleAvatarPathChange = (avatarPath: string) => {
+    setForm((prev) => ({ ...prev, avatarPath }));
+  };
+
+  const handleUsernameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setForm((prev) => ({ ...prev, username: event.target.value }));
+  };
+
+  const handleLocaleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setForm((prev) => ({
+      ...prev,
+      locale: event.target.value as "en" | "de",
+    }));
+  };
+
+  const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    setForm((prev) => ({
+      ...prev,
+      description: event.target.value,
+    }));
+  };
 
   if (!ready || !session) {
     return <PageViewport />;
@@ -174,28 +193,16 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
             invalidDimensionsLabel={t("ui.imageUpload.invalidDimensions")}
             invalidFileSizeLabel={t("ui.imageUpload.invalidFileSize")}
             disabled={busy}
-            onChange={(avatarPath) =>
-              setForm((prev) => ({ ...prev, avatarPath }))
-            }
+            onChange={handleAvatarPathChange}
             onUpload={uploadProfileImage}
             onResolvePreviewUrl={resolveProfileImagePreview}
           />
           <FormInput
             value={form.username}
             placeholder={t("ui.fields.username")}
-            onChange={(event) =>
-              setForm((prev) => ({ ...prev, username: event.target.value }))
-            }
+            onChange={handleUsernameChange}
           />
-          <FormSelect
-            value={form.locale}
-            onChange={(event) =>
-              setForm((prev) => ({
-                ...prev,
-                locale: event.target.value as "en" | "de",
-              }))
-            }
-          >
+          <FormSelect value={form.locale} onChange={handleLocaleChange}>
             <option value="en">English</option>
             <option value="de">Deutsch</option>
           </FormSelect>
@@ -203,12 +210,7 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
             size="lg"
             value={form.description}
             placeholder={t("ui.fields.description")}
-            onChange={(event) =>
-              setForm((prev) => ({
-                ...prev,
-                description: event.target.value,
-              }))
-            }
+            onChange={handleDescriptionChange}
           />
           <UiDiv inlineGap={2}>
             <Button disabled={busy} onClick={save}>
@@ -220,4 +222,6 @@ export function ProfilePageView({ locale }: ProfileScreenProps) {
       </Card>
     </AppPageMain>
   );
-}
+};
+
+export default ProfilePageView;

@@ -1,5 +1,5 @@
 import { requireAuth } from "@/server/auth/require-auth";
-import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
 
 type Params = {
   params: Promise<{ campaignId: string }>;
@@ -11,7 +11,7 @@ type UpdateCampaignBody = {
   isPrivate?: boolean;
 };
 
-export async function GET(request: Request, { params }: Params) {
+const GET = async (request: Request, { params }: Params) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -52,9 +52,9 @@ export async function GET(request: Request, { params }: Params) {
   }
 
   return jsonOk({ campaign, memberships: memberships ?? [] });
-}
+};
 
-export async function PATCH(request: Request, { params }: Params) {
+const PATCH = async (request: Request, { params }: Params) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -91,9 +91,9 @@ export async function PATCH(request: Request, { params }: Params) {
   }
 
   return jsonOk(data);
-}
+};
 
-export async function DELETE(request: Request, { params }: Params) {
+const DELETE = async (request: Request, { params }: Params) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -110,4 +110,6 @@ export async function DELETE(request: Request, { params }: Params) {
   }
 
   return jsonOk({ deleted: true });
-}
+};
+
+export { DELETE, GET, PATCH };

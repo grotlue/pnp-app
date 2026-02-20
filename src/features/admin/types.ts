@@ -1,7 +1,7 @@
 import type { Campaign } from "@/features/campaigns/types";
 import type { Character } from "@/features/characters/types";
 
-export type AdminUser = {
+type AdminUser = {
   id: string;
   email: string;
   username: string;
@@ -12,7 +12,7 @@ export type AdminUser = {
   updated_at: string;
 };
 
-export type AdminCreateUserInput = {
+type AdminCreateUserInput = {
   email: string;
   password: string;
   username: string;
@@ -20,7 +20,7 @@ export type AdminCreateUserInput = {
   locale: "en" | "de";
 };
 
-export type AdminUpdateUserInput = {
+type AdminUpdateUserInput = {
   email?: string;
   password?: string;
   username?: string;
@@ -28,31 +28,31 @@ export type AdminUpdateUserInput = {
   locale?: "en" | "de";
 };
 
-export type AdminCampaign = Campaign & {
+type AdminCampaign = Campaign & {
   created_at?: string;
   updated_at?: string;
 };
 
-export type AdminCreateCampaignInput = {
+type AdminCreateCampaignInput = {
   ownerUserId: string;
   title: string;
   description: string;
   isPrivate?: boolean;
 };
 
-export type AdminUpdateCampaignInput = {
+type AdminUpdateCampaignInput = {
   ownerUserId?: string;
   title?: string;
   description?: string;
   isPrivate?: boolean;
 };
 
-export type AdminCharacter = Character & {
+type AdminCharacter = Character & {
   created_at?: string;
   updated_at?: string;
 };
 
-export type AdminCreateCharacterInput = {
+type AdminCreateCharacterInput = {
   ownerUserId: string;
   campaignId?: string | null;
   type: "player" | "npc";
@@ -63,7 +63,7 @@ export type AdminCreateCharacterInput = {
   isPrivate?: boolean;
 };
 
-export type AdminUpdateCharacterInput = {
+type AdminUpdateCharacterInput = {
   ownerUserId?: string;
   campaignId?: string | null;
   type?: "player" | "npc";
@@ -72,4 +72,16 @@ export type AdminUpdateCharacterInput = {
   description?: string;
   avatarPath?: string | null;
   isPrivate?: boolean;
+};
+
+export type {
+  AdminCampaign,
+  AdminCharacter,
+  AdminCreateCampaignInput,
+  AdminCreateCharacterInput,
+  AdminCreateUserInput,
+  AdminUpdateCampaignInput,
+  AdminUpdateCharacterInput,
+  AdminUpdateUserInput,
+  AdminUser,
 };

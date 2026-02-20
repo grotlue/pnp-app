@@ -1,4 +1,5 @@
 import { SearchIcon } from "lucide-react";
+import type { ChangeEvent } from "react";
 import { FormSelect } from "@/components/ui/form-controls";
 import {
   InputGroup,
@@ -26,7 +27,7 @@ type ListControlsProps = {
   filterOptions?: ListControlOption[];
 };
 
-export function ListControls({
+const ListControls = ({
   searchValue,
   onSearchChange,
   searchPlaceholder,
@@ -38,7 +39,21 @@ export function ListControls({
   filterValue,
   onFilterChange,
   filterOptions = [],
-}: ListControlsProps) {
+}: ListControlsProps) => {
+  const handleSearchInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onSearchChange(event.target.value);
+  };
+
+  const handleSortInputChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    onSortChange(event.target.value);
+  };
+
+  const handleFilterValueChange = (value: string) => {
+    if (value && onFilterChange) {
+      onFilterChange(value);
+    }
+  };
+
   return (
     <div>
       <div>
@@ -48,7 +63,7 @@ export function ListControls({
           </InputGroupAddon>
           <InputGroupInput
             value={searchValue}
-            onChange={(event) => onSearchChange(event.target.value)}
+            onChange={handleSearchInputChange}
             placeholder={searchPlaceholder}
             aria-label={searchPlaceholder}
           />
@@ -57,7 +72,7 @@ export function ListControls({
           <label>{sortLabel}</label>
           <FormSelect
             value={sortValue}
-            onChange={(event) => onSortChange(event.target.value)}
+            onChange={handleSortInputChange}
             aria-label={sortLabel}
           >
             {sortOptions.map((option) => (
@@ -80,11 +95,7 @@ export function ListControls({
             variant="outline"
             size="sm"
             value={filterValue}
-            onValueChange={(value) => {
-              if (value) {
-                onFilterChange(value);
-              }
-            }}
+            onValueChange={handleFilterValueChange}
           >
             {filterOptions.map((option) => (
               <ToggleGroupItem key={option.value} value={option.value}>
@@ -96,4 +107,6 @@ export function ListControls({
       ) : null}
     </div>
   );
-}
+};
+
+export default ListControls;

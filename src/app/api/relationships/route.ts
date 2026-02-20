@@ -1,5 +1,5 @@
 import { requireAuth } from "@/server/auth/require-auth";
-import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
 
 type CreateRelationshipBody = {
   sourceCharacterId?: string;
@@ -11,7 +11,7 @@ type CreateRelationshipBody = {
   description?: string;
 };
 
-export async function POST(request: Request) {
+const POST = async (request: Request) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -57,4 +57,6 @@ export async function POST(request: Request) {
   }
 
   return jsonOk({ relationshipId: data }, 201);
-}
+};
+
+export { POST };

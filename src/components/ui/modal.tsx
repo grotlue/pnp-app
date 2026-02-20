@@ -12,16 +12,15 @@ type ModalProps = {
   footer?: ReactNode;
 };
 
-export function Modal({ open, title, onClose, children, footer }: ModalProps) {
+const Modal = ({ open, title, onClose, children, footer }: ModalProps) => {
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      onClose();
+    }
+  };
+
   return (
-    <Dialog.Root
-      open={open}
-      onOpenChange={(nextOpen) => {
-        if (!nextOpen) {
-          onClose();
-        }
-      }}
-    >
+    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Portal>
         <Dialog.Backdrop
           data-slot="modal-backdrop"
@@ -57,4 +56,6 @@ export function Modal({ open, title, onClose, children, footer }: ModalProps) {
       </Dialog.Portal>
     </Dialog.Root>
   );
-}
+};
+
+export { Modal as default, Modal };

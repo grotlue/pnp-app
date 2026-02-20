@@ -4,7 +4,7 @@ import { UiDiv } from "@/components/ui/html-elements";
 import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
-import { useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
@@ -29,19 +29,19 @@ import { TitleWithPrivacy } from "@/components/ui/title-with-privacy";
 import { VisibilityToggle } from "@/components/ui/visibility-toggle";
 import { useCampaignDetailScreen } from "@/features/campaigns/hooks/use-campaign-detail-screen";
 import { canManageCampaign, isAdmin } from "@/features/users/logic/role.logic";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
-import { useClientSession } from "@/lib/client/use-client-session";
+import { type AppLocale, getTranslator } from "@/lib/i18n/index";
+import useClientSession from "@/lib/client/use-client-session";
 
 type CampaignDetailScreenProps = {
   locale: AppLocale;
   campaignId: string;
 };
 
-export function CampaignDetailPageView({
+const CampaignDetailPageView = ({
   locale,
   campaignId,
-}: CampaignDetailScreenProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
+}: CampaignDetailScreenProps) => {
+  const t = getTranslator(locale);
   const router = useRouter();
   const { session, ready } = useClientSession();
   const {
@@ -151,13 +151,40 @@ export function CampaignDetailPageView({
     (entry) => entry.source === "request" && entry.state === "pending",
   );
 
-  function usernameFor(userId: string) {
+  const usernameFor = (userId: string) => {
     return users.find((entry) => entry.id === userId)?.username ?? userId;
-  }
+  };
 
-  function isAdminUser(userId: string) {
+  const isAdminUser = (userId: string) => {
     return isAdmin(users.find((entry) => entry.id === userId)?.role);
-  }
+  };
+
+  const handleEditTitleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setEditForm((prev) => ({ ...prev, title: event.target.value }));
+  };
+
+  const handleEditDescriptionChange = (
+    event: ChangeEvent<HTMLTextAreaElement>,
+  ) => {
+    setEditForm((prev) => ({
+      ...prev,
+      description: event.target.value,
+    }));
+  };
+
+  const handleEditPrivacyToggle = () => {
+    setEditForm((prev) => ({ ...prev, isPrivate: !prev.isPrivate }));
+  };
+
+  const handleInviteUserChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setInviteUserId(event.target.value);
+  };
+
+  const handleAssignCharacterChange = (
+    event: ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setAssignCharacterId(event.target.value);
+  };
 
   return (
     <>
@@ -393,29 +420,20 @@ export function CampaignDetailPageView({
           <FormInput
             value={editForm.title}
             placeholder={t("ui.fields.campaignTitle")}
-            onChange={(event) =>
-              setEditForm((prev) => ({ ...prev, title: event.target.value }))
-            }
+            onChange={handleEditTitleChange}
           />
           <FormTextarea
             size="lg"
             value={editForm.description}
             placeholder={t("ui.fields.campaignDescription")}
-            onChange={(event) =>
-              setEditForm((prev) => ({
-                ...prev,
-                description: event.target.value,
-              }))
-            }
+            onChange={handleEditDescriptionChange}
           />
           <VisibilityToggle
             isPrivate={editForm.isPrivate}
             label={t("ui.fields.visibilityPrivate")}
             onLabel={t("ui.actions.on")}
             offLabel={t("ui.actions.off")}
-            onToggle={() =>
-              setEditForm((prev) => ({ ...prev, isPrivate: !prev.isPrivate }))
-            }
+            onToggle={handleEditPrivacyToggle}
           />
         </UiDiv>
       </Modal>
@@ -487,10 +505,7 @@ export function CampaignDetailPageView({
           </>
         }
       >
-        <FormSelect
-          value={inviteUserId}
-          onChange={(event) => setInviteUserId(event.target.value)}
-        >
+        <FormSelect value={inviteUserId} onChange={handleInviteUserChange}>
           <option value="">{t("ui.campaignDetail.selectUser")}</option>
           {inviteCandidates.map((entry) => (
             <option key={entry.id} value={entry.id}>
@@ -534,7 +549,7 @@ export function CampaignDetailPageView({
       >
         <FormSelect
           value={assignCharacterId}
-          onChange={(event) => setAssignCharacterId(event.target.value)}
+          onChange={handleAssignCharacterChange}
         >
           <option value="">{t("ui.campaignDetail.selectCharacter")}</option>
           {assignableCharacters.map((entry) => (
@@ -580,4 +595,6 @@ export function CampaignDetailPageView({
       </Modal>
     </>
   );
-}
+};
+
+export default CampaignDetailPageView;

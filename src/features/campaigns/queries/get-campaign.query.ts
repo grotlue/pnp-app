@@ -2,10 +2,10 @@ import { apiRequest, unwrapApiResponse } from "@/lib/client/api";
 import type { ClientSession } from "@/lib/client/session";
 import type { CampaignDetail } from "@/features/campaigns/types";
 
-export async function getCampaignDetail(
+const getCampaignDetail = async (
   session: ClientSession,
   campaignId: string,
-): Promise<CampaignDetail> {
+): Promise<CampaignDetail> => {
   const response = await apiRequest<CampaignDetail>(
     `/api/campaigns/${campaignId}`,
     {
@@ -13,4 +13,6 @@ export async function getCampaignDetail(
     },
   );
   return unwrapApiResponse(response, "Failed to load campaign");
-}
+};
+
+export { getCampaignDetail as default, getCampaignDetail };

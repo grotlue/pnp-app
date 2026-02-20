@@ -1,19 +1,19 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearSession, getSession, setSession } from "@/lib/client/session";
 
-function toBase64Url(value: string): string {
+const toBase64Url = (value: string): string => {
   return window
     .btoa(value)
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
     .replace(/=+$/g, "");
-}
+};
 
-function buildJwtWithExp(exp: number): string {
+const buildJwtWithExp = (exp: number): string => {
   const header = toBase64Url(JSON.stringify({ alg: "none", typ: "JWT" }));
   const payload = toBase64Url(JSON.stringify({ exp }));
   return `${header}.${payload}.sig`;
-}
+};
 
 describe("client session storage", () => {
   beforeEach(() => {

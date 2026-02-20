@@ -1,11 +1,11 @@
 import { cookies, headers } from "next/headers";
 import {
+  type AppLocale,
   detectLocaleFromAcceptLanguage,
   resolveLocale,
-  type AppLocale,
 } from "./index";
 
-export async function getRequestLocale(): Promise<AppLocale> {
+const getRequestLocale = async (): Promise<AppLocale> => {
   try {
     const cookieStore = await cookies();
     const localeCookie = cookieStore.get("locale")?.value;
@@ -18,4 +18,6 @@ export async function getRequestLocale(): Promise<AppLocale> {
   } catch {
     return "en";
   }
-}
+};
+
+export { getRequestLocale as default, getRequestLocale };

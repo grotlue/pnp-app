@@ -10,7 +10,7 @@ import {
   getCharacters,
 } from "../queries/characters-screen.query";
 
-export function useCharactersScreen(session: ClientSession | null) {
+const useCharactersScreen = (session: ClientSession | null) => {
   const queryClient = useQueryClient();
   const token = session?.accessToken ?? "no-session";
   const queryKey = queryKeys.charactersScreen(token);
@@ -26,9 +26,9 @@ export function useCharactersScreen(session: ClientSession | null) {
     },
   });
 
-  async function invalidate() {
+  const invalidate = async () => {
     await queryClient.invalidateQueries({ queryKey });
-  }
+  };
 
   const createMutation = useMutation({
     mutationFn: async (input: CharacterCreateInput) => {
@@ -56,4 +56,6 @@ export function useCharactersScreen(session: ClientSession | null) {
     deleteMutation,
     anyPending: createMutation.isPending || deleteMutation.isPending,
   };
-}
+};
+
+export { useCharactersScreen as default, useCharactersScreen };

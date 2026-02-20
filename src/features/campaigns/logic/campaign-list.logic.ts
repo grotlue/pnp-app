@@ -1,20 +1,20 @@
 import type { Campaign } from "@/features/campaigns/types";
 import { normalizeListQuery } from "@/lib/utils/list";
 
-export type CampaignListSort = "updated_desc" | "created_desc" | "name_asc";
+type CampaignListSort = "updated_desc" | "created_desc" | "name_asc";
 
-function toTimestamp(value?: string | null): number {
+const toTimestamp = (value?: string | null): number => {
   if (!value) {
     return 0;
   }
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp) ? timestamp : 0;
-}
+};
 
-export function sortCampaigns(
+const sortCampaigns = (
   items: Campaign[],
   sort: CampaignListSort,
-): Campaign[] {
+): Campaign[] => {
   const copy = [...items];
   copy.sort((left, right) => {
     if (sort === "name_asc") {
@@ -34,9 +34,9 @@ export function sortCampaigns(
     return rightTimestamp - leftTimestamp;
   });
   return copy;
-}
+};
 
-export function searchCampaigns(items: Campaign[], query: string): Campaign[] {
+const searchCampaigns = (items: Campaign[], query: string): Campaign[] => {
   const normalizedQuery = normalizeListQuery(query);
   if (!normalizedQuery) {
     return items;
@@ -48,4 +48,6 @@ export function searchCampaigns(items: Campaign[], query: string): Campaign[] {
     );
     return haystack.includes(normalizedQuery);
   });
-}
+};
+
+export { searchCampaigns, sortCampaigns, type CampaignListSort };

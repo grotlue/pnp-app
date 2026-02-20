@@ -7,12 +7,12 @@ type ListItemRowProps = {
   dimmed?: boolean;
 };
 
-export function ListItemRow({
+const ListItemRow = ({
   children,
   actions,
   className,
   dimmed: _dimmed = false,
-}: ListItemRowProps) {
+}: ListItemRowProps) => {
   void _dimmed;
   return (
     <div className={className}>
@@ -20,4 +20,6 @@ export function ListItemRow({
       {actions ? <div>{actions}</div> : null}
     </div>
   );
-}
+};
+
+export { ListItemRow as default, ListItemRow };

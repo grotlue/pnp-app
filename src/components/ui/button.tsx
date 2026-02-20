@@ -50,7 +50,7 @@ type ButtonProps = Omit<
     children?: React.ReactNode;
   };
 
-function Button({
+const Button = ({
   className,
   variant = "default",
   size = "default",
@@ -58,7 +58,7 @@ function Button({
   children,
   nativeButton,
   ...props
-}: ButtonProps) {
+}: ButtonProps) => {
   const classNames = cn(buttonVariants({ variant, size, className }));
 
   if (asChild) {
@@ -94,7 +94,7 @@ function Button({
       {children}
     </BaseButton>
   );
-}
+};
 
 export { Button, buttonVariants };
 export type { ButtonProps };

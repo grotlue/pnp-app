@@ -1,7 +1,7 @@
 import en from "@/i18n/en.json";
 import de from "@/i18n/de.json";
 
-export type AppLocale = "en" | "de";
+type AppLocale = "en" | "de";
 
 type Dict = typeof en;
 
@@ -12,7 +12,7 @@ const dictionaries: Record<AppLocale, Dict> = {
 
 const DEFAULT_LOCALE: AppLocale = "en";
 
-function getByPath(obj: unknown, path: string): string | undefined {
+const getByPath = (obj: unknown, path: string): string | undefined => {
   if (!obj || typeof obj !== "object") {
     return undefined;
   }
@@ -26,15 +26,15 @@ function getByPath(obj: unknown, path: string): string | undefined {
   }
 
   return typeof current === "string" ? current : undefined;
-}
+};
 
-export function resolveLocale(input?: string | null): AppLocale {
+const resolveLocale = (input?: string | null): AppLocale => {
   return input === "de" ? "de" : DEFAULT_LOCALE;
-}
+};
 
-export function detectLocaleFromAcceptLanguage(
+const detectLocaleFromAcceptLanguage = (
   acceptLanguage?: string | null,
-): AppLocale {
+): AppLocale => {
   if (!acceptLanguage) {
     return DEFAULT_LOCALE;
   }
@@ -45,9 +45,9 @@ export function detectLocaleFromAcceptLanguage(
   }
 
   return DEFAULT_LOCALE;
-}
+};
 
-export function getTranslator(locale: AppLocale) {
+const getTranslator = (locale: AppLocale) => {
   const dict = dictionaries[locale] ?? dictionaries[DEFAULT_LOCALE];
 
   return (key: string, fallback?: string): string => {
@@ -62,4 +62,11 @@ export function getTranslator(locale: AppLocale) {
 
     return key;
   };
-}
+};
+
+export {
+  detectLocaleFromAcceptLanguage,
+  getTranslator,
+  resolveLocale,
+  type AppLocale,
+};

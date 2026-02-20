@@ -6,10 +6,10 @@ type GetNotificationsQueryOptions = {
   limit?: number;
 };
 
-export async function getNotificationsQuery(
+const getNotificationsQuery = async (
   session: ClientSession,
   options?: GetNotificationsQueryOptions,
-): Promise<NotificationEntry[]> {
+): Promise<NotificationEntry[]> => {
   const limit = options?.limit ?? 100;
   const params = new URLSearchParams();
   params.set("limit", String(limit));
@@ -21,4 +21,6 @@ export async function getNotificationsQuery(
     },
   );
   return unwrapApiResponse(response, "Failed to load notifications");
-}
+};
+
+export { getNotificationsQuery as default, getNotificationsQuery };

@@ -6,11 +6,11 @@ type EmptyStateProps = {
   variant?: "default" | "ghost" | "panel";
 };
 
-export function EmptyState({
+const EmptyState = ({
   label,
   className,
   variant: _variant = "default",
-}: EmptyStateProps) {
+}: EmptyStateProps) => {
   void _variant;
   return (
     <Empty className={className}>
@@ -19,4 +19,6 @@ export function EmptyState({
       </EmptyHeader>
     </Empty>
   );
-}
+};
+
+export { EmptyState as default, EmptyState };

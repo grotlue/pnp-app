@@ -3,27 +3,27 @@
 import { UiDiv } from "@/components/ui/html-elements";
 import {
   AppPageMain,
-  AuthRadialPageMain,
   AuthCardPageContent,
+  AuthRadialPageMain,
   CompactPageViewport,
   PageViewport,
 } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
-import { useMemo, useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { FormInput } from "@/components/ui/form-controls";
-import { ListControls } from "@/components/ui/list-controls";
+import ListControls from "@/components/ui/list-controls";
 import { ListItemRow } from "@/components/ui/list-item-row";
 import { OwnershipBadge } from "@/components/common/ownership-badge";
 import { PageLoadingState } from "@/components/ui/page-loading-state";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import {
-  TurnstileWidget,
   type TurnstileErrorReason,
+  TurnstileWidget,
 } from "@/components/common/turnstile-widget";
 import { ToggleTabs } from "@/components/ui/toggle-tabs";
 import { TitleWithPrivacy } from "@/components/ui/title-with-privacy";
@@ -43,7 +43,6 @@ import {
   searchCampaigns,
   sortCampaigns,
 } from "@/features/campaigns/logic/campaign-list.logic";
-import { getCampaignsQuery } from "@/features/campaigns/queries/get-campaigns.query";
 import {
   type CharacterListSort,
   type CharacterOwnershipFilter,
@@ -51,7 +50,7 @@ import {
   searchCharacters,
   sortCharacters,
 } from "@/features/characters/logic/character-list.logic";
-import { getCharacters } from "@/features/characters/queries/characters-screen.query";
+import { useHomeLoggedInQuery } from "@/features/users/hooks/use-home-logged-in-query";
 import { loginUser } from "@/features/users/queries/users-auth.query";
 import { resolveAdminMfaStepUpDecision } from "@/features/users/logic/admin-mfa-step-up.logic";
 import { getAdminMfaStatus } from "@/features/users/queries/users-mfa.query";
@@ -63,9 +62,9 @@ import {
   clearSession,
   setSession as persistSession,
 } from "@/lib/client/session";
-import { useClientSession } from "@/lib/client/use-client-session";
+import useClientSession from "@/lib/client/use-client-session";
 import { resolveAuthCaptchaClientConfig } from "@/lib/features/auth-captcha";
-import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
+import { type AppLocale, getTranslator, resolveLocale } from "@/lib/i18n/index";
 import {
   clampListPage,
   DEFAULT_LIST_PAGE_SIZE,
@@ -78,7 +77,7 @@ type HomeScreenProps = {
   registeredNotice?: boolean;
 };
 
-function isAuthSessionError(error: unknown): boolean {
+const isAuthSessionError = (error: unknown): boolean => {
   if (!(error instanceof Error)) {
     return false;
   }
@@ -88,12 +87,12 @@ function isAuthSessionError(error: unknown): boolean {
     message.includes("invalid or expired") ||
     message.includes("authorization bearer token is required")
   );
-}
+};
 
-function getCaptchaFailureMessage(
+const getCaptchaFailureMessage = (
   t: ReturnType<typeof getTranslator>,
   reason: TurnstileErrorReason | null,
-): string {
+): string => {
   if (!reason) {
     return t("ui.feedback.captchaRequired");
   }
@@ -103,15 +102,15 @@ function getCaptchaFailureMessage(
   }
 
   return t("ui.feedback.captchaUnavailable");
-}
+};
 
-export function HomePageView({
+const HomePageView = ({
   locale,
   registrationEnabled,
   registeredNotice = false,
-}: HomeScreenProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
-  const authCaptchaConfig = useMemo(() => resolveAuthCaptchaClientConfig(), []);
+}: HomeScreenProps) => {
+  const t = getTranslator(locale);
+  const authCaptchaConfig = resolveAuthCaptchaClientConfig();
   const { session, ready } = useClientSession();
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -139,34 +138,9 @@ export function HomePageView({
     useState<CampaignListSort>("updated_desc");
   const [campaignPage, setCampaignPage] = useState(1);
 
-  const loggedInQuery = useQuery({
-    queryKey: queryKeys.homeLoggedIn(session?.accessToken ?? "no-session"),
-    enabled: Boolean(session),
-    queryFn: async () => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
+  const loggedInQuery = useHomeLoggedInQuery(session);
 
-      const token = session.accessToken;
-      const [me, campaigns, characters] = await Promise.all([
-        queryClient.ensureQueryData({
-          queryKey: queryKeys.me(token),
-          staleTime: 60_000,
-          queryFn: async () => getMe(session),
-        }),
-        getCampaignsQuery(session, { scope: "public" }),
-        getCharacters(session, { scope: "public" }),
-      ]);
-
-      return {
-        me,
-        campaigns,
-        characters,
-      };
-    },
-  });
-
-  async function onLogin() {
+  const onLogin = async () => {
     if (authCaptchaConfig.required && !authCaptchaConfig.enabled) {
       setMessage(t("ui.feedback.captchaMisconfigured"));
       return;
@@ -222,7 +196,40 @@ export function HomePageView({
       }
       setBusy(false);
     }
-  }
+  };
+
+  const handleLoginEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setLoginForm((prev) => ({
+      ...prev,
+      email: event.target.value,
+    }));
+  };
+
+  const handleLoginPasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setLoginForm((prev) => ({
+      ...prev,
+      password: event.target.value,
+    }));
+  };
+
+  const handleCaptchaTokenChange = (token: string | null) => {
+    if (token) {
+      setCaptchaErrorReason(null);
+    }
+    setCaptchaToken(token);
+  };
+
+  const handleCharacterSortChange = (value: string) => {
+    setCharacterSortBy(value as CharacterListSort);
+  };
+
+  const handleCharacterOwnershipFilterChange = (value: string) => {
+    setCharacterOwnershipFilter(value as CharacterOwnershipFilter);
+  };
+
+  const handleCampaignSortChange = (value: string) => {
+    setCampaignSortBy(value as CampaignListSort);
+  };
 
   if (!ready) {
     return <CompactPageViewport />;
@@ -244,35 +251,20 @@ export function HomePageView({
                 type="email"
                 placeholder={t("ui.fields.email")}
                 value={loginForm.email}
-                onChange={(event) =>
-                  setLoginForm((prev) => ({
-                    ...prev,
-                    email: event.target.value,
-                  }))
-                }
+                onChange={handleLoginEmailChange}
               />
               <FormInput
                 type="password"
                 placeholder={t("ui.fields.password")}
                 value={loginForm.password}
-                onChange={(event) =>
-                  setLoginForm((prev) => ({
-                    ...prev,
-                    password: event.target.value,
-                  }))
-                }
+                onChange={handleLoginPasswordChange}
               />
               {authCaptchaConfig.enabled && authCaptchaConfig.siteKey ? (
                 <TurnstileWidget
                   siteKey={authCaptchaConfig.siteKey}
                   resetKey={captchaResetKey}
                   loadErrorMessage={t("ui.feedback.captchaUnavailable")}
-                  onTokenChange={(token) => {
-                    if (token) {
-                      setCaptchaErrorReason(null);
-                    }
-                    setCaptchaToken(token);
-                  }}
+                  onTokenChange={handleCaptchaTokenChange}
                   onErrorReason={setCaptchaErrorReason}
                 />
               ) : null}
@@ -408,16 +400,12 @@ export function HomePageView({
               onSearchChange={setCharacterSearchQuery}
               searchPlaceholder={t("ui.list.searchCharacters")}
               sortValue={characterSortBy}
-              onSortChange={(value) =>
-                setCharacterSortBy(value as CharacterListSort)
-              }
+              onSortChange={handleCharacterSortChange}
               sortLabel={t("ui.list.sortBy")}
               sortOptions={characterSortOptions}
               filterLabel={t("ui.list.filterBy")}
               filterValue={characterOwnershipFilter}
-              onFilterChange={(value) =>
-                setCharacterOwnershipFilter(value as CharacterOwnershipFilter)
-              }
+              onFilterChange={handleCharacterOwnershipFilterChange}
               filterOptions={[
                 { value: "all", label: t("ui.labels.ownership.all") },
                 { value: "mine", label: t("ui.labels.ownership.mine") },
@@ -492,9 +480,7 @@ export function HomePageView({
               onSearchChange={setCampaignSearchQuery}
               searchPlaceholder={t("ui.list.searchCampaigns")}
               sortValue={campaignSortBy}
-              onSortChange={(value) =>
-                setCampaignSortBy(value as CampaignListSort)
-              }
+              onSortChange={handleCampaignSortChange}
               sortLabel={t("ui.list.sortBy")}
               sortOptions={campaignSortOptions}
             />
@@ -561,4 +547,6 @@ export function HomePageView({
       </UiDiv>
     </AppPageMain>
   );
-}
+};
+
+export default HomePageView;

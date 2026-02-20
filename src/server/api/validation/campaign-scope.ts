@@ -1,11 +1,13 @@
 import type { CampaignListScope } from "@/features/campaigns/types";
 
-export function parseCampaignListScopeParam(
+const parseCampaignListScopeParam = (
   value: string | null,
-): CampaignListScope {
+): CampaignListScope => {
   if (value === "member" || value === "public") {
     return value;
   }
 
   return "all";
-}
+};
+
+export { parseCampaignListScopeParam as default, parseCampaignListScopeParam };

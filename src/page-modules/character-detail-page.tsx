@@ -5,7 +5,7 @@ import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Trash2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -28,8 +28,8 @@ import {
   AssignCampaignModal,
   DeleteRelationshipModal,
   EditRelationshipModal,
-  RelationshipDetailModal,
   type RelationshipAddFormValues,
+  RelationshipDetailModal,
   type RelationshipEditFormValues,
   type RelationshipTargetMode,
   UnassignCampaignModal,
@@ -42,19 +42,19 @@ import type {
   OutgoingRelationship,
   RelationshipDetail,
 } from "@/features/relationships/types";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
-import { useClientSession } from "@/lib/client/use-client-session";
+import { type AppLocale, getTranslator } from "@/lib/i18n/index";
+import useClientSession from "@/lib/client/use-client-session";
 
 type CharacterDetailScreenProps = {
   locale: AppLocale;
   characterId: string;
 };
 
-export function CharacterDetailPageView({
+const CharacterDetailPageView = ({
   locale,
   characterId,
-}: CharacterDetailScreenProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
+}: CharacterDetailScreenProps) => {
+  const t = getTranslator(locale);
   const router = useRouter();
   const { session, ready } = useClientSession();
   const {
@@ -199,7 +199,7 @@ export function CharacterDetailPageView({
     };
   });
 
-  function openEditRelationship(relation: OutgoingRelationship) {
+  const openEditRelationship = (relation: OutgoingRelationship) => {
     setEditRelation(relation);
     const mode: RelationshipTargetMode = relation.target_character_id
       ? "existing"
@@ -216,7 +216,7 @@ export function CharacterDetailPageView({
       description: relation.description,
     });
     setEditRelationshipOpen(true);
-  }
+  };
 
   const editTargetOptions = editRelation?.target_character_id
     ? [
@@ -594,4 +594,6 @@ export function CharacterDetailPageView({
       />
     </>
   );
-}
+};
+
+export default CharacterDetailPageView;

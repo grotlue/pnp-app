@@ -2,9 +2,9 @@ import { jsonError, jsonOk } from "@/lib/api/http";
 import { requireAdmin } from "@/server/auth/require-admin";
 import { createServiceRoleSupabaseClient } from "@/server/supabase/service-role-client";
 
-async function listAllAuthUsers(
+const listAllAuthUsers = async (
   service: ReturnType<typeof createServiceRoleSupabaseClient>,
-) {
+) => {
   const users: Array<{ id: string; email?: string | null }> = [];
   let page = 1;
 
@@ -31,9 +31,9 @@ async function listAllAuthUsers(
   }
 
   return { ok: true as const, users };
-}
+};
 
-export async function GET(request: Request) {
+const GET = async (request: Request) => {
   const admin = await requireAdmin(request);
   if ("response" in admin) {
     return admin.response;
@@ -146,4 +146,6 @@ export async function GET(request: Request) {
     campaigns: campaignsResult.data ?? [],
     characters: charactersResult.data ?? [],
   });
-}
+};
+
+export { GET };

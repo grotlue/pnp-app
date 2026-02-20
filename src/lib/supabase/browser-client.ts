@@ -1,5 +1,7 @@
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-export function getBrowserSupabaseClient() {
+const getBrowserSupabaseClient = () => {
   return createSupabaseBrowserClient();
-}
+};
+
+export { getBrowserSupabaseClient as default, getBrowserSupabaseClient };

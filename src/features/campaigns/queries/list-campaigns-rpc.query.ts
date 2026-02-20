@@ -23,10 +23,10 @@ type ListCampaignsRpcQueryParams = {
   limit: number;
 };
 
-export async function listCampaignsRpcQuery(
+const listCampaignsRpcQuery = async (
   client: CampaignRpcClient,
   params: ListCampaignsRpcQueryParams,
-): Promise<CampaignRpcRow[]> {
+): Promise<CampaignRpcRow[]> => {
   const { data, error } = await client.rpc("rpc_list_campaigns_for_user", {
     p_scope: params.scope,
     p_role_for_user_id: params.roleForUserId,
@@ -38,4 +38,6 @@ export async function listCampaignsRpcQuery(
   }
 
   return data ?? [];
-}
+};
+
+export { listCampaignsRpcQuery as default, listCampaignsRpcQuery };

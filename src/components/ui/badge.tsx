@@ -25,14 +25,14 @@ const badgeVariants = cva(
   },
 );
 
-function Badge({
+const Badge = ({
   className,
   variant = "default",
   asChild = false,
   children,
   ...props
 }: React.ComponentProps<"span"> &
-  VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+  VariantProps<typeof badgeVariants> & { asChild?: boolean }) => {
   const classes = cn(badgeVariants({ variant }), className);
 
   if (asChild) {
@@ -71,6 +71,6 @@ function Badge({
       {children}
     </span>
   );
-}
+};
 
 export { Badge, badgeVariants };

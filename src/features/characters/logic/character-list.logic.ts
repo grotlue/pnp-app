@@ -1,21 +1,21 @@
 import type { Character } from "@/features/characters/types";
 import { normalizeListQuery } from "@/lib/utils/list";
 
-export type CharacterListSort = "updated_desc" | "created_desc" | "name_asc";
-export type CharacterOwnershipFilter = "all" | "mine" | "others";
+type CharacterListSort = "updated_desc" | "created_desc" | "name_asc";
+type CharacterOwnershipFilter = "all" | "mine" | "others";
 
-function toTimestamp(value?: string | null): number {
+const toTimestamp = (value?: string | null): number => {
   if (!value) {
     return 0;
   }
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp) ? timestamp : 0;
-}
+};
 
-export function sortCharacters(
+const sortCharacters = (
   items: Character[],
   sort: CharacterListSort,
-): Character[] {
+): Character[] => {
   const copy = [...items];
   copy.sort((left, right) => {
     if (sort === "name_asc") {
@@ -35,12 +35,9 @@ export function sortCharacters(
     return rightTimestamp - leftTimestamp;
   });
   return copy;
-}
+};
 
-export function searchCharacters(
-  items: Character[],
-  query: string,
-): Character[] {
+const searchCharacters = (items: Character[], query: string): Character[] => {
   const normalizedQuery = normalizeListQuery(query);
   if (!normalizedQuery) {
     return items;
@@ -52,13 +49,13 @@ export function searchCharacters(
     );
     return haystack.includes(normalizedQuery);
   });
-}
+};
 
-export function filterCharactersByOwnership(
+const filterCharactersByOwnership = (
   items: Character[],
   filter: CharacterOwnershipFilter,
   currentUserId?: string,
-): Character[] {
+): Character[] => {
   if (!currentUserId || filter === "all") {
     return items;
   }
@@ -70,4 +67,7 @@ export function filterCharactersByOwnership(
   }
 
   return items.filter((character) => character.owner_user_id !== currentUserId);
-}
+};
+
+export type { CharacterListSort, CharacterOwnershipFilter };
+export { filterCharactersByOwnership, searchCharacters, sortCharacters };

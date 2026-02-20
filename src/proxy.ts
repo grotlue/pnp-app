@@ -1,13 +1,13 @@
 import type { NextRequest } from "next/server";
 import { resolveVercelToolbarEnabled } from "@/lib/features/vercel-toolbar";
-import { updateSession } from "@/lib/supabase/middleware";
+import updateSession from "@/lib/supabase/middleware";
 import { buildContentSecurityPolicy } from "@/server/security/csp";
 import {
-  SECURITY_HEADERS,
   SECURITY_HEADER_VALUES,
+  SECURITY_HEADERS,
 } from "@/server/security/constants";
 
-export async function proxy(request: NextRequest) {
+const proxy = async (request: NextRequest) => {
   const response = await updateSession(request);
   const toolbarEnabled = resolveVercelToolbarEnabled();
 
@@ -41,10 +41,12 @@ export async function proxy(request: NextRequest) {
   }
 
   return response;
-}
+};
 
 export const config = {
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
   ],
 };
+
+export { proxy };

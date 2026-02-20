@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
@@ -18,7 +18,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { setSession } from "@/lib/client/session";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import {
   exchangeAuthCode,
   verifyAuthToken,
@@ -32,15 +32,15 @@ type AuthCallbackPageViewProps = {
   locale: AppLocale;
 };
 
-export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
+const AuthCallbackPageView = ({ locale }: AuthCallbackPageViewProps) => {
+  const t = getTranslator(locale);
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     let cancelled = false;
 
-    async function run() {
+    const run = async () => {
       try {
         const tokenSession = getSessionTokensFromUrl(window.location);
         if (tokenSession) {
@@ -100,7 +100,7 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
           );
         }
       }
-    }
+    };
 
     void run();
 
@@ -133,4 +133,6 @@ export function AuthCallbackPageView({ locale }: AuthCallbackPageViewProps) {
       </AuthCardPageContent>
     </AuthCardPageMain>
   );
-}
+};
+
+export default AuthCallbackPageView;

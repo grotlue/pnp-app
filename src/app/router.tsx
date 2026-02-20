@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export const appRoutes = {
+const appRoutes = {
   home: "/",
   register: "/register",
   passwordReset: "/password-reset",
@@ -19,7 +19,7 @@ export const appRoutes = {
   dashboard: "/dashboard",
 } as const;
 
-export const appNavigationRoutes = [
+const appNavigationRoutes = [
   { href: appRoutes.characters, key: "ui.menu.characters" },
   { href: appRoutes.campaigns, key: "ui.menu.campaigns" },
 ] as const;
@@ -30,6 +30,8 @@ type AppRouterProps = {
 
 // Next.js file-system routing resolves route matching.
 // This component centralizes route metadata and wraps rendered routes.
-export function AppRouter({ children }: AppRouterProps) {
+const AppRouter = ({ children }: AppRouterProps) => {
   return <>{children}</>;
-}
+};
+
+export { AppRouter, appNavigationRoutes, appRoutes };

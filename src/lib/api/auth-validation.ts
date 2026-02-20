@@ -6,15 +6,15 @@ const HAS_UPPERCASE = /[A-Z]/;
 const HAS_DIGIT = /\d/;
 const TOTP_CODE_PATTERN = /^\d{6,8}$/;
 
-export function normalizeEmail(value: string): string {
+const normalizeEmail = (value: string): string => {
   return value.trim().toLowerCase();
-}
+};
 
-export function isValidEmail(value: string): boolean {
+const isValidEmail = (value: string): boolean => {
   return EMAIL_PATTERN.test(value);
-}
+};
 
-export function normalizeAndValidateEmail(value: unknown): string | null {
+const normalizeAndValidateEmail = (value: unknown): string | null => {
   if (typeof value !== "string") {
     return null;
   }
@@ -25,18 +25,18 @@ export function normalizeAndValidateEmail(value: unknown): string | null {
   }
 
   return normalized;
-}
+};
 
-export function normalizeCaptchaToken(value: unknown): string | null {
+const normalizeCaptchaToken = (value: unknown): string | null => {
   if (typeof value !== "string") {
     return null;
   }
 
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
-}
+};
 
-export function normalizeTotpCode(value: unknown): string | null {
+const normalizeTotpCode = (value: unknown): string | null => {
   if (typeof value !== "string") {
     return null;
   }
@@ -47,9 +47,9 @@ export function normalizeTotpCode(value: unknown): string | null {
   }
 
   return normalized;
-}
+};
 
-export function validatePasswordStrength(password: string): string | null {
+const validatePasswordStrength = (password: string): string | null => {
   if (password.length < MIN_PASSWORD_LENGTH) {
     return `password must be at least ${MIN_PASSWORD_LENGTH} characters`;
   }
@@ -67,4 +67,13 @@ export function validatePasswordStrength(password: string): string | null {
   }
 
   return null;
-}
+};
+
+export {
+  isValidEmail,
+  normalizeAndValidateEmail,
+  normalizeCaptchaToken,
+  normalizeEmail,
+  normalizeTotpCode,
+  validatePasswordStrength,
+};

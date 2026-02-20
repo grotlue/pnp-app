@@ -3,7 +3,7 @@
 import { UiDiv } from "@/components/ui/html-elements";
 import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import {
@@ -11,7 +11,7 @@ import {
   FormSelect,
   FormTextarea,
 } from "@/components/ui/form-controls";
-import { ImageUploadField } from "@/components/common/image-upload-field";
+import ImageUploadField from "@/components/common/image-upload-field";
 import { Modal } from "@/components/ui/modal";
 import { VisibilityToggle } from "@/components/ui/visibility-toggle";
 import { Button } from "@/components/ui/button";
@@ -25,8 +25,8 @@ import {
 import { createCharacterAvatarSignedUpload } from "@/features/characters/queries/character-edit.query";
 import { getCharacterAvatarSignedUrl } from "@/features/characters/queries/character-detail.query";
 import { uploadImageToSignedPath } from "@/lib/client/storage-upload";
-import { useClientSession } from "@/lib/client/use-client-session";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import useClientSession from "@/lib/client/use-client-session";
+import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import { useCharacterEditScreen } from "@/features/characters/hooks/use-character-edit-screen";
 import { canManageCharacter, isAdmin } from "@/features/users/logic/role.logic";
 
@@ -35,11 +35,11 @@ type CharacterEditScreenProps = {
   characterId: string;
 };
 
-export function CharacterEditPageView({
+const CharacterEditPageView = ({
   locale,
   characterId,
-}: CharacterEditScreenProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
+}: CharacterEditScreenProps) => {
+  const t = getTranslator(locale);
   const router = useRouter();
   const { session, ready } = useClientSession();
 
@@ -66,45 +66,118 @@ export function CharacterEditPageView({
   const { editQuery, updateMutation, deleteMutation, anyPending } =
     useCharacterEditScreen(session, characterId);
 
-  const uploadCharacterImage = useCallback(
-    async (file: File, dimensions: { width: number; height: number }) => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
+  const uploadCharacterImage = async (
+    file: File,
+    dimensions: { width: number; height: number },
+  ) => {
+    if (!session) {
+      throw new Error("Missing session");
+    }
 
-      const signedUpload = await createCharacterAvatarSignedUpload(
-        session,
-        characterId,
-        {
-          fileName: file.name,
-          width: dimensions.width,
-          height: dimensions.height,
-          fileSize: file.size,
-        },
-      );
-      await uploadImageToSignedPath({
-        bucket: "character-images",
-        path: signedUpload.path,
-        token: signedUpload.token,
-        file,
+    const signedUpload = await createCharacterAvatarSignedUpload(
+      session,
+      characterId,
+      {
+        fileName: file.name,
+        width: dimensions.width,
+        height: dimensions.height,
+        fileSize: file.size,
+      },
+    );
+    await uploadImageToSignedPath({
+      bucket: "character-images",
+      path: signedUpload.path,
+      token: signedUpload.token,
+      file,
+    });
+
+    return { path: signedUpload.path };
+  };
+
+  const resolveCharacterImagePreview = async (path: string) => {
+    if (!session) {
+      throw new Error("Missing session");
+    }
+
+    const response = await getCharacterAvatarSignedUrl(session, path);
+    return response.signedUrl;
+  };
+
+  const handleNameChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setFormEdits((prev) => ({ ...prev, name: event.target.value }));
+  };
+
+  const handleAgeChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setFormEdits((prev) => ({ ...prev, age: event.target.value }));
+  };
+
+  const handleTypeChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setFormEdits((prev) => ({
+      ...prev,
+      type: event.target.value as "player" | "npc",
+    }));
+  };
+
+  const handleAvatarPathChange = (avatarPath: string) => {
+    setFormEdits((prev) => ({ ...prev, avatarPath }));
+  };
+
+  const handleDescriptionChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    setFormEdits((prev) => ({
+      ...prev,
+      description: event.target.value,
+    }));
+  };
+
+  const handlePrivacyToggle = () => {
+    setFormEdits((prev) => ({
+      ...prev,
+      isPrivate: !form.isPrivate,
+    }));
+  };
+
+  const handleSave = async () => {
+    try {
+      await updateMutation.mutateAsync({
+        name: form.name,
+        age: form.age ? Number(form.age) : null,
+        type: form.type as "player" | "npc",
+        avatarPath: form.avatarPath || null,
+        description: form.description,
+        isPrivate: form.isPrivate,
       });
+      setMessage(t("ui.feedback.saved"));
+      router.push(`/characters/${character.id}`);
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
+    }
+  };
 
-      return { path: signedUpload.path };
-    },
-    [characterId, session],
-  );
+  const handleClose = () => {
+    router.push(`/characters/${character.id}`);
+  };
 
-  const resolveCharacterImagePreview = useCallback(
-    async (path: string) => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
+  const handleOpenDelete = () => {
+    setDeleteOpen(true);
+  };
 
-      const response = await getCharacterAvatarSignedUrl(session, path);
-      return response.signedUrl;
-    },
-    [session],
-  );
+  const handleCloseDelete = () => {
+    setDeleteOpen(false);
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteMutation.mutateAsync();
+      setDeleteOpen(false);
+      router.push("/characters");
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : t("ui.feedback.requestFailed"),
+      );
+    }
+  };
 
   if (!ready || !session || !editQuery.data) {
     return <PageViewport />;
@@ -160,26 +233,14 @@ export function CharacterEditPageView({
             <FormInput
               value={form.name}
               placeholder={t("ui.fields.characterName")}
-              onChange={(event) =>
-                setFormEdits((prev) => ({ ...prev, name: event.target.value }))
-              }
+              onChange={handleNameChange}
             />
             <FormInput
               value={form.age}
               placeholder={t("ui.fields.characterAge")}
-              onChange={(event) =>
-                setFormEdits((prev) => ({ ...prev, age: event.target.value }))
-              }
+              onChange={handleAgeChange}
             />
-            <FormSelect
-              value={form.type}
-              onChange={(event) =>
-                setFormEdits((prev) => ({
-                  ...prev,
-                  type: event.target.value as "player" | "npc",
-                }))
-              }
-            >
+            <FormSelect value={form.type} onChange={handleTypeChange}>
               <option value="player">
                 {t("ui.labels.characterType.player")}
               </option>
@@ -199,9 +260,7 @@ export function CharacterEditPageView({
               invalidDimensionsLabel={t("ui.imageUpload.invalidDimensions")}
               invalidFileSizeLabel={t("ui.imageUpload.invalidFileSize")}
               disabled={anyPending}
-              onChange={(avatarPath) =>
-                setFormEdits((prev) => ({ ...prev, avatarPath }))
-              }
+              onChange={handleAvatarPathChange}
               onUpload={uploadCharacterImage}
               onResolvePreviewUrl={resolveCharacterImagePreview}
             />
@@ -209,63 +268,26 @@ export function CharacterEditPageView({
               size="lg"
               value={form.description}
               placeholder={t("ui.fields.description")}
-              onChange={(event) =>
-                setFormEdits((prev) => ({
-                  ...prev,
-                  description: event.target.value,
-                }))
-              }
+              onChange={handleDescriptionChange}
             />
             <VisibilityToggle
               isPrivate={form.isPrivate}
               label={t("ui.fields.visibilityPrivate")}
               onLabel={t("ui.actions.on")}
               offLabel={t("ui.actions.off")}
-              onToggle={() =>
-                setFormEdits((prev) => ({
-                  ...prev,
-                  isPrivate: !form.isPrivate,
-                }))
-              }
+              onToggle={handlePrivacyToggle}
             />
 
             <UiDiv wrapGap={2}>
-              <Button
-                disabled={anyPending}
-                onClick={() =>
-                  void (async () => {
-                    try {
-                      await updateMutation.mutateAsync({
-                        name: form.name,
-                        age: form.age ? Number(form.age) : null,
-                        type: form.type as "player" | "npc",
-                        avatarPath: form.avatarPath || null,
-                        description: form.description,
-                        isPrivate: form.isPrivate,
-                      });
-                      setMessage(t("ui.feedback.saved"));
-                      router.push(`/characters/${character.id}`);
-                    } catch (error) {
-                      setMessage(
-                        error instanceof Error
-                          ? error.message
-                          : t("ui.feedback.requestFailed"),
-                      );
-                    }
-                  })()
-                }
-              >
+              <Button disabled={anyPending} onClick={() => void handleSave()}>
                 {t("ui.actions.save")}
               </Button>
 
-              <Button
-                variant="outline"
-                onClick={() => router.push(`/characters/${character.id}`)}
-              >
+              <Button variant="outline" onClick={handleClose}>
                 {t("ui.actions.close")}
               </Button>
 
-              <Button variant="destructive" onClick={() => setDeleteOpen(true)}>
+              <Button variant="destructive" onClick={handleOpenDelete}>
                 {t("ui.actions.delete")}
               </Button>
             </UiDiv>
@@ -278,30 +300,16 @@ export function CharacterEditPageView({
       <Modal
         open={deleteOpen}
         title={t("ui.characters.deleteTitle")}
-        onClose={() => setDeleteOpen(false)}
+        onClose={handleCloseDelete}
         footer={
           <>
-            <Button variant="outline" onClick={() => setDeleteOpen(false)}>
+            <Button variant="outline" onClick={handleCloseDelete}>
               {t("ui.actions.close")}
             </Button>
             <Button
               variant="destructive"
               disabled={anyPending}
-              onClick={() =>
-                void (async () => {
-                  try {
-                    await deleteMutation.mutateAsync();
-                    setDeleteOpen(false);
-                    router.push("/characters");
-                  } catch (error) {
-                    setMessage(
-                      error instanceof Error
-                        ? error.message
-                        : t("ui.feedback.requestFailed"),
-                    );
-                  }
-                })()
-              }
+              onClick={() => void handleDelete()}
             >
               {t("ui.actions.confirmDelete")}
             </Button>
@@ -312,4 +320,6 @@ export function CharacterEditPageView({
       </Modal>
     </>
   );
-}
+};
+
+export default CharacterEditPageView;

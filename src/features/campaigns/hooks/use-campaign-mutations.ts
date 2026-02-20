@@ -8,12 +8,12 @@ import { createCampaignMutation } from "../queries/create-campaign.mutation";
 import { updateCampaignMutation } from "../queries/update-campaign.mutation";
 import { deleteCampaignMutation } from "../queries/delete-campaign.mutation";
 
-export function useCampaignMutations(session: ClientSession | null) {
+const useCampaignMutations = (session: ClientSession | null) => {
   const queryClient = useQueryClient();
 
-  async function invalidateCampaigns() {
+  const invalidateCampaigns = async () => {
     await queryClient.invalidateQueries({ queryKey: queryKeys.campaigns() });
-  }
+  };
 
   const createMutation = useMutation({
     mutationFn: async (input: CampaignFormValues) => {
@@ -57,4 +57,6 @@ export function useCampaignMutations(session: ClientSession | null) {
       updateMutation.isPending ||
       deleteMutation.isPending,
   };
-}
+};
+
+export { useCampaignMutations as default, useCampaignMutations };

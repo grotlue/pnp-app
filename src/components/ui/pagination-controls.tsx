@@ -16,7 +16,7 @@ type PaginationControlsProps = {
   onPageChange: (page: number) => void;
 };
 
-export function PaginationControls({
+const PaginationControls = ({
   page,
   pageSize,
   totalItems,
@@ -24,13 +24,19 @@ export function PaginationControls({
   nextLabel,
   pageLabel,
   onPageChange,
-}: PaginationControlsProps) {
+}: PaginationControlsProps) => {
   if (totalItems <= pageSize) {
     return null;
   }
 
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safePage = Math.min(Math.max(page, 1), totalPages);
+  const handlePreviousPageClick = () => {
+    onPageChange(safePage - 1);
+  };
+  const handleNextPageClick = () => {
+    onPageChange(safePage + 1);
+  };
 
   return (
     <div>
@@ -46,7 +52,7 @@ export function PaginationControls({
                 size="sm"
                 variant="outline"
                 disabled={safePage <= 1}
-                onClick={() => onPageChange(safePage - 1)}
+                onClick={handlePreviousPageClick}
               >
                 {previousLabel}
               </Button>
@@ -55,7 +61,7 @@ export function PaginationControls({
                 size="sm"
                 variant="outline"
                 disabled={safePage >= totalPages}
-                onClick={() => onPageChange(safePage + 1)}
+                onClick={handleNextPageClick}
               >
                 {nextLabel}
               </Button>
@@ -65,4 +71,6 @@ export function PaginationControls({
       </Pagination>
     </div>
   );
-}
+};
+
+export { PaginationControls as default, PaginationControls };

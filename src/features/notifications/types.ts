@@ -1,12 +1,12 @@
-export type NotificationId = string;
+type NotificationId = string;
 
-export type NotificationEventType =
+type NotificationEventType =
   | "relationship_created"
   | "relationship_updated"
   | "campaign_invite"
   | "campaign_join_request";
 
-export type NotificationPayload = {
+type NotificationPayload = {
   relationship_id?: string;
   source_character_name?: string;
   target_character_name?: string;
@@ -17,7 +17,7 @@ export type NotificationPayload = {
   membership_id?: string;
 };
 
-export type NotificationEntry = {
+type NotificationEntry = {
   id: NotificationId;
   recipient_user_id: string;
   event_type: NotificationEventType;
@@ -29,4 +29,12 @@ export type NotificationEntry = {
   read_at: string | null;
 };
 
-export type NotificationRpcRow = NotificationEntry;
+type NotificationRpcRow = NotificationEntry;
+
+export type {
+  NotificationEntry,
+  NotificationEventType,
+  NotificationId,
+  NotificationPayload,
+  NotificationRpcRow,
+};

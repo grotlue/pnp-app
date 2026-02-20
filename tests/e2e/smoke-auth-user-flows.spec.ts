@@ -9,9 +9,9 @@ import { clearMailpitMessages, waitForMailpitLink } from "./support/mailpit";
 
 test.describe.configure({ mode: "serial" });
 
-function uniqueEmail() {
+const uniqueEmail = () => {
   return `e2e.auth.${Date.now()}@pnp.test`;
-}
+};
 
 test("FLOW-auth-user-registration-login-logout @smoke @auth user registration, login, logout, and session lifecycle work end-to-end", async ({
   page,

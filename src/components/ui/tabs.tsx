@@ -6,11 +6,11 @@ import { Tabs as TabsPrimitive } from "@base-ui/react/tabs";
 
 import { cn } from "@/lib/utils/cn";
 
-function Tabs({
+const Tabs = ({
   className,
   orientation = "horizontal",
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.Root>) {
+}: React.ComponentProps<typeof TabsPrimitive.Root>) => {
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
@@ -23,7 +23,7 @@ function Tabs({
       {...props}
     />
   );
-}
+};
 
 const tabsListVariants = cva(
   "rounded-lg p-[3px] group-data-[orientation=horizontal]/tabs:h-9 data-[variant=line]:rounded-none group/tabs-list text-muted-foreground inline-flex w-fit items-center justify-center group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col",
@@ -40,12 +40,12 @@ const tabsListVariants = cva(
   },
 );
 
-function TabsList({
+const TabsList = ({
   className,
   variant = "default",
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.List> &
-  VariantProps<typeof tabsListVariants>) {
+  VariantProps<typeof tabsListVariants>) => {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
@@ -54,9 +54,9 @@ function TabsList({
       {...props}
     />
   );
-}
+};
 
-function TabsTrigger({
+const TabsTrigger = ({
   className,
   asChild = false,
   children,
@@ -64,7 +64,7 @@ function TabsTrigger({
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Tab> & {
   asChild?: boolean;
-}) {
+}) => {
   if (asChild) {
     const child = React.Children.only(children);
     if (!React.isValidElement(child)) {
@@ -106,12 +106,12 @@ function TabsTrigger({
       {children}
     </TabsPrimitive.Tab>
   );
-}
+};
 
-function TabsContent({
+const TabsContent = ({
   className,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.Panel>) {
+}: React.ComponentProps<typeof TabsPrimitive.Panel>) => {
   return (
     <TabsPrimitive.Panel
       data-slot="tabs-content"
@@ -119,6 +119,6 @@ function TabsContent({
       {...props}
     />
   );
-}
+};
 
 export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants };

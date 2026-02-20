@@ -1,4 +1,4 @@
-import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
 import {
   normalizeAndValidateEmail,
   normalizeCaptchaToken,
@@ -18,7 +18,7 @@ type PasswordResetRequestBody = {
   captchaToken?: string;
 };
 
-export async function POST(request: Request) {
+const POST = async (request: Request) => {
   const rateLimited = await enforceRateLimit({
     request,
     route: "auth:password-reset:request",
@@ -75,4 +75,6 @@ export async function POST(request: Request) {
   }
 
   return jsonOk({ requested: true });
-}
+};
+
+export { POST };

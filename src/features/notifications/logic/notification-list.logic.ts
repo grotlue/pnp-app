@@ -3,21 +3,23 @@ import type {
   NotificationPayload,
 } from "@/features/notifications/types";
 
-function payloadString(
+const payloadString = (
   payload: NotificationPayload | null,
   key: keyof NotificationPayload,
-) {
+): string | null => {
   const value = payload?.[key];
   return typeof value === "string" && value.length > 0 ? value : null;
-}
+};
 
-export function getNotificationUnreadCount(notifications: NotificationEntry[]) {
+const getNotificationUnreadCount = (
+  notifications: NotificationEntry[],
+): number => {
   return notifications.filter((entry) => !entry.is_read).length;
-}
+};
 
-export function getNotificationMembershipTarget(
+const getNotificationMembershipTarget = (
   notification: NotificationEntry,
-) {
+): { campaignId: string; membershipId: string } | null => {
   const campaignId = payloadString(notification.payload, "campaign_id");
   const membershipId = payloadString(notification.payload, "membership_id");
   if (!campaignId || !membershipId) {
@@ -25,9 +27,11 @@ export function getNotificationMembershipTarget(
   }
 
   return { campaignId, membershipId };
-}
+};
 
-export function getNotificationViewPath(notification: NotificationEntry) {
+const getNotificationViewPath = (
+  notification: NotificationEntry,
+): string | null => {
   const campaignId = payloadString(notification.payload, "campaign_id");
   if (campaignId) {
     return `/campaigns/${campaignId}`;
@@ -38,12 +42,12 @@ export function getNotificationViewPath(notification: NotificationEntry) {
   }
 
   return null;
-}
+};
 
-export function getNotificationDisplayTitle(
+const getNotificationDisplayTitle = (
   notification: NotificationEntry,
   t: (key: string, fallback?: string) => string,
-) {
+): string => {
   const campaignTitle = payloadString(notification.payload, "campaign_title");
   const sourceName = payloadString(
     notification.payload,
@@ -77,12 +81,12 @@ export function getNotificationDisplayTitle(
     return `${sourceName} -> ${targetName}`;
   }
   return t("ui.notifications.events.relationshipUpdated");
-}
+};
 
-export function getNotificationEventLabel(
+const getNotificationEventLabel = (
   notification: NotificationEntry,
   t: (key: string, fallback?: string) => string,
-) {
+): string => {
   if (notification.event_type === "campaign_invite") {
     return t("ui.notifications.events.campaignInvite");
   }
@@ -96,4 +100,12 @@ export function getNotificationEventLabel(
   }
 
   return t("ui.notifications.events.relationshipUpdated");
-}
+};
+
+export {
+  getNotificationDisplayTitle,
+  getNotificationEventLabel,
+  getNotificationMembershipTarget,
+  getNotificationUnreadCount,
+  getNotificationViewPath,
+};

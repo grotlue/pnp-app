@@ -4,9 +4,9 @@ import {
   getSessionTokensFromUrl,
 } from "../auth-session-from-url";
 
-function toLocation(url: string): Location {
+const toLocation = (url: string): Location => {
   return new URL(url) as unknown as Location;
-}
+};
 
 describe("auth-session-from-url", () => {
   it("extracts tokens from hash", () => {

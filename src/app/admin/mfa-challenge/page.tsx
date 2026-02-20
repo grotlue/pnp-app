@@ -1,6 +1,6 @@
 import { appRoutes } from "@/app/router";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
-import { AdminMfaChallengePageView } from "@/page-modules/admin-mfa-challenge-page";
+import AdminMfaChallengePageView from "@/page-modules/admin-mfa-challenge-page";
 
 type AdminMfaChallengePageProps = {
   searchParams: Promise<{ returnTo?: string }>;

@@ -53,7 +53,7 @@ type UiMutedTextProps = ComponentPropsWithoutRef<"div"> & {
   size?: "xs" | "sm";
 };
 
-export function UiDiv({
+const UiDiv = ({
   className,
   stack: _stack,
   layout: _layout,
@@ -71,7 +71,7 @@ export function UiDiv({
   paddingBottom: _paddingBottom,
   paddingX: _paddingX,
   ...props
-}: UiDivProps) {
+}: UiDivProps) => {
   void _stack;
   void _layout;
   void _gridGap;
@@ -88,34 +88,36 @@ export function UiDiv({
   void _paddingBottom;
   void _paddingX;
   return <div className={className} {...props} />;
-}
+};
 
-export function UiMain({ className, ...props }: UiMainProps) {
+const UiMain = ({ className, ...props }: UiMainProps) => {
   return <main className={className} {...props} />;
-}
+};
 
-export function UiPre({
+const UiPre = ({
   className,
   format: _format = "default",
   ...props
-}: UiPreProps) {
+}: UiPreProps) => {
   void _format;
   return <pre className={className} {...props} />;
-}
+};
 
-export function UiStack({ className, ...props }: UiStackProps) {
+const UiStack = ({ className, ...props }: UiStackProps) => {
   return <div className={className} {...props} />;
-}
+};
 
-export function UiFormGrid({ className, ...props }: UiFormGridProps) {
+const UiFormGrid = ({ className, ...props }: UiFormGridProps) => {
   return <div className={className} {...props} />;
-}
+};
 
-export function UiMutedText({
+const UiMutedText = ({
   className,
   size: _size = "xs",
   ...props
-}: UiMutedTextProps) {
+}: UiMutedTextProps) => {
   void _size;
   return <div className={className} {...props} />;
-}
+};
+
+export { UiDiv, UiFormGrid, UiMain, UiMutedText, UiPre, UiStack };

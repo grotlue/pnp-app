@@ -4,9 +4,8 @@ import { UiDiv } from "@/components/ui/html-elements";
 import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 import { TextLink } from "@/components/ui/text-link";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { ListItemRow } from "@/components/ui/list-item-row";
@@ -24,14 +23,10 @@ import {
 } from "@/components/ui/card";
 import { CampaignRoleBadge } from "@/features/campaigns/components/campaign-role-badge";
 import { sortCampaigns } from "@/features/campaigns/logic/campaign-list.logic";
-import { getCampaignsQuery } from "@/features/campaigns/queries/get-campaigns.query";
 import { sortCharacters } from "@/features/characters/logic/character-list.logic";
-import { getCharacters } from "@/features/characters/queries/characters-screen.query";
-import type { Campaign } from "@/features/campaigns/types";
-import { getPublicUserProfile } from "@/features/users/queries/users-public-profile.query";
-import { queryKeys } from "@/lib/client/query-keys";
-import { useClientSession } from "@/lib/client/use-client-session";
-import { getTranslator, type AppLocale } from "@/lib/i18n/index";
+import { useUserProfileScreenQuery } from "@/features/users/hooks/use-user-profile-screen-query";
+import useClientSession from "@/lib/client/use-client-session";
+import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import { hasItems } from "@/lib/logic/collections";
 import {
   clampListPage,
@@ -44,16 +39,8 @@ type UserProfilePageViewProps = {
   userId: string;
 };
 
-type ProfileCampaignEntry = {
-  campaign: Campaign;
-  role: "owner" | "player";
-};
-
-export function UserProfilePageView({
-  locale,
-  userId,
-}: UserProfilePageViewProps) {
-  const t = useMemo(() => getTranslator(locale), [locale]);
+const UserProfilePageView = ({ locale, userId }: UserProfilePageViewProps) => {
+  const t = getTranslator(locale);
   const router = useRouter();
   const { session, ready } = useClientSession();
   const [characterTab, setCharacterTab] = useState<"player" | "npc">("player");
@@ -69,42 +56,7 @@ export function UserProfilePageView({
     }
   }, [ready, router, session]);
 
-  const profileQuery = useQuery({
-    queryKey: queryKeys.usersPublicProfile(
-      userId,
-      session?.accessToken ?? "no-session",
-    ),
-    enabled: Boolean(session),
-    queryFn: async () => {
-      if (!session) {
-        throw new Error("Missing session");
-      }
-
-      const [profile, campaigns, characters] = await Promise.all([
-        getPublicUserProfile(session, userId),
-        getCampaignsQuery(session, { roleForUserId: userId }),
-        getCharacters(session),
-      ]);
-      const profileCampaigns: ProfileCampaignEntry[] = campaigns
-        .filter(
-          (campaign) =>
-            campaign.role_for_user === "owner" ||
-            campaign.role_for_user === "player",
-        )
-        .map((campaign) => ({
-          campaign,
-          role: campaign.role_for_user === "owner" ? "owner" : "player",
-        }));
-
-      return {
-        profile,
-        campaigns: profileCampaigns,
-        characters: characters.filter(
-          (character) => character.owner_user_id === userId,
-        ),
-      };
-    },
-  });
+  const profileQuery = useUserProfileScreenQuery(session, userId);
 
   if (!ready || !session) {
     return <PageViewport />;
@@ -269,4 +221,6 @@ export function UserProfilePageView({
       </Card>
     </AppPageMain>
   );
-}
+};
+
+export default UserProfilePageView;

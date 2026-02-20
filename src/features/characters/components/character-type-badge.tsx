@@ -9,11 +9,11 @@ type CharacterTypeBadgeProps = {
   withTopSpacing?: boolean;
 };
 
-export function CharacterTypeBadge({
+const CharacterTypeBadge = ({
   type,
   t,
   withTopSpacing = false,
-}: CharacterTypeBadgeProps) {
+}: CharacterTypeBadgeProps) => {
   return (
     <StatusBadge
       label={t(`ui.labels.characterType.${type}`)}
@@ -21,4 +21,6 @@ export function CharacterTypeBadge({
       withTopSpacing={withTopSpacing}
     />
   );
-}
+};
+
+export { CharacterTypeBadge as default, CharacterTypeBadge };

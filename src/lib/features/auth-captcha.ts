@@ -1,25 +1,26 @@
 import {
   AUTH_CAPTCHA_MODE_LIST,
   AUTH_CAPTCHA_MODES,
+  type AuthCaptchaMode,
   PRODUCTION_RUNTIME_ENVIRONMENTS,
   RUNTIME_ENVIRONMENT_LIST,
   RUNTIME_ENVIRONMENTS,
-  type AuthCaptchaMode,
   type RuntimeEnvironment,
 } from "./constants";
 
-export type { AuthCaptchaMode, RuntimeEnvironment };
+type CaptchaMode = AuthCaptchaMode;
+type CaptchaRuntimeEnvironment = RuntimeEnvironment;
 
 type AuthCaptchaClientConfig = {
-  mode: AuthCaptchaMode;
+  mode: CaptchaMode;
   required: boolean;
   siteKey: string | null;
   enabled: boolean;
 };
 
-const KNOWN_CAPTCHA_MODES = new Set<AuthCaptchaMode>(AUTH_CAPTCHA_MODE_LIST);
+const KNOWN_CAPTCHA_MODES = new Set<CaptchaMode>(AUTH_CAPTCHA_MODE_LIST);
 
-function normalizeEnvValue(value?: string | null): string | null {
+const normalizeEnvValue = (value?: string | null): string | null => {
   if (!value) {
     return null;
   }
@@ -36,37 +37,39 @@ function normalizeEnvValue(value?: string | null): string | null {
       : trimmed;
 
   return unquoted ? unquoted.toLowerCase() : null;
-}
+};
 
-function normalizeRuntimeEnvironment(
+const normalizeRuntimeEnvironment = (
   value?: string | null,
-): RuntimeEnvironment | null {
+): CaptchaRuntimeEnvironment | null => {
   const normalized = normalizeEnvValue(value);
   if (!normalized) {
     return null;
   }
 
-  if (RUNTIME_ENVIRONMENT_LIST.includes(normalized as RuntimeEnvironment)) {
-    return normalized as RuntimeEnvironment;
+  if (
+    RUNTIME_ENVIRONMENT_LIST.includes(normalized as CaptchaRuntimeEnvironment)
+  ) {
+    return normalized as CaptchaRuntimeEnvironment;
   }
 
   return null;
-}
+};
 
-function normalizeCaptchaMode(value?: string | null): AuthCaptchaMode | null {
+const normalizeCaptchaMode = (value?: string | null): CaptchaMode | null => {
   const normalized = normalizeEnvValue(value);
   if (!normalized) {
     return null;
   }
 
-  if (KNOWN_CAPTCHA_MODES.has(normalized as AuthCaptchaMode)) {
-    return normalized as AuthCaptchaMode;
+  if (KNOWN_CAPTCHA_MODES.has(normalized as CaptchaMode)) {
+    return normalized as CaptchaMode;
   }
 
   return null;
-}
+};
 
-export function resolveAuthCaptchaRuntimeEnvironment(): RuntimeEnvironment {
+const resolveAuthCaptchaRuntimeEnvironment = (): CaptchaRuntimeEnvironment => {
   const explicitEnvironment = normalizeRuntimeEnvironment(process.env.APP_ENV);
   if (explicitEnvironment) {
     return explicitEnvironment;
@@ -78,9 +81,9 @@ export function resolveAuthCaptchaRuntimeEnvironment(): RuntimeEnvironment {
   }
 
   return RUNTIME_ENVIRONMENTS.development;
-}
+};
 
-export function resolveClientAuthCaptchaMode(): AuthCaptchaMode {
+const resolveClientAuthCaptchaMode = (): CaptchaMode => {
   const explicitMode = normalizeCaptchaMode(
     process.env.NEXT_PUBLIC_AUTH_CAPTCHA_MODE,
   );
@@ -94,14 +97,14 @@ export function resolveClientAuthCaptchaMode(): AuthCaptchaMode {
   }
 
   return AUTH_CAPTCHA_MODES.off;
-}
+};
 
-export function getTurnstileSiteKey(): string | null {
+const getTurnstileSiteKey = (): string | null => {
   const value = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim();
   return value ? value : null;
-}
+};
 
-export function resolveAuthCaptchaClientConfig(): AuthCaptchaClientConfig {
+const resolveAuthCaptchaClientConfig = (): AuthCaptchaClientConfig => {
   const mode = resolveClientAuthCaptchaMode();
   const siteKey = getTurnstileSiteKey();
 
@@ -111,4 +114,16 @@ export function resolveAuthCaptchaClientConfig(): AuthCaptchaClientConfig {
     siteKey,
     enabled: mode !== AUTH_CAPTCHA_MODES.off && Boolean(siteKey),
   };
-}
+};
+
+export type {
+  AuthCaptchaClientConfig,
+  CaptchaMode as AuthCaptchaMode,
+  CaptchaRuntimeEnvironment as RuntimeEnvironment,
+};
+export {
+  getTurnstileSiteKey,
+  resolveAuthCaptchaClientConfig,
+  resolveAuthCaptchaRuntimeEnvironment,
+  resolveClientAuthCaptchaMode,
+};

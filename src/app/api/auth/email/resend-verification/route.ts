@@ -1,4 +1,4 @@
-import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
 import {
   normalizeAndValidateEmail,
   normalizeCaptchaToken,
@@ -17,7 +17,7 @@ type ResendVerificationBody = {
   captchaToken?: string;
 };
 
-export async function POST(request: Request) {
+const POST = async (request: Request) => {
   const rateLimited = await enforceRateLimit({
     request,
     route: "auth:email:resend-verification",
@@ -62,4 +62,6 @@ export async function POST(request: Request) {
   }
 
   return jsonOk({ sent: true });
-}
+};
+
+export { POST };

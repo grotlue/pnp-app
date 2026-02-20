@@ -5,12 +5,12 @@ import {
   resolveClientAuthCaptchaMode,
 } from "../auth-captcha";
 
-function clearCaptchaEnv() {
+const clearCaptchaEnv = () => {
   delete process.env.APP_ENV;
   delete process.env.VERCEL_ENV;
   delete process.env.NEXT_PUBLIC_AUTH_CAPTCHA_MODE;
   delete process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-}
+};
 
 afterEach(() => {
   clearCaptchaEnv();

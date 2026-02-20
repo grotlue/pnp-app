@@ -19,7 +19,7 @@ type CampaignCardProps = {
   onDelete: () => void;
 };
 
-export function CampaignCard({
+const CampaignCard = ({
   campaign,
   ownerLabel,
   roleLabel,
@@ -29,7 +29,7 @@ export function CampaignCard({
   canManage,
   onEdit,
   onDelete,
-}: CampaignCardProps) {
+}: CampaignCardProps) => {
   return (
     <ListItemRow
       actions={
@@ -65,4 +65,6 @@ export function CampaignCard({
       </TextLink>
     </ListItemRow>
   );
-}
+};
+
+export { CampaignCard as default, CampaignCard };

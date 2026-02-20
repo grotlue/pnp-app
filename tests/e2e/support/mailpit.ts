@@ -22,44 +22,44 @@ type MailpitMessageDetails = {
   HTML?: string;
 };
 
-function getMailpitBaseUrl() {
+const getMailpitBaseUrl = () => {
   return process.env.E2E_MAILPIT_BASE_URL ?? DEFAULT_MAILPIT_BASE_URL;
-}
+};
 
-async function fetchMailpitJson<T>(path: string): Promise<T> {
+const fetchMailpitJson = async <T>(path: string): Promise<T> => {
   const response = await fetch(`${getMailpitBaseUrl()}${path}`);
   if (!response.ok) {
     throw new Error(`Mailpit request failed: ${response.status}`);
   }
 
   return (await response.json()) as T;
-}
+};
 
-function parseCreatedTimestamp(created?: string): number {
+const parseCreatedTimestamp = (created?: string): number => {
   if (!created) {
     return 0;
   }
 
   const timestamp = Date.parse(created);
   return Number.isFinite(timestamp) ? timestamp : 0;
-}
+};
 
-function extractFirstUrl(text: string): string | null {
+const extractFirstUrl = (text: string): string | null => {
   const match = text.match(/https?:\/\/[^\s)]+/i);
   if (!match) {
     return null;
   }
 
   return match[0].replace(/&amp;/g, "&");
-}
+};
 
-function delay(ms: number): Promise<void> {
+const delay = (ms: number): Promise<void> => {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
-}
+};
 
-export async function clearMailpitMessages() {
+const clearMailpitMessages = async () => {
   const response = await fetch(`${getMailpitBaseUrl()}/api/v1/messages`, {
     method: "DELETE",
   });
@@ -67,14 +67,14 @@ export async function clearMailpitMessages() {
   if (!response.ok) {
     throw new Error(`Mailpit clear failed: ${response.status}`);
   }
-}
+};
 
-export async function waitForMailpitLink(input: {
+const waitForMailpitLink = async (input: {
   recipient: string;
   subjectIncludes: string;
   afterUnixMs: number;
   timeoutMs?: number;
-}): Promise<string> {
+}): Promise<string> => {
   const timeoutMs = input.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const recipient = input.recipient.toLowerCase();
   const subjectIncludes = input.subjectIncludes.toLowerCase();
@@ -130,4 +130,6 @@ export async function waitForMailpitLink(input: {
   }
 
   throw new Error("Timed out waiting for email link in Mailpit");
-}
+};
+
+export { clearMailpitMessages, waitForMailpitLink };

@@ -12,7 +12,7 @@ type NavTabsProps = {
   activeKey: string;
 };
 
-export function NavTabs({ tabs, activeKey }: NavTabsProps) {
+const NavTabs = ({ tabs, activeKey }: NavTabsProps) => {
   return (
     <Tabs value={activeKey}>
       <TabsList variant="line">
@@ -24,4 +24,6 @@ export function NavTabs({ tabs, activeKey }: NavTabsProps) {
       </TabsList>
     </Tabs>
   );
-}
+};
+
+export { NavTabs as default, NavTabs };
