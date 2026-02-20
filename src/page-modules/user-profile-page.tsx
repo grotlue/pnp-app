@@ -25,7 +25,7 @@ import { CampaignRoleBadge } from "@/features/campaigns/components/campaign-role
 import { sortCampaigns } from "@/features/campaigns/logic/campaign-list.logic";
 import { sortCharacters } from "@/features/characters/logic/character-list.logic";
 import { useUserProfileScreenQuery } from "@/features/users/hooks/use-user-profile-screen-query";
-import { useClientSession } from "@/lib/client/use-client-session";
+import useClientSession from "@/lib/client/use-client-session";
 import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import { hasItems } from "@/lib/logic/collections";
 import {

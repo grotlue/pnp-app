@@ -2,7 +2,7 @@
 
 import AppHeader from "@/components/common/app-header";
 import { readLocaleCookie } from "@/lib/client/locale-cookie";
-import { useClientSession } from "@/lib/client/use-client-session";
+import useClientSession from "@/lib/client/use-client-session";
 import { resolveLocale } from "@/lib/i18n";
 
 const AuthenticatedAppHeader = () => {

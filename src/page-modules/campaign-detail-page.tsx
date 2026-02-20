@@ -30,7 +30,7 @@ import { VisibilityToggle } from "@/components/ui/visibility-toggle";
 import { useCampaignDetailScreen } from "@/features/campaigns/hooks/use-campaign-detail-screen";
 import { canManageCampaign, isAdmin } from "@/features/users/logic/role.logic";
 import { type AppLocale, getTranslator } from "@/lib/i18n/index";
-import { useClientSession } from "@/lib/client/use-client-session";
+import useClientSession from "@/lib/client/use-client-session";
 
 type CampaignDetailScreenProps = {
   locale: AppLocale;

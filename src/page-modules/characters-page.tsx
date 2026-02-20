@@ -44,7 +44,7 @@ import {
 import type { Character } from "@/features/characters/types";
 import { useCharactersScreen } from "@/features/characters/hooks/use-characters-screen";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";
-import { useClientSession } from "@/lib/client/use-client-session";
+import useClientSession from "@/lib/client/use-client-session";
 import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import {
   clampListPage,

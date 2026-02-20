@@ -25,7 +25,7 @@ import {
 import { createCharacterAvatarSignedUpload } from "@/features/characters/queries/character-edit.query";
 import { getCharacterAvatarSignedUrl } from "@/features/characters/queries/character-detail.query";
 import { uploadImageToSignedPath } from "@/lib/client/storage-upload";
-import { useClientSession } from "@/lib/client/use-client-session";
+import useClientSession from "@/lib/client/use-client-session";
 import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import { useCharacterEditScreen } from "@/features/characters/hooks/use-character-edit-screen";
 import { canManageCharacter, isAdmin } from "@/features/users/logic/role.logic";

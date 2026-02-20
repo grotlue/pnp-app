@@ -62,7 +62,7 @@ import {
   clearSession,
   setSession as persistSession,
 } from "@/lib/client/session";
-import { useClientSession } from "@/lib/client/use-client-session";
+import useClientSession from "@/lib/client/use-client-session";
 import { resolveAuthCaptchaClientConfig } from "@/lib/features/auth-captcha";
 import { type AppLocale, getTranslator, resolveLocale } from "@/lib/i18n/index";
 import {

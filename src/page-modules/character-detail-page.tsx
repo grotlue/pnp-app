@@ -43,7 +43,7 @@ import type {
   RelationshipDetail,
 } from "@/features/relationships/types";
 import { type AppLocale, getTranslator } from "@/lib/i18n/index";
-import { useClientSession } from "@/lib/client/use-client-session";
+import useClientSession from "@/lib/client/use-client-session";
 
 type CharacterDetailScreenProps = {
   locale: AppLocale;

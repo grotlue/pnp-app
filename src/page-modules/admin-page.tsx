@@ -41,7 +41,7 @@ import type {
   AdminCreateUserInput,
   AdminUser,
 } from "@/features/admin/types";
-import { useClientSession } from "@/lib/client/use-client-session";
+import useClientSession from "@/lib/client/use-client-session";
 import { type AppLocale, getTranslator } from "@/lib/i18n";
 import { hasItems } from "@/lib/logic/collections";
 

@@ -20,7 +20,7 @@ import {
   clearSession,
   setSession as persistSession,
 } from "@/lib/client/session";
-import { useClientSession } from "@/lib/client/use-client-session";
+import useClientSession from "@/lib/client/use-client-session";
 import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import { useAdminMfaStatusQuery } from "@/features/users/hooks/use-admin-mfa-status-query";
 import { useMeQuery } from "@/features/users/hooks/use-me-query";

@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/card";
 import { uploadImageToSignedPath } from "@/lib/client/storage-upload";
 import { setLocaleCookie } from "@/lib/client/locale-cookie";
-import { useClientSession } from "@/lib/client/use-client-session";
+import useClientSession from "@/lib/client/use-client-session";
 import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 import {
   createProfileAvatarSignedUpload,

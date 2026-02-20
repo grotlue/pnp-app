@@ -26,7 +26,7 @@ import {
   getNotificationViewPath,
 } from "@/features/notifications/logic/notification-list.logic";
 import type { NotificationEntry } from "@/features/notifications/types";
-import { useClientSession } from "@/lib/client/use-client-session";
+import useClientSession from "@/lib/client/use-client-session";
 import { type AppLocale, getTranslator } from "@/lib/i18n/index";
 
 type NotificationsPageViewProps = {

@@ -29,7 +29,7 @@ import {
 import { verifyAdminTotp } from "@/features/users/queries/users-mfa.query";
 import { queryKeys } from "@/lib/client/query-keys";
 import { setSession as persistSession } from "@/lib/client/session";
-import { useClientSession } from "@/lib/client/use-client-session";
+import useClientSession from "@/lib/client/use-client-session";
 import { type AppLocale, getTranslator } from "@/lib/i18n";
 
 type AdminMfaChallengePageProps = {
