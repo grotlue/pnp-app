@@ -1,5 +1,5 @@
 import { requireAuth } from "@/server/auth/require-auth";
-import { parseJsonBody, jsonError, jsonOk } from "@/lib/api/http";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/api/http";
 import { listCampaignsRpcQuery } from "@/features/campaigns/queries/list-campaigns-rpc.query";
 import { mapCampaignRpcRow } from "@/features/campaigns/logic/map-campaign-rpc-row.logic";
 import { parseCampaignListScopeParam } from "@/server/api/validation/campaign-scope";
@@ -11,7 +11,7 @@ type CreateCampaignBody = {
   isPrivate?: boolean;
 };
 
-export async function GET(request: Request) {
+const GET = async (request: Request) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -35,9 +35,9 @@ export async function GET(request: Request) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return jsonError(400, "campaign_list_failed", message);
   }
-}
+};
 
-export async function POST(request: Request) {
+const POST = async (request: Request) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -72,4 +72,6 @@ export async function POST(request: Request) {
   }
 
   return jsonOk({ campaignId: data }, 201);
-}
+};
+
+export { GET, POST };

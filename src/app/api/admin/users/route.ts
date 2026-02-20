@@ -14,9 +14,9 @@ type CreateAdminUserBody = {
   locale?: "en" | "de";
 };
 
-async function listAllAuthUsers(
+const listAllAuthUsers = async (
   service: ReturnType<typeof createServiceRoleSupabaseClient>,
-) {
+) => {
   const users: Array<{ id: string; email?: string | null }> = [];
   let page = 1;
 
@@ -43,9 +43,9 @@ async function listAllAuthUsers(
   }
 
   return { ok: true as const, users };
-}
+};
 
-export async function GET(request: Request) {
+const GET = async (request: Request) => {
   const admin = await requireAdmin(request);
   if ("response" in admin) {
     return admin.response;
@@ -97,9 +97,9 @@ export async function GET(request: Request) {
   }));
 
   return jsonOk(data);
-}
+};
 
-export async function POST(request: Request) {
+const POST = async (request: Request) => {
   try {
     const admin = await requireAdmin(request);
     if ("response" in admin) {
@@ -166,4 +166,6 @@ export async function POST(request: Request) {
     console.warn("admin users create failed", error);
     return jsonError(500, "admin_user_create_failed", "Failed to create user");
   }
-}
+};
+
+export { GET, POST };
