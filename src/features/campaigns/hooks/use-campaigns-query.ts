@@ -6,7 +6,7 @@ import type { ClientSession } from "@/lib/client/session";
 import { getCampaignsQuery } from "../queries/get-campaigns.query";
 import { getMe } from "@/features/users/queries/users-profile.query";
 
-export function useCampaignsQuery(session: ClientSession | null) {
+const useCampaignsQuery = (session: ClientSession | null) => {
   const queryClient = useQueryClient();
   const token = session?.accessToken ?? "no-session";
 
@@ -33,4 +33,6 @@ export function useCampaignsQuery(session: ClientSession | null) {
       };
     },
   });
-}
+};
+
+export { useCampaignsQuery as default, useCampaignsQuery };

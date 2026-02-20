@@ -7,10 +7,10 @@ type GetCampaignsQueryOptions = {
   scope?: "member" | "public";
 };
 
-export async function getCampaignsQuery(
+const getCampaignsQuery = async (
   session: ClientSession,
   options?: GetCampaignsQueryOptions,
-): Promise<Campaign[]> {
+): Promise<Campaign[]> => {
   const searchParams = new URLSearchParams();
   if (options?.roleForUserId) {
     searchParams.set("roleForUserId", options.roleForUserId);
@@ -28,4 +28,6 @@ export async function getCampaignsQuery(
     throw new Error(response.error?.message ?? "Failed to load campaigns");
   }
   return response.data;
-}
+};
+
+export { getCampaignsQuery as default, getCampaignsQuery };

@@ -1,6 +1,6 @@
 import type { Campaign, CampaignRpcRow } from "@/features/campaigns/types";
 
-export function mapCampaignRpcRow(row: CampaignRpcRow): Campaign {
+const mapCampaignRpcRow = (row: CampaignRpcRow): Campaign => {
   return {
     id: row.id,
     owner_user_id: row.owner_user_id,
@@ -15,4 +15,6 @@ export function mapCampaignRpcRow(row: CampaignRpcRow): Campaign {
     current_user_role: row.current_user_role,
     role_for_user: row.role_for_user,
   };
-}
+};
+
+export { mapCampaignRpcRow as default, mapCampaignRpcRow };

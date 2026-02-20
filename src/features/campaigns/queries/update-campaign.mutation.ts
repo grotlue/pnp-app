@@ -2,11 +2,11 @@ import type { ClientSession } from "@/lib/client/session";
 import { apiRequest } from "@/lib/client/api";
 import type { Campaign, CampaignFormValues } from "../types";
 
-export async function updateCampaignMutation(
+const updateCampaignMutation = async (
   session: ClientSession,
   campaignId: string,
   input: CampaignFormValues,
-): Promise<Campaign> {
+): Promise<Campaign> => {
   const response = await apiRequest<Campaign>(`/api/campaigns/${campaignId}`, {
     method: "PATCH",
     session,
@@ -18,4 +18,6 @@ export async function updateCampaignMutation(
   }
 
   return response.data;
-}
+};
+
+export { updateCampaignMutation as default, updateCampaignMutation };

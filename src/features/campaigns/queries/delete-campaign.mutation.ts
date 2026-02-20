@@ -5,10 +5,10 @@ type DeleteCampaignResponse = {
   deleted: boolean;
 };
 
-export async function deleteCampaignMutation(
+const deleteCampaignMutation = async (
   session: ClientSession,
   campaignId: string,
-): Promise<DeleteCampaignResponse> {
+): Promise<DeleteCampaignResponse> => {
   const response = await apiRequest<DeleteCampaignResponse>(
     `/api/campaigns/${campaignId}`,
     {
@@ -22,4 +22,6 @@ export async function deleteCampaignMutation(
   }
 
   return response.data;
-}
+};
+
+export { deleteCampaignMutation as default, deleteCampaignMutation };
