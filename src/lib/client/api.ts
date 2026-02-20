@@ -1,34 +1,34 @@
 import { clearSession, type ClientSession } from "@/lib/client/session";
 
-export type ApiError = {
+type ApiError = {
   code: string;
   message: string;
 };
 
-export type ApiResponse<T> = {
+type ApiResponse<T> = {
   data: T | null;
   error: ApiError | null;
   status: number;
 };
 
-export function unwrapApiResponse<T>(
+const unwrapApiResponse = <T>(
   response: ApiResponse<T>,
   fallbackMessage = "Request failed",
-): T {
+): T => {
   if (response.error || !response.data) {
     throw new Error(response.error?.message ?? fallbackMessage);
   }
   return response.data;
-}
+};
 
-export async function apiRequest<T>(
+const apiRequest = async <T>(
   path: string,
   options?: {
     method?: "GET" | "POST" | "PATCH" | "DELETE";
     session?: ClientSession | null;
     body?: Record<string, unknown>;
   },
-): Promise<ApiResponse<T>> {
+): Promise<ApiResponse<T>> => {
   const method = options?.method ?? "GET";
 
   const headers: Record<string, string> = {
@@ -88,4 +88,6 @@ export async function apiRequest<T>(
     error: null,
     status: response.status,
   };
-}
+};
+
+export { apiRequest, type ApiError, type ApiResponse, unwrapApiResponse };
