@@ -51,8 +51,13 @@ const eslintConfig = defineConfig([
   {
     rules: {
       "func-style": ["warn", "expression", { allowArrowFunctions: true }],
+      "import/prefer-default-export": "warn",
       "import/exports-last": "warn",
       "import/group-exports": "warn",
+      "sort-imports": [
+        "warn",
+        { ignoreCase: true, ignoreDeclarationSort: true },
+      ],
       "react/jsx-no-bind": [
         "warn",
         {
