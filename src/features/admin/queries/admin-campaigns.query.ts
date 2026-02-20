@@ -6,32 +6,32 @@ import type {
   AdminUpdateCampaignInput,
 } from "../types";
 
-export async function listAdminCampaigns(
+const listAdminCampaigns = async (
   session: ClientSession,
-): Promise<AdminCampaign[]> {
+): Promise<AdminCampaign[]> => {
   const response = await apiRequest<AdminCampaign[]>("/api/admin/campaigns", {
     session,
   });
   return unwrapApiResponse(response, "Failed to load campaigns");
-}
+};
 
-export async function createAdminCampaign(
+const createAdminCampaign = async (
   session: ClientSession,
   input: AdminCreateCampaignInput,
-): Promise<AdminCampaign> {
+): Promise<AdminCampaign> => {
   const response = await apiRequest<AdminCampaign>("/api/admin/campaigns", {
     method: "POST",
     session,
     body: input,
   });
   return unwrapApiResponse(response, "Failed to create campaign");
-}
+};
 
-export async function updateAdminCampaign(
+const updateAdminCampaign = async (
   session: ClientSession,
   campaignId: string,
   input: AdminUpdateCampaignInput,
-): Promise<AdminCampaign> {
+): Promise<AdminCampaign> => {
   const response = await apiRequest<AdminCampaign>(
     `/api/admin/campaigns/${campaignId}`,
     {
@@ -41,12 +41,12 @@ export async function updateAdminCampaign(
     },
   );
   return unwrapApiResponse(response, "Failed to update campaign");
-}
+};
 
-export async function deleteAdminCampaign(
+const deleteAdminCampaign = async (
   session: ClientSession,
   campaignId: string,
-): Promise<{ deleted: true }> {
+): Promise<{ deleted: true }> => {
   const response = await apiRequest<{ deleted: true }>(
     `/api/admin/campaigns/${campaignId}`,
     {
@@ -55,4 +55,11 @@ export async function deleteAdminCampaign(
     },
   );
   return unwrapApiResponse(response, "Failed to delete campaign");
-}
+};
+
+export {
+  createAdminCampaign,
+  deleteAdminCampaign,
+  listAdminCampaigns,
+  updateAdminCampaign,
+};

@@ -2,7 +2,7 @@ const DEFAULT_HEADERS: Record<string, string> = {
   "Cache-Control": "no-store",
 };
 
-function parseAllowedOrigins(): string[] {
+const parseAllowedOrigins = (): string[] => {
   const env = process.env.ALLOWED_ORIGINS;
   if (!env) {
     return [];
@@ -12,9 +12,9 @@ function parseAllowedOrigins(): string[] {
     .split(",")
     .map((entry) => entry.trim())
     .filter(Boolean);
-}
+};
 
-export function isAllowedOrigin(origin: string | null): boolean {
+const isAllowedOrigin = (origin: string | null): boolean => {
   if (!origin) {
     return false;
   }
@@ -25,12 +25,12 @@ export function isAllowedOrigin(origin: string | null): boolean {
   }
 
   return allowed.includes(origin);
-}
+};
 
-export function resolveSafeRedirectUrl(
+const resolveSafeRedirectUrl = (
   request: Request,
   path: string,
-): string | undefined {
+): string | undefined => {
   const headerOrigin = request.headers.get("origin");
   const requestOrigin = (() => {
     try {
@@ -59,9 +59,9 @@ export function resolveSafeRedirectUrl(
   } catch {
     return undefined;
   }
-}
+};
 
-export function withDefaultSecurityHeaders(response: Response): Response {
+const withDefaultSecurityHeaders = (response: Response): Response => {
   const headers = new Headers(response.headers);
   Object.entries(DEFAULT_HEADERS).forEach(([key, value]) => {
     headers.set(key, value);
@@ -72,13 +72,20 @@ export function withDefaultSecurityHeaders(response: Response): Response {
     statusText: response.statusText,
     headers,
   });
-}
+};
 
-export function getClientIp(request: Request): string {
+const getClientIp = (request: Request): string => {
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) {
     return forwarded.split(",")[0]?.trim() ?? "unknown";
   }
 
   return request.headers.get("x-real-ip") ?? "unknown";
-}
+};
+
+export {
+  getClientIp,
+  isAllowedOrigin,
+  resolveSafeRedirectUrl,
+  withDefaultSecurityHeaders,
+};

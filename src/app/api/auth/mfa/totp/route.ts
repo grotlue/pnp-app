@@ -16,7 +16,7 @@ type VerifyTotpBody = {
   code?: string;
 };
 
-function normalizeFriendlyName(value: unknown): string | undefined {
+const normalizeFriendlyName = (value: unknown): string | undefined => {
   if (typeof value !== "string") {
     return undefined;
   }
@@ -27,13 +27,15 @@ function normalizeFriendlyName(value: unknown): string | undefined {
   }
 
   return trimmed.slice(0, 64);
-}
+};
 
-function isCompleteTotpEnrollment(data: unknown): data is {
+const isCompleteTotpEnrollment = (
+  data: unknown,
+): data is {
   id: string;
   friendly_name?: string;
   totp: { qr_code: string; secret: string; uri: string };
-} {
+} => {
   if (!data || typeof data !== "object") {
     return false;
   }
@@ -50,12 +52,14 @@ function isCompleteTotpEnrollment(data: unknown): data is {
     typeof candidate.totp.secret === "string" &&
     typeof candidate.totp.uri === "string"
   );
-}
+};
 
-function isCompleteMfaVerification(data: unknown): data is {
+const isCompleteMfaVerification = (
+  data: unknown,
+): data is {
   access_token: string;
   refresh_token?: string;
-} {
+} => {
   if (!data || typeof data !== "object") {
     return false;
   }
@@ -73,9 +77,9 @@ function isCompleteMfaVerification(data: unknown): data is {
   }
 
   return true;
-}
+};
 
-export async function GET(request: Request) {
+const GET = async (request: Request) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -122,9 +126,9 @@ export async function GET(request: Request) {
     hasVerifiedTotp: totpFactors.some((factor) => factor.status === "verified"),
     factors: totpFactors,
   });
-}
+};
 
-export async function POST(request: Request) {
+const POST = async (request: Request) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -177,9 +181,9 @@ export async function POST(request: Request) {
     secret: data.totp.secret,
     uri: data.totp.uri,
   });
-}
+};
 
-export async function PATCH(request: Request) {
+const PATCH = async (request: Request) => {
   const auth = await requireAuth(request);
   if ("response" in auth) {
     return auth.response;
@@ -255,4 +259,6 @@ export async function PATCH(request: Request) {
       refreshToken: data.refresh_token,
     },
   );
-}
+};
+
+export { GET, PATCH, POST };

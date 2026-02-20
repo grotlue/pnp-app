@@ -6,32 +6,32 @@ import type {
   AdminUpdateCharacterInput,
 } from "../types";
 
-export async function listAdminCharacters(
+const listAdminCharacters = async (
   session: ClientSession,
-): Promise<AdminCharacter[]> {
+): Promise<AdminCharacter[]> => {
   const response = await apiRequest<AdminCharacter[]>("/api/admin/characters", {
     session,
   });
   return unwrapApiResponse(response, "Failed to load characters");
-}
+};
 
-export async function createAdminCharacter(
+const createAdminCharacter = async (
   session: ClientSession,
   input: AdminCreateCharacterInput,
-): Promise<AdminCharacter> {
+): Promise<AdminCharacter> => {
   const response = await apiRequest<AdminCharacter>("/api/admin/characters", {
     method: "POST",
     session,
     body: input,
   });
   return unwrapApiResponse(response, "Failed to create character");
-}
+};
 
-export async function updateAdminCharacter(
+const updateAdminCharacter = async (
   session: ClientSession,
   characterId: string,
   input: AdminUpdateCharacterInput,
-): Promise<AdminCharacter> {
+): Promise<AdminCharacter> => {
   const response = await apiRequest<AdminCharacter>(
     `/api/admin/characters/${characterId}`,
     {
@@ -41,12 +41,12 @@ export async function updateAdminCharacter(
     },
   );
   return unwrapApiResponse(response, "Failed to update character");
-}
+};
 
-export async function deleteAdminCharacter(
+const deleteAdminCharacter = async (
   session: ClientSession,
   characterId: string,
-): Promise<{ deleted: true }> {
+): Promise<{ deleted: true }> => {
   const response = await apiRequest<{ deleted: true }>(
     `/api/admin/characters/${characterId}`,
     {
@@ -55,4 +55,11 @@ export async function deleteAdminCharacter(
     },
   );
   return unwrapApiResponse(response, "Failed to delete character");
-}
+};
+
+export {
+  createAdminCharacter,
+  deleteAdminCharacter,
+  listAdminCharacters,
+  updateAdminCharacter,
+};
