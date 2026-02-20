@@ -5,30 +5,30 @@ type CookieOptions = {
   maxAgeSeconds?: number;
 };
 
-function baseCookieParts(): string[] {
+const baseCookieParts = (): string[] => {
   return ["Path=/", "HttpOnly", "SameSite=Lax", "Secure"];
-}
+};
 
-function serializeCookie(
+const serializeCookie = (
   name: string,
   value: string,
   options?: CookieOptions,
-): string {
+): string => {
   const parts = [`${name}=${encodeURIComponent(value)}`, ...baseCookieParts()];
   if (options?.maxAgeSeconds !== undefined) {
     parts.push(`Max-Age=${Math.max(0, Math.trunc(options.maxAgeSeconds))}`);
   }
   return parts.join("; ");
-}
+};
 
-export function setSessionCookies(
+const setSessionCookies = (
   response: Response,
   input: {
     accessToken: string;
     refreshToken?: string;
     expiresAt?: number;
   },
-) {
+) => {
   const headers = new Headers(response.headers);
 
   const nowSeconds = Math.floor(Date.now() / 1000);
@@ -57,9 +57,9 @@ export function setSessionCookies(
     statusText: response.statusText,
     headers,
   });
-}
+};
 
-export function clearSessionCookies(response: Response) {
+const clearSessionCookies = (response: Response) => {
   const headers = new Headers(response.headers);
   headers.append(
     "Set-Cookie",
@@ -75,9 +75,9 @@ export function clearSessionCookies(response: Response) {
     statusText: response.statusText,
     headers,
   });
-}
+};
 
-export function readAccessTokenFromCookies(request: Request): string | null {
+const readAccessTokenFromCookies = (request: Request): string | null => {
   const cookieHeader = request.headers.get("cookie");
   if (!cookieHeader) {
     return null;
@@ -93,4 +93,6 @@ export function readAccessTokenFromCookies(request: Request): string | null {
 
   const value = match.slice(ACCESS_COOKIE_NAME.length + 1);
   return value ? decodeURIComponent(value) : null;
-}
+};
+
+export { clearSessionCookies, readAccessTokenFromCookies, setSessionCookies };
