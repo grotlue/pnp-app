@@ -43,10 +43,10 @@ const proxy = async (request: NextRequest) => {
   return response;
 };
 
-const config = {
+export const config = {
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
   ],
 };
 
-export { config, proxy };
+export { proxy };

@@ -139,6 +139,16 @@ const eslintConfig = defineConfig([
     },
   },
   {
+    files: ["src/proxy.ts"],
+    rules: {
+      "import/group-exports": "off",
+      "no-restricted-syntax": [
+        "warn",
+        ...reactCompilerMemoizationRestrictions,
+      ],
+    },
+  },
+  {
     files: [
       "src/page-modules/**/*.{ts,tsx}",
       "src/components/**/*.{ts,tsx}",
@@ -169,7 +179,7 @@ const eslintConfig = defineConfig([
   },
   {
     files: ["src/**/*.{ts,tsx}"],
-    ignores: ["src/components/ui/**/*.{ts,tsx}"],
+    ignores: ["src/components/ui/**/*.{ts,tsx}", "src/proxy.ts"],
     rules: {
       "no-restricted-syntax": [
         "warn",
