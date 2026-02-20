@@ -10,9 +10,9 @@ import type { NotificationEntry } from "@/features/notifications/types";
 
 const t = (key: string) => key;
 
-function makeNotification(
+const makeNotification = (
   input?: Partial<NotificationEntry>,
-): NotificationEntry {
+): NotificationEntry => {
   return {
     id: "n1",
     recipient_user_id: "u1",
@@ -25,7 +25,7 @@ function makeNotification(
     read_at: null,
     ...input,
   };
-}
+};
 
 describe("notification-list logic", () => {
   it("counts unread notifications", () => {

@@ -4,11 +4,11 @@ import {
   resolveSpeedInsightsEnabled,
 } from "../performance-observability";
 
-function clearPerformanceEnv() {
+const clearPerformanceEnv = () => {
   delete process.env.APP_ENV;
   delete process.env.VERCEL_ENV;
   delete process.env.ENABLE_VERCEL_SPEED_INSIGHTS;
-}
+};
 
 afterEach(() => {
   clearPerformanceEnv();

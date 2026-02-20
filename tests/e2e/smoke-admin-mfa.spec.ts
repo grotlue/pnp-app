@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import {
   expectClientSessionSet,
   loginAsUser,
@@ -17,13 +17,13 @@ const MFA_CODE_PLACEHOLDER = /authenticator code|authenticator-code/i;
 
 let adminTotpSecret: string | null = null;
 
-async function completeAdminChallenge(page: Page, secret: string) {
+const completeAdminChallenge = async (page: Page, secret: string) => {
   await page
     .getByPlaceholder(MFA_CODE_PLACEHOLDER)
     .fill(generateTotpCode(secret));
   await page.getByRole("button", { name: VERIFY_MFA_LABEL }).click();
   await expect(page).toHaveURL("/admin/users");
-}
+};
 
 test("FLOW-auth-admin-mfa-and-dashboard @smoke @auth admin login enforces MFA and grants dashboard access after OTP challenge", async ({
   page,
