@@ -1,8 +1,8 @@
-export type CharacterId = string;
+type CharacterId = string;
 
-export type CharacterType = "player" | "npc";
+type CharacterType = "player" | "npc";
 
-export type Character = {
+type Character = {
   id: string;
   owner_user_id: string;
   campaign_id: string | null;
@@ -16,7 +16,7 @@ export type Character = {
   is_private?: boolean;
 };
 
-export type CharacterCreateInput = {
+type CharacterCreateInput = {
   type: CharacterType;
   name: string;
   age: number | null;
@@ -24,11 +24,19 @@ export type CharacterCreateInput = {
   isPrivate?: boolean;
 };
 
-export type CharacterUpdateInput = {
+type CharacterUpdateInput = {
   name: string;
   age: number | null;
   type: CharacterType;
   avatarPath: string | null;
   description: string;
   isPrivate?: boolean;
+};
+
+export type {
+  Character,
+  CharacterCreateInput,
+  CharacterId,
+  CharacterType,
+  CharacterUpdateInput,
 };

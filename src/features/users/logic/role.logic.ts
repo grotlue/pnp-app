@@ -1,29 +1,31 @@
-export type AppRole = "admin" | "user" | null | undefined;
+type AppRole = "admin" | "user" | null | undefined;
 
-export function isAdmin(role: AppRole): role is "admin" {
+const isAdmin = (role: AppRole): role is "admin" => {
   return role === "admin";
-}
+};
 
-export function canManageCampaign(input: {
+const canManageCampaign = (input: {
   isOwner: boolean;
   role: AppRole;
   isPrivate: boolean | null | undefined;
-}): boolean {
+}): boolean => {
   if (input.isOwner) {
     return true;
   }
 
   return isAdmin(input.role) && !input.isPrivate;
-}
+};
 
-export function canManageCharacter(input: {
+const canManageCharacter = (input: {
   isOwner: boolean;
   role: AppRole;
   isPrivate: boolean | null | undefined;
-}): boolean {
+}): boolean => {
   if (input.isOwner) {
     return true;
   }
 
   return isAdmin(input.role) && !input.isPrivate;
-}
+};
+
+export { canManageCampaign, canManageCharacter, isAdmin, type AppRole };

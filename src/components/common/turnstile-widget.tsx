@@ -5,6 +5,7 @@ import {
   TURNSTILE_EXPLICIT_RENDER_SCRIPT_URL,
   TURNSTILE_SCRIPT_ELEMENT_ID,
 } from "@/lib/security/constants";
+import { UiDiv } from "@/components/ui/html-elements";
 import { cn } from "@/lib/utils/cn";
 
 type TurnstileWidgetProps = {
@@ -35,7 +36,7 @@ declare global {
   }
 }
 
-export type TurnstileErrorReason =
+type TurnstileErrorReason =
   | "script_failed"
   | "script_timeout"
   | "script_unavailable"
@@ -45,7 +46,7 @@ export type TurnstileErrorReason =
 let turnstileScriptPromise: Promise<void> | null = null;
 const TURNSTILE_SCRIPT_TIMEOUT_MS = 12_000;
 
-function mapTurnstileErrorReason(error: unknown): TurnstileErrorReason {
+const mapTurnstileErrorReason = (error: unknown): TurnstileErrorReason => {
   if (!(error instanceof Error)) {
     return "script_failed";
   }
@@ -57,11 +58,11 @@ function mapTurnstileErrorReason(error: unknown): TurnstileErrorReason {
     return "script_unavailable";
   }
   return "script_failed";
-}
+};
 
-function waitForExistingTurnstileScript(
+const waitForExistingTurnstileScript = (
   script: HTMLScriptElement,
-): Promise<void> {
+): Promise<void> => {
   return new Promise((resolve, reject) => {
     if (window.turnstile) {
       resolve();
@@ -92,7 +93,7 @@ function waitForExistingTurnstileScript(
       finalize(() => reject(new Error("turnstile_script_timeout")));
     }, TURNSTILE_SCRIPT_TIMEOUT_MS);
 
-    function finalize(callback: () => void) {
+    const finalize = (callback: () => void) => {
       if (settled) {
         return;
       }
@@ -102,14 +103,14 @@ function waitForExistingTurnstileScript(
       script.removeEventListener("load", onLoad);
       script.removeEventListener("error", onError);
       callback();
-    }
+    };
 
     script.addEventListener("load", onLoad, { once: true });
     script.addEventListener("error", onError, { once: true });
   });
-}
+};
 
-function ensureTurnstileScript(): Promise<void> {
+const ensureTurnstileScript = (): Promise<void> => {
   if (window.turnstile) {
     return Promise.resolve();
   }
@@ -149,16 +150,16 @@ function ensureTurnstileScript(): Promise<void> {
   });
 
   return turnstileScriptPromise;
-}
+};
 
-export function TurnstileWidget({
+const TurnstileWidget = ({
   siteKey,
   resetKey = 0,
   className,
   loadErrorMessage,
   onTokenChange,
   onErrorReason,
-}: TurnstileWidgetProps) {
+}: TurnstileWidgetProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const widgetIdRef = useRef<string | null>(null);
   const onTokenChangeRef = useRef(onTokenChange);
@@ -223,16 +224,22 @@ export function TurnstileWidget({
 
   if (loadError) {
     return loadErrorMessage ? (
-      <div
+      <UiDiv
         className={cn(
           "border-border bg-background rounded-md border p-2 text-xs",
           className,
         )}
       >
         {loadErrorMessage}
-      </div>
+      </UiDiv>
     ) : null;
   }
 
-  return <div ref={containerRef} className={cn("min-h-16", className)} />;
-}
+  return (
+    <UiDiv className={cn("min-h-16", className)}>
+      <div ref={containerRef} />
+    </UiDiv>
+  );
+};
+
+export { TurnstileWidget, type TurnstileErrorReason };
