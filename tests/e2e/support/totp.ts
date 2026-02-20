@@ -4,7 +4,7 @@ const BASE32_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 const TOTP_PERIOD_SECONDS = 30;
 const TOTP_DIGITS = 6;
 
-function decodeBase32(secret: string): Buffer {
+const decodeBase32 = (secret: string): Buffer => {
   const normalized = secret
     .toUpperCase()
     .replace(/=+$/g, "")
@@ -26,9 +26,9 @@ function decodeBase32(secret: string): Buffer {
   }
 
   return Buffer.from(bytes);
-}
+};
 
-export function extractTotpSecretFromUri(uri: string): string {
+const extractTotpSecretFromUri = (uri: string): string => {
   const parsed = new URL(uri);
   const secret = parsed.searchParams.get("secret");
   if (!secret) {
@@ -36,9 +36,9 @@ export function extractTotpSecretFromUri(uri: string): string {
   }
 
   return secret;
-}
+};
 
-export function generateTotpCode(secret: string, unixMs = Date.now()): string {
+const generateTotpCode = (secret: string, unixMs = Date.now()): string => {
   const key = decodeBase32(secret);
   const step = Math.floor(unixMs / 1000 / TOTP_PERIOD_SECONDS);
 
@@ -56,4 +56,6 @@ export function generateTotpCode(secret: string, unixMs = Date.now()): string {
 
   const token = binary % 10 ** TOTP_DIGITS;
   return token.toString().padStart(TOTP_DIGITS, "0");
-}
+};
+
+export { extractTotpSecretFromUri, generateTotpCode };
