@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, LogOut, Moon, Settings, Shield, Sun, User } from "lucide-react";
+import { UiDiv } from "@/components/ui/html-elements";
 import {
   IconActionButton,
   IconActionLinkButton,
@@ -20,7 +21,7 @@ import {
   setLocaleCookie,
 } from "@/lib/client/locale-cookie";
 import { clearSession } from "@/lib/client/session";
-import { getTranslator, resolveLocale, type AppLocale } from "@/lib/i18n/index";
+import { type AppLocale, getTranslator, resolveLocale } from "@/lib/i18n/index";
 import type { ClientSession } from "@/lib/client/session";
 import { logoutUser } from "@/features/users/queries/users-auth.query";
 import { useNotificationsUnreadCount } from "@/features/notifications/hooks/use-notifications-unread-count";
@@ -33,7 +34,7 @@ type AppHeaderProps = {
   session: ClientSession;
 };
 
-export function AppHeader({ locale, session }: AppHeaderProps) {
+const AppHeader = ({ locale, session }: AppHeaderProps) => {
   const t = getTranslator(locale);
   const pathname = usePathname();
   const router = useRouter();
@@ -66,7 +67,7 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
     }
   }, [locale, profileLocale, router]);
 
-  async function onLogout() {
+  const onLogout = async () => {
     try {
       await logoutUser(session);
     } catch {
@@ -78,11 +79,11 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
       router.replace("/");
       router.refresh();
     }
-  }
+  };
 
   return (
-    <header className="border-border bg-background/80 border-b backdrop-blur-sm">
-      <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-2 px-4 py-3">
+    <UiDiv className="border-border bg-background/80 border-b backdrop-blur-sm">
+      <UiDiv className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-2 px-4 py-3">
         <Link href={appRoutes.home} className="mr-2 font-semibold">
           pnp-app
         </Link>
@@ -105,7 +106,7 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
             })}
           </NavigationMenuList>
         </NavigationMenu>
-        <div className="ml-auto flex items-center gap-1">
+        <UiDiv className="ml-auto flex items-center gap-1">
           <IconActionButton
             label={
               themeMode === "dark"
@@ -162,8 +163,10 @@ export function AppHeader({ locale, session }: AppHeaderProps) {
             variant="ghost"
             onClick={onLogout}
           />
-        </div>
-      </div>
-    </header>
+        </UiDiv>
+      </UiDiv>
+    </UiDiv>
   );
-}
+};
+
+export default AppHeader;
