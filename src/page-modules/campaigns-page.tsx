@@ -6,7 +6,7 @@ import { AppPageMain, PageViewport } from "@/components/ui/page-shell";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
-import { ListControls } from "@/components/ui/list-controls";
+import ListControls from "@/components/ui/list-controls";
 import { ConfirmAlertDialog } from "@/components/ui/confirm-alert-dialog";
 import { Modal } from "@/components/ui/modal";
 import { PageLoadingState } from "@/components/ui/page-loading-state";

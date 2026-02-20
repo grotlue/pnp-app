@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "@/components/ui/sonner";
@@ -10,7 +10,7 @@ type AppProvidersProps = {
   children: ReactNode;
 };
 
-export function AppProviders({ children }: AppProvidersProps) {
+const AppProviders = ({ children }: AppProvidersProps) => {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -34,4 +34,6 @@ export function AppProviders({ children }: AppProvidersProps) {
       </QueryClientProvider>
     </ThemePreferenceProvider>
   );
-}
+};
+
+export default AppProviders;

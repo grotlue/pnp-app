@@ -19,7 +19,7 @@ import {
   IconActionButton,
   IconActionLinkButton,
 } from "@/components/ui/icon-action-button";
-import { ListControls } from "@/components/ui/list-controls";
+import ListControls from "@/components/ui/list-controls";
 import { ListItemRow } from "@/components/ui/list-item-row";
 import { Modal } from "@/components/ui/modal";
 import { PageLoadingState } from "@/components/ui/page-loading-state";

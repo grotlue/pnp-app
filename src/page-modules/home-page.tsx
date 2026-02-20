@@ -16,7 +16,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FeedbackMessage } from "@/components/ui/feedback-message";
 import { FormInput } from "@/components/ui/form-controls";
-import { ListControls } from "@/components/ui/list-controls";
+import ListControls from "@/components/ui/list-controls";
 import { ListItemRow } from "@/components/ui/list-item-row";
 import { OwnershipBadge } from "@/components/common/ownership-badge";
 import { PageLoadingState } from "@/components/ui/page-loading-state";

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import FrontendLayout from "@/components/common/frontend-layout";
-import { AppProviders } from "./providers";
+import AppProviders from "./providers";
 import { AppRouter } from "./router";
 
 type AppProps = {
