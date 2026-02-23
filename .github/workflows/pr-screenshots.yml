@@ -109,7 +109,7 @@ jobs:
       - name: Upload PR screenshots artifact
         if: ${{ always() && steps.targets.outputs.has_targets == 'true' }}
         id: upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: pr-screenshots
           path: artifacts/pr-screenshots
