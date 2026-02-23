@@ -7417,7 +7417,7 @@ __metadata:
     react-dom: "npm:19.2.4"
     shadcn: "npm:^3.8.5"
     sonner: "npm:^2.0.7"
-    supabase: "npm:^2.76.9"
+    supabase: "npm:^2.76.12"
     tailwind-merge: "npm:^3.4.1"
     tailwindcss: "npm:^4"
     tw-animate-css: "npm:^1.4.0"
@@ -8692,9 +8692,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"supabase@npm:^2.76.9":
-  version: 2.76.10
-  resolution: "supabase@npm:2.76.10"
+"supabase@npm:^2.76.12":
+  version: 2.76.12
+  resolution: "supabase@npm:2.76.12"
   dependencies:
     bin-links: "npm:^6.0.0"
     https-proxy-agent: "npm:^7.0.2"
@@ -8702,7 +8702,7 @@ __metadata:
     tar: "npm:7.5.9"
   bin:
     supabase: bin/supabase
-  checksum: 10c0/c8cbba4d1503887fb8e58904c7322f47ccb9f073f44a33dd36472bf99869ab743f768796a4fc788579931c50e7c765c29430e14ffeaac82110045bc317ee8d37
+  checksum: 10c0/eb3f71219d0d120633bfe4971a3add016b2d616f69ab13155afe04c8d0f726a4abab6c71bc229c5900fd13c8e21e2b0a70d772a16e9ab44b74a7c54d529619c4
   languageName: node
   linkType: hard
 
